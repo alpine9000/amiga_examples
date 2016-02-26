@@ -57,10 +57,23 @@ level3InterruptHandler:
 	rte
 
 copper:
+
+	dc.w    DIWSTRT,$2c81
+	dc.w	DIWSTOP,$2cc1
 	dc.w	BPLCON0,(SCREEN_BIT_DEPTH<<12)|$200 ; Set color depth and enable COLOR
 	dc.w	BPL1MOD,SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES
 	dc.w	BPL2MOD,SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES
 
+	rem	// Original copper list from https://github.com/vilcans/amiga-startup
+	dc.l	$008e2c81,$00902cc1
+	dc.l	$00920038,$009400d0
+	dc.w	$0100,(SCREEN_BIT_DEPTH<<12)|$200
+	dc.l	$01020000,$01060000,$010c0011
+	dc.w	$108,SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES
+	dc.w	$10a,SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES
+	dc.l	$01fc0000
+	erem
+	
 	include	"out/image-copper.s"
 
 	dc.l	$fffffffe	

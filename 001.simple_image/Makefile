@@ -7,6 +7,9 @@ all: bin out $(MAKEADF) $(FLOPPY)
 gdrive: all
 	cp $(FLOPPY) ~/Google\ Drive
 
+test: all
+	cp $(FLOPPY) ~/Projects/amiga/test.adf
+
 bin:
 	mkdir bin
 
