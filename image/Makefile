@@ -1,5 +1,6 @@
 MAKEADF=../tools/makeadf
-FLOPPY=bin/test.adf
+FLOPPY=bin/image.adf
+IMAGE_DATA=out/image-copper.s out/image-data.bin
 
 all: bin out $(MAKEADF) $(FLOPPY)
 
@@ -24,11 +25,14 @@ out/bootblock.bin: out/bootblock.o
 out/bootblock.o: bootblock.s out/main.bin
 	vc -c $< -o $@
 
-out/main.o: main.s
+out/main.o: image.s $(IMAGE_DATA)
 	vc -c $< -o $@
 
 out/main.bin: out/main.o
 	vlink -brawbin1 $< -o $@
+
+$(IMAGE_DATA): images/hello.png ../tools/bitplanify.py
+	../tools/bitplanify.py images/hello.png  --copper $(IMAGE_DATA) 
 
 clean:
 	rm -rf out bin

@@ -1,4 +1,4 @@
-	include registers.i
+	include ../include/registers.i
 	include hardware/dmabits.i
 	include hardware/intbits.i
 	
