@@ -15,41 +15,47 @@ Notes:
     ```
 # git clone git://github.com/cahirwpz/amigaos-cross-toolchain.git
 # cd amigaos-cross-toolchain
-#./toolchain-m68k --prefix=/usr/local/amiga build
+# ./toolchain-m68k --prefix=/usr/local/amiga build
 ```
    
-
-
 1. autoconf
-    curl -OL http://ftpmirror.gnu.org/autoconf/autoconf-2.69.tar.gz
-    tar xzf autoconf-2.69.tar.gz
-    cd autoconf-2.69
-    ./configure --prefix=/usr/local
-    make
-    make install
+    ```
+    # curl -OL http://ftpmirror.gnu.org/autoconf/autoconf-2.69.tar.gz
+    # tar xzf autoconf-2.69.tar.gz
+    # cd autoconf-2.69
+    # ./configure --prefix=/usr/local
+    # make
+    # make install
+```
 
 2. automake
-    curl -OL http://ftpmirror.gnu.org/automake/automake-1.15.tar.gz
-    tar xzf automake-1.15.tar.gz
-    cd automake-1.15
-    ./configure --prefix=/usr/local
-    make
-    make install
+    ```
+    # curl -OL http://ftpmirror.gnu.org/automake/automake-1.15.tar.gz
+    # tar xzf automake-1.15.tar.gz
+    # cd automake-1.15
+    # ./configure --prefix=/usr/local
+    # make
+    # make install
+```
 
 3. pkg-config
-    curl -OL https://pkg-config.freedesktop.org/releases/pkg-config-0.29.tar.gz
-    tar zxf pkg-config-0.29.tar.gz
-    cd pkg-config-0.29
-    ./configure --with-internal-glib --prefix=/usr/local LDFLAGS="-framework CoreFoundation -framework Carbon"
-    make
-    make install
+    ```
+    # curl -OL https://pkg-config.freedesktop.org/releases/pkg-config-0.29.tar.gz
+    # tar zxf pkg-config-0.29.tar.gz
+    # cd pkg-config-0.29
+    # ./configure --with-internal-glib --prefix=/usr/local LDFLAGS="-framework CoreFoundation -framework Carbon"
+    # make
+    # make install
+```
 
 4. lha
-    git clone https://github.com/jca02266/lha.git
-    aclocal
-    autoheader
-    automake -a
-    autoconf
-    ./configure --prefix=/usr/local
-    make
-    make install
+    ```
+    # git clone https://github.com/jca02266/lha.git
+    # aclocal
+    # autoheader
+    # automake -a
+    # autoconf
+    # ./configure --prefix=/usr/local
+    # make
+    # make install
+```
