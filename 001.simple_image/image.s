@@ -1,14 +1,13 @@
-	include ../include/registers.i
-	include hardware/dmabits.i
-	include hardware/intbits.i
+	include "../include/registers.i"
+	include "hardware/dmabits.i"
+	include "hardware/intbits.i"
 	
 LVL3_INT_VECTOR		equ $6c
 SCREEN_WIDTH_BYTES	equ (320/8)
-SCREEN_BIT_DEPTH	equ	4
-
+SCREEN_BIT_DEPTH	equ 4
 	
 entry:	
-	lea	level3InterruptHandler,a3
+	lea	level3InterruptHandler(pc),a3
  	move.l	a3,LVL3_INT_VECTOR
 
 	;; install copper list and enable DMA
@@ -31,15 +30,15 @@ level3InterruptHandler:
 	beq.s	.checkCopper
 
 .verticalBlank:
-	move.w	#INTF_VERTB,INTREQ(a5)	; Clear interrupt bit	
+	move.w	#INTF_VERTB,INTREQ(a5)	; clear interrupt bit	
 
 .resetBitplanePointers:
-	lea	bitplanes,a1
-	lea	$dff0e0,a2
+	lea	bitplanes(pc),a1
+	lea     BPL1PTH(a5),a2
 	moveq	#SCREEN_BIT_DEPTH,d0
 .bitplaneloop:
 	move.l	a1,(a2)
-	lea	SCREEN_WIDTH_BYTES(a1),a1 ; Bit plane data is interleaved
+	lea	SCREEN_WIDTH_BYTES(a1),a1 ; bit plane data is interleaved
 	addq	#4,a2
 	dbra	d0,.bitplaneloop
 	
@@ -49,7 +48,7 @@ level3InterruptHandler:
 	and.w	#INTF_COPER,d0	
 	beq.s	.interruptComplete
 .copperInterrupt:
-	move.w	#INTF_COPER,INTREQ(a5)	; Clear interrupt bit	
+	move.w	#INTF_COPER,INTREQ(a5)	; clear interrupt bit	
 	
 .interruptComplete:
 	movem.l	(sp)+,d0-a6
@@ -58,7 +57,7 @@ level3InterruptHandler:
 copper:
 	dc.w    DIWSTRT,$2c81
 	dc.w	DIWSTOP,$2cc1
-	dc.w	BPLCON0,(SCREEN_BIT_DEPTH<<12)|$200 ; Set color depth and enable COLOR
+	dc.w	BPLCON0,(SCREEN_BIT_DEPTH<<12)|$200 ; set color depth and enable COLOR
 	dc.w	BPL1MOD,SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES
 	dc.w	BPL2MOD,SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES
 	
