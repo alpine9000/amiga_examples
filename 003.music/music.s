@@ -6,11 +6,19 @@ LVL3_INT_VECTOR		equ $6c
 SCREEN_WIDTH_BYTES	equ (320/8)
 SCREEN_BIT_DEPTH	equ	4
 
+	include "P6112-Options.i"
 	
 entry:	
 	lea	level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR
 
+	;; initialise P61
+	lea Module1(pc),a0
+	sub.l a1,a1
+	sub.l a2,a2
+	moveq #0,d0
+	jsr P61_Init(pc)	
+	
 	;; install copper list and enable DMA
 	lea 	CUSTOM,a1
 	lea	copper(pc),a0
@@ -21,6 +29,7 @@ entry:
 .mainLoop:
 	bra.b	.mainLoop
 
+	
 level3InterruptHandler:
 	movem.l	d0-a6,-(sp)
 
@@ -31,7 +40,10 @@ level3InterruptHandler:
 	beq.s	.checkCopper
 
 .verticalBlank:
-	move.w	#INTF_VERTB,INTREQ(a5)	; Clear interrupt bit	
+	move.w	#INTF_VERTB,INTREQ(a5)	; Clear interrupt bit
+	movem.l	d0-a6,-(sp)
+	jsr P61_Music			;and call the playroutine manually.
+	movem.l	(sp)+,d0-a6
 
 .resetBitplanePointers:
 	lea	bitplanes,a1
@@ -61,10 +73,17 @@ copper:
 	dc.w	BPLCON0,(SCREEN_BIT_DEPTH<<12)|$200 ; Set color depth and enable COLOR
 	dc.w	BPL1MOD,SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES
 	dc.w	BPL2MOD,SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES
-	
+
 	include	"out/image-copper.s"
 
 	dc.l	$fffffffe	
+
+Playrtn:
+	include "P6112-Play.i"
+	
+Module1:
+	incbin "P61.sowhat-intro"			;usecode $9410	
+
 bitplanes:
 	incbin	"out/image-data.bin"
 	

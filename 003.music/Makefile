@@ -1,8 +1,7 @@
 MAKEADF=../tools/makeadf
-FLOPPY=bin/image.adf
+FLOPPY=bin/music.adf
 EXTRA=out/image-copper.s out/image-data.bin
-
-MODULE=image.s
+MODULE=music.s
 
 include ../base.mk
 

@@ -65,6 +65,7 @@ copper:
 	include	"out/image-copper.s"
 
 	dc.l	$fffffffe	
+
 bitplanes:
 	incbin	"out/image-data.bin"
 	
