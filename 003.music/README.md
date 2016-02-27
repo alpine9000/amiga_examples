@@ -1,7 +1,7 @@
 Play music using the P61 Player
 ===============================
 
-Building on simple_image, we now try and play some music.
+Building on [simple image](../001.simple_image), we now try and play some music.
 
 We use the P6112 Player. See P6112-Options.i for configuration details for the Player.
 
