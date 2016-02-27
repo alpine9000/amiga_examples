@@ -9,6 +9,9 @@ test: all
 go: test
 	 ~/Google\ Drive/Amiga/amiga500.sh
 
+list:
+	m68k-amigaos-objdump  -b binary --disassemble-all out/bootblock.bin -m m68k > out/bootblock.txt
+
 bin:
 	mkdir bin
 
