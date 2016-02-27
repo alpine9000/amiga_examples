@@ -15,6 +15,7 @@ Notes:
     ```
 # git clone git://github.com/cahirwpz/amigaos-cross-toolchain.git
 # cd amigaos-cross-toolchain
+#./toolchain-m68k --prefix=/usr/local/amiga build
 ```
    
 
