@@ -13,22 +13,21 @@ entry:
  	move.l	a3,LVL3_INT_VECTOR
 
 	;; initialise P61
-	lea Module1(pc),a0
-	sub.l a1,a1
-	sub.l a2,a2
-	moveq #0,d0
-	jsr P61_Init(pc)	
+	lea 	Module1(pc),a0
+	sub.l 	a1,a1
+	sub.l 	a2,a2
+	moveq 	#0,d0
+	jsr 	P61_Init(pc)	
 	
 	;; install copper list and enable DMA
 	lea 	CUSTOM,a1
 	lea	copper(pc),a0
-	move.l	a0,cop1lc(a1)
+	move.l	a0,COP1LC(a1)
 	move.w  COPJMP1(a1),d0
 	move.w  #(DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),dmacon(a1)
 	
 .mainLoop:
 	bra.b	.mainLoop
-
 	
 level3InterruptHandler:
 	movem.l	d0-a6,-(sp)
@@ -42,7 +41,7 @@ level3InterruptHandler:
 .verticalBlank:
 	move.w	#INTF_VERTB,INTREQ(a5)	; clear interrupt bit
 	movem.l	d0-a6,-(sp)
-	jsr P61_Music			; and call the playroutine manually.
+	jsr 	P61_Music		; and call the playroutine manually.
 	movem.l	(sp)+,d0-a6
 
 .resetBitplanePointers:

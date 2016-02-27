@@ -13,7 +13,7 @@ entry:
 	;; install copper list and enable DMA
 	lea 	CUSTOM,a1
 	lea	copper(pc),a0
-	move.l	a0,cop1lc(a1)
+	move.l	a0,COP1LC(a1)
 	move.w  COPJMP1(a1),d0
 	move.w  #(DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),dmacon(a1)
 	
