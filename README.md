@@ -8,6 +8,17 @@ Notes:
    * My /usr/local is writable by me. You will probable need to add "sudo" to any "make install" lines
    * I have gcc-5.3.0 installed in /usr/local
 
+0. The fantastic AmigaOS cross compiler for Linux / MacOSX / Windows 
+
+   https://github.com/cahirwpz/amigaos-cross-toolchain
+
+    ```
+# git clone git://github.com/cahirwpz/amigaos-cross-toolchain.git
+# cd amigaos-cross-toolchain
+```
+   
+
+
 1. autoconf
     curl -OL http://ftpmirror.gnu.org/autoconf/autoconf-2.69.tar.gz
     tar xzf autoconf-2.69.tar.gz
