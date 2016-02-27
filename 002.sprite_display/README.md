@@ -1,6 +1,4 @@
 Display a simple image
 ======================
 
-Building on trackdisk.device, we now display a simple color image
-
-Image display code and conversion tools from https://github.com/vilcans/amiga-startup
+Building on trackdisk.device, we now implement the [simple sprite example from the RKM](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node02D2.html)
