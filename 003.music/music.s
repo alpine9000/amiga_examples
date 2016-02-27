@@ -9,7 +9,7 @@ SCREEN_BIT_DEPTH	equ	4
 	include "P6112-Options.i"
 	
 entry:	
-	lea	level3InterruptHandler,a3
+	lea	level3InterruptHandler(pc),a3
  	move.l	a3,LVL3_INT_VECTOR
 
 	;; initialise P61
