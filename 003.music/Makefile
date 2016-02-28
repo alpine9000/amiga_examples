@@ -5,6 +5,6 @@ MODULE=music.s
 
 include ../base.mk
 
-$(EXTRA): images/hello.png ../tools/bitplanify.py
-	../tools/bitplanify.py images/hello.png  --copper $(EXTRA) 
 
+$(EXTRA): ../assets/hello.png ../tools/bitplanify.py
+	../tools/bitplanify.py ../assets/hello.png  --copper $(EXTRA) 

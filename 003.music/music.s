@@ -81,7 +81,7 @@ Playrtn:
 	include "P6112-Play.i"
 	
 Module1:
-	incbin "P61.sowhat-intro"			;usecode $9410	
+	incbin "../assets/P61.sowhat-intro"			;usecode $9410	
 
 bitplanes:
 	incbin	"out/image-data.bin"
