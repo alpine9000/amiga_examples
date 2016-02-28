@@ -1,4 +1,4 @@
-SUBDIRS=000.trackdisk 001.simple_image 002.sprite_display 003.music
+SUBDIRS=000.trackdisk 001.simple_image 002.sprite_display 003.music 004.copper_bars
 
 .PHONY: subdirs $(SUBDIRS)
 
