@@ -3,10 +3,10 @@
 
 Documentation
 -------------
-* (68000 instruction s[http://68k.hax.com/]
-* ( documentation) [http://sun.hasenbraten.de/vasm/release/vasm.html]
+* (68000 instructions) [http://68k.hax.com/]
+* (documentation) [http://sun.hasenbraten.de/vasm/release/vasm.html]
 * (vlink documenta - PDF) [http://sun.hasenbraten.de/vlink/release/vlink.pdf]
-* ga registers) [http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0060.html]
+* (Amiga registers) [http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0060.html]
 * (Amiga Hardware Reference Manal)[http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0000.html]
 * (Amiga RKM Devices Manual)[http://amigadev.elowar.com/read/ADCD_2.1/Devices_Manual_guide/node0000.html]
 * (coppershare.org downloads) [http://coppershade.org/articles/More!/Downloads/]
