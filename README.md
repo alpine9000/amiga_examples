@@ -7,9 +7,9 @@ Documentation
 * [vasm documentation](http://sun.hasenbraten.de/vasm/release/vasm.html)
 * [vlink documentation (PDF)](http://sun.hasenbraten.de/vlink/release/vlink.pdf)
 * [Amiga registers](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0060.html)
-* [Amiga Hardware Reference Manal](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0000.html)
+* [Amiga Hardware Reference Manual](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0000.html)
 * [Amiga RKM Devices Manual](http://amigadev.elowar.com/read/ADCD_2.1/Devices_Manual_guide/node0000.html)
-* [coppershare.org downloads](http://coppershade.org/articles/More!/Downloads/)
+* [coppershade.org downloads](http://coppershade.org/articles/More!/Downloads/)
 * [Copper timing details](http://coppershade.org/articles/AMIGA/Agnus/Copper:_Exact_WAIT_Timing/)
 * [Coding forum](http://ada.untergrund.net/?p=boardforums&forum=4)
 
