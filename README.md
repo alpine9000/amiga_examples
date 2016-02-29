@@ -1,6 +1,18 @@
 (re)Learning how to program an Amiga after a 20 year break
 ==========================================================
 
+Documentation
+-------------
+	* (68000 instruction s[http://68k.hax.com/]
+	* ( documentation) [http://sun.hasenbraten.de/vasm/release/vasm.html]
+	* (vlink documenta - PDF) [http://sun.hasenbraten.de/vlink/release/vlink.pdf]
+	* ga registers) [http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0060.html]
+    * (Amiga Hardware Reference Manal)[http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0000.html]
+    * (Amiga RKM Devices Manual)[http://amigadev.elowar.com/read/ADCD_2.1/Devices_Manual_guide/node0000.html]
+    * (coppershare.org downloads) [http://coppershade.org/articles/More!/Downloads/]
+    * (Copper timing details) [http://coppershade.org/articles/AMIGA/Agnus/Copper:_Exact_WAIT_Timing/]
+    * (Coding forum) [http://ada.untergrund.net/?p=boardforums&forum=4]
+
 Cross development environment
 -----------------------------
 Built on OSX 10.11.3
