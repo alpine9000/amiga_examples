@@ -8,7 +8,7 @@ SCREEN_HEIGHT		equ 256
 SCREEN_WIDTH_BYTES	equ (SCREEN_WIDTH/8)
 SCREEN_BIT_DEPTH	equ 1
 SCREEN_RES		equ 8 	; 8=lo resolution, 4=hi resolution
-RASTER_X_START		equ $81	; Hard coded coordinates from hardware manual
+RASTER_X_START		equ $81	; hard coded coordinates from hardware manual
 RASTER_Y_START		equ $2c
 RASTER_X_STOP		equ RASTER_X_START+SCREEN_WIDTH
 RASTER_Y_STOP		equ RASTER_Y_START+SCREEN_HEIGHT
@@ -44,6 +44,7 @@ entry:
 	bra.b	.mainLoop
 
 copper:
+	dc.w 	$1fc,0			;slow fetch mode, AGA compatibility
 copperBitPlanePtr:	
 	dc.w	BPL1PTH,0 	; address of the bitplane will be poked once we know it
 	dc.w	BPL1PTL,0

@@ -3,66 +3,31 @@
 #include <stdio.h>
 #include <math.h>
 
-typedef struct {
-  float r;
-  float g;
-  float b;
-} color;
-
-#define numColors  50
-color colors[numColors];
-
-void
-makeColorGradient()
+int 
+main(int argc, char** argv)
 {
-  float frequencyr = 02;
-  float frequencyg = 02;
-  float frequencyb = 02;
-  float phase1 = 0.1, phase2 = 0.1, phase3 = 0.1;
+  char* hpos = "07";
+  int   firstVisibleScanLine = 0x2c; // hard coded value from AHRM
+  float numLines = 312; // PAL only
+
+  float frequencyr = 0.3, frequencyg = 0.3, frequencyb = 0.3;
+  float phase1 = 0, phase2 = 2, phase3 = 4;
   float center = 0x7;
   float width = 0x7;
-  float len = numColors;
 
-  for (int i = 0; i < len; ++i) {
-    color* c = &colors[i];
-    c->r = sin(frequencyr*i + phase1) * width + center;
-    c->g = sin(frequencyg*i + phase2) * width + center;
-    c->b = sin(frequencyb*i + phase3) * width + center;
-  }
-}
-
-int 
-main()
-{
-  makeColorGradient();
-
-  int lines = 312;
-  color start = { 0x0, 0x0, 0x0};
-  color end = { 0xF, 0xF, 0xF};
-  color current = {0};
-  int count = lines-0x2c;
-  int from = 0, to = 1;
-  int segment = count/((sizeof(colors)/sizeof(color))-1);
-  
-  for (int i = 0, y = 0; i < count; i++) {
-    if (i != 0 && i % segment == 0) {
-      from++;
-      to++;
-    }
-
-    float distance = (float)((i)%segment)/segment;
-    color* start = &colors[from];
-    color* end = &colors[to];
-    current.r = start->r + ((end->r-start->r)*distance);
-    current.g = start->g + ((end->g-start->g)*distance);
-    current.b = start->b + ((end->b-start->b)*distance);
-
-    if (0x2c+i <= 255) {
-      printf("\tdc.w $%xdf,$fffe\n\tdc.w COLOR00,$%x%x%x\n",0x2c+i, (int)(current.r+0.5), (int)(current.g+0.5), (int)(current.b+0.5));
+  for (int i = 0, line = firstVisibleScanLine; i < (numLines-firstVisibleScanLine); ++i, ++line) {
+    unsigned char r = (sin(frequencyr*i + phase1) * width + center) + 0.5;
+    unsigned char g = (sin(frequencyg*i + phase2) * width + center) + 0.5;
+    unsigned char b = (sin(frequencyb*i + phase3) * width + center) + 0.5;
+    if (line <= 255) {
+      printf("\tdc.w $%x%s,$fffe\n\tdc.w COLOR00,$%x%x%x\n",line, hpos, r, g, b);
+      if (0x2c+i == 255) {
+	printf(".greaterThan255Hack:\n");
+	printf("\tdc.w $%xdf,$fffe\n",line);
+      }
     } else {
-      printf("\tdc.w $%xdf,$fffe\n\tdc.w COLOR00,$%x%x%x\n",y++, (int)(current.r+0.5), (int)(current.g+0.5), (int)(current.b+0.5));
+      printf("\tdc.w $%x%s,$fffe\n\tdc.w COLOR00,$%x%x%x\n", line-256, hpos,r, g, b);
     }
-
   }
 
   return 0;

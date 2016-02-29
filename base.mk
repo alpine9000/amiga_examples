@@ -1,3 +1,6 @@
+HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow
+HOST_CFLAGS=-g $(HOST_WARNINGS)
+
 all: bin out $(MAKEADF) $(FLOPPY)
 
 gdrive: all
