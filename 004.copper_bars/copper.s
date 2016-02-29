@@ -17,14 +17,19 @@ entry:
 	;; custom chip base globally in a6
 	lea 	CUSTOM,a6
 
+	move	#$7ff,DMACON(a6)	; disable all dma
+	move	#$7fff,INTENA(a6)	; disable all interrupts
+	
 	;; poke bitplane pointers into the copper list
 	lea	bitplane(pc),a0
-	lea 	copperBitPlanePtr(pc),a1
+	lea 	_BPL1PTL(pc),a1
 	move.l	a0,d0
-	move.w	d0,6(a1) 	;BPL1PTL
+	move.w	d0,(a1)	; poke BPL1PTL
 	swap	d0
-	move.w	d0,2(a1)	;BPL1PTH
+	lea 	_BPL1PTH(pc),a1
+	move.w	d0,(a1)	; poke BPL1PTH
 
+	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)
 	move.w	#((RASTER_Y_STOP-256)<<8)|(RASTER_X_STOP-256),DIWSTOP(a6)
 
@@ -34,25 +39,25 @@ entry:
 	move.w	#(SCREEN_BIT_DEPTH<<12)|$200,BPLCON0(a6)
 	move.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES,BPL1MOD(a6)
 	
-	;; install copper list and enable DMA
+	;; install copper list, then enable dma and selected interrupts
 	lea	copper(pc),a0
 	move.l	a0,COP1LC(a6)
 	move.w  COPJMP1(a6),d0
-	move.w	#(DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),dmacon(a6)
+	move.w	#(DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
+	move.w	#(INTF_SETCLR|INTF_INTEN|INTF_EXTER),INTENA(a6)
 
 .mainLoop:
 	bra.b	.mainLoop
 
 copper:
-	dc.w 	$1fc,0			;slow fetch mode, AGA compatibility
-copperBitPlanePtr:	
-	dc.w	BPL1PTH,0 	; address of the bitplane will be poked once we know it
-	dc.w	BPL1PTL,0
-
+	dc.w	BPL1PTH
+_BPL1PTH:	
+	dc.w	0 	; hi word address of the bitplane will be poked once we know it
+	dc.w	BPL1PTL
+_BPL1PTL:	
+	dc.w	0	; lo word address of the bitplane will be poked once we know it
 	dc.w    COLOR00,$0000 
-
-	include "out/copper-list.s"
-
+ 	include "out/copper-list.s"
 	dc.l	$fffffffe
 
 bitplane:
