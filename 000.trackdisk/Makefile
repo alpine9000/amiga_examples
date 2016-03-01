@@ -1,4 +1,3 @@
-MAKEADF=../tools/makeadf
 FLOPPY=bin/test.adf
 MODULE=main.s
 

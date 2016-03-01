@@ -1,3 +1,5 @@
+MAKEADFDIR=../tools/makeadf/
+MAKEADF=$(MAKEADFDIR)/bin/makeadf
 HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow
 HOST_CFLAGS=-g $(HOST_WARNINGS)
 IMAGECONDIR=../tools/imagecon
@@ -26,8 +28,8 @@ out:
 $(IMAGECON):
 	make -C $(IMAGECONDIR)
 
-$(MAKEADF): ../tools/makeadf.c
-	gcc ../tools/makeadf.c -o $(MAKEADF)
+$(MAKEADF):
+	make -C $(MAKEADFDIR)
 
 $(FLOPPY): out/bootblock.bin
 	$(MAKEADF) out/bootblock.bin > $(FLOPPY)
