@@ -2,19 +2,23 @@
 ==========================================================
 Introduction
 ------------
-This repo is not meant to be an amiga programming guide.
+This repo is not meant to be an amiga programming guide. If you're looking for the correct way to program an amiga, there are lots of other guides out there. These examples start were I left off around 1990, and we had very bad programming habbits in those days.
+
+I do however try to show exactly what is going on in each example. Wherever possible I try and use constants from the OS includes instead of magic custom addresses etc.
+
+Where possible I will try and write development system programs that show how data is created/converted.
 
 Documentation
 -------------
 * [68000 instructions](http://68k.hax.com/)
 * [vasm documentation](http://sun.hasenbraten.de/vasm/release/vasm.html)
 * [vlink documentation (PDF)](http://sun.hasenbraten.de/vlink/release/vlink.pdf)
-* [Amiga registers](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0060.html)
-* [Amiga Hardware Reference Manual](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0000.html)
-* [Amiga RKM Devices Manual](http://amigadev.elowar.com/read/ADCD_2.1/Devices_Manual_guide/node0000.html)
+* [amiga registers](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0060.html)
+* [amiga hardware reference manual](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0000.html)
+* [amiga rkm devices manual](http://amigadev.elowar.com/read/ADCD_2.1/Devices_Manual_guide/node0000.html)
 * [coppershade.org downloads](http://coppershade.org/articles/More!/Downloads/)
-* [Copper timing details](http://coppershade.org/articles/AMIGA/Agnus/Copper:_Exact_WAIT_Timing/)
-* [Coding forum](http://ada.untergrund.net/?p=boardforums&forum=4)
+* [copper timing details](http://coppershade.org/articles/AMIGA/Agnus/Copper:_Exact_WAIT_Timing/)
+* [coding forum](http://ada.untergrund.net/?p=boardforums&forum=4)
 
 Cross development environment
 -----------------------------
