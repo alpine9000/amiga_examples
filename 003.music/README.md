@@ -8,3 +8,9 @@ We use the P6112 Player. See P6112-Options.i for configuration details for the P
 * Tutorial video here: http://youtu.be/xBtHO-IuN9E
 * Tutorial source here: http://coppershade.org/asmskool/
 * Source here: http://coppershade.org/asmskool/P6112/
+
+[Download disk image](bin/music.adf?raw=true)
+
+Screenshot:
+
+![Screenshot](screenshot.png?raw=true)
