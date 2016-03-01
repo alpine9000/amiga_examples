@@ -1,10 +1,11 @@
 MAKEADF=../tools/makeadf
-FLOPPY=bin/music.adf
-EXTRA=out/image-copper.s out/image-data.bin
+FLOPPY=bin/image.adf
+EXTRA=out/image-copper-list.s out/image.bin
+IMAGEFILE=../assets/hello.png
+
 MODULE=music.s
 
 include ../base.mk
 
-
-$(EXTRA): ../assets/hello.png ../tools/bitplanify.py
-	../tools/bitplanify.py ../assets/hello.png  --copper $(EXTRA) 
+$(EXTRA): $(IMAGECON) $(IMAGEFILE)
+	$(IMAGECON) $(IMAGEFILE) out/image
