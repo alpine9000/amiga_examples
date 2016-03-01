@@ -1,4 +1,4 @@
-IMAGECON=./bin/imagecon
+IMAGECON=./out/imagecon
 SRCS=imagecon.c
 HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -limagequant
 HOST_CFLAGS=$(HOST_WARNINGS)

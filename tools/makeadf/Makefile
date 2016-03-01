@@ -1,4 +1,4 @@
-MAKEADF=./bin/makeadf
+MAKEADF=./out/makeadf
 SRCS=makeadf.c
 HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow
 HOST_CFLAGS=$(HOST_WARNINGS)

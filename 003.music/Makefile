@@ -1,4 +1,3 @@
-MAKEADF=../tools/makeadf
 FLOPPY=bin/image.adf
 EXTRA=out/image-copper-list.s out/image.bin
 IMAGEFILE=../assets/mission-beach.png

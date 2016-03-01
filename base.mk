@@ -1,9 +1,9 @@
 MAKEADFDIR=../tools/makeadf/
-MAKEADF=$(MAKEADFDIR)/bin/makeadf
+MAKEADF=$(MAKEADFDIR)/out/makeadf
 HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow
 HOST_CFLAGS=-g $(HOST_WARNINGS)
 IMAGECONDIR=../tools/imagecon
-IMAGECON=$(IMAGECONDIR)/bin/imagecon
+IMAGECON=$(IMAGECONDIR)/out/imagecon
 
 all: bin out $(MAKEADF) $(FLOPPY)
 
@@ -47,4 +47,4 @@ out/main.bin: out/main.o
 	vlink -brawbin1 $< -o $@
 
 clean:
-	rm -rf out bin *~
+	rm -rf out *~

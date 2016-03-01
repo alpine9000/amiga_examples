@@ -1,4 +1,3 @@
-MAKEADF=../tools/makeadf
 FLOPPY=bin/copper_bars.adf
 EXTRA=out/copper-list.s
 

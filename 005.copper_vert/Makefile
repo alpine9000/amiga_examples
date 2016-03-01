@@ -1,4 +1,3 @@
-MAKEADF=../tools/makeadf
 FLOPPY=bin/copper_vert.adf
 EXTRA=out/copper-list.s
 
