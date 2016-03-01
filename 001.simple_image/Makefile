@@ -8,4 +8,4 @@ MODULE=image.s
 include ../base.mk
 
 $(EXTRA): $(IMAGECON) $(IMAGEFILE)
-	$(IMAGECON) $(IMAGEFILE) out/image
+	$(IMAGECON) --input $(IMAGEFILE) --output out/image --colors 32

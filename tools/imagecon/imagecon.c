@@ -1,9 +1,15 @@
 /*
+ * Orginal copyright from libpng example code
+ *
  * Copyright 2002-2011 Guillaume Cottenceau and contributors.
  *
  * This software may be freely redistributed under the terms
  * of the X11 license.
  *
+ */
+
+/*
+ * Amiga bitplane creation inspired (copied) from https://github.com/vilcans/amiga-startup
  */
 
 #include <unistd.h>
@@ -12,6 +18,8 @@
 #include <string.h>
 #include <stdarg.h>
 #include <math.h>
+#include <getopt.h>
+#include <libgen.h>
 
 #define PNG_DEBUG 3
 #include <png.h>
@@ -20,6 +28,13 @@
 
 char** _argv;
 int verbose = 0;
+
+void
+usage()
+{
+  fprintf(stderr, "%s: --input <input.png> [options]\nOptions:\n  --colors <max colors>\n  --output <output prefix>\n", _argv[0]);
+  exit(1);
+}
 
 void 
 abort_(const char * s, ...)
@@ -33,10 +48,10 @@ abort_(const char * s, ...)
   exit(1);
 }
 
-int width, height;
+#define MAX_PALETTE 32
+int width, height, maxColors = MAX_PALETTE;
 png_bytep* rowPointers;
 
-#define MAX_PALETTE 16
 typedef struct {
     unsigned char r;
     unsigned char g;
@@ -157,7 +172,7 @@ processFile(char* outFilename)
     liq_attr *attr = liq_attr_create();
     //    liq_image *image = liq_image_create_rgba(attr, rowPointers, width, height, 0);
     liq_image *image = liq_image_create_rgba_rows(attr, (void**)rowPointers, width, height, 0);
-    liq_set_max_colors(attr, 16);
+    liq_set_max_colors(attr, maxColors);
     liq_set_speed(attr, 1);
     liq_result *res = liq_quantize_image(attr, image);
     liq_write_remapped_image(res, image, amigaImage, width*height);
@@ -292,12 +307,79 @@ int
 main(int argc, char **argv)
 {
   _argv = argv;
+  char* inputFile = 0, *outputFile = 0;
+  int c;
 
-  if (argc != 3)
-    abort_("usage: %s: <file_in> <file_out>", argv[0]);
+  while (1)
+    {
+      static struct option long_options[] =
+        {
+          /* These options set a flag. */
+          {"verbose", no_argument,       &verbose, 1},
+          {"output",  required_argument, 0, 'o'},
+          {"colors",  required_argument, 0, 'c'},
+          {"input",   required_argument, 0, 'i'},
+          {0, 0, 0, 0}
+        };
+      /* getopt_long stores the option index here. */
+      int option_index = 0;
+
+      c = getopt_long (argc, argv, "o:c:i:",
+                       long_options, &option_index);
+
+      /* Detect the end of the options. */
+      if (c == -1)
+        break;
+
+      switch (c)
+        {
+	case 0:
+          break;
+        case 'i':
+	  inputFile = optarg;
+          break;
+
+        case 'o':
+	  outputFile = optarg;
+          break;
+
+        case 'c':
+	  if (sscanf(optarg, "%d", &maxColors) != 1) {
+	    abort_("invalid number of colors");
+	  }
+          break;
+
+        case '?':
+	  usage();
+          break;
+
+        default:
+	  usage();
+	  break;
+        }
+    }
+
+  if (outputFile == 0 && inputFile != 0) {
+    outputFile = basename(inputFile);
+    char* ptr  = malloc(strlen(outputFile)+1);
+    strcpy(ptr, outputFile);
+    outputFile = ptr;
+    ptr = rindex(outputFile, '.');
+    if (ptr) {
+      *ptr = 0;
+    }
+  }
   
-  readFile(argv[1]);
-  processFile(argv[2]);
+  if (inputFile == 0 || optind < argc) {
+    usage();
+  }
+  
+  if (verbose) {
+    printf("Options:\nverbose = %d\ninputFile = %s\noutputFile = %s\nmaxColors = %d\n\n", verbose, inputFile, outputFile, maxColors);
+  }
+  
+  readFile(inputFile);
+  processFile(outputFile);
  
   return 0;
 }

@@ -4,7 +4,7 @@
 	
 LVL3_INT_VECTOR		equ $6c
 SCREEN_WIDTH_BYTES	equ (320/8)
-SCREEN_BIT_DEPTH	equ 4
+SCREEN_BIT_DEPTH	equ 5
 	
 entry:	
 	lea	level3InterruptHandler(pc),a3
