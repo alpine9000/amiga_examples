@@ -16,6 +16,8 @@
 #define PNG_DEBUG 3
 #include <png.h>
 
+#include <pngquant/libimagequant.h>
+
 char** _argv;
 
 void 
@@ -42,7 +44,7 @@ typedef struct {
 
 amiga_color_t palette[MAX_PALETTE];
 int paletteIndex = 0;
-unsigned* amigaImage = 0;
+unsigned char* amigaImage = 0;
 
 void readFile(char* file_name)
 {
@@ -143,42 +145,67 @@ void readFile(char* file_name)
 void
 processFile(char* outFilename)
 {
-  amigaImage = calloc(width*height, 4);
+  int numColors;
+  amigaImage = calloc(width*height, 1);
 
-  for (int y=0; y<height; y++) {
-    png_byte* row = rowPointers[y];
-    for (int x=0; x<width; x++) {
-      png_byte* ptr = &(row[x*4]);
-  
-      amiga_color_t color;
-      color.r = ptr[0] >> 4;
-      color.g = ptr[1] >> 4;
-      color.b = ptr[2] >> 4;
+  if (1) {
+    liq_attr *attr = liq_attr_create();
+    //    liq_image *image = liq_image_create_rgba(attr, rowPointers, width, height, 0);
+    liq_image *image = liq_image_create_rgba_rows(attr, (void**)rowPointers, width, height, 0);
+    liq_set_max_colors(attr, 16);
+    liq_set_speed(attr, 1);
+    liq_result *res = liq_quantize_image(attr, image);
+    liq_write_remapped_image(res, image, amigaImage, width*height);
+    
+    const liq_palette *pal = liq_get_palette(res);
+    
+    printf("pal->count = %d\n", pal->count);
 
-      int index = -1;
-      for (int i = 0; i < paletteIndex; i++) {
-	if (memcmp(&palette[i], &color, sizeof(amiga_color_t)) == 0) {
-	  index = i;
-	  break;
-	}
-      }
 
-      if (index == -1 && paletteIndex < MAX_PALETTE) {
-	index = paletteIndex;
-	paletteIndex++;
-
-      } else if (index == -1 && paletteIndex == MAX_PALETTE) {
-	abort_("Too many colors\n");
-      }
-
-      palette[index] = color ;
-      amigaImage[(width*y)+x] = index;
+    for (unsigned i = 0; i < pal->count; i++) {
+      printf("%d %d %d %d\n", i, pal->entries[i].r, pal->entries[i].g, pal->entries[i].b);
+      palette[i].r = pal->entries[i].r >> 4;
+      palette[i].g = pal->entries[i].g >> 4;
+      palette[i].b = pal->entries[i].b >> 4;
     }
+    
+    numColors =  pal->count;
+  } else {
+    for (int y=0; y<height; y++) {
+      png_byte* row = rowPointers[y];
+      for (int x=0; x<width; x++) {
+	png_byte* ptr = &(row[x*4]);
+	
+	amiga_color_t color;
+	color.r = ptr[0] >> 4;
+	color.g = ptr[1] >> 4;
+	color.b = ptr[2] >> 4;
+	
+	int index = -1;
+	for (int i = 0; i < paletteIndex; i++) {
+	  if (memcmp(&palette[i], &color, sizeof(amiga_color_t)) == 0) {
+	    index = i;
+	    break;
+	  }
+	}
+	
+	if (index == -1 && paletteIndex < MAX_PALETTE) {
+	  index = paletteIndex;
+	  paletteIndex++;
+	  
+	} else if (index == -1 && paletteIndex == MAX_PALETTE) {
+	  abort_("Too many colors\n");
+	}
+	
+	palette[index] = color ;
+	amigaImage[(width*y)+x] = index;
+      }
+    }
+   
+    numColors = paletteIndex;
   }
-
-
-  int numColors = paletteIndex-1;
-  int numBitPlanes = (int)(log(numColors) / log(2))+1;
+  
+  int numBitPlanes = (int)(log(numColors-1) / log(2))+1;
   
   printf("number of colors = %d\n", numColors);
   printf("number of bitplanes = %d\n", numBitPlanes);
@@ -190,7 +217,7 @@ processFile(char* outFilename)
     abort_("failed to open %s for writing", filenameBuffer);
   }
   
-  for (int i = 0; i < paletteIndex; i++) {
+  for (int i = 0; i < numColors; i++) {
     printf("%d: %x %d %d %d\n", i , palette[i].r << 8 | palette[i].g << 4 | palette[i].b, palette[i].r, palette[i].g, palette[i].b);
     fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+(i*2), palette[i].r << 8 | palette[i].g << 4 | palette[i].b);
   }

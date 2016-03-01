@@ -94,3 +94,14 @@ Notes:
    # make
    # make install
 ```
+
+7. pngquant
+    ```
+    # git clone git://github.com/pornel/pngquant.git
+    # cd pngquant/lib
+    # ./configure --prefix=/usr/local
+    # make
+    # mkdir /usr/local/include/pngquant
+    # cp *.h /usr/local/include/pngquant/
+    # cp *.a /usr/local/lib
+```
