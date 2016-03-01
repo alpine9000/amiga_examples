@@ -9,7 +9,7 @@ The image data is prepared using a new tool I wrote called [imagecon](../tools/i
 
 The original version of this example used [vilcans amiga-startup](https://github.com/vilcans/amiga-startup) as a starting point, however almost all of that code has been replaced as my understanding exanded.
 
-[Disk Image](bin/image.adf?raw=true)
+[Download disk image](bin/image.adf?raw=true)
 
 Screenshot:
 
