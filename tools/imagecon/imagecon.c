@@ -19,6 +19,7 @@
 #include <pngquant/libimagequant.h>
 
 char** _argv;
+int verbose = 0;
 
 void 
 abort_(const char * s, ...)
@@ -85,12 +86,14 @@ void readFile(char* file_name)
   color_type = png_get_color_type(png_ptr, info_ptr);
   bit_depth = png_get_bit_depth(png_ptr, info_ptr);
 
-  printf("width = %d\n", width);
-  printf("height = %d\n", height);
-  printf("color_type = %d (palette = %s)\n", color_type, color_type == PNG_COLOR_TYPE_PALETTE ? "yes" : "no");
-  printf("bit_depth = %d\n", bit_depth);
-  printf("number_of_passes = %d\n", number_of_passes);
-
+  if (verbose) {
+    printf("width = %d\n", width);
+    printf("height = %d\n", height);
+    printf("color_type = %d (palette = %s)\n", color_type, color_type == PNG_COLOR_TYPE_PALETTE ? "yes" : "no");
+    printf("bit_depth = %d\n", bit_depth);
+    printf("number_of_passes = %d\n", number_of_passes);
+  }
+  
   if (color_type == PNG_COLOR_TYPE_PALETTE)
     png_set_palette_to_rgb(png_ptr);
 
@@ -133,11 +136,13 @@ void readFile(char* file_name)
   
   fclose(fp);
 
-  printf("width = %d\n", width);
-  printf("height = %d\n", height);
-  printf("color_type = %d (palette = %s)\n", color_type, color_type == PNG_COLOR_TYPE_PALETTE ? "yes" : "no");
-  printf("bit_depth = %d\n", bit_depth);
-  printf("number_of_passes = %d\n", number_of_passes);
+  if (verbose) {
+    printf("width = %d\n", width);
+    printf("height = %d\n", height);
+    printf("color_type = %d (palette = %s)\n", color_type, color_type == PNG_COLOR_TYPE_PALETTE ? "yes" : "no");
+    printf("bit_depth = %d\n", bit_depth);
+    printf("number_of_passes = %d\n", number_of_passes);
+  }
 }
 
 
@@ -159,11 +164,15 @@ processFile(char* outFilename)
     
     const liq_palette *pal = liq_get_palette(res);
     
-    printf("pal->count = %d\n", pal->count);
+    if (verbose) {
+      printf("pal->count = %d\n", pal->count);
+    }
 
 
     for (unsigned i = 0; i < pal->count; i++) {
-      printf("%d %d %d %d\n", i, pal->entries[i].r, pal->entries[i].g, pal->entries[i].b);
+      if (verbose) {
+	printf("%d %d %d %d\n", i, pal->entries[i].r, pal->entries[i].g, pal->entries[i].b);
+      }
       palette[i].r = pal->entries[i].r >> 4;
       palette[i].g = pal->entries[i].g >> 4;
       palette[i].b = pal->entries[i].b >> 4;
@@ -207,9 +216,11 @@ processFile(char* outFilename)
   
   int numBitPlanes = (int)(log(numColors-1) / log(2))+1;
   
-  printf("number of colors = %d\n", numColors);
-  printf("number of bitplanes = %d\n", numBitPlanes);
-
+  if (verbose) {
+    printf("number of colors = %d\n", numColors);
+    printf("number of bitplanes = %d\n", numBitPlanes);
+  }
+  
   char filenameBuffer[2048];
   snprintf(filenameBuffer, 2048, "%s-copper-list.s", outFilename);
   FILE* fp = fopen(filenameBuffer, "w+");
@@ -218,7 +229,9 @@ processFile(char* outFilename)
   }
   
   for (int i = 0; i < numColors; i++) {
-    printf("%d: %x %d %d %d\n", i , palette[i].r << 8 | palette[i].g << 4 | palette[i].b, palette[i].r, palette[i].g, palette[i].b);
+    if (verbose) {
+      printf("%d: %x %d %d %d\n", i , palette[i].r << 8 | palette[i].g << 4 | palette[i].b, palette[i].r, palette[i].g, palette[i].b);
+    }
     fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+(i*2), palette[i].r << 8 | palette[i].g << 4 | palette[i].b);
   }
 
