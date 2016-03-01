@@ -47,4 +47,4 @@ out/main.bin: out/main.o
 	vlink -brawbin1 $< -o $@
 
 clean:
-	rm -rf out *~
+	rm -rf out bin *~

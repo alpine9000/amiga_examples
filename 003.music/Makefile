@@ -1,4 +1,4 @@
-FLOPPY=bin/image.adf
+FLOPPY=bin/music.adf
 EXTRA=out/image-copper-list.s out/image.bin
 IMAGEFILE=../assets/mission-beach.png
 
