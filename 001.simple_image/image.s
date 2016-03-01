@@ -61,9 +61,9 @@ copper:
 	dc.w	BPL1MOD,SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES
 	dc.w	BPL2MOD,SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES
 	
-	include	"out/image-copper.s"
+	include	"out/image-copper-list.s"
 
 	dc.l	$fffffffe	
 bitplanes:
-	incbin	"out/image-data.bin"
+	incbin	"out/image.bin"
 	

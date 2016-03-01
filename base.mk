@@ -1,5 +1,7 @@
 HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow
 HOST_CFLAGS=-g $(HOST_WARNINGS)
+IMAGECONDIR=../tools/imagecon
+IMAGECON=$(IMAGECONDIR)/bin/imagecon
 
 all: bin out $(MAKEADF) $(FLOPPY)
 
@@ -20,6 +22,9 @@ bin:
 
 out:
 	mkdir out
+
+$(IMAGECON):
+	make -C $(IMAGECONDIR)
 
 $(MAKEADF): ../tools/makeadf.c
 	gcc ../tools/makeadf.c -o $(MAKEADF)

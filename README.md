@@ -1,5 +1,8 @@
 (re)Learning how to program an Amiga after a 20 year break
 ==========================================================
+Introduction
+------------
+This repo is not meant to be an amiga programming guide.
 
 Documentation
 -------------
@@ -70,4 +73,24 @@ Notes:
     # ./configure --prefix=/usr/local
     # make
     # make install
+```
+
+5. libtool
+    ```
+   # wget http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz
+   # tar zxfv libtool-2.4.6.tar.gz
+   # cd libtool-2.4.6
+   # ./configure --prefix=/usr/local
+   # make
+   # make install
+```
+
+6. libpng
+    ```
+   # wget ftp://ftp.simplesystems.org/pub/png/src/libpng16/libpng-1.6.21.tar.gz
+   # tar zxfv libpng-1.6.21.tar.gz
+   # cd libpng-1.6.21
+   # ./configure --prefix=/usr/local
+   # make
+   # make install
 ```

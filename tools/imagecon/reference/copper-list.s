@@ -1,0 +1,16 @@
+	dc.w $180,$fff
+	dc.w $182,$ee9
+	dc.w $184,$ddd
+	dc.w $186,$fe0
+	dc.w $188,$fa7
+	dc.w $18a,$9dc
+	dc.w $18c,$f92
+	dc.w $18e,$2b5
+	dc.w $190,$e20
+	dc.w $192,$e9a
+	dc.w $194,$b0
+	dc.w $196,$d12
+	dc.w $198,$1ae
+	dc.w $19a,$6a
+	dc.w $19c,$744
+	dc.w $19e,$362
