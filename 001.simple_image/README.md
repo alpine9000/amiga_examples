@@ -11,6 +11,6 @@ The original version of this example used [vilcans amiga-startup](https://github
 
 Screenshot:
 
--> ![Screenshot](screenshot.png?raw=true) <-
+![Screenshot](screenshot.png?raw=true)
 
-[Disk Image](bin/image.adf)
+[Disk Image](bin/image.adf?raw=true)
