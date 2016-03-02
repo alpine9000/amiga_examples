@@ -6,14 +6,14 @@ Generate amiga data/files from a PNG image file.
 usage
 -----
     ```
-imagecon: --input <input.png> [options]
-Options:
-  --output <output prefix>
-  --colors <max colors>
-  --quantize
-  --output-palette
-  --override-palette <palette file>
-  --verbose
+    imagecon: --input <input.png> [options]
+    Options:
+      --output <output prefix>
+      --colors <max colors>
+      --quantize
+      --output-palette
+      --override-palette <palette file>
+      --verbose
 ```
 
 The following files will be generated:
