@@ -1,13 +1,18 @@
 IMAGECON=./out/imagecon
-SRCS=imagecon.c
+OBJS=out/imagecon.o out/png.o
 HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -limagequant
 HOST_CFLAGS=$(HOST_WARNINGS)
 OUTPUT_BASE=out/mission-beach
 REFERENCE_BASE=reference/mission-beach
 TEST_IMAGE=../../assets/mission-beach.png
+LIBS=-lpng -limagequant
 
-$(IMAGECON): out bin $(SRCS)
-	gcc $(HOST_CFLAGS) $(SRCS) -o $(IMAGECON) -lpng
+$(IMAGECON): out bin $(OBJS)
+	gcc $(OBJS) -o $(IMAGECON) $(LIBS)
+
+
+out/%.o: %.c
+	gcc -c $(HOST_CFLAGS) $< -o $@ 
 
 out:
 	mkdir out
@@ -17,7 +22,7 @@ bin:
 
 out/mission-beach.bin: $(IMAGECON) 
 	-rm -f $(OUTPUT_BASE).bin $(OUTPUT_BASE)-copper-list.s
-	$(IMAGECON) --input $(TEST_IMAGE) --output $(OUTPUT_BASE) --colors 32
+	$(IMAGECON) --input $(TEST_IMAGE) --output $(OUTPUT_BASE) --colors 32 --quantize
 
 test: $(IMAGECON) $(OUTPUT_BASE).bin	
 	diff $(OUTPUT_BASE).bin $(REFERENCE_BASE).bin	
@@ -25,4 +30,4 @@ test: $(IMAGECON) $(OUTPUT_BASE).bin
 	@echo "Success!"
 
 clean:
-	rm -r out bin
+	rm -rf out bin *~

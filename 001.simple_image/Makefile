@@ -7,4 +7,4 @@ MODULE=image.s
 include ../base.mk
 
 $(EXTRA): $(IMAGECON) $(IMAGEFILE)
-	$(IMAGECON) --input $(IMAGEFILE) --output out/image --colors 32
+	$(IMAGECON) --input $(IMAGEFILE) --output out/image --colors 32 --quantize
