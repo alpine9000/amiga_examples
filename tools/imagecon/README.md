@@ -26,7 +26,7 @@ options
 **--output** &lt;output prefix>
 Specify the prefix for the output file set. Extentions will be added to this. Default is the input file name minus the extension.
 
-**--colors** <max colors>>
+**--colors** &lt;max colors>
 Specify the maximum number of colors allowed in the palette. Acceptable values are from 2 to 32.
 
 **--quantize**
