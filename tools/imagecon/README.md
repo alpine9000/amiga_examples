@@ -23,10 +23,10 @@ The following files will be generated:
 
 options
 -------
-**--output** <output prefix>
+**--output** <output prefix>>
 Specify the prefix for the output file set. Extentions will be added to this. Default is the input file name minus the extension.
 
-**--colors** <max colors>
+**--colors** <max colors>>
 Specify the maximum number of colors allowed in the palette. Acceptable values are from 2 to 32.
 
 **--quantize**
@@ -35,7 +35,7 @@ Convert the image to use less colors.
 **--output-palette**
 Generate a palette file of the final palette used. Output will be the output file with the ".pal" extension.
 
-**--override-palette** <palette file>
+**--override-palette** <palette file>>
 Specify a palette file to use that will override the image or quantized palette. Also overrides the --colors option.
 
 **--verbose**
