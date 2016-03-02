@@ -5,7 +5,7 @@ Generate amiga data/files from a PNG image file.
 
 usage
 -----
-    ```
+```
     imagecon: --input <input.png> [options]
     Options:
       --output <output prefix>
