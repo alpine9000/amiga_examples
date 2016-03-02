@@ -17,9 +17,9 @@ usage
 ```
 
 The following files will be generated:
-    1. <output prefix>.bin		binary interleave bitplane data
-    2. <output prefix>-copper-list.s 	m68k assembler syntax copper list with no symbols
-    3. <output prefix>.pal		(optional) palette file listing the palette colors as hex
+1. <output prefix>.bin		binary interleave bitplane data
+2. <output prefix>-copper-list.s 	m68k assembler syntax copper list with no symbols
+3. <output prefix>.pal		(optional) palette file listing the palette colors as hex
 
 options
 -------
