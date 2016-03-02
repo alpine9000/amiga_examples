@@ -1,14 +1,14 @@
 (re)Learning how to program an Amiga after a 20 year break
 ==========================================================
-Introduction
+introduction
 ------------
-This repo is not meant to be an amiga programming guide. If you're looking for the correct way to program an amiga, there are lots of other guides out there. These examples start were I left off around 1990, and we had very bad programming habbits in those days.
+This repo is not meant to be an amiga programming guide. If you're looking for the correct way to program an amiga, there are lots of other guides out there. These examples start where I left off around 1990. We had very bad programming habbits in those days.
 
 I do however try to show exactly what is going on in each example. Wherever possible I try and use constants from the OS includes instead of magic custom addresses etc.
 
 Where possible I will try and write development system programs that show how data is created/converted.
 
-Documentation
+documentation
 -------------
 * [68000 instructions](http://68k.hax.com/)
 * [vasm documentation](http://sun.hasenbraten.de/vasm/release/vasm.html)
@@ -20,7 +20,11 @@ Documentation
 * [copper timing details](http://coppershade.org/articles/AMIGA/Agnus/Copper:_Exact_WAIT_Timing/)
 * [coding forum](http://ada.untergrund.net/?p=boardforums&forum=4)
 
-Cross development environment
+tools
+=====
+* [imagecon](tools/imagecon/README.md)
+
+cross development environment
 -----------------------------
 Built on OSX 10.11.3
 Notes: 
