@@ -35,7 +35,7 @@ Convert the image to use less colors.
 **--output-palette**
 Generate a palette file of the final palette used. Output will be the output file with the ".pal" extension.
 
-**--override-palette** <palette file>>
+**--override-palette** &lt;palette file>
 Specify a palette file to use that will override the image or quantized palette. Also overrides the --colors option.
 
 **--verbose**
