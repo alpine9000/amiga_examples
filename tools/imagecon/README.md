@@ -43,6 +43,6 @@ Display debugging information
 
 example
 -------
-    ```
+```
     ./imagecon --input full_color.png --output image-data --quantize --colors 32 --palette
 ```
