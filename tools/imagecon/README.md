@@ -23,7 +23,7 @@ The following files will be generated:
 
 options
 -------
-**--output** <output prefix>>
+**--output** \<output prefix>>
 Specify the prefix for the output file set. Extentions will be added to this. Default is the input file name minus the extension.
 
 **--colors** <max colors>>
