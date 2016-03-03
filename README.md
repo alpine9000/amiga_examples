@@ -29,11 +29,17 @@ tools
 The tools have tests:
 
     ```
-# git clone git://github.com/cahirwpz/amigaos-cross-toolchain.git
-# cd amigaos-cross-toolchain
-# ./toolchain-m68k --prefix=/usr/local/amiga build
+# cd tools/imagecon
+# make test
+...
+______  ___   _____ _____ ___________
+| ___ \/ _ \ /  ___/  ___|  ___|  _  \
+| |_/ / /_\ \\ `--.\ `--.| |__ | | | |
+|  __/|  _  | `--. \`--. \  __|| | | |
+| |   | | | |/\__/ /\__/ / |___| |/ /
+\_|   \_| |_/\____/\____/\____/|___/
+#
 ```
-
 or test all by running make at the top level
 
 cross development environment
