@@ -40,7 +40,7 @@ ______  ___   _____ _____ ___________
 #
 ```
 
-or test all by running make at the top level
+or test all by running  ``make test`` at the top level
 
 cross development environment
 -----------------------------
