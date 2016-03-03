@@ -28,9 +28,9 @@ tools
 
 The tools have tests:
     ```
-    # cd tools/imagecon
-    # make test
-    #
+# git clone git://github.com/cahirwpz/amigaos-cross-toolchain.git
+# cd amigaos-cross-toolchain
+# ./toolchain-m68k --prefix=/usr/local/amiga build
 ```
 
 or test all by running make at the top level
