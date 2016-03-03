@@ -4,15 +4,17 @@ IMAGEDATA=out/image-copper-list.s out/image.bin
 IMAGEFILE=../assets/mission-beach.png
 TC_IMAGEDATA=out/tc.bin out/tc-mask.bin
 TC_IMAGEFILE=../assets/tc.png
-EXTRA=$(IMAGEDATA) $(TC_IMAGEDATA) out/bitblit.s
+EXTRA=$(IMAGEDATA) $(TC_IMAGEDATA)
+SHARED_PALETTE_BASE=out/shared-palette
+SHARED_PALETTE=$(SHARED_PALETTE_BASE).pal
 
 include ../base.mk
 
-out/bitblit.s: bitblit.c
-	vc -S bitblit.c -o out/bitblit.s
+$(SHARED_PALETTE): $(IMAGEFILE) $(TC_IMAGEFILE)
+	$(IMAGECON) --input $(IMAGEFILE),$(TC_IMAGEFILE) --output $(SHARED_PALETTE_BASE) --colors 32 --quantize --output-palette
 
-$(IMAGEDATA): $(IMAGECON) $(IMAGEFILE)
-	$(IMAGECON) --input $(IMAGEFILE) --output out/image --colors 32 --quantize
+$(IMAGEDATA): $(IMAGECON) $(IMAGEFILE) $(SHARED_PALETTE)
+	$(IMAGECON) --input $(IMAGEFILE) --output out/image --output-bitplanes --output-copperlist --override-palette $(SHARED_PALETTE)
 
-$(TC_IMAGEDATA): $(IMAGECON) $(TC_IMAGEFILE)
-	$(IMAGECON) --input $(TC_IMAGEFILE) --output out/tc --colors 32 --quantize --output-mask
+$(TC_IMAGEDATA): $(IMAGECON) $(TC_IMAGEFILE) $(SHARED_PALETTE)
+	$(IMAGECON) --input $(TC_IMAGEFILE) --output out/tc --output-bitplanes --output-mask --output-copperlist --override-palette $(SHARED_PALETTE)

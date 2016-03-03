@@ -16,8 +16,8 @@
 
 #include "imagecon.h"
 
-png_bytep* 
-png_read(char* file_name)
+void
+png_read(char* file_name, imagecon_image_t* ic)
 {
   png_structp png_ptr; 
   png_byte color_type;
@@ -51,14 +51,14 @@ png_read(char* file_name)
   
   png_read_info(png_ptr, info_ptr);
   
-  config.width = png_get_image_width(png_ptr, info_ptr);
-  config.height = png_get_image_height(png_ptr, info_ptr);
+  ic->width = png_get_image_width(png_ptr, info_ptr);
+  ic->height = png_get_image_height(png_ptr, info_ptr);
   color_type = png_get_color_type(png_ptr, info_ptr);
   bit_depth = png_get_bit_depth(png_ptr, info_ptr);
 
   if (config.verbose) {
-    printf("width = %d\n", config.width);
-    printf("height = %d\n", config.height);
+    printf("width = %d\n", ic->width);
+    printf("height = %d\n", ic->height);
     printf("color_type = %d (palette = %s)\n", color_type, color_type == PNG_COLOR_TYPE_PALETTE ? "yes" : "no");
     printf("bit_depth = %d\n", bit_depth);
     printf("number_of_passes = %d\n", number_of_passes);
@@ -84,35 +84,37 @@ png_read(char* file_name)
   number_of_passes = png_set_interlace_handling(png_ptr);
 
   png_read_update_info(png_ptr, info_ptr);  
-  config.width = png_get_image_width(png_ptr, info_ptr);
-  config.height = png_get_image_height(png_ptr, info_ptr);
+  ic->width = png_get_image_width(png_ptr, info_ptr);
+  ic->height = png_get_image_height(png_ptr, info_ptr);
   color_type = png_get_color_type(png_ptr, info_ptr);
   bit_depth = png_get_bit_depth(png_ptr, info_ptr);
 
   if (setjmp(png_jmpbuf(png_ptr)))
     abort_("Error during read_image");
   
-  png_bytep* rowPointers = (png_bytep*) malloc(sizeof(png_bytep) * config.height);
+  ic->rowPointers = (png_bytep*) malloc(sizeof(png_bytep) * ic->height);
   
+  /*
   if (bit_depth == 16)
-    rowbytes = config.width*8;
-  else
-    rowbytes = config.width*4;
+    rowbytes = ic->width*8;
+    else */
+    rowbytes = ic->width*4;
+ 
+
+  for (int y=0; y< ic->height; y++)
+    ic->rowPointers[y] = (png_byte*) malloc(rowbytes);
   
-  for (int y=0; y<config.height; y++)
-    rowPointers[y] = (png_byte*) malloc(rowbytes);
-  
-  png_read_image(png_ptr, rowPointers);
+  png_read_image(png_ptr, ic->rowPointers);
   
   fclose(fp);
 
   if (config.verbose) {
-    printf("width = %d\n", config.width);
-    printf("height = %d\n", config.height);
+    printf("width = %d\n", ic->width);
+    printf("height = %d\n", ic->height);
     printf("color_type = %d (palette = %s)\n", color_type, color_type == PNG_COLOR_TYPE_PALETTE ? "yes" : "no");
     printf("bit_depth = %d\n", bit_depth);
     printf("number_of_passes = %d\n", number_of_passes);
   }
 
-  return rowPointers;
+  ic->amigaImage = calloc(ic->width*ic->height, 1);
 }

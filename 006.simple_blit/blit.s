@@ -12,8 +12,6 @@ RASTER_X_START		equ $81	; hard coded coordinates from hardware manual
 RASTER_Y_START		equ $2c
 RASTER_X_STOP		equ RASTER_X_START+SCREEN_WIDTH
 RASTER_Y_STOP		equ RASTER_Y_START+SCREEN_HEIGHT
-
-	public _bitblit
 	
 entry:
 	;; custom chip base globally in a6
@@ -22,8 +20,7 @@ entry:
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6)	; disable all interrupts
 
-	;;  	bsr.s	resetBitplanePointers
-	;; reset color registers to white
+	;; reset color registers to white to prevent startup flicker
 	move.l	#32,d0
 	lea	COLOR00(a6),a0
 .loop:
@@ -108,21 +105,21 @@ TC_WIDTH_BYTES	equ	TC_WIDTH/8
 TC_WIDTH_WORDS	equ	TC_WIDTH/16
 TC_XPOS		equ	16
 TC_YPOS		equ	16	
+TC_XPOS_BYTES	equ 	(TC_XPOS)/8
+
 doblit:	
 	movem.l d0-a6,-(sp)
-	lea $dff000,a6
 	bsr blitWait
 	move.l #$09f00000,BLTCON0(a6) 	;A->D copy, no shifts, ascending mode
 	move.l #$ffffffff,BLTAFWM(a6) 	;no masking of first/last word
 	move.w #0,BLTAMOD(a6)	      	;A modulo=bytes to skip between lines
 	move.w #SCREEN_WIDTH_BYTES-TC_WIDTH_BYTES,BLTDMOD(a6)	;D modulo
 	move.l #tc,BLTAPTH(a6)		;source graphic top left corner
-	move.l #bitplanes+(TC_XPOS)/8+(SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*TC_YPOS),BLTDPTH(a6)	;destination top left corner
-	move.w #(TC_HEIGHT*SCREEN_BIT_DEPTH)<<6|(TC_WIDTH_WORDS),BLTSIZE(a6)	  	;rectangle size, starts blit
+	move.l #bitplanes+TC_XPOS_BYTES+(SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*TC_YPOS),BLTDPTH(a6)	;destination top left corner
+	move.w #(TC_HEIGHT*SCREEN_BIT_DEPTH)<<6|(TC_WIDTH_WORDS),BLTSIZE(a6)	;rectangle size, starts blit
 	movem.l (sp)+,d0-a6
 	rts
 	
-	include "out/bitblit.s"
 copper:
 	;; bitplane pointers must be first else poking addresses will be incorrect
 	dc.w	BPL1PTL,0

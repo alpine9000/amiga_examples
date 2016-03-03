@@ -1,15 +1,18 @@
-Display a simple image
-======================
+perform a basic blit
+=====================
 
-Building on [trackdisk.device](../000.trackdisk), we now display a simple color image.
+We make some changes to [001.simple_image)(../001.simple_image):
+   1. The bitplane pointers are now reset using the copper.
+   2. Interrupt processing is disabled
+   3. A6 is now used as the base register for CUSTOM
 
-I display a 5 bitplane (32 color) low res image.
+Next we use some new features in [imagecon](../tools/imagecon) that allow us to generate a shared palette based on two PNG images.
 
-The image data is prepared using a new tool I wrote called [imagecon](../tools/imagecon/imagecon.c). This takes (almost) any 320x256 PNG and using [libimagequant](https://pngquant.org/lib/) it reduces the palette to 32 colors, then dumps out the copper list and interleaved bitplane data ready to be included into [image.s](image.s).
+This means out sprite and background can share the single palette.
 
-The original version of this example used [vilcans amiga-startup](https://github.com/vilcans/amiga-startup) as a starting point, however almost all of that code has been replaced as my understanding exanded.
+We then blit the sprite to the background.
 
-[Download disk image](bin/image.adf?raw=true)
+[Download disk image](bin/blit.adf?raw=true)
 
 Screenshot:
 

@@ -7,9 +7,12 @@ REFERENCE_BASE=reference/mission-beach
 TEST_IMAGE=../../assets/mission-beach.png
 LIBS=-lpng -limagequant
 
-$(IMAGECON): out bin $(OBJS)
+$(IMAGECON): out bin $(OBJS) 
 	gcc $(OBJS) -o $(IMAGECON) $(LIBS)
 
+
+out/imagecon.o: imagecon.h
+out/png.o: imagecon.h
 
 out/%.o: %.c
 	gcc -c $(HOST_CFLAGS) $< -o $@ 
@@ -22,7 +25,7 @@ bin:
 
 out/mission-beach.bin: $(IMAGECON) 
 	-rm -f $(OUTPUT_BASE).bin $(OUTPUT_BASE)-copper-list.s
-	$(IMAGECON) --input $(TEST_IMAGE) --output $(OUTPUT_BASE) --colors 32 --quantize
+	$(IMAGECON) --input $(TEST_IMAGE) --output $(OUTPUT_BASE) --output-copperlist --output-bitplanes --colors 32 --quantize
 
 test: $(IMAGECON) $(OUTPUT_BASE).bin	
 	diff $(OUTPUT_BASE).bin $(REFERENCE_BASE).bin	

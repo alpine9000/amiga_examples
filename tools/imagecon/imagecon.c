@@ -18,22 +18,28 @@ imagecon_config_t config = {
   .maxColors = MAX_PALETTE, 
   .outputPalette = 0, 
   .outputMask = 0,
+  .outputBitplanes = 0,
+  .outputCopperList = 0,
   .quantize = 0,
   .overridePalette = 0
 };
-
-typedef struct {
-  unsigned char r;
-  unsigned char g;
-  unsigned char b;
-  unsigned char a;
-} amiga_color_t;
 
 
 void
 usage()
 {
-  fprintf(stderr, "%s: --input <input.png> [options]\nOptions:\n  --output <output prefix>\n  --colors <max colors>\n  --quantize\n  --output-mask\n  --output-palette\n  --override-palette <palette file>\n  --verbose\n", config.argv[0]);
+  fprintf(stderr, 
+	  "%s:  --input <input1.png,input2.png...> [options]\n"\
+	  "options:\n"\
+	  "  --output <output prefix>\n"\
+	  "  --colors <max colors>\n"\
+	  "  --quantize\n  --output-mask\n"\
+	  "  --output-bitplanes\n"\
+	  "  --output-copperlist\n"\
+	  "  --output-mask\n"\
+	  "  --output-palette\n"\
+	  "  --override-palette <palette file>\n"\
+	  "  --verbose\n", config.argv[0]);
   exit(1);
 }
 
@@ -90,14 +96,19 @@ openFileRead(const char * s, ...)
 
 
 void 
-outputPalette(char* outFilename, amiga_color_t* palette, int numColors)
+outputPalette(char* outFilename, imagecon_image_t* ic)
 {
   if (config.verbose) {
     printf("outputPalette...\n");
   }
 
-  FILE* fp = openFileWrite("%s-copper-list.s", outFilename);
+  FILE* fp = 0;
   FILE* paletteFP = 0;
+
+  if (config.outputCopperList) {
+    fp = openFileWrite("%s-copper-list.s", outFilename);
+  }
+
   if (config.outputPalette) {
     paletteFP = openFileWrite("%s.pal", outFilename);
   }
@@ -106,20 +117,25 @@ outputPalette(char* outFilename, amiga_color_t* palette, int numColors)
     printf("outputPalette:\n");
   }
   
-  for (int i = 0; i < numColors; i++) {
+  for (int i = 0; i < ic->numColors; i++) {
     if (config.verbose) {
-      printf("%02d: hex=%03x r=%03d g=%03d b=%03d a=%03d\n", i , palette[i].r << 8 | palette[i].g << 4 | palette[i].b, palette[i].r, palette[i].g, palette[i].b, palette[i].a);
+      printf("%02d: hex=%03x r=%03d g=%03d b=%03d a=%03d\n", i , ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b, ic->palette[i].r, ic->palette[i].g, ic->palette[i].b, ic->palette[i].a);
     }
     if (paletteFP) {
-      fprintf(paletteFP, "%03x\n",  palette[i].r << 8 | palette[i].g << 4 | palette[i].b);
+      fprintf(paletteFP, "%03x\n",  ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b);
     }
-    fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+(i*2), palette[i].r << 8 | palette[i].g << 4 | palette[i].b);
+    if (fp) {
+      fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+(i*2), ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b);
+    }
   }
+
   if (paletteFP) {
     fclose(paletteFP);
   }
 
-  fclose(fp);
+  if (fp) {
+    fclose(fp);
+  }
 
   if (config.verbose) {
     printf("done\n\n");
@@ -127,15 +143,15 @@ outputPalette(char* outFilename, amiga_color_t* palette, int numColors)
 }
 
 
-int
-generateQuantizedPalette(unsigned char* amigaImage, png_bytep* rowPointers, amiga_color_t* palette)
+void
+generateQuantizedPalette(imagecon_image_t* ic)
 {
   if (config.verbose) {
     printf("generateQuantizedPalette...\n");
   }
 
   liq_attr *attr = liq_attr_create();
-  liq_image *image = liq_image_create_rgba_rows(attr, (void**)rowPointers, config.width, config.height, 0);
+  liq_image *image = liq_image_create_rgba_rows(attr, (void**)ic->rowPointers, ic->width, ic->height, 0);
 
   if (config.overridePalette) {
     FILE* fp = openFileRead(config.overridePalette);
@@ -163,48 +179,49 @@ generateQuantizedPalette(unsigned char* amigaImage, png_bytep* rowPointers, amig
     config.maxColors = paletteIndex;
   }
 
+
   liq_set_max_colors(attr, config.maxColors);
   liq_set_speed(attr, 1);
   liq_result *res = liq_quantize_image(attr, image);
 
-  liq_write_remapped_image(res, image, amigaImage, config.width*config.height);
-  
+  liq_write_remapped_image(res, image, ic->amigaImage, ic->width*ic->height);
+
   const liq_palette *pal = liq_get_palette(res);
   
   if (config.verbose) {
     printf("pal->count = %d\n", pal->count);
     printf("generateQuantizedPalette: post liq_write_remapped_image\n");
   }
-  
+
   for (unsigned i = 0; i < pal->count; i++) {
     if (config.verbose) {
       printf("%02d:  r=%03d g=%03d b=%03d a=%03d\n", i, pal->entries[i].r, pal->entries[i].g, pal->entries[i].b, pal->entries[i].a);
     }
-    palette[i].r = pal->entries[i].r >> 4;
-    palette[i].g = pal->entries[i].g >> 4;
-    palette[i].b = pal->entries[i].b >> 4;
-    palette[i].a = pal->entries[i].a >> 4;
+    ic->palette[i].r = pal->entries[i].r >> 4;
+    ic->palette[i].g = pal->entries[i].g >> 4;
+    ic->palette[i].b = pal->entries[i].b >> 4;
+    ic->palette[i].a = pal->entries[i].a >> 4;
   }
 
   if (config.verbose) {
     printf("done\n\n");
   }
   
-  return pal->count;
+  ic->numColors = pal->count;
 }
 
 
-int
-generatePalette(unsigned char* amigaImage, png_bytep* rowPointers, amiga_color_t* palette)
+void
+generatePalette(imagecon_image_t* ic)
 {
   if (config.verbose) {
     printf("generatePalette...\n");
   }
 
   int paletteIndex = 0;
-  for (int y=0; y<config.height; y++) {
-    png_byte* row = rowPointers[y];
-    for (int x=0; x < config.width; x++) {
+  for (int y=0; y< ic->height; y++) {
+    png_byte* row = ic->rowPointers[y];
+    for (int x=0; x < ic->width; x++) {
       png_byte* ptr = &(row[x*4]);
       
       amiga_color_t color;
@@ -215,7 +232,7 @@ generatePalette(unsigned char* amigaImage, png_bytep* rowPointers, amiga_color_t
       
       int index = -1;
       for (int i = 0; i < paletteIndex; i++) {
-	if (memcmp(&palette[i], &color, sizeof(amiga_color_t)) == 0) {
+	if (memcmp(&ic->palette[i], &color, sizeof(amiga_color_t)) == 0) {
 	  index = i;
 	  break;
 	}
@@ -229,8 +246,8 @@ generatePalette(unsigned char* amigaImage, png_bytep* rowPointers, amiga_color_t
 	abort_("Too many colors. Use --quantize.\n");
       }
       
-      palette[index] = color ;
-      amigaImage[(config.width*y)+x] = index;
+      ic->palette[index] = color ;
+      ic->amigaImage[(ic->width*y)+x] = index;
     }
   }
 
@@ -238,37 +255,38 @@ generatePalette(unsigned char* amigaImage, png_bytep* rowPointers, amiga_color_t
     printf("done\n\n");
   }  
 
-  return paletteIndex;
+  ic->numColors = paletteIndex;
 }
 
+
 void
-outputBitplanes(char* outFilename, unsigned char* amigaImage, int numColors)
+outputBitplanes(char* outFilename, imagecon_image_t* ic)
 {
 
 
   if (config.verbose) {
     printf("outputBitplanes...\n");
   }
-  int numBitPlanes = (int)(log(numColors-1) / log(2))+1;
+  int numBitPlanes = (int)(log(ic->numColors-1) / log(2))+1;
   
   if (config.verbose) {
-    printf("number of colors = %d\n", numColors);
+    printf("number of colors = %d\n", ic->numColors);
     printf("number of bitplanes = %d\n", numBitPlanes);
   }
 
   
-  int byteWidth = (config.width + 7) / 8;
+  int byteWidth = (ic->width + 7) / 8;
 
   char** bitplanes = malloc(sizeof(void*)*numBitPlanes);
   for (int i = 0; i < numBitPlanes; i++) {
-    bitplanes[i] = calloc(byteWidth*config.height, 1);
+    bitplanes[i] = calloc(byteWidth*ic->height, 1);
   }
 
-  for (int y = 0, writeIndex = 0; y < config.height; y++) {
+  for (int y = 0, writeIndex = 0; y < ic->height; y++) {
     for (int byte = 0;byte < byteWidth; byte++) {
       for (int bit = 0; bit < 8; bit++) {	
 	int x = byte * 8 + 7 - bit;
-	int palette_index = amigaImage[(config.width*y)+x];
+	int palette_index = ic->amigaImage[(ic->width*y)+x];
 	for (int plane_index = 0; plane_index < numBitPlanes; plane_index++) {
 	  char* plane = bitplanes[plane_index];
 	  plane[writeIndex] |= ((palette_index >> plane_index) & 1) << bit;
@@ -278,10 +296,9 @@ outputBitplanes(char* outFilename, unsigned char* amigaImage, int numColors)
     }
   }
 
-
   FILE* fp = openFileWrite("%s.bin", outFilename);
 
-  for (int y = 0; y < config.height; y++) {
+  for (int y = 0; y < ic->height; y++) {
     for (int plane_index = 0; plane_index < numBitPlanes; plane_index++) {
       char* plane = bitplanes[plane_index];
       fwrite(&plane[y*byteWidth], byteWidth, 1, fp);      
@@ -293,28 +310,28 @@ outputBitplanes(char* outFilename, unsigned char* amigaImage, int numColors)
   }
 }
 
+
 void
-outputMask(char* outFilename, unsigned char* amigaImage, amiga_color_t* palette, int numColors)
+outputMask(char* outFilename, imagecon_image_t* ic)
 {
   if (config.verbose) {
     printf("outputMask...\n");
   }
-  int numBitPlanes = (int)(log(numColors-1) / log(2))+1;
+  int numBitPlanes = (int)(log(ic->numColors-1) / log(2))+1;
   
-  int byteWidth = (config.width + 7) / 8;
+  int byteWidth = (ic->width + 7) / 8;
 
   char** bitplanes = malloc(sizeof(void*)*numBitPlanes);
   for (int i = 0; i < numBitPlanes; i++) {
-    bitplanes[i] = calloc(byteWidth*config.height, 1);
+    bitplanes[i] = calloc(byteWidth*ic->height, 1);
   }
 
-
-  for (int y = 0, writeIndex = 0; y < config.height; y++) {
+  for (int y = 0, writeIndex = 0; y < ic->height; y++) {
     for (int byte = 0;byte < byteWidth; byte++) {
       for (int bit = 0; bit < 8; bit++) {	
 	int x = byte * 8 + 7 - bit;
-	int paletteIndex = amigaImage[(config.width*y)+x];
-	int bitmask = palette[paletteIndex].a > 0 ? 0xFF : 0;
+	int paletteIndex = ic->amigaImage[(ic->width*y)+x];
+	int bitmask = ic->palette[paletteIndex].a > 0 ? 0xFF : 0;
 	for (int plane_index = 0; plane_index < numBitPlanes; plane_index++) {
 	  char* plane = bitplanes[plane_index];
 	  plane[writeIndex] |= ((bitmask >> plane_index) & 1) << bit;
@@ -326,7 +343,7 @@ outputMask(char* outFilename, unsigned char* amigaImage, amiga_color_t* palette,
 
   FILE* fp = openFileWrite("%s-mask.bin", outFilename);
 
-  for (int y = 0; y < config.height; y++) {
+  for (int y = 0; y < ic->height; y++) {
     for (int plane_index = 0; plane_index < numBitPlanes; plane_index++) {
       char* plane = bitplanes[plane_index];
       fwrite(&plane[y*byteWidth], byteWidth, 1, fp);      
@@ -339,38 +356,91 @@ outputMask(char* outFilename, unsigned char* amigaImage, amiga_color_t* palette,
   }
 }
 
+
 void
-processFile(char* outFilename, png_bytep* rowPointers)
+processFile(char* outFilename, imagecon_image_t* ic)
 {
   if (config.verbose) {
     printf("processFile...\n");
   }
 
-  int numColors;
-  amiga_color_t palette[MAX_PALETTE];
-
-  unsigned char* amigaImage = 0;
-  
-  amigaImage = calloc(config.width*config.height, 1);
-
   if (config.quantize || config.overridePalette) {
-    numColors = generateQuantizedPalette(amigaImage, rowPointers,  palette);
+    generateQuantizedPalette(ic);
   } else {
-    numColors = generatePalette(amigaImage, rowPointers, palette);
+    generatePalette(ic);
   }
 
-  outputBitplanes(outFilename, amigaImage, numColors);
+  if (config.outputBitplanes) {
+    outputBitplanes(outFilename, ic);
+  }
 
   if (config.outputMask) {
-    outputMask(outFilename, amigaImage, palette, numColors);
+    outputMask(outFilename, ic);
   }
-  outputPalette(outFilename, palette, numColors);
+
+  outputPalette(outFilename, ic);
 
   if (config.verbose) {
     printf("done\n\n");
   }
 }
+
     
+void
+splitFiles(char* inputFile, int* count, char*** vector)
+{
+  char* ptr = inputFile;
+  char* end;
+  char** files = calloc(sizeof(void*), 1);
+  int index = 0;			  
+  do {
+    end = strchr(ptr, ',');
+    char* file;
+    if (end) {
+      file = calloc(end-ptr+1, 1);
+      strncpy(file, ptr, end-ptr);
+      ptr = end+1;
+    } else {
+      file = calloc(strlen(ptr)+1, 1);
+      strcpy(file, ptr);
+    }
+    
+    files[index++] = file;
+    files = realloc(files, index*sizeof(void*));
+    
+  } while (end != 0);
+  
+  
+  *vector = files;
+  *count = index;
+}
+
+#define max(x,y) (x > y ? x : y)
+
+void
+combineImages(imagecon_image_t** images, int numImages, imagecon_image_t* ic)
+{
+  ic->width = 0;
+  ic->height = 0;
+  
+ for (int i = 0; i < numImages; i++) {
+   ic->width = max(images[i]->width, ic->width);
+   ic->height += images[i]->height;
+ }
+
+ ic->rowPointers = (png_bytep*) malloc(sizeof(png_bytep) * ic->height);
+ ic->amigaImage = calloc(ic->width*ic->height, 1);
+
+ for (int y = 0; y < ic->height; y++) {
+   ic->rowPointers[y] = (png_byte*) calloc(ic->width*4, 1);
+ }
+ 
+ for (int i = 0, ny = 0; i < numImages; i++) {
+   for (int y = 0; y < images[i]->height; y++, ny++) {
+     memcpy(ic->rowPointers[ny], images[i]->rowPointers[y], images[i]->width*4);
+   }
+ }
+}
 
 
 int 
@@ -384,6 +454,8 @@ main(int argc, char **argv)
     static struct option long_options[] = {
       {"verbose", no_argument, &config.verbose, 1},
       {"quantize", no_argument, &config.quantize, 1},
+      {"output-copperlist", no_argument, &config.outputCopperList, 1},
+      {"output-bitplanes", no_argument, &config.outputBitplanes, 1},
       {"output-palette", no_argument, &config.outputPalette, 1},
       {"output-mask", no_argument, &config.outputMask, 1},
       {"override-palette", required_argument, 0, 'p'},
@@ -444,11 +516,26 @@ main(int argc, char **argv)
     usage();
   }
   
-  if (config.verbose) {
-    printf("Options:\nverbose = %d\ninputFile = %s\noutputFile = %s\nmaxColors = %d\noutputPalette = %d\noutputMask = %d\n\n", config.verbose, inputFile, outputFile, config.maxColors, config.outputPalette, config.outputMask);
+  if (strchr(inputFile, ',') == 0) {
+    imagecon_image_t ic = {0};
+    png_read(inputFile, &ic);
+    processFile(outputFile, &ic); 
+  } else {
+    char** files;
+    int numFiles;
+    splitFiles(inputFile, &numFiles, &files);
+
+    imagecon_image_t** images = malloc(sizeof(imagecon_image_t*)*numFiles);
+
+    for (int i = 0; i < numFiles; i++) {
+      images[i] = calloc(sizeof(imagecon_image_t), 1);
+      png_read(files[i], images[i]);
+    }
+    
+    imagecon_image_t combined;
+    combineImages(images, numFiles, &combined);
+    processFile(outputFile, &combined);       
   }
-  
-  processFile(outputFile, png_read(inputFile));
  
   return 0;
 }

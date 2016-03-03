@@ -1,0 +1,14 @@
+MEMORY
+{
+ram: org = 0x70000, len = 0x100000
+}
+
+SECTIONS
+{
+.text : { *(.text) } > ram
+.bss  : { *(.bss) } > ram
+.data : { *(.data) } > ram 
+CODE : { *(CODE) } > ram 
+DATA : { *(DATA) } > ram 
+}
+
