@@ -26,6 +26,22 @@ tools
 * [imagecon](tools/imagecon)
 * [makeadf](tools/makeadf)
 
+The tools have tests:
+    ```
+# cd tools/imagecon
+# make test
+...
+______  ___   _____ _____ ___________
+| ___ \/ _ \ /  ___/  ___|  ___|  _  \
+| |_/ / /_\ \\ `--.\ `--.| |__ | | | |
+|  __/|  _  | `--. \`--. \  __|| | | |
+| |   | | | |/\__/ /\__/ / |___| |/ /
+\_|   \_| |_/\____/\____/\____/|___/
+#
+```
+
+or test all by running make at the top level
+
 cross development environment
 -----------------------------
 Built on OSX 10.11.3
