@@ -14,6 +14,7 @@
 #include <pngquant/libimagequant.h>
 #include "imagecon.h"
 
+
 imagecon_config_t config = { 
   .maxColors = MAX_PALETTE, 
   .outputPalette = 0, 
@@ -38,7 +39,7 @@ usage()
 	  "  --output-copperlist\n"\
 	  "  --output-mask\n"\
 	  "  --output-palette\n"\
-	  "  --override-palette <palette file>\n"\
+	  "  --use-palette <palette file>\n"\
 	  "  --verbose\n", config.argv[0]);
   exit(1);
 }
@@ -434,9 +435,12 @@ combineImages(imagecon_image_t** images, int numImages, imagecon_image_t* ic)
  for (int y = 0; y < ic->height; y++) {
    ic->rowPointers[y] = (png_byte*) calloc(ic->width*4, 1);
  }
- 
+
  for (int i = 0, ny = 0; i < numImages; i++) {
    for (int y = 0; y < images[i]->height; y++, ny++) {
+     for (int r = 0; r <  ic->width*4; r+=4) {
+       memcpy(&ic->rowPointers[ny][0]+r, &images[i]->rowPointers[y][0], 4);
+     }
      memcpy(ic->rowPointers[ny], images[i]->rowPointers[y], images[i]->width*4);
    }
  }
@@ -458,7 +462,7 @@ main(int argc, char **argv)
       {"output-bitplanes", no_argument, &config.outputBitplanes, 1},
       {"output-palette", no_argument, &config.outputPalette, 1},
       {"output-mask", no_argument, &config.outputMask, 1},
-      {"override-palette", required_argument, 0, 'p'},
+      {"use-palette", required_argument, 0, 'p'},
       {"output",  required_argument, 0, 'o'},
       {"colors",  required_argument, 0, 'c'},
       {"input",   required_argument, 0, 'i'},

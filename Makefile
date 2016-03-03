@@ -1,4 +1,12 @@
-SUBDIRS=tools/makeadf tools/imagecon 000.trackdisk 001.simple_image 002.sprite_display 003.music 004.copper_bars 005.copper_vert
+SUBDIRS=tools/makeadf \
+	tools/imagecon\
+	000.trackdisk\
+	001.simple_image\
+	002.sprite_display\
+	003.music\
+	004.copper_bars\
+	005.copper_vert\
+	006.simple_blit
 
 .PHONY: subdirs $(SUBDIRS)
 

@@ -14,7 +14,7 @@ $(SHARED_PALETTE): $(IMAGEFILE) $(TC_IMAGEFILE)
 	$(IMAGECON) --input $(IMAGEFILE),$(TC_IMAGEFILE) --output $(SHARED_PALETTE_BASE) --colors 32 --quantize --output-palette
 
 $(IMAGEDATA): $(IMAGECON) $(IMAGEFILE) $(SHARED_PALETTE)
-	$(IMAGECON) --input $(IMAGEFILE) --output out/image --output-bitplanes --output-copperlist --override-palette $(SHARED_PALETTE)
+	$(IMAGECON) --input $(IMAGEFILE) --output out/image --output-bitplanes --output-copperlist --use-palette $(SHARED_PALETTE)
 
 $(TC_IMAGEDATA): $(IMAGECON) $(TC_IMAGEFILE) $(SHARED_PALETTE)
-	$(IMAGECON) --input $(TC_IMAGEFILE) --output out/tc --output-bitplanes --output-mask --output-copperlist --override-palette $(SHARED_PALETTE)
+	$(IMAGECON) --input $(TC_IMAGEFILE) --output out/tc --output-bitplanes --output-mask --output-copperlist --use-palette $(SHARED_PALETTE)

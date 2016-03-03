@@ -15,7 +15,7 @@ usage
       --output-bitplanes
       --output-mask
       --output-copperlist
-      --override-palette <palette file>
+      --use-palette <palette file>
       --verbose
 ```
 
@@ -30,7 +30,7 @@ options
 -------
 **--input** i&ltnput1.png,input2.png...>
 
-Specify the file(s) to be processed. Multiple files are coma separated. If bitplane output is directed, the bitplane data is appended vertically filling any empty portions with color index zero.
+Specify the file(s) to be processed. Multiple files are coma separated. If bitplane output is directed, the bitplane data is stacked vertically. For images that need right padding, each line is right padded with the pixel in coloumn zero of that line.
 
 **--output** &lt;output prefix>
 
@@ -60,9 +60,9 @@ Output the binary bitplane data for use as a blitter source mask
 
 Generate a palette file of the final palette used. Output will be the output file with the ".pal" extension.
 
-**--override-palette** &lt;palette file>
+**--use-palette** &lt;palette file>
 
-Specify a palette file to use that will override the image or quantized palette. Also overrides the --colors option.
+Specify a palette file to use that will override the image or quantized palette.  Overrides the --colors and --quantize options.
 
 **--verbose**
 
