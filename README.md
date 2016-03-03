@@ -19,10 +19,12 @@ documentation
 * [coppershade.org downloads](http://coppershade.org/articles/More!/Downloads/)
 * [copper timing details](http://coppershade.org/articles/AMIGA/Agnus/Copper:_Exact_WAIT_Timing/)
 * [coding forum](http://ada.untergrund.net/?p=boardforums&forum=4)
+* [coding forum](http://eab.abime.net/forumdisplay.php?f=112)
 
 tools
 =====
 * [imagecon](tools/imagecon/README.md)
+* [makeadf](tools/makeadf/README.md)
 
 cross development environment
 -----------------------------
@@ -113,3 +115,11 @@ Notes:
     # cp *.h /usr/local/include/pngquant/
     # cp *.a /usr/local/lib
 ```
+
+license
+=======
+Some of the code I have included in this repository is copyright by various authors and provided under various licenses. Copyright notices are preseved where possible.
+
+Some of the tools use GPL licensed libraries which would mean they could only be distributed under the conditions of the respective version of the GPL.
+
+All code without a copyright notice is probably in the public domain.

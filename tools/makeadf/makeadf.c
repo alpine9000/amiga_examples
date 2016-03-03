@@ -13,7 +13,8 @@
 uint8_t image[DISKSIZE];
 
 
-static void boot_chksum(uint8_t *p)
+static void 
+boot_chksum(uint8_t *p)
 {
   uint32_t oldchk,chk=0;
   int i;
