@@ -27,6 +27,7 @@ tools
 * [makeadf](tools/makeadf)
 
 The tools have tests:
+
     ```
 # git clone git://github.com/cahirwpz/amigaos-cross-toolchain.git
 # cd amigaos-cross-toolchain
