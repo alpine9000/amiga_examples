@@ -6,6 +6,7 @@ typedef struct {
 
   int maxColors;
   int outputPalette;
+  int outputPaletteAsm;
   int outputMask;
   int outputBitplanes;
   int outputCopperList;

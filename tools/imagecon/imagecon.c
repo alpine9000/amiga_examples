@@ -19,6 +19,7 @@ imagecon_config_t config = {
   .maxColors = MAX_PALETTE, 
   .outputPalette = 0, 
   .outputMask = 0,
+  .outputPaletteAsm = 0,
   .outputBitplanes = 0,
   .outputCopperList = 0,
   .quantize = 0,
@@ -38,6 +39,7 @@ usage()
 	  "  --output-bitplanes\n"\
 	  "  --output-copperlist\n"\
 	  "  --output-mask\n"\
+	  "  --output-palette-asm\n"\
 	  "  --output-palette\n"\
 	  "  --use-palette <palette file>\n"\
 	  "  --verbose\n", config.argv[0]);
@@ -105,6 +107,7 @@ outputPalette(char* outFilename, imagecon_image_t* ic)
 
   FILE* fp = 0;
   FILE* paletteFP = 0;
+  FILE* paletteAsmFP = 0;
 
   if (config.outputCopperList) {
     fp = openFileWrite("%s-copper-list.s", outFilename);
@@ -112,6 +115,11 @@ outputPalette(char* outFilename, imagecon_image_t* ic)
 
   if (config.outputPalette) {
     paletteFP = openFileWrite("%s.pal", outFilename);
+  }
+
+  if (config.outputPaletteAsm) {
+    paletteAsmFP = openFileWrite("%s-palette.s", outFilename);
+    fprintf(paletteAsmFP, "\tmovem.l d0-a6,-(sp)\n\tlea CUSTOM,a6\n");
   }
 
   if (config.verbose) {
@@ -125,12 +133,20 @@ outputPalette(char* outFilename, imagecon_image_t* ic)
     if (paletteFP) {
       fprintf(paletteFP, "%03x\n",  ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b);
     }
+    if (paletteAsmFP) {
+      fprintf(paletteAsmFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i, ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b);
+    }
     if (fp) {
       fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+(i*2), ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b);
     }
   }
 
   if (paletteFP) {
+    fclose(paletteFP);
+  }
+
+  if (paletteAsmFP) {
+    fprintf(paletteAsmFP, "\tmovem.l (sp)+,d0-a6\n");
     fclose(paletteFP);
   }
 
@@ -461,6 +477,7 @@ main(int argc, char **argv)
       {"output-copperlist", no_argument, &config.outputCopperList, 1},
       {"output-bitplanes", no_argument, &config.outputBitplanes, 1},
       {"output-palette", no_argument, &config.outputPalette, 1},
+      {"output-palette-asm", no_argument, &config.outputPaletteAsm, 1},
       {"output-mask", no_argument, &config.outputMask, 1},
       {"use-palette", required_argument, 0, 'p'},
       {"output",  required_argument, 0, 'o'},

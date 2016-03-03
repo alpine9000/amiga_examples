@@ -3,6 +3,7 @@ perform a basic blit
 
 We make some changes to [001.simple_image](../001.simple_image):
    1. The bitplane pointers are now reset using the copper.
+   2. The palette is now installed once and removed from the copper list.
    2. Interrupt processing is disabled.
    3. A6 is now used as the global base register for CUSTOM.
 

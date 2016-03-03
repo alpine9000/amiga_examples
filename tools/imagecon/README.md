@@ -12,6 +12,7 @@ usage
       --colors <max colors>
       --quantize
       --output-palette
+      --output-palette-asm
       --output-bitplanes
       --output-mask
       --output-copperlist
@@ -23,8 +24,9 @@ The following files can be generated:
 
 1. **&lt;output prefix>.bin** binary interleaved bitplane data
 2. **&lt;output prefix>-copper-list.s**	m68k assembler syntax copper list with no symbols
-3. **&lt;output prefix>.pal** palette file listing the palette colors as hex
-3. **&lt;output prefix>-mask.bin** binary interleaved bitplane mask
+3. **&lt;output prefix>-palette.s**	m68k assembler syntax code to install the color palette (preserves all registers)
+4. **&lt;output prefix>.pal** palette file listing the palette colors as hex
+5. **&lt;output prefix>-mask.bin** binary interleaved bitplane mask
 
 options
 -------
@@ -59,6 +61,10 @@ Output the binary bitplane data for use as a blitter source mask
 **--output-palette**
 
 Generate a palette file of the final palette used. Output will be the output file with the ".pal" extension.
+
+**--output-palette-asm**
+
+Generate m68k assembler instructions to install the palette. No symbols are generated. Registers are preserved.
 
 **--use-palette** &lt;palette file>
 

@@ -20,6 +20,8 @@ entry:
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6)	; disable all interrupts
 
+	include "out/image-palette.s"
+	if 0
 	;; reset color registers to white to prevent startup flicker
 	move.l	#32,d0
 	lea	COLOR00(a6),a0
@@ -27,6 +29,7 @@ entry:
 	move.w	#$FFF,(a0)
 	addq	#2,a0
 	dbra	d0,.loop
+	endif
 	
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)
@@ -132,8 +135,7 @@ copper:
 	dc.w	BPL4PTH,0
 	dc.w	BPL5PTL,0
 	dc.w	BPL5PTH,0
-	
-	include	"out/image-copper-list.s"
+
 
 	dc.l	$fffffffe	
 bitplanes:

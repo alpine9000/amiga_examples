@@ -39,12 +39,13 @@ $(SHARED_PALETTE): $(IMAGECON)
 	$(IMAGECON) --input $(TEST_IMAGE),$(TEST_IMAGE2) --output $(SHARED_BASE) --colors 32 --quantize --output-palette
 
 $(OUTPUT_BASE).bin: $(IMAGECON) 
-	-rm -f $(OUTPUT_BASE).bin $(OUTPUT_BASE)-copper-list.s $(OUTPUT_BASE)-mask.bin
-	$(IMAGECON) --input $(TEST_IMAGE) --output $(OUTPUT_BASE) --output-mask --output-copperlist --output-bitplanes --colors 32 --quantize
+	-rm -f $(OUTPUT_BASE).bin $(OUTPUT_BASE)-copper-list.s $(OUTPUT_BASE)-palette.s $(OUTPUT_BASE)-mask.bin
+	$(IMAGECON) --input $(TEST_IMAGE) --output $(OUTPUT_BASE) --output-mask --output-copperlist --output-bitplanes --output-palette-asm --colors 32 --quantize
 
 test: $(IMAGECON) $(OUTPUT_BASE).bin $(SHARED_PALETTE) $(USED_PALETTE)
 	diff $(OUTPUT_BASE).bin $(REFERENCE_BASE).bin	
 	diff $(OUTPUT_BASE)-copper-list.s $(REFERENCE_BASE)-copper-list.s
+	diff $(OUTPUT_BASE)-palette.s $(REFERENCE_BASE)-palette.s
 	diff $(OUTPUT_BASE)-mask.bin $(REFERENCE_BASE)-mask.bin
 	diff $(SHARED_PALETTE) $(REFERENCE_SHARED_PALETTE)
 	diff $(SHARED_BASE).bin $(REFERENCE_SHARED_BASE).bin	
