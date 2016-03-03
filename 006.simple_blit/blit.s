@@ -110,10 +110,38 @@ TC_XPOS		equ	16
 TC_YPOS		equ	16	
 TC_XPOS_BYTES	equ 	(TC_XPOS)/8
 
+;; BLTCON? configuration
+
+;; http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node011C.html
+;; blitter logic function minterm truth table
+;; fill in D column for desired function
+;;       A       B       C       D 
+;;       -       -       -       - 
+;;       0       0       0       0 
+;;       0       0       1       0 
+;;       0       1       0       0 
+;;       0       1       1       0 
+;;       1       0       0       1 
+;;       1       0       1       1 
+;;       1       1       0       1 
+;;       1       1       1       1
+;;
+;; then read D column from bottom up = 1111000 = $f0
+;; this is used in the LF? bits
+BLIT_LF_MINTERM		equ $f0	
+BLIT_A_SOURCE_SHIFT	equ 0
+BLIT_DEST		equ $100
+BLIT_SRCC	    	equ $200
+BLIT_SRCB	    	equ $400
+BLIT_SRCA	    	equ $800
+BLIT_ASHIFTSHIFT	equ 12   ;Bit index of ASH? bits
+BLIT_BLTCON1		equ 0    ;BSH?=0, DOFF=0, EFE=0, IFE=0, FCI=0, DESC=0, LINE=0
+	
 doblit:	
 	movem.l d0-a6,-(sp)
 	bsr blitWait
-	move.l #$09f00000,BLTCON0(a6) 	;A->D copy, no shifts, ascending mode
+	move.w #(BLIT_SRCA|BLIT_DEST|BLIT_LF_MINTERM|BLIT_A_SOURCE_SHIFT<<BLIT_ASHIFTSHIFT),BLTCON0(A6)
+	move.w #BLIT_BLTCON1,BLTCON1(a6) 
 	move.l #$ffffffff,BLTAFWM(a6) 	;no masking of first/last word
 	move.w #0,BLTAMOD(a6)	      	;A modulo=bytes to skip between lines
 	move.w #SCREEN_WIDTH_BYTES-TC_WIDTH_BYTES,BLTDMOD(a6)	;D modulo
