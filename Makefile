@@ -20,9 +20,24 @@ clean:
 
 subdirs: $(SUBDIRS)
 
+test:
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "Testing tools/makeadf..."	
+	@echo "------------------------"
+	make -C tools/makeadf test
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "Testing tools/imagecon..."	
+	@echo "-------------------------"
+	make -C tools/imagecon test
+	@echo ""
+	@echo ""
+	@echo ""
+
 $(SUBDIRS):
 	@echo ""
 	make -C $@
-
-
 

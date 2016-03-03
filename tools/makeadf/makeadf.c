@@ -46,20 +46,21 @@ int main(int argc,char *argv[])
     if ((f = fopen(argv[1],"rb"))) {
       len = fread(image,1,DISKSIZE,f);
       if (len > 0) {
-        if (len < DISKSIZE)
+        if (len < DISKSIZE) {
           memset(image+len,0,DISKSIZE-len);
+	}
         boot_chksum(image);
         fwrite(image,1,DISKSIZE,stdout);
         rc = 0;
       }
       else
-        fprintf(stderr,"Image read error!\n");
+        fprintf(stderr,"%s: image read error!\n", argv[0]);
     }
     else
-      fprintf(stderr,"Cannot open '%s'!\n",argv[0]);  
+      fprintf(stderr,"%s: file to open open %s\n", argv[0], argv[1]);  
   }
   else
-    fprintf(stderr,"Usage: %s <image data>\n",argv[0]);
+    fprintf(stderr,"usage: %s <image data>\n", argv[0]);
 
   return rc;
 }
