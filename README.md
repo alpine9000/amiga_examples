@@ -70,7 +70,7 @@ ______  ___   _____ _____ ___________
 or test all by running  ``make test`` at the top level
 
 license
-=======
+-------
 Some of the code I have included in this repository is copyright by various authors and provided under various licenses. Copyright notices are preseved where possible.
 
 Some of the tools use GPL licensed libraries which would mean they could only be distributed under the conditions of the respective version of the GPL.
