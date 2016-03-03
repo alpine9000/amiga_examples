@@ -111,6 +111,20 @@ Notes:
     # cp *.a /usr/local/lib
 ```
 
+building
+========
+
+Build all examples by running ``make`` at the top level directory.
+
+Each example will have an ADF file in it's ``bin`` directory.  These files can be loaded directly as DF0: on [FS-UAE](http://fs-uae.net/) or [Scripted Amiga Emulator](http://scriptedamigaemulator.net/) using the AROS ROM.
+
+Invdivual examples can be built by entering the directory and running make:
+
+  ```
+# cd 001.simple_image
+# make
+```
+
 tools
 =====
 * [imagecon](tools/imagecon)
