@@ -132,7 +132,7 @@ The following tools have been developed to support the examples:
 * [imagecon](tools/imagecon)
 * [makeadf](tools/makeadf)
 
-Each tool has a test to check if any changes you have made has broken basic functionality:
+Each tool has a test to check if any changes you have made have broken basic functionality:
 
   ```
 # cd tools/imagecon
