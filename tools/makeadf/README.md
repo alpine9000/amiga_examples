@@ -1,7 +1,7 @@
 makeadf
 =======
 
-The simplest form for ADF creation.
+The simplest form of ADF creation.
 
 Disk layout must be handled by the assembler/linker.  This tool only calculates the checksum and pads the disk image to the correct size.
 
