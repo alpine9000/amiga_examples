@@ -69,7 +69,7 @@ Notes:
 ```
 
 4. lha
-```
+    ```
     # git clone https://github.com/jca02266/lha.git
     # aclocal
     # autoheader
@@ -81,7 +81,7 @@ Notes:
 ```
 
 5. libtool
-```
+    ```
    # wget http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz
    # tar zxfv libtool-2.4.6.tar.gz
    # cd libtool-2.4.6
@@ -91,7 +91,7 @@ Notes:
 ```
 
 6. libpng
-```
+    ```
    # wget ftp://ftp.simplesystems.org/pub/png/src/libpng16/libpng-1.6.21.tar.gz
    # tar zxfv libpng-1.6.21.tar.gz
    # cd libpng-1.6.21
@@ -101,7 +101,7 @@ Notes:
 ```
 
 7. pngquant
-```
+    ```
     # git clone git://github.com/pornel/pngquant.git
     # cd pngquant/lib
     # ./configure --prefix=/usr/local
@@ -118,7 +118,7 @@ tools
 
 The tools have tests:
 
-```
+  ```
 # cd tools/imagecon
 # make test
 ______  ___   _____ _____ ___________
