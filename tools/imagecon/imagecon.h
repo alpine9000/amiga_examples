@@ -7,6 +7,7 @@ typedef struct {
   int height;
   int maxColors;
   int outputPalette;
+  int outputMask;
   char* overridePalette;
   int quantize;
   int verbose;

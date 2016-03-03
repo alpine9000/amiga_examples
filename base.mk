@@ -41,10 +41,14 @@ out/bootblock.o: ../shared/bootblock.s out/main.bin
 	vc -c $< -o $@
 
 out/main.o: $(MODULE) $(EXTRA)
-	vc -c $< -o $@
+	@# -v
+	@#vc -c $< -o $@
+	@#-showopt -no-opt
+	vasmm68k_mot -Fhunk -phxass -opt-fconst -nowarn=62 -quiet $< -o $@ -I/usr/local/amiga/os-include
 
-out/main.bin: out/main.o
-	vlink -brawbin1 $< -o $@
+out/main.bin: out/main.o $(EXTRAOBJS)
+	@#-T ../link.script
+	vlink -Ttext 0x70000 -brawbin1 $< $(EXTRAOBJS) -o $@
 
 clean:
 	rm -rf out bin *~

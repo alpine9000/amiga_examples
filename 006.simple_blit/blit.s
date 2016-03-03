@@ -101,7 +101,13 @@ blitWait:
 	btst #6,DMACONR(a6)
 	bne.s .waitblit
 	rts
-	
+
+TC_WIDTH 	equ	64
+TC_HEIGHT	equ	64
+TC_WIDTH_BYTES	equ	TC_WIDTH/8
+TC_WIDTH_WORDS	equ	TC_WIDTH/16
+TC_XPOS		equ	16
+TC_YPOS		equ	16	
 doblit:	
 	movem.l d0-a6,-(sp)
 	lea $dff000,a6
@@ -109,10 +115,10 @@ doblit:
 	move.l #$09f00000,BLTCON0(a6) 	;A->D copy, no shifts, ascending mode
 	move.l #$ffffffff,BLTAFWM(a6) 	;no masking of first/last word
 	move.w #0,BLTAMOD(a6)	      	;A modulo=bytes to skip between lines
-	move.w #0,BLTDMOD(a6) 		;D modulo
-	move.l #bitplanes,BLTAPTH(a6)	;source graphic top left corner
-	move.l #bitplanes+(SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*SCREEN_HEIGHT/2),BLTDPTH(a6)	;destination top left corner
-	move.w #SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*SCREEN_HEIGHT/4,BLTSIZE(a6)	  	;rectangle size, starts blit
+	move.w #SCREEN_WIDTH_BYTES-TC_WIDTH_BYTES,BLTDMOD(a6)	;D modulo
+	move.l #tc,BLTAPTH(a6)		;source graphic top left corner
+	move.l #bitplanes+(TC_XPOS)/8+(SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*TC_YPOS),BLTDPTH(a6)	;destination top left corner
+	move.w #(TC_HEIGHT*SCREEN_BIT_DEPTH)<<6|(TC_WIDTH_WORDS),BLTSIZE(a6)	  	;rectangle size, starts blit
 	movem.l (sp)+,d0-a6
 	rts
 	
