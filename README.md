@@ -21,27 +21,6 @@ documentation
 * [coding forum](http://ada.untergrund.net/?p=boardforums&forum=4)
 * [coding forum](http://eab.abime.net/forumdisplay.php?f=112)
 
-tools
-=====
-* [imagecon](tools/imagecon)
-* [makeadf](tools/makeadf)
-
-The tools have tests:
-
-```
-# cd tools/imagecon
-# make test
-______  ___   _____ _____ ___________
-| ___ \/ _ \ /  ___/  ___|  ___|  _  \
-| |_/ / /_\ \\ `--.\ `--.| |__ | | | |
-|  __/|  _  | `--. \`--. \  __|| | | |
-| |   | | | |/\__/ /\__/ / |___| |/ /
-\_|   \_| |_/\____/\____/\____/|___/
-#
-```
-
-or test all by running  ``make test`` at the top level
-
 cross development environment
 -----------------------------
 Built on OSX 10.11.3
@@ -90,7 +69,7 @@ Notes:
 ```
 
 4. lha
-    ```
+```
     # git clone https://github.com/jca02266/lha.git
     # aclocal
     # autoheader
@@ -102,7 +81,7 @@ Notes:
 ```
 
 5. libtool
-    ```
+```
    # wget http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz
    # tar zxfv libtool-2.4.6.tar.gz
    # cd libtool-2.4.6
@@ -112,7 +91,7 @@ Notes:
 ```
 
 6. libpng
-    ```
+```
    # wget ftp://ftp.simplesystems.org/pub/png/src/libpng16/libpng-1.6.21.tar.gz
    # tar zxfv libpng-1.6.21.tar.gz
    # cd libpng-1.6.21
@@ -122,7 +101,7 @@ Notes:
 ```
 
 7. pngquant
-    ```
+```
     # git clone git://github.com/pornel/pngquant.git
     # cd pngquant/lib
     # ./configure --prefix=/usr/local
@@ -131,6 +110,27 @@ Notes:
     # cp *.h /usr/local/include/pngquant/
     # cp *.a /usr/local/lib
 ```
+
+tools
+=====
+* [imagecon](tools/imagecon)
+* [makeadf](tools/makeadf)
+
+The tools have tests:
+
+```
+# cd tools/imagecon
+# make test
+______  ___   _____ _____ ___________
+| ___ \/ _ \ /  ___/  ___|  ___|  _  \
+| |_/ / /_\ \\ `--.\ `--.| |__ | | | |
+|  __/|  _  | `--. \`--. \  __|| | | |
+| |   | | | |/\__/ /\__/ / |___| |/ /
+\_|   \_| |_/\____/\____/\____/|___/
+#
+```
+
+or test all by running  ``make test`` at the top level
 
 license
 =======
