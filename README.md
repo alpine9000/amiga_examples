@@ -23,8 +23,8 @@ documentation
 
 tools
 =====
-* [imagecon](tools/imagecon/README.md)
-* [makeadf](tools/makeadf/README.md)
+* [imagecon](tools/imagecon)
+* [makeadf](tools/makeadf)
 
 cross development environment
 -----------------------------
