@@ -127,10 +127,12 @@ Invdivual examples can be built by entering the directory and running make:
 
 tools
 =====
+The following tools have been developed to support the examples:
+
 * [imagecon](tools/imagecon)
 * [makeadf](tools/makeadf)
 
-The tools have tests:
+Each tool has a test to check if any changes you have made has broken basic functionality:
 
   ```
 # cd tools/imagecon
