@@ -41,7 +41,7 @@ Then we read D column from bottom up to give us the logic function minterm:
 11001010 = $ca
 ```
 
-This is then ready to be used in the [BLTCON0](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node001A.html) register setup.
+This is then ready to be used in the LF-17 bits of the [BLTCON0](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node001A.html) register setup.
 
 [imagecon](../tools/imagecon) generates the interleaved mask bitplanes for the A channel.
 
