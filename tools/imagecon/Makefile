@@ -9,7 +9,10 @@ OUTPUT_BASE=out/mission-beach
 REFERENCE_BASE=reference/mission-beach
 TEST_IMAGE=../../assets/mission-beach.png
 TEST_IMAGE2=../../assets/tc.png
+BOB_IMAGE=../../assets/emoji.png
 SHARED_BASE=out/shared
+BOB_BASE=out/bob
+REFERENCE_BOB_BASE=reference/bob
 REFERENCE_SHARED_BASE=reference/shared
 REFERENCE_SHARED_PALETTE=$(REFERENCE_SHARED_BASE).pal
 SHARED_PALETTE=$(SHARED_BASE).pal
@@ -39,17 +42,18 @@ $(SHARED_PALETTE): $(IMAGECON)
 	$(IMAGECON) --input $(TEST_IMAGE),$(TEST_IMAGE2) --output $(SHARED_BASE) --colors 32 --quantize --output-palette
 
 $(OUTPUT_BASE).bin: $(IMAGECON) 
-	-rm -f $(OUTPUT_BASE).bin $(OUTPUT_BASE)-copper-list.s $(OUTPUT_BASE)-palette.s $(OUTPUT_BASE)-mask.bin
-	$(IMAGECON) --input $(TEST_IMAGE) --output $(OUTPUT_BASE) --output-mask --output-copperlist --output-bitplanes --output-palette-asm --colors 32 --quantize
+	-rm -f $(OUTPUT_BASE).bin $(OUTPUT_BASE)-copper-list.s $(OUTPUT_BASE)-palette.s 
+	$(IMAGECON) --input $(TEST_IMAGE) --output $(OUTPUT_BASE) --output-copperlist --output-bitplanes --output-palette-asm --colors 32 --quantize
+	$(IMAGECON) --input $(BOB_IMAGE) --output $(BOB_BASE) --output-mask --colors 32 --quantize
 
 test: $(IMAGECON) $(OUTPUT_BASE).bin $(SHARED_PALETTE) $(USED_PALETTE)
 	diff $(OUTPUT_BASE).bin $(REFERENCE_BASE).bin	
 	diff $(OUTPUT_BASE)-copper-list.s $(REFERENCE_BASE)-copper-list.s
 	diff $(OUTPUT_BASE)-palette.s $(REFERENCE_BASE)-palette.s
-	diff $(OUTPUT_BASE)-mask.bin $(REFERENCE_BASE)-mask.bin
 	diff $(SHARED_PALETTE) $(REFERENCE_SHARED_PALETTE)
 	diff $(SHARED_BASE).bin $(REFERENCE_SHARED_BASE).bin	
 	diff $(SHARED_BASE)-copper-list.s $(REFERENCE_SHARED_BASE)-copper-list.s
+	diff $(BOB_BASE)-mask.bin $(REFERENCE_BOB_BASE)-mask.bin
 
 	@echo "______  ___   _____ _____ ___________  "
 	@echo "| ___ \/ _ \ /  ___/  ___|  ___|  _  \ "

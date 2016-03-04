@@ -56,7 +56,7 @@ Output the copper is as a series of m68k instructions (No labels are generated)
 
 **--output-mask**
 
-Output the binary bitplane data for use as a blitter source mask
+Output the binary bitplane data for use as a blitter source mask. Note: Be careful using this feature combined with color quantization. It's possible the transparent color might get quantized resulting in an bad mask.
 
 **--output-palette**
 

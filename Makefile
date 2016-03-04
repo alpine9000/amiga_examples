@@ -17,6 +17,7 @@ clean:
 		echo Cleaning $$dir; \
 		make -C $$dir clean; \
 	done
+	rm -f *~
 
 subdirs: $(SUBDIRS)
 

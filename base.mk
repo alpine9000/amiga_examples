@@ -1,7 +1,7 @@
 MAKEADFDIR=../tools/makeadf/
 MAKEADF=$(MAKEADFDIR)/out/makeadf
 HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow
-HOST_CFLAGS=-g $(HOST_WARNINGS)
+HOST_CFLAGS=$(HOST_WARNINGS)
 IMAGECONDIR=../tools/imagecon
 IMAGECON=$(IMAGECONDIR)/out/imagecon
 
