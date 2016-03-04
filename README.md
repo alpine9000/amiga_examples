@@ -2,11 +2,9 @@
 ==========================================================
 introduction
 ------------
-This repo is not meant to be an amiga programming guide. I don't do things the "correct" way (especially in the early examples).
+This repo contains example programs I have written as I re-learn how to program an amiga.  The programs are written in assembler and directly access the hardware. The target is an Amiga 500 (my long lost friend). Currently I do not own an amiga, so I can only test using UAE, so it's possible they will not work on the real hardware.
 
-I do however try to show exactly what is going on in each example. Wherever possible I try and use constants from the OS includes instead of magic custom addresses and numbers etc.
-
-Where possible I will try and write development system programs that show how data is created/converted.
+Don't use this as an amiga programming guide. I don't do things the "correct" way. There are heaps of great guides out there if you want to do things the right way.
 
 documentation
 -------------
@@ -49,7 +47,7 @@ Invdivual examples can be built by entering the directory and running make:
 
 tools
 -----
-The following tools have been developed to support the examples:
+The following cross development tools have been developed to support the examples:
 
 * [imagecon](tools/imagecon)
 * [makeadf](tools/makeadf)
