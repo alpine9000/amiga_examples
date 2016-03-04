@@ -31,7 +31,7 @@ These examples are developed on a mac using [cahirwpz's](https://github.com/cahi
 
 The support tools I have developed have additional requirements which you may not have on your system.
 
-For a dump of what I did to install them see [installing the cross development environment](BuildingCrossDev.md)
+For a dump of what I did to install them see [installing the cross development environment](doc/BuildingCrossDev.md)
 
 building
 --------

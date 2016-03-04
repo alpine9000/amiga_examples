@@ -3,7 +3,7 @@ EXTRA=out/copper-list.s
 
 MODULE=copper.s
 
-include ../base.mk
+include ../shared/base.mk
 
 out/copper-list.s: out/copper_gen
 	./out/copper_gen  > out/copper-list.s

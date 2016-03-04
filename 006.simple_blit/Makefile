@@ -8,7 +8,7 @@ EXTRA=$(IMAGEDATA) $(TC_IMAGEDATA)
 SHARED_PALETTE_BASE=out/shared-palette
 SHARED_PALETTE=$(SHARED_PALETTE_BASE).pal
 
-include ../base.mk
+include ../shared/base.mk
 
 $(SHARED_PALETTE): $(IMAGEFILE) $(TC_IMAGEFILE)
 	$(IMAGECON) --input $(IMAGEFILE),$(TC_IMAGEFILE) --output $(SHARED_PALETTE_BASE) --colors 32 --quantize --output-palette

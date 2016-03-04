@@ -4,7 +4,7 @@ IMAGEFILE=../assets/mission-beach.png
 
 MODULE=music.s
 
-include ../base.mk
+include ../shared/base.mk
 
 $(EXTRA): $(IMAGECON) $(IMAGEFILE)
 	$(IMAGECON) --input $(IMAGEFILE) --output out/image --colors 32 --quantize --output-bitplanes --output-copperlist

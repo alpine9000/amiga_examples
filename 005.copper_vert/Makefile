@@ -3,7 +3,7 @@ EXTRA=out/copper-list.s
 
 MODULE=copper_vert.s
 
-include ../base.mk
+include ../shared/base.mk
 
 out/copper-list.s: out/copper_gen_vert
 	./out/copper_gen_vert  > out/copper-list.s
