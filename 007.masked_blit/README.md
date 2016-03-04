@@ -17,7 +17,7 @@ C = background
 D = destination (background)
 ```
 
-Now we calculate the [logic function min term](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node011C.html:
+Now we calculate the [logic function min term](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node011C.html):
 
 blitter logic function minterm truth table
 ------------------------------------------
