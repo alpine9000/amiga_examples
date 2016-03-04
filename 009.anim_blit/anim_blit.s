@@ -5,7 +5,8 @@
 	include "constants.i"
 	
 entry:
-	include "init.s"
+	lea 	CUSTOM,a6
+	bsr	init
 	
 	moveq	#32,d0 		; starting x position for the blitter object
 	moveq 	#32,d1		; starting y position for the blitter object
@@ -17,20 +18,21 @@ entry:
 	bsr.s 	blitObject64	; blit 64 pixel object (x=d0,y=d1,background=a0,object=a1,mask=a2)
 	addq	#1,d0		; move the blitter object one pixel to the left
 	addq	#1,d1		; move the blitter object one pixel down
-	cmp.l	#SCREEN_WIDTH-BOB_WIDTH,d0 	; check if we need to wrap the x
+	cmp.l	#SCREEN_WIDTH-BLIT_BOB_WIDTH64,d0	; check if we need to wrap the x
 	bne.s	.skip
-	moveq	#0,d0				; wrap x back to zero
+	moveq	#0,d0					; wrap x back to zero
 .skip:
 
-	cmp.l	#SCREEN_HEIGHT-BOB_HEIGHT,d1 	; check if we need to wrap the y
+	cmp.l	#SCREEN_HEIGHT-BLIT_BOB_HEIGHT64,d1	; check if we need to wrap the y
 	bne.s	.skip2
-	moveq	#0,d1				; wrap y back to the top
+	moveq	#0,d1					; wrap y back to the top
 .skip2:		
 	bra.s	.mainLoop
 
 	include	"utils.s"
 	include	"blit.s"
-
+	include "init.s"
+	
 	
 copper:
 	;; bitplane pointers must be first else poking addresses will be incorrect

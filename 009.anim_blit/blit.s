@@ -1,5 +1,5 @@
 ;; BLTCON? configuration
-	;; http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node011C.html
+;; http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node011C.html
 ;; blitter logic function minterm truth table
 ;; fill in D column for desired function
 ;;       A(mask) B(bob)  C(bg)   D(dest)
@@ -22,10 +22,10 @@ BLIT_SRCB	    	equ $400
 BLIT_SRCA	    	equ $800
 BLIT_ASHIFTSHIFT	equ 12   ;Bit index of ASH? bits
 
-BOB_WIDTH 		equ 64+16 ; Must blit extra word to allow shifting
-BOB_HEIGHT		equ 64
-BOB_WIDTH_BYTES		equ BOB_WIDTH/8
-BOB_WIDTH_WORDS		equ BOB_WIDTH/16
+BLIT_BOB_WIDTH64 		equ 64+16 ; Must blit extra word to allow shifting
+BLIT_BOB_HEIGHT64		equ 64
+BLIT_BOB_WIDTH64_BYTES		equ BLIT_BOB_WIDTH64/8
+BLIT_BOB_WIDTH64_WORDS		equ BLIT_BOB_WIDTH64/16
 	
 blitWait:
 	tst	DMACONR(a6)		;for compatibility
@@ -34,7 +34,7 @@ blitWait:
 	bne.s 	.waitblit
 	rts
 
-	;; blitobject
+	;; blitobject64
 	;; d0 - xpos
 	;; d1 - ypos
 	;; a0 - display
@@ -67,8 +67,8 @@ blitObject64:
 	move.w	#$0000,BLTALWM(a6) 	; mask out last word
 	move.w	#-2,BLTAMOD(a6)	      	; negative 2 byte modulo to account for extra blitted word
 	move.w	#-2,BLTBMOD(a6)	      	; negative 2 byte modulo to account for extra blitted word
-	move.w 	#SCREEN_WIDTH_BYTES-BOB_WIDTH_BYTES,BLTCMOD(a6)	;C modulo
-	move.w 	#SCREEN_WIDTH_BYTES-BOB_WIDTH_BYTES,BLTDMOD(a6)	;D modulo
+	move.w 	#SCREEN_WIDTH_BYTES-BLIT_BOB_WIDTH64_BYTES,BLTCMOD(a6)	;C modulo
+	move.w 	#SCREEN_WIDTH_BYTES-BLIT_BOB_WIDTH64_BYTES,BLTDMOD(a6)	;D modulo
 	move.l 	a2,BLTAPTH(a6)	; mask bitplane
 	move.l 	a1,BLTBPTH(a6)	; bob bitplane
 
@@ -80,6 +80,6 @@ blitObject64:
 	move.l 	d2,BLTCPTH(a6) ;background top left corner
 	move.l 	d2,BLTDPTH(a6) ;destination top left corner
 
-	move.w 	#(BOB_HEIGHT*SCREEN_BIT_DEPTH)<<6|(BOB_WIDTH_WORDS),BLTSIZE(a6)	;rectangle size, starts blit
+	move.w 	#(BLIT_BOB_HEIGHT64*SCREEN_BIT_DEPTH)<<6|(BLIT_BOB_WIDTH64_WORDS),BLTSIZE(a6)	;rectangle size, starts blit
 	movem.l (sp)+,d0-a6
 	rts

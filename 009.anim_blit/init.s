@@ -1,6 +1,6 @@
 	;; custom chip base globally in a6
-	lea 	CUSTOM,a6
-
+init:
+	movem.l	d0-a6,-(sp)
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6)	; disable all interrupts
 
@@ -36,5 +36,5 @@
  	move.w  COPJMP1(a6),d0
 	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 	move.w	#(INTF_SETCLR|INTF_INTEN|INTF_EXTER),INTENA(a6)
-
-
+	movem.l (sp)+,d0-a6
+	rts
