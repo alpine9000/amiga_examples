@@ -2,9 +2,9 @@
 ==========================================================
 introduction
 ------------
-This repo is not meant to be an amiga programming guide. If you're looking for the correct way to program an amiga, there are lots of other guides out there. These examples start where I left off around 1990. We had very bad programming habbits in those days.
+This repo is not meant to be an amiga programming guide. I don't do things the "correct" way (especially in the early examples).
 
-I do however try to show exactly what is going on in each example. Wherever possible I try and use constants from the OS includes instead of magic custom addresses etc.
+I do however try to show exactly what is going on in each example. Wherever possible I try and use constants from the OS includes instead of magic custom addresses and numbers etc.
 
 Where possible I will try and write development system programs that show how data is created/converted.
 
@@ -25,7 +25,7 @@ Most of the sites I have used during the learning process:
 cross development environment
 -----------------------------
 
-These examples are developed on a mac using the fantastic AmigaOS cross compiler for Linux / MacOSX / Windows.
+These examples are developed on a mac using [cahirwpz's](https://github.com/cahirwpz) AmigaOS cross compiler for Linux / MacOSX / Windows.
 
    https://github.com/cahirwpz/amigaos-cross-toolchain
 
