@@ -126,7 +126,7 @@ TC_XPOS_BYTES	equ 	(TC_XPOS)/8
 ;;       1       1       0       1 
 ;;       1       1       1       1
 ;;
-;; then read D column from bottom up = 1111000 = $f0
+;; then read D column from bottom up = 11110000 = $f0
 ;; this is used in the LF? bits
 BLIT_LF_MINTERM		equ $f0	
 BLIT_A_SOURCE_SHIFT	equ 0
