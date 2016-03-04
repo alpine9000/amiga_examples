@@ -8,17 +8,17 @@ entry:
 	lea 	CUSTOM,a6
 	bsr	init
 	
-	moveq	#32,d0 		; starting x position for the blitter object
-	moveq 	#32,d1		; starting y position for the blitter object
+	moveq	#0,d0 		; starting x position for the blitter object
+	moveq 	#0,d1		; starting y position for the blitter object
 	lea	bitplanes(pc),a0
 	lea	emoji,a1
 	lea	emojiMask,a2
 .mainLoop:
 	bsr.s	waitvbl
-	bsr.s 	blitObject64	; blit 64 pixel object (x=d0,y=d1,background=a0,object=a1,mask=a2)
 	addq	#1,d0		; move the blitter object one pixel to the left
 	addq	#1,d1		; move the blitter object one pixel down
-	cmp.l	#SCREEN_WIDTH-BLIT_BOB_WIDTH64,d0	; check if we need to wrap the x
+	bsr.s 	blitObject64	; blit 64 pixel object (x=d0,y=d1,background=a0,object=a1,mask=a2)
+	cmp.l	#SCREEN_WIDTH-BLIT_BOB_WIDTH64+16,d0	; check if we need to wrap the x
 	bne.s	.skip
 	moveq	#0,d0					; wrap x back to zero
 .skip:
