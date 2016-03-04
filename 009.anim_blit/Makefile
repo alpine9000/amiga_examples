@@ -5,7 +5,7 @@ IMAGEFILE=../assets/mission-beach.png
 BOB_BASE=out/emoji
 BOB_IMAGEDATA=$(BOB_BASE).bin $(BOB_BASE)-mask.bin
 BOB_IMAGEFILE=../assets/emoji.png
-EXTRA=$(IMAGEDATA) $(BOB_IMAGEDATA)
+EXTRA=$(IMAGEDATA) $(BOB_IMAGEDATA) blit.s init.s utils.s
 SHARED_PALETTE_BASE=out/shared-palette
 SHARED_PALETTE=$(SHARED_PALETTE_BASE).pal
 
