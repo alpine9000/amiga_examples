@@ -9,7 +9,7 @@ So the algorithm for drawing to non word aligned boundaries is as follows:
    1. The destination address is the word aligned address to the left of the desired position.
    2. Command the blitter to blit an extra word to the right of our blitter object.
    3. We mask the trailing word of each line to prevent the extra word from being blit.
-   4. We shift the data by the difference in bits between the desired column and the word aligned column from (1).
+   4. We right shift the data by the difference in bits between the desired column and the word aligned column from (1).
    5. We make the line modulos #-2 so blitter object data is correctly fetched.
    
 
