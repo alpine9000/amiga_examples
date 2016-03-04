@@ -35,13 +35,16 @@ blitWait:
 	rts
 
 	;; blitobject64
-	;; d0 - xpos
-	;; d1 - ypos
+	;; a3 - xpos
+	;; a4 - ypos
 	;; a0 - display
 	;; a1 - object
 	;; a2 - mask
 blitObject64: 
 	movem.l	d0-a6,-(sp)
+	
+	move.l	(a3),d0
+	move.l	(a4),d1
 	bsr	 blitWait
 
 	;; d0 = XPOS

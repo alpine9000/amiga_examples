@@ -8,31 +8,41 @@ entry:
 	lea 	CUSTOM,a6
 	bsr	init
 	
-	moveq	#0,d0 		; starting x position for the blitter object
-	moveq 	#0,d1		; starting y position for the blitter object
 	lea	bitplanes(pc),a0
 	lea	emoji,a1
 	lea	emojiMask,a2
 .mainLoop:
-	bsr.s	waitvbl
-	addq	#1,d0		; move the blitter object one pixel to the left
-	addq	#1,d1		; move the blitter object one pixel down
-	bsr.s 	blitObject64	; blit 64 pixel object (x=d0,y=d1,background=a0,object=a1,mask=a2)
-	cmp.l	#SCREEN_WIDTH-BLIT_BOB_WIDTH64+16,d0	; check if we need to wrap the x
-	bne.s	.skip
-	moveq	#0,d0					; wrap x back to zero
-.skip:
-
-	cmp.l	#SCREEN_HEIGHT-BLIT_BOB_HEIGHT64,d1	; check if we need to wrap the y
-	bne.s	.skip2
-	moveq	#0,d1					; wrap y back to the top
-.skip2:		
 	bra.s	.mainLoop
 
-	include	"utils.s"
 	include	"blit.s"
 	include "init.s"
-	
+
+level3InterruptHandler:
+	movem.l	d0-a6,-(sp)	
+	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
+
+.moveBlitterObject:	
+	lea	xpos(pc),a3
+	lea	ypos(pc),a4
+	add.l	#1,xpos		; move the blitter object one pixel to the left
+	add.l	#1,ypos		; move the blitter object one pixel down
+	bsr.s 	blitObject64	; blit 64 pixel object (x=d0,y=d1,background=a0,object=a1,mask=a2)
+	cmp.l	#SCREEN_WIDTH-BLIT_BOB_WIDTH64+16,xpos	; check if we need to wrap the x
+	bne.s	.skip
+	move.l	#0,xpos					; wrap x back to 0
+.skip:
+	cmp.l	#SCREEN_HEIGHT-BLIT_BOB_HEIGHT64,ypos	; check if we need to wrap the y
+	bne.s	.done
+	move.l	#0,ypos					; wrap y back to 0
+.done:
+
+		
+.interruptComplete:
+	movem.l	(sp)+,d0-a6
+	rte
+
+xpos:	dc.l	0
+ypos:	dc.l	0
 	
 copper:
 	;; bitplane pointers must be first else poking addresses will be incorrect
