@@ -19,7 +19,7 @@ Then in the main loop I now:
 .mainLoop:
         bsr.s  waitVerticalBlank
         bsr.s  installGreyscalePalette
-        move.l #4,d0 ; blit the object 4 times each frame
+        move.l #4,d0 ; blit the object 5 times each frame
 .blitLoop:
         bsr.s	 moveBlitterObject
         dbra	 d0,.blitLoop
@@ -35,7 +35,7 @@ The `NUM_COLORS` variable in the [Makefile](Makefile) sets the number of colors.
 -----------
 ![5 bitplanes](5bitplanes-screenshot.png?raw=true)
 
-At 5 bitplanes we don't have enough time to do 5 blits.
+At 5 bitplanes we have enough time to do 5 blits.
 
 4 bitplanes
 -----------

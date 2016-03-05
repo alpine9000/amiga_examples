@@ -12,8 +12,6 @@ So the algorithm for drawing to non word aligned boundaries is as follows:
    4. We right shift the data by the difference in bits between the desired column and the word aligned column from (1).
    5. We make the line modulos #-2 so blitter object data is correctly fetched.
    
-
-
 [Download disk image](bin/shift_blit.adf?raw=true)
 
 Screenshot:

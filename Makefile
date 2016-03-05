@@ -9,7 +9,8 @@ SUBDIRS=tools/makeadf \
 	006.simple_blit\
 	007.masked_blit\
 	008.shift_blit\
-	009.anim_blit
+	009.anim_blit\
+	010.blit_speed
 
 .PHONY: subdirs $(SUBDIRS)
 

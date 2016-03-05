@@ -44,7 +44,7 @@ out/main.o: $(MODULE) $(EXTRA)
 	@# -v
 	@#vc -c $< -o $@
 	@#-showopt -no-opt
-	vasmm68k_mot -Fhunk -phxass -opt-fconst -nowarn=62 -quiet $< -o $@ -I/usr/local/amiga/os-include
+	vasmm68k_mot $(VASM_EXTRA_ARGS) -Fhunk -phxass -opt-fconst -nowarn=62 -quiet $< -o $@ -I/usr/local/amiga/os-include
 
 out/main.bin: out/main.o $(EXTRAOBJS)
 	@#-T ../link.script
