@@ -11,7 +11,7 @@ Then in the main loop I now:
 
 * wait for the vertical blank
 * set the greyscale palette
-* do some blits (4)
+* do 4 blits
 * set the color palette
 
   ```
