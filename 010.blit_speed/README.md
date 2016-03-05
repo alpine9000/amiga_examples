@@ -17,14 +17,14 @@ Then in the main loop I now:
 
   ```
 .mainLoop:
-	bsr 	waitVerticalBlank
-	bsr     installGreyscalePalette
-	move.l	#4,d0 ; blit the object 4 times each frame
+        bsr 	waitVerticalBlank
+        bsr     installGreyscalePalette
+        move.l	#4,d0 ; blit the object 4 times each frame
 .blitLoop:
-	bsr	moveBlitterObject
-	dbra	d0,.blitLoop
-	bsr.s	installColorPalette
-	bra.s	.mainLoop
+        bsr	moveBlitterObject
+        dbra	d0,.blitLoop
+        bsr.s	installColorPalette
+        bra.s	.mainLoop
 ```
 
 So when the screen changes to color, that's how many scan lines we have used blitting stuff.
