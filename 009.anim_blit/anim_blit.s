@@ -23,7 +23,7 @@ entry:
 moveBlitterObject:	
 	lea	xpos(pc),a3
 	lea	ypos(pc),a4
-	add.l	#1,xpos		; move the blitter object one pixel to the left
+	add.l	#1,xpos		; move the blitter object one pixel to the right
 	add.l	#1,ypos		; move the blitter object one pixel down
 	bsr.s 	blitObject64	; blit 64 pixel object (x=d0,y=d1,background=a0,object=a1,mask=a2)
 	cmp.l	#SCREEN_WIDTH-BLIT_BOB_WIDTH64+16,xpos	; check if we need to wrap the x
