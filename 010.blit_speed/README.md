@@ -14,6 +14,7 @@ Then in the main loop I now:
 * do 4 blits
 * set the color palette
 
+
   ```
 .mainLoop:
 	bsr 	waitVerticalBlank
