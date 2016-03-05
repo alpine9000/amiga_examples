@@ -9,10 +9,10 @@ I added a feature to [imagecon](../tools/imagecon) to generate a greyscale versi
 
 Then in the main loop I now:
 
-	* wait for the vertical blank
-	*set the greyscale palette
-	* do some blits (4)
-	* set the color palette
+* wait for the vertical blank
+* set the greyscale palette
+* do some blits (4)
+* set the color palette
 
   ```
 .mainLoop:
