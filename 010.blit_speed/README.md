@@ -1,7 +1,7 @@
 how fast are my blits?
 ======================
 
-Blitting a 5 bitplane 64x65 rectangle with the cookie cut (4 active DMA changes) function probably isn't going to be very fast.
+Blitting a 5 bitplane 64x64 rectangle with the cookie cut function (4 active DMA channels) probably isn't going to be very fast.
 
 How fast is it ?
 
@@ -10,14 +10,14 @@ I added a feature to [imagecon](../tools/imagecon) to generate a greyscale versi
 Then in the main loop I now:
      * wait for the vertical blank
      * set the greyscale palette
-     * do some blits
+     * do some blits (4)
      * set the color palette
 
   ```
 .mainLoop:
 	bsr 	waitVerticalBlank
 	bsr     installGreyscalePalette
-	move.l	#4,d0 ; blit the object 5 times each frame
+	move.l	#4,d0 ; blit the object 4 times each frame
 .blitLoop:
 	bsr	moveBlitterObject
 	dbra	d0,.blitLoop
@@ -27,9 +27,7 @@ Then in the main loop I now:
 
 So when the screen changes to color, that's how many scan lines we have used blitting stuff.
 
-There is a variable in the Makefile that sets the number of colors. This automatically creates the correct bitplane and palette data as well as reconfiguring the example. So now we can see what impact the number of bitplanes has on blit speed.
-
-So here we can see the results:
+The `NUM_COLORS` variable in the [Makefile](Makefile] sets the number of colors. This automatically creates the correct bitplane and palette data as well as reconfiguring the example code. So now we can see what impact the number of bitplanes has on blit speed:
 
 5 bitplanes
 -----------
