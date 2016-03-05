@@ -20,6 +20,7 @@ imagecon_config_t config = {
   .outputPalette = 0, 
   .outputMask = 0,
   .outputPaletteAsm = 0,
+  .outputPaletteGrey = 0,
   .outputBitplanes = 0,
   .outputCopperList = 0,
   .quantize = 0,
@@ -40,6 +41,7 @@ usage()
 	  "  --output-copperlist\n"\
 	  "  --output-mask\n"\
 	  "  --output-palette-asm\n"\
+	  "  --output-grey-palette-asm\n"\
 	  "  --output-palette\n"\
 	  "  --use-palette <palette file>\n"\
 	  "  --verbose\n", config.argv[0]);
@@ -108,6 +110,7 @@ outputPalette(char* outFilename, imagecon_image_t* ic)
   FILE* fp = 0;
   FILE* paletteFP = 0;
   FILE* paletteAsmFP = 0;
+  FILE* paletteGreyFP = 0;
 
   if (config.outputCopperList) {
     fp = openFileWrite("%s-copper-list.s", outFilename);
@@ -115,6 +118,11 @@ outputPalette(char* outFilename, imagecon_image_t* ic)
 
   if (config.outputPalette) {
     paletteFP = openFileWrite("%s.pal", outFilename);
+  }
+
+  if (config.outputPaletteGrey) {
+    paletteGreyFP = openFileWrite("%s-grey.s", outFilename);
+    fprintf(paletteGreyFP, "\tmovem.l d0-a6,-(sp)\n\tlea CUSTOM,a6\n");
   }
 
   if (config.outputPaletteAsm) {
@@ -136,6 +144,11 @@ outputPalette(char* outFilename, imagecon_image_t* ic)
     if (paletteAsmFP) {
       fprintf(paletteAsmFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i, ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b);
     }
+    if (paletteGreyFP) {
+      unsigned grey = (ic->palette[i].r + ic->palette[i].g + ic->palette[i].b)/3;
+      fprintf(paletteGreyFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i, grey << 8 | grey << 4 | grey);
+    }
+
     if (fp) {
       fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+(i*2), ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b);
     }
@@ -143,6 +156,11 @@ outputPalette(char* outFilename, imagecon_image_t* ic)
 
   if (paletteFP) {
     fclose(paletteFP);
+  }
+
+  if (paletteGreyFP) {
+    fprintf(paletteGreyFP, "\tmovem.l (sp)+,d0-a6\n");
+    fclose(paletteGreyFP);
   }
 
   if (paletteAsmFP) {
@@ -478,6 +496,7 @@ main(int argc, char **argv)
       {"output-bitplanes", no_argument, &config.outputBitplanes, 1},
       {"output-palette", no_argument, &config.outputPalette, 1},
       {"output-palette-asm", no_argument, &config.outputPaletteAsm, 1},
+      {"output-grey-palette-asm", no_argument, &config.outputPaletteGrey, 1},
       {"output-mask", no_argument, &config.outputMask, 1},
       {"use-palette", required_argument, 0, 'p'},
       {"output",  required_argument, 0, 'o'},

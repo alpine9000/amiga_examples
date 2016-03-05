@@ -13,6 +13,7 @@ usage
       --quantize
       --output-palette
       --output-palette-asm
+      --output-grey-palette-asm
       --output-bitplanes
       --output-mask
       --output-copperlist
@@ -65,6 +66,10 @@ Generate a palette file of the final palette used. Output will be the output fil
 **--output-palette-asm**
 
 Generate m68k assembler instructions to install the palette. No symbols are generated. Registers are preserved.
+
+**--output-grey-palette-asm**
+
+Generate m68k assembler instructions to install a greyscale version of the palette. No symbols are generated. Registers are preserved.
 
 **--use-palette** &lt;palette file>
 
