@@ -7,21 +7,20 @@
 entry:
 	lea 	CUSTOM,a6
 	bsr	init
-	
+
 	lea	bitplanes(pc),a0
 	lea	emoji,a1
 	lea	emojiMask,a2
 .mainLoop:
+	bsr 	waitvbl
+	bsr	moveBlitterObject
 	bra.s	.mainLoop
 
 	include	"blit.s"
 	include "init.s"
-
-level3InterruptHandler:
-	movem.l	d0-a6,-(sp)	
-	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
-
-.moveBlitterObject:	
+	include "utils.s"
+	
+moveBlitterObject:	
 	lea	xpos(pc),a3
 	lea	ypos(pc),a4
 	add.l	#1,xpos		; move the blitter object one pixel to the left
@@ -35,12 +34,13 @@ level3InterruptHandler:
 	bne.s	.done
 	move.l	#0,ypos					; wrap y back to 0
 .done:
+	rts
 
-		
-.interruptComplete:
-	movem.l	(sp)+,d0-a6
-	rte
-
+	
+installPalette:
+	include "out/image-palette.s"
+	rts
+	
 xpos:	dc.l	0
 ypos:	dc.l	0
 	
