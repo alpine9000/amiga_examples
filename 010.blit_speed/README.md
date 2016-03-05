@@ -32,21 +32,28 @@ There is a variable in the Makefile that sets the number of colors. This automat
 So here we can see the results:
 
 5 bitplanes
+-----------
 ![5 bitplanes](5bitplanes-screenshot.png?raw=true)
 
 At 5 bitplanes we don't have enough time to do 5 blits.
 
 4 bitplanes
+-----------
 ![4 bitplanes](4bitplanes-screenshot.png?raw=true)
 
 3 bitplanes
+-----------
 ![3 bitplanes](3bitplanes-screenshot.png?raw=true)
 
 2 bitplanes
+-----------
 ![5 bitplanes](2bitplanes-screenshot.png?raw=true)
 
 1 bitplanes
+-----------
 ![5 bitplanes](1bitplanes-screenshot.png?raw=true)
+
+Lots of time left over with 1 bitplane :-D
 
 [Download disk image](bin/blit_speed.adf?raw=true)
 
