@@ -11,11 +11,11 @@ Then in the main loop I now:
 
 * wait for the vertical blank
 * set the greyscale palette
-* do some blits
-* set the color palette
+* do 5 blits
+* set the color palette 
 
 
-  ```
+```
 .mainLoop:
         bsr.s  waitVerticalBlank
         bsr.s  installGreyscalePalette
