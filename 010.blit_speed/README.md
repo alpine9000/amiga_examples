@@ -8,10 +8,11 @@ How fast is it ?
 I added a feature to [imagecon](../tools/imagecon) to generate a greyscale version of the palette.
 
 Then in the main loop I now:
-     * wait for the vertical blank
-     * set the greyscale palette
-     * do some blits (4)
-     * set the color palette
+
+	* wait for the vertical blank
+	*set the greyscale palette
+	* do some blits (4)
+	* set the color palette
 
   ```
 .mainLoop:
@@ -27,7 +28,7 @@ Then in the main loop I now:
 
 So when the screen changes to color, that's how many scan lines we have used blitting stuff.
 
-The `NUM_COLORS` variable in the [Makefile](Makefile] sets the number of colors. This automatically creates the correct bitplane and palette data as well as reconfiguring the example code. So now we can see what impact the number of bitplanes has on blit speed:
+The `NUM_COLORS` variable in the [Makefile](Makefile) sets the number of colors. This automatically creates the correct bitplane and palette data as well as reconfiguring the example code. So now we can see what impact the number of bitplanes has on blit speed:
 
 5 bitplanes
 -----------
