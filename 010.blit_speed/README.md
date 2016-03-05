@@ -33,25 +33,25 @@ The `NUM_COLORS` variable in the [Makefile](Makefile) sets the number of colors.
 
 5 bitplanes
 -----------
-![5 bitplanes](5bitplanes-screenshot.png?raw=true)
+![5 bitplanes](screenshots/5bitplanes-screenshot.png?raw=true)
 
 At 5 bitplanes we have enough time to do 5 blits.
 
 4 bitplanes
 -----------
-![4 bitplanes](4bitplanes-screenshot.png?raw=true)
+![4 bitplanes](screenshots/4bitplanes-screenshot.png?raw=true)
 
 3 bitplanes
 -----------
-![3 bitplanes](3bitplanes-screenshot.png?raw=true)
+![3 bitplanes](screenshots/3bitplanes-screenshot.png?raw=true)
 
 2 bitplanes
 -----------
-![5 bitplanes](2bitplanes-screenshot.png?raw=true)
+![5 bitplanes](screenshots/2bitplanes-screenshot.png?raw=true)
 
 1 bitplanes
 -----------
-![5 bitplanes](1bitplanes-screenshot.png?raw=true)
+![5 bitplanes](screenshots/1bitplanes-screenshot.png?raw=true)
 
 Lots of time left over with 1 bitplane :-D
 
