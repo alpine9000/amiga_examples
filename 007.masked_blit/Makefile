@@ -19,4 +19,4 @@ $(IMAGEDATA): $(IMAGECON) $(IMAGEFILE) $(SHARED_PALETTE)
 
 $(BOB_IMAGEDATA): $(IMAGECON) $(BOB_IMAGEFILE) $(SHARED_PALETTE)
 	$(IMAGECON) --input $(BOB_IMAGEFILE) --output $(BOB_BASE) --output-bitplanes --use-palette $(SHARED_PALETTE)
-	$(IMAGECON) --input $(BOB_IMAGEFILE) --output $(BOB_BASE) --output-mask  --quantize
+	$(IMAGECON) --input $(BOB_IMAGEFILE) --output $(BOB_BASE) --output-mask  --quantize --colors 32
