@@ -17,6 +17,7 @@ usage
       --output-bitplanes
       --output-mask
       --output-copperlist
+      --extra-half-brite
       --use-palette <palette file>
       --verbose
 ```
@@ -70,6 +71,10 @@ Generate m68k assembler instructions to install the palette. No symbols are gene
 **--output-grey-palette-asm**
 
 Generate m68k assembler instructions to install a greyscale version of the palette. No symbols are generated. Registers are preserved.
+
+**--extra-half-brite
+
+Generate an extra half brite image. This only works in combination with --colors 32. A 32 color palette will be output, however there will be a sixth bitplane that includes the half brite control bits for any pixels that can use it.
 
 **--use-palette** &lt;palette file>
 

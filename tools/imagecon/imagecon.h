@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAX_PALETTE 64
+#define MAX_PALETTE 32
 
 typedef struct {
 
@@ -32,7 +32,7 @@ typedef struct {
   int height;
   png_bytep* rowPointers;
   unsigned char* amigaImage;
-  amiga_color_t palette[MAX_PALETTE];
+  amiga_color_t palette[MAX_PALETTE*2]; // extra half brite mode
 } imagecon_image_t;
 
 

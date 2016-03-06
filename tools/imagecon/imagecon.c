@@ -342,9 +342,13 @@ outputBitplanes(char* outFilename, imagecon_image_t* ic)
 	int palette_index = ic->amigaImage[(ic->width*y)+x];
 	int ehb = 0;
 	if (palette_index >= numColors) {
-	  printf("EHB Detected %d -> ", palette_index);
+	  if (config.verbose) {
+	    printf("EHB Detected e%d -> ", palette_index);
+	  }
 	  palette_index -= numColors;
-	  printf("%d\n", palette_index);
+	  if (config.verbose) {
+	    printf("%d\n", palette_index);
+	  }
 	  ehb = 1;
 	}
 	int _numBitPlanes = config.ehbMode ? numBitPlanes-1 : numBitPlanes;
