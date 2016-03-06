@@ -17,6 +17,10 @@ REFERENCE_SHARED_PALETTE=$(REFERENCE_SHARED_BASE).pal
 SHARED_PALETTE=$(SHARED_BASE).pal
 USED_PALETTE=$(SHARED_BASE).bin $(SHARED_BASE)-copper-list.s
 
+EHB_IMAGE=../../assets/gigi.png
+EHB_BASE=out/ehb
+REFERENCE_EHB_BASE=reference/ehb
+
 $(IMAGECON): out bin $(OBJS) 
 	gcc $(OBJS) -o $(IMAGECON) $(LIBS)
 
@@ -46,7 +50,10 @@ $(OUTPUT_BASE).bin: $(IMAGECON)
 	$(IMAGECON) --input $(TEST_IMAGE) --output $(OUTPUT_BASE) --output-copperlist --output-bitplanes --output-grey-palette --output-palette-asm --colors 32 --quantize
 	$(IMAGECON) --input $(BOB_IMAGE) --output $(BOB_BASE) --output-mask --colors 32 --quantize
 
-test: $(IMAGECON) $(OUTPUT_BASE).bin $(SHARED_PALETTE) $(USED_PALETTE)
+$(EHB_BASE).bin: $(EHB_IMAGE)
+	$(IMAGECON) --input $(EHB_IMAGE) --output $(EHB_BASE) --output-bitplanes --colors 32 --quantize --extra-half-brite --output-copperlist
+
+test: $(IMAGECON) $(OUTPUT_BASE).bin $(SHARED_PALETTE) $(USED_PALETTE) $(EHB_BASE).bin
 	diff $(OUTPUT_BASE).bin $(REFERENCE_BASE).bin	
 	diff $(OUTPUT_BASE)-copper-list.s $(REFERENCE_BASE)-copper-list.s
 	diff $(OUTPUT_BASE)-palette.s $(REFERENCE_BASE)-palette.s
@@ -55,6 +62,8 @@ test: $(IMAGECON) $(OUTPUT_BASE).bin $(SHARED_PALETTE) $(USED_PALETTE)
 	diff $(SHARED_BASE).bin $(REFERENCE_SHARED_BASE).bin	
 	diff $(SHARED_BASE)-copper-list.s $(REFERENCE_SHARED_BASE)-copper-list.s
 	diff $(BOB_BASE)-mask.bin $(REFERENCE_BOB_BASE)-mask.bin
+	diff $(EHB_BASE).bin $(REFERENCE_EHB_BASE).bin
+	diff $(EHB_BASE)-copper-list.s $(REFERENCE_EHB_BASE)-copper-list.s
 
 	@echo "______  ___   _____ _____ ___________  "
 	@echo "| ___ \/ _ \ /  ___/  ___|  ___|  _  \ "
