@@ -35,7 +35,7 @@ bin:
 	mkdir bin
 
 $(USED_PALETTE): $(SHARED_PALETTE)
-	$(IMAGECON) --input $(TEST_IMAGE),$(TEST_IMAGE2) --output $(SHARED_BASE) --colors 32 --quantize --output-bitplanes --output-copperlist
+	$(IMAGECON) --input $(TEST_IMAGE),$(TEST_IMAGE2) --output $(SHARED_BASE) --use-palette $(SHARED_PALETTE) --output-bitplanes --output-copperlist
 
 $(SHARED_PALETTE): $(IMAGECON)
 	-rm -f $(SHARED_PALETTE)
