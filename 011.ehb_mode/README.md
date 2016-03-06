@@ -9,8 +9,8 @@ The only changes I made to the asm code to allow EHB mode was to add the 6th bit
 
 We can see from the output that it's not earth shatteringly different.  I think if you developed an image with EHB in mind, then imagecon would generate the correct data...  maybe ;-) I will test this at some stage.
 
-64 extra half brite
--------------------
+64 color extra half brite
+-------------------------
 ![6 bitplanes](screenshots/64-colors.png?raw=true)
 
 32 colors
