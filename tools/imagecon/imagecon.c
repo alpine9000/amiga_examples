@@ -23,6 +23,7 @@ imagecon_config_t config = {
   .outputPaletteGrey = 0,
   .outputBitplanes = 0,
   .outputCopperList = 0,
+  .ehbMode = 0,
   .quantize = 0,
   .overridePalette = 0
 };
@@ -43,7 +44,8 @@ usage()
 	  "  --output-palette-asm\n"\
 	  "  --output-grey-palette-asm\n"\
 	  "  --output-palette\n"\
-	  "  --use-palette <palette file>\n"\
+	  "  --extra-half-brite\n"\
+	  "  --use-palette <palette file>\n"	\
 	  "  --verbose\n", config.argv[0]);
   exit(1);
 }
@@ -104,7 +106,7 @@ void
 outputPalette(char* outFilename, imagecon_image_t* ic)
 {
   if (config.verbose) {
-    printf("outputPalette...\n");
+    printf("outputPalette...%d colors\n", ic->numColors);
   }
 
   FILE* fp = 0;
@@ -134,23 +136,24 @@ outputPalette(char* outFilename, imagecon_image_t* ic)
     printf("outputPalette:\n");
   }
   
-  for (int i = 0; i < ic->numColors; i++) {
+  for (int i = 0; i < (config.ehbMode ? ic->numColors/2 : ic->numColors); i++) {
     if (config.verbose) {
       printf("%02d: hex=%03x r=%03d g=%03d b=%03d a=%03d\n", i , ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b, ic->palette[i].r, ic->palette[i].g, ic->palette[i].b, ic->palette[i].a);
     }
     if (paletteFP) {
-      fprintf(paletteFP, "%03x\n",  ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b);
+      fprintf(paletteFP, "%03x\n",  (ic->palette[i].r >> 4) << 8 | (ic->palette[i].g >>4) << 4 | (ic->palette[i].b >>4));
     }
     if (paletteAsmFP) {
-      fprintf(paletteAsmFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i, ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b);
+      fprintf(paletteAsmFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i, (ic->palette[i].r >> 4) << 8 | (ic->palette[i].g >>4) << 4 | (ic->palette[i].b >>4));
     }
     if (paletteGreyFP) {
-      unsigned grey = (ic->palette[i].r + ic->palette[i].g + ic->palette[i].b)/3;
+      // TODO: this is for compat, can be better
+      unsigned grey = (((ic->palette[i].r>>4) + (ic->palette[i].g>>4) + (ic->palette[i].b>>4))/3);
       fprintf(paletteGreyFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i, grey << 8 | grey << 4 | grey);
     }
 
     if (fp) {
-      fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+(i*2), ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b);
+      fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+(i*2), (ic->palette[i].r >> 4) << 8 | (ic->palette[i].g >>4) << 4 | (ic->palette[i].b >>4));
     }
   }
 
@@ -177,43 +180,50 @@ outputPalette(char* outFilename, imagecon_image_t* ic)
   }
 }
 
+void loadPaletteFile(imagecon_image_t* ic)
+{
+  FILE* fp = openFileRead(config.overridePalette);
+  int paletteIndex;
+  
+  for (paletteIndex = 0; paletteIndex < MAX_PALETTE; paletteIndex++) {
+    unsigned int c;
+    char buffer[255];
+    char* line = fgets(buffer, 255, fp);
+    if (!line) {
+      break;
+    }
+    sscanf(buffer, "%x\n", &c);
+    
+    ic->palette[paletteIndex].r = (c >> 8 & 0xF) << 4;
+    ic->palette[paletteIndex].g = (c >> 4 & 0xF) << 4;
+    ic->palette[paletteIndex].b = (c >> 0 & 0xF) << 4;
+    ic->palette[paletteIndex].a = 255;
+  }
+
+  ic->numColors = paletteIndex;
+}
 
 void
-generateQuantizedPalette(imagecon_image_t* ic)
+generateQuantizedImage(imagecon_image_t* ic, int usePalette)
 {
   if (config.verbose) {
-    printf("generateQuantizedPalette...\n");
+    printf("generateQuantizedImage...\n");
   }
 
   liq_attr *attr = liq_attr_create();
   liq_image *image = liq_image_create_rgba_rows(attr, (void**)ic->rowPointers, ic->width, ic->height, 0);
 
-  if (config.overridePalette) {
-    FILE* fp = openFileRead(config.overridePalette);
-    int paletteIndex;
-
-    for (paletteIndex = 0; paletteIndex < MAX_PALETTE; paletteIndex++) {
-      unsigned int c;
-      char buffer[255];
-      char* line = fgets(buffer, 255, fp);
+  if (usePalette) {
+    for (int i = 0; i < ic->numColors; i++) {
       liq_color color;
-      if (!line) {
-	break;
-      }
-      sscanf(buffer, "%x\n", &c);
-      
-      color.r = (c >> 8 & 0xF) << 4;
-      color.g = (c >> 4 & 0xF) << 4;
-      color.b = (c >> 0 & 0xF) << 4;
-      color.a = 255;
-      if (config.verbose) {
-	printf("adding fixed color %d %d %d %d\n", paletteIndex, color.r, color.g, color.b);
-      }
+      color.a = ic->palette[i].a;
+      color.r = ic->palette[i].r;
+      color.g = ic->palette[i].g;
+      color.b = ic->palette[i].b;
       liq_image_add_fixed_color(image, color);
     }
-    config.maxColors = paletteIndex;
+    config.maxColors = ic->numColors;
   }
-
 
   liq_set_max_colors(attr, config.maxColors);
   liq_set_speed(attr, 1);
@@ -225,17 +235,17 @@ generateQuantizedPalette(imagecon_image_t* ic)
   
   if (config.verbose) {
     printf("pal->count = %d\n", pal->count);
-    printf("generateQuantizedPalette: post liq_write_remapped_image\n");
+    printf("generateQuantizedImage: post liq_write_remapped_image\n");
   }
 
   for (unsigned i = 0; i < pal->count; i++) {
     if (config.verbose) {
       printf("%02d:  r=%03d g=%03d b=%03d a=%03d\n", i, pal->entries[i].r, pal->entries[i].g, pal->entries[i].b, pal->entries[i].a);
     }
-    ic->palette[i].r = pal->entries[i].r >> 4;
-    ic->palette[i].g = pal->entries[i].g >> 4;
-    ic->palette[i].b = pal->entries[i].b >> 4;
-    ic->palette[i].a = pal->entries[i].a >> 4;
+    ic->palette[i].r = pal->entries[i].r;
+    ic->palette[i].g = pal->entries[i].g;
+    ic->palette[i].b = pal->entries[i].b;
+    ic->palette[i].a = pal->entries[i].a;
   }
 
   if (config.verbose) {
@@ -297,19 +307,27 @@ generatePalette(imagecon_image_t* ic)
 void
 outputBitplanes(char* outFilename, imagecon_image_t* ic)
 {
-
-
   if (config.verbose) {
     printf("outputBitplanes...\n");
   }
+ 
   int numBitPlanes = (int)(log(ic->numColors-1) / log(2))+1;
-  
-  if (config.verbose) {
-    printf("number of colors = %d\n", ic->numColors);
+  int numColors;
+
+  if (config.ehbMode) {
+    numColors = ic->numColors / 2;
+    if (config.verbose) {    
+      printf("extra half brite mode\n");
+    }
+  } else {
+    numColors = ic->numColors;
+  }
+ 
+  if (config.verbose) {    
+    printf("number of colors = %d\n", numColors);
     printf("number of bitplanes = %d\n", numBitPlanes);
   }
-
-  
+ 
   int byteWidth = (ic->width + 7) / 8;
 
   char** bitplanes = malloc(sizeof(void*)*numBitPlanes);
@@ -322,9 +340,22 @@ outputBitplanes(char* outFilename, imagecon_image_t* ic)
       for (int bit = 0; bit < 8; bit++) {	
 	int x = byte * 8 + 7 - bit;
 	int palette_index = ic->amigaImage[(ic->width*y)+x];
-	for (int plane_index = 0; plane_index < numBitPlanes; plane_index++) {
+	int ehb = 0;
+	if (palette_index >= numColors) {
+	  printf("EHB Detected %d -> ", palette_index);
+	  palette_index -= numColors;
+	  printf("%d\n", palette_index);
+	  ehb = 1;
+	}
+	int _numBitPlanes = config.ehbMode ? numBitPlanes-1 : numBitPlanes;
+
+	for (int plane_index = 0; plane_index < _numBitPlanes; plane_index++) {
 	  char* plane = bitplanes[plane_index];
 	  plane[writeIndex] |= ((palette_index >> plane_index) & 1) << bit;
+	}
+	
+	if (ehb) {
+	  bitplanes[numBitPlanes-1][writeIndex] |= (1 << bit);
 	}
       }
       writeIndex++;
@@ -400,7 +431,30 @@ processFile(char* outFilename, imagecon_image_t* ic)
   }
 
   if (config.quantize || config.overridePalette) {
-    generateQuantizedPalette(ic);
+    if (config.ehbMode) {
+      if (config.maxColors > 32) {
+	abort_("Can't do EHB emode with > 32 colors\n");
+      }
+      // First find best N color palette
+      generateQuantizedImage(ic, 0);
+      // now add the EHB colors
+      
+      for (int i = 0; i < ic->numColors; i++) {
+	ic->palette[i+ic->numColors].r = ic->palette[i].r/2;
+	ic->palette[i+ic->numColors].g = ic->palette[i].g/2;
+	ic->palette[i+ic->numColors].b = ic->palette[i].b/2;
+	ic->palette[i+ic->numColors].a = ic->palette[i].a;
+      }
+      config.maxColors = ic->numColors = config.maxColors * 2;
+      printf("config.maxColors = %d\n", config.maxColors);
+      //now generate the half brite version*/
+      generateQuantizedImage(ic, 1);
+    } else {
+      if (config.overridePalette) {
+	loadPaletteFile(ic);
+      }
+      generateQuantizedImage(ic, config.overridePalette != 0);
+    }
   } else {
     generatePalette(ic);
   }
@@ -498,6 +552,7 @@ main(int argc, char **argv)
       {"output-palette-asm", no_argument, &config.outputPaletteAsm, 1},
       {"output-grey-palette-asm", no_argument, &config.outputPaletteGrey, 1},
       {"output-mask", no_argument, &config.outputMask, 1},
+      {"extra-half-brite", no_argument, &config.ehbMode, 1},
       {"use-palette", required_argument, 0, 'p'},
       {"output",  required_argument, 0, 'o'},
       {"colors",  required_argument, 0, 'c'},

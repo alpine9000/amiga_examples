@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAX_PALETTE 32
+#define MAX_PALETTE 64
 
 typedef struct {
 
@@ -11,6 +11,7 @@ typedef struct {
   int outputMask;
   int outputBitplanes;
   int outputCopperList;
+  int ehbMode;
   char* overridePalette;
   int quantize;
   int verbose;
