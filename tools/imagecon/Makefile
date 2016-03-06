@@ -8,7 +8,6 @@ LIBS=-lpng -limagequant
 OUTPUT_BASE=out/mission-beach
 REFERENCE_BASE=reference/mission-beach
 TEST_IMAGE=../../assets/mission-beach.png
-TEST_IMAGE2=../../assets/tc.png
 BOB_IMAGE=../../assets/emoji.png
 SHARED_BASE=out/shared
 BOB_BASE=out/bob
@@ -35,11 +34,12 @@ bin:
 	mkdir bin
 
 $(USED_PALETTE): $(SHARED_PALETTE)
-	$(IMAGECON) --input $(TEST_IMAGE),$(TEST_IMAGE2) --output $(SHARED_BASE) --use-palette $(SHARED_PALETTE) --output-bitplanes --output-copperlist
+	@echo "testing use-palette"
+	$(IMAGECON) --input $(TEST_IMAGE),$(BOB_IMAGE) --output $(SHARED_BASE) --use-palette $(SHARED_PALETTE) --output-bitplanes --output-copperlist
 
 $(SHARED_PALETTE): $(IMAGECON)
 	-rm -f $(SHARED_PALETTE)
-	$(IMAGECON) --input $(TEST_IMAGE),$(TEST_IMAGE2) --output $(SHARED_BASE) --colors 32 --quantize --output-palette
+	$(IMAGECON) --input $(TEST_IMAGE),$(BOB_IMAGE) --output $(SHARED_BASE) --colors 32 --quantize --output-palette
 
 $(OUTPUT_BASE).bin: $(IMAGECON) 
 	-rm -f $(OUTPUT_BASE).bin $(OUTPUT_BASE)-copper-list.s $(OUTPUT_BASE)-palette.s 
