@@ -15,8 +15,8 @@ $(SHARED_PALETTE): $(IMAGEFILE) $(BOB_IMAGEFILE)
 	$(IMAGECON) --input $(IMAGEFILE),$(BOB_IMAGEFILE) --output $(SHARED_PALETTE_BASE) --colors 32 --quantize --output-palette
 
 $(IMAGEDATA): $(IMAGECON) $(IMAGEFILE) $(SHARED_PALETTE)
-	$(IMAGECON) --input $(IMAGEFILE) --output out/image --output-bitplanes --output-palette-asm --use-palette $(SHARED_PALETTE)
+	$(IMAGECON) --input $(IMAGEFILE) --output out/image --output-bitplanes --output-palette-asm --use-palette $(SHARED_PALETTE) --colors 32
 
 $(BOB_IMAGEDATA): $(IMAGECON) $(BOB_IMAGEFILE) $(SHARED_PALETTE)
-	$(IMAGECON) --input $(BOB_IMAGEFILE) --output $(BOB_BASE) --output-bitplanes --use-palette $(SHARED_PALETTE)
-	$(IMAGECON) --input $(BOB_IMAGEFILE) --output $(BOB_BASE) --output-mask  --quantize
+	$(IMAGECON) --input $(BOB_IMAGEFILE) --output $(BOB_BASE) --output-bitplanes --use-palette $(SHARED_PALETTE) --colors 32
+	$(IMAGECON) --input $(BOB_IMAGEFILE) --output $(BOB_BASE) --output-mask  --quantize --colors 32

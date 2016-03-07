@@ -14,11 +14,11 @@ VASM_EXTRA_ARGS=-DSCREEN_COLORS=$(NUM_COLORS)
 include ../shared/base.mk
 
 $(SHARED_PALETTE): $(IMAGEFILE) $(BOB_IMAGEFILE) Makefile
-	$(IMAGECON) --input $(IMAGEFILE),$(BOB_IMAGEFILE) --output $(SHARED_PALETTE_BASE) --colors $(NUM_COLORS) --quantize --output-palette
+	$(IMAGECON) --input $(IMAGEFILE),$(BOB_IMAGEFILE) --output $(SHARED_PALETTE_BASE) --colors $(NUM_COLORS) --quantize --colors $(NUM_COLORS) --output-palette
 
 $(IMAGEDATA): $(IMAGECON) $(IMAGEFILE) $(SHARED_PALETTE) Makefile
-	$(IMAGECON) --input $(IMAGEFILE) --output out/image --output-bitplanes --output-grey-palette-asm --output-palette-asm --use-palette $(SHARED_PALETTE)
+	$(IMAGECON) --input $(IMAGEFILE) --output out/image --output-bitplanes --output-grey-palette-asm --output-palette-asm --use-palette $(SHARED_PALETTE) --colors $(NUM_COLORS)
 
 $(BOB_IMAGEDATA): $(IMAGECON) $(BOB_IMAGEFILE) $(SHARED_PALETTE) Makefile
-	$(IMAGECON) --input $(BOB_IMAGEFILE) --output $(BOB_BASE) --output-bitplanes --use-palette $(SHARED_PALETTE)
-	$(IMAGECON) --input $(BOB_IMAGEFILE) --output $(BOB_BASE) --colors $(NUM_COLORS) --output-mask  --quantize
+	$(IMAGECON) --input $(BOB_IMAGEFILE) --output $(BOB_BASE) --output-bitplanes --use-palette $(SHARED_PALETTE) --colors $(NUM_COLORS)
+	$(IMAGECON) --input $(BOB_IMAGEFILE) --output $(BOB_BASE) --output-mask --quantize --colors $(NUM_COLORS)
