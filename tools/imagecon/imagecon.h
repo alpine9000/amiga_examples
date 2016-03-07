@@ -12,18 +12,29 @@ typedef struct {
   int outputBitplanes;
   int outputCopperList;
   int ehbMode;
+  int hamMode;
   char* overridePalette;
   int quantize;
   int verbose;
   char** argv;
 } imagecon_config_t;
 
+#if 0
 typedef struct {
   unsigned char r;
   unsigned char g;
   unsigned char b;
   unsigned char a;
 } amiga_color_t;
+#else
+typedef struct {
+  int r;
+  int g;
+  int b;
+  int a;
+} amiga_color_t;
+
+#endif
 
 
 typedef struct {

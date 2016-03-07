@@ -24,6 +24,7 @@ imagecon_config_t config = {
   .outputBitplanes = 0,
   .outputCopperList = 0,
   .ehbMode = 0,
+  .hamMode = 0,
   .quantize = 0,
   .overridePalette = 0
 };
@@ -45,7 +46,8 @@ usage()
 	  "  --output-grey-palette-asm\n"\
 	  "  --output-palette\n"\
 	  "  --extra-half-brite\n"\
-	  "  --use-palette <palette file>\n"	\
+	  "  --ham\n"\
+	  "  --use-palette <palette file>\n"\
 	  "  --verbose\n", config.argv[0]);
   exit(1);
 }
@@ -222,7 +224,6 @@ generateQuantizedImage(imagecon_image_t* ic, int usePalette)
       color.b = ic->palette[i].b;
       liq_image_add_fixed_color(image, color);
     }
-    config.maxColors = ic->numColors;
   }
 
   liq_set_max_colors(attr, config.maxColors);
@@ -255,6 +256,29 @@ generateQuantizedImage(imagecon_image_t* ic, int usePalette)
   ic->numColors = pal->count;
 }
 
+amiga_color_t
+getOriginalColor(int x, int y, imagecon_image_t* ic)
+{
+  png_byte* ptr = ic->rowPointers[y] + (x*4);
+  amiga_color_t color;
+  color.r = ptr[0];
+  color.g = ptr[1];
+  color.b = ptr[2];
+  color.a = ptr[3];
+  return color;
+}
+
+amiga_color_t
+getColor(int x, int y, imagecon_image_t* ic)
+{
+  int paletteIndex = ic->amigaImage[(ic->width*y)+x];
+  amiga_color_t color;
+  color.r = ic->palette[paletteIndex].r;
+  color.g = ic->palette[paletteIndex].g;
+  color.b = ic->palette[paletteIndex].b;
+  color.a = ic->palette[paletteIndex].a;
+  return color;
+}
 
 void
 generatePalette(imagecon_image_t* ic)
@@ -269,6 +293,7 @@ generatePalette(imagecon_image_t* ic)
     for (int x=0; x < ic->width; x++) {
       png_byte* ptr = &(row[x*4]);
       
+      // TODO: this shift is probably wrong now
       amiga_color_t color;
       color.r = ptr[0] >> 4;
       color.g = ptr[1] >> 4;
@@ -399,9 +424,9 @@ outputMask(char* outFilename, imagecon_image_t* ic)
   for (int y = 0, writeIndex = 0; y < ic->height; y++) {
     for (int byte = 0;byte < byteWidth; byte++) {
       for (int bit = 0; bit < 8; bit++) {	
-	int x = byte * 8 + 7 - bit;
-	int paletteIndex = ic->amigaImage[(ic->width*y)+x];
-	int bitmask = ic->palette[paletteIndex].a > 0 ? 0xFF : 0;
+	int x = byte * 8 + 7 - bit;	
+	amiga_color_t c = getOriginalColor(x, y, ic);
+	int bitmask = c.a > 0 ? 0xFF : 0;
 	for (int plane_index = 0; plane_index < numBitPlanes; plane_index++) {
 	  char* plane = bitplanes[plane_index];
 	  plane[writeIndex] |= ((bitmask >> plane_index) & 1) << bit;
@@ -426,52 +451,248 @@ outputMask(char* outFilename, imagecon_image_t* ic)
   }
 }
 
+void
+generateEHBImage(imagecon_image_t* ic)
+{
+  if (config.maxColors > 32) {
+    abort_("Can't do EHB emode with > 32 colors\n");
+  }
+  // First find best N color palette
+  generateQuantizedImage(ic, 0);
+  // now add the EHB colors
+  
+  for (int i = 0; i < ic->numColors; i++) {
+    ic->palette[i+ic->numColors].r = ic->palette[i].r/2;
+    ic->palette[i+ic->numColors].g = ic->palette[i].g/2;
+    ic->palette[i+ic->numColors].b = ic->palette[i].b/2;
+    ic->palette[i+ic->numColors].a = ic->palette[i].a;
+  }
+  config.maxColors = ic->numColors = config.maxColors * 2;
+  //now generate the half brite version*/
+  generateQuantizedImage(ic, 1);
+}
 
 void
+printColor(amiga_color_t color)
+{
+  printf("R = %03d  G = %03d  B = %03d A = %03d", color.r, color.g, color.b, color.a);
+}
+
+
+
+int
+colorDelta(amiga_color_t c1, amiga_color_t c2)
+{
+  int dr = abs((c1.r)-(c2.r));
+  int dg = abs((c1.g)-(c2.g));
+  int db = abs((c1.b)-(c2.b));
+  return (dr+dg+db) / 3;
+}
+
+typedef struct {
+  int control;
+  int data;
+  amiga_color_t pixel;
+} ham_control_t;
+
+ham_control_t
+findBestHamPixel(imagecon_image_t* ic, amiga_color_t color, amiga_color_t orig, amiga_color_t last)
+{
+  int delta = INT_MAX;
+
+  ham_control_t ham = {0};
+
+  for (int i = 0; i < ic->numColors; i++) {
+    int dc = colorDelta(color, ic->palette[i]);
+    if (dc < delta) {
+      delta = dc;
+      ham.data = i;
+      ham.pixel = ic->palette[i];
+    }
+  }
+
+  delta =  colorDelta(orig, ham.pixel);
+  if (last.r != -1) {
+    for (int c = 0; c <= 0xF; c++) {
+      amiga_color_t copy = last;
+      copy.r = c<<4;
+      int dc = colorDelta(orig, copy);
+      if (dc < delta) {
+	ham.control = 2;
+	ham.data = c;
+	ham.pixel = copy;
+	delta = dc;
+      }
+    }
+    for (int c = 0; c <= 0xF; c++) {
+      amiga_color_t copy = last;
+      copy.g = c<<4;
+      int dc = colorDelta(orig, copy);
+      if (dc < delta) {
+	ham.control = 3;
+	ham.data = c;
+	ham.pixel = copy;
+	delta = dc;
+      }
+    }
+    for (int c = 0; c <= 0xF; c++) {
+      amiga_color_t copy = last;
+      copy.b = c<<4;
+      int dc = colorDelta(orig, copy);
+      if (dc < delta) {
+	ham.control = 1;
+	ham.data = c;
+	ham.pixel = copy;
+	delta = dc;
+      }
+    }
+  }	
+
+  return ham;
+}
+
+
+void
+outputHamBitplanes(char* outFilename, imagecon_image_t* ic)
+{
+  if (config.verbose) {
+    printf("outputHamBitplanes\n");
+  }
+ 
+  int numBitPlanes = 6;
+  int numColors = 16;
+
+  if (config.verbose) {    
+    printf("ham number of colors = %d\n", numColors);
+    printf("ham number of bitplanes = %d\n", numBitPlanes);
+  }
+ 
+  int byteWidth = (ic->width + 7) / 8;
+
+  char** bitplanes = malloc(sizeof(void*)*numBitPlanes);
+  for (int i = 0; i < numBitPlanes; i++) {
+    bitplanes[i] = calloc(byteWidth*ic->height, 1);
+  }
+
+  ham_control_t* hams = malloc(sizeof(ham_control_t)*ic->width*ic->height);
+
+  for (int y = 0; y < ic->height; y++) {
+    amiga_color_t lastPixel = { -1, -1, -1, -1};
+    for (int x = 0; x < ic->width; x++) {
+
+	amiga_color_t color = getColor(x, y, ic);
+	amiga_color_t orig = getOriginalColor(x, y, ic);
+
+	ham_control_t ham = findBestHamPixel(ic, color, orig, lastPixel);
+	lastPixel = ham.pixel;
+
+#if 0
+	printf("Color: ");
+	printColor(color);
+	printf("\n");
+	printf("Orig:  ");
+	printColor(orig);       
+	printf("\n");
+
+	printf("Ham:\n");
+	printf("Control: %d\n", ham.control);
+	printf("Data: %d\n", ham.data);
+	printf("Color: ");
+	printColor(ham.pixel);
+	printf("\n\n");	
+#endif
+
+	hams[(y*ic->width)+x] = ham;
+    }
+  }
+
+
+  for (int y = 0, writeIndex = 0; y < ic->height; y++) {
+    for (int byte = 0;byte < byteWidth; byte++) {
+      for (int bit = 0; bit < 8; bit++) {	
+	int x = byte * 8 + 7 - bit;    
+
+	ham_control_t ham = hams[(y*ic->width)+x];
+
+	int _numBitPlanes = 4;
+	for (int plane_index = 0; plane_index < _numBitPlanes; plane_index++) {
+	  char* plane = bitplanes[plane_index];
+	  plane[writeIndex] |= ((ham.data >> plane_index) & 1) << bit;
+	}       
+
+	for (int plane_index = 0; plane_index < 2; plane_index++) {
+	  char* plane = bitplanes[4+plane_index];
+	  plane[writeIndex] |= ((ham.control >> plane_index) & 1) << bit;
+	}       
+
+	
+      }
+      writeIndex++;
+    }
+  }
+
+
+  FILE* fp = openFileWrite("%s-ham.bin", outFilename);
+
+  for (int y = 0; y < ic->height; y++) {
+    for (int plane_index = 0; plane_index < numBitPlanes; plane_index++) {
+      char* plane = bitplanes[plane_index];
+      fwrite(&plane[y*byteWidth], byteWidth, 1, fp);      
+    }
+  }
+  fclose(fp);
+  if (config.verbose) {
+    printf("done\n\n");
+  }
+}
+
+static void
+doHamMode(char* outFilename, imagecon_image_t* ic)
+{
+  config.maxColors = 16;
+  generateQuantizedImage(ic, 0);
+
+  if (config.outputBitplanes) {
+    outputHamBitplanes(outFilename, ic);
+  }
+  
+  outputPalette(outFilename, ic);  
+
+}
+
+static void
 processFile(char* outFilename, imagecon_image_t* ic)
 {
   if (config.verbose) {
     printf("processFile...\n");
   }
 
-  if (config.quantize || config.overridePalette) {
-    if (config.ehbMode) {
-      if (config.maxColors > 32) {
-	abort_("Can't do EHB emode with > 32 colors\n");
+  if (config.hamMode) {
+    doHamMode(outFilename, ic);
+  } else { 
+    if (config.quantize || config.overridePalette) {
+      if (config.ehbMode) {
+	generateEHBImage(ic);
+      } else {
+	if (config.overridePalette) {
+	  loadPaletteFile(ic);
+	}
+	generateQuantizedImage(ic, config.overridePalette != 0);
       }
-      // First find best N color palette
-      generateQuantizedImage(ic, 0);
-      // now add the EHB colors
-      
-      for (int i = 0; i < ic->numColors; i++) {
-	ic->palette[i+ic->numColors].r = ic->palette[i].r/2;
-	ic->palette[i+ic->numColors].g = ic->palette[i].g/2;
-	ic->palette[i+ic->numColors].b = ic->palette[i].b/2;
-	ic->palette[i+ic->numColors].a = ic->palette[i].a;
-      }
-      config.maxColors = ic->numColors = config.maxColors * 2;
-      printf("config.maxColors = %d\n", config.maxColors);
-      //now generate the half brite version*/
-      generateQuantizedImage(ic, 1);
     } else {
-      if (config.overridePalette) {
-	loadPaletteFile(ic);
-      }
-      generateQuantizedImage(ic, config.overridePalette != 0);
+      generatePalette(ic);
     }
-  } else {
-    generatePalette(ic);
+    
+    if (config.outputBitplanes) {
+      outputBitplanes(outFilename, ic);
+    }
+    
+    if (config.outputMask) {
+      outputMask(outFilename, ic);
+    }
+    
+    outputPalette(outFilename, ic);
   }
-
-  if (config.outputBitplanes) {
-    outputBitplanes(outFilename, ic);
-  }
-
-  if (config.outputMask) {
-    outputMask(outFilename, ic);
-  }
-
-  outputPalette(outFilename, ic);
 
   if (config.verbose) {
     printf("done\n\n");
@@ -557,6 +778,7 @@ main(int argc, char **argv)
       {"output-grey-palette-asm", no_argument, &config.outputPaletteGrey, 1},
       {"output-mask", no_argument, &config.outputMask, 1},
       {"extra-half-brite", no_argument, &config.ehbMode, 1},
+      {"ham", no_argument, &config.hamMode, 1},
       {"use-palette", required_argument, 0, 'p'},
       {"output",  required_argument, 0, 'o'},
       {"colors",  required_argument, 0, 'c'},
