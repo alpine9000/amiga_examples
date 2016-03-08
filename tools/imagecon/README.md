@@ -18,6 +18,9 @@ usage
       --output-mask
       --output-copperlist
       --extra-half-brite
+      --ham
+      --ham-brute-force
+      --dither
       --use-palette <palette file>
       --verbose
 ```
@@ -75,6 +78,18 @@ Generate m68k assembler instructions to install a greyscale version of the palet
 **--extra-half-brite**
 
 Generate an extra half brite image. This only works in combination with --colors 32. A 32 color palette will be output, however there will be a sixth bitplane that includes the half brite control bits for any pixels that can use it.
+
+**--ham**
+
+Generate bitplane and palette data for the OCS HAM mode.
+
+**--ham-brute-force**
+
+Use a primitive brute force method to calculate the HAM base palette.
+
+**--dither**
+
+Apply additional dithering to the image.
 
 **--use-palette** &lt;palette file>
 
