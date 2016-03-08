@@ -15,7 +15,6 @@ _ham_outputBitplanes(char* outFilename, imagecon_image_t* ic)
     bitplanes[i] = calloc(byteWidth*ic->height, 1);
   }
 
-
   ham_control_t* hams;
 
   if (config.dither) {
@@ -34,7 +33,6 @@ _ham_outputBitplanes(char* outFilename, imagecon_image_t* ic)
       }
     }
   }
-
 
   for (int y = 0, writeIndex = 0; y < ic->height; y++) {
     for (int byte = 0;byte < byteWidth; byte++) {
@@ -74,38 +72,104 @@ _ham_outputBitplanes(char* outFilename, imagecon_image_t* ic)
   }
 }
 
-#if 0
+
+static  int 
+_score(imagecon_image_t* ic)
+{
+  long error = 0;
+  for (int y = 0; y < ic->height; y++) {
+    amiga_color_t lastPixel = { -1, -1, -1, -1};
+    for (int x = 0; x < ic->width; x++) {
+      amiga_color_t color = color_getOriginalPixel(ic, x, y);
+      ham_control_t ham = color_findClosestHamPixel(ic, color, lastPixel);
+      error += color_delta(color, color_findClosestPalettePixel(ic, ham.pixel));
+      lastPixel = ham.pixel;
+    }
+  }
+
+  return error;
+}
+
+
+static void
+_ham_bruteForcePalette(imagecon_image_t* ic)
+{
+  int totalCombinations = 0xF*0xF*0xF;
+  amiga_color_t *combos = malloc(sizeof(amiga_color_t)*totalCombinations);
+  int index = 0;
+  int length = 16;
+
+  bzero(ic->palette, sizeof(ic->palette));
+  ic->numColors = 16;
+
+  for (unsigned char r = 0; r <= 0xF; r++) {
+    for (unsigned char g = 0; g <= 0xF; g++) {
+      for (unsigned char b = 0; b <= 0xF; b++) {
+	combos[index].a = 255;
+	combos[index].r = r<<4;
+	combos[index].g = g<<4;
+	combos[index++].b = b<<4;
+      }
+    }
+  }
+
+  long big = totalCombinations*length;
+  long b = 0;
+
+  for (int x = 0; x < length; x++) {
+    long benchmark = LONG_MAX;
+    int bmIndex = 0;
+    for (int i = 0; i < totalCombinations; i++, b++) {
+      ic->palette[x] = combos[i];      
+      fflush(stdout);
+      printf("%c7", 27);
+      fflush(stdout);
+      printf(" %ld/%ld (%ld%%)", b, big, (b*100L)/big);
+      fflush(stdout);
+      printf("%c8", 27);
+      fflush(stdout);
+      long score = _score(ic);
+      if (score < benchmark) {
+	benchmark = score;
+	bmIndex = i;
+      }
+    }
+    ic->palette[x] = combos[bmIndex];
+
+    
+  }
+
+  for (int i = 0; i < ic->numColors; i++) {
+    printf("%d: ", i);
+    color_print(ic->palette[i]);
+    printf("\n");
+  }
+}
+
+
 void
 ham_process(char* outFilename, imagecon_image_t* ic)
 {
-  config.maxColors = 256;
-  generateQuantizedImage(ic, 0);
-  dither_image(ic, dither_getPalettedColor);
-  dither_transferToPaletted(ic);    
-  color_transferPalettedToOriginal(ic);
-
   config.maxColors = 16;
-  generateQuantizedImage(ic, 0);
+
+  if (config.hamBruteForce) {
+
+    _ham_bruteForcePalette(ic);
+        
+  } else {
+    config.maxColors = 16;
+    
+    if (config.overridePalette) {
+      palette_loadFile(ic);    
+    }
+    
+    generateQuantizedImage(ic, config.overridePalette != 0);   
+  }
+
+  if (config.outputBitplanes) {
+    _ham_outputBitplanes(outFilename, ic);
+  }
  
-
-  if (config.outputBitplanes) {
-    _ham_outputBitplanes(outFilename, ic);
-  }
-  
   palette_output(outFilename, ic);  
 }
 
-#else
-void
-ham_process(char* outFilename, imagecon_image_t* ic)
-{
-  config.maxColors = 16;
-  generateQuantizedImage(ic, 0);
-
-  if (config.outputBitplanes) {
-    _ham_outputBitplanes(outFilename, ic);
-  }
-  
-  palette_output(outFilename, ic);  
-}
-#endif

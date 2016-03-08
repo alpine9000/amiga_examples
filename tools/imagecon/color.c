@@ -120,16 +120,16 @@ color_setOriginalPixel(imagecon_image_t* ic, int x, int y, amiga_color_t color)
 }
 
 
-amiga_color_t
+dither_color_t
 color_getDitheredPixel(imagecon_image_t* ic, int x, int y)
 {
   return ic->dithered[(y*ic->width)+x];
 }
 
 void
-color_setDitheredPixel(imagecon_image_t* ic, int x, int y, amiga_color_t color)
+color_setDitheredPixel(imagecon_image_t* ic, int x, int y, dither_color_t color)
 {
-  amiga_color_t *d = &ic->dithered[(y*ic->width)+x];
+  dither_color_t *d = &ic->dithered[(y*ic->width)+x];
 
   if (color.r > 255) {
     color.r = 255;
@@ -184,4 +184,28 @@ color_transferPalettedToOriginal(imagecon_image_t* ic)
       color_setOriginalPixel(ic, x, y, color_getPalettedPixel(ic, x, y));
     }
   }
+}
+
+
+amiga_color_t
+color_ditheredToAmiga(dither_color_t color)
+{
+  amiga_color_t c;
+  c.r = color.r;
+  c.g = color.g;
+  c.b = color.b;
+  c.a = color.a;
+
+  return c;
+}
+
+dither_color_t
+color_amigaToDithered(amiga_color_t color)
+{
+  dither_color_t c;
+  c.r = color.r;
+  c.g = color.g;
+  c.b = color.b;
+  c.a = color.a;
+  return c;
 }

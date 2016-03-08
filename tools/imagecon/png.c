@@ -16,6 +16,12 @@
 
 #include "imagecon.h"
 
+static void
+_wrapjmp(png_structp png_ptr)
+{
+  if (setjmp(png_jmpbuf(png_ptr)))
+    abort_("Error during init_io");
+}
 void
 png_read(char* file_name, imagecon_image_t* ic)
 {
@@ -23,7 +29,7 @@ png_read(char* file_name, imagecon_image_t* ic)
   png_byte color_type;
   png_byte bit_depth; 
   png_infop info_ptr;
-  int number_of_passes, rowbytes;
+  int number_of_passes = 0, rowbytes;
   unsigned char header[8];    // 8 is the maximum size that can be checked
   
   /* open file and test for it being a png */
@@ -43,9 +49,8 @@ png_read(char* file_name, imagecon_image_t* ic)
   if (!info_ptr)
     abort_("png_create_info_struct failed");
   
-  if (setjmp(png_jmpbuf(png_ptr)))
-    abort_("Error during init_io");
-  
+ 
+  _wrapjmp(png_ptr);
   png_init_io(png_ptr, fp);
   png_set_sig_bytes(png_ptr, 8);
   
@@ -117,6 +122,4 @@ png_read(char* file_name, imagecon_image_t* ic)
   }
 
   ic->amigaImage = calloc(ic->width*ic->height, 1);
-
-
 }

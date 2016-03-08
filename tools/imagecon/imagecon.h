@@ -24,6 +24,7 @@ typedef struct {
   int outputCopperList;
   int ehbMode;
   int hamMode;
+  int hamBruteForce;
   int dither;
   char* overridePalette;
   int quantize;
@@ -39,6 +40,13 @@ typedef struct {
 } amiga_color_t;
 
 typedef struct {
+  float r;
+  float g;
+  float b;
+  float a;
+} dither_color_t;
+
+typedef struct {
   int control;
   int data;
   amiga_color_t pixel;
@@ -52,7 +60,7 @@ typedef struct {
   png_bytep* rowPointers;
   unsigned char* amigaImage;
   amiga_color_t palette[MAX_PALETTE*2]; // extra half brite mode
-  amiga_color_t* dithered;
+  dither_color_t* dithered;
 } imagecon_image_t;
 
 

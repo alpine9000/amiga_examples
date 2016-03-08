@@ -1,7 +1,8 @@
 IMAGECON=./out/imagecon
 OBJS=out/imagecon.o out/png.o out/color.o out/dither.o out/ham.o out/palette.o out/file.o
-HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -limagequant
-HOST_CFLAGS=$(HOST_WARNINGS)
+WARN_ERROR=-Werror
+HOST_WARNINGS=$(WARN_ERROR) -pedantic-errors -Wfatal-errors -Wall  -Wextra -Wno-unused-parameter -Wshadow -limagequant
+HOST_CFLAGS=$(HOST_WARNINGS) -O3
 LIBS=-lpng -limagequant
 
 # test stuff

@@ -14,6 +14,7 @@ imagecon_config_t config = {
   .outputCopperList = 0,
   .ehbMode = 0,
   .hamMode = 0,
+  .hamBruteForce = 0,
   .quantize = 0,
   .dither = 0,
   .overridePalette = 0
@@ -37,6 +38,7 @@ usage()
 	  "  --output-palette\n"\
 	  "  --extra-half-brite\n"\
 	  "  --ham\n"\
+	  "  --ham-brute-force\n"\
           "  --dither\n"\
 	  "  --use-palette <palette file>\n"\
 	  "  --verbose\n", config.argv[0]);
@@ -432,6 +434,7 @@ main(int argc, char **argv)
       {"output-mask", no_argument, &config.outputMask, 1},
       {"extra-half-brite", no_argument, &config.ehbMode, 1},
       {"ham", no_argument, &config.hamMode, 1},
+      {"ham-brute-force", no_argument, &config.hamBruteForce, 1},
       {"dither", no_argument, &config.dither, 1},
       {"use-palette", required_argument, 0, 'p'},
       {"output",  required_argument, 0, 'o'},
