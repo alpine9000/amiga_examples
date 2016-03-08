@@ -11,6 +11,6 @@ No dither
 ---------
 ![dithered](screenshots/ham.png?raw=true)
 
-[Download disk image](bin/dither_ham.adf?raw=true)
+[Download disk image](bin/dithered_ham.adf?raw=true)
 
 
