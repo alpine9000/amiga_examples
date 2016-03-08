@@ -3,9 +3,13 @@ Ditherered HAM
 
 Work in progress
 
-Screenshot:
+Dithered
+--------
+![dithered](screenshots/dithered.png?raw=true)
 
-![dithered](screenshots/dithered_ham.png?raw=true)
+No dither 
+---------
+![dithered](screenshots/ham.png?raw=true)
 
 [Download disk image](bin/dither_ham.adf?raw=true)
 
