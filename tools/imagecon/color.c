@@ -1,12 +1,28 @@
 #include "imagecon.h"
 
+
 int
 color_delta(amiga_color_t c1, amiga_color_t c2)
 {
   int dr = abs((c1.r)-(c2.r));
   int dg = abs((c1.g)-(c2.g));
   int db = abs((c1.b)-(c2.b));
-  return sqrt((dr*dr)+(dg*dg)+(db*db));
+  
+  enum  {
+    DISTANCE,
+    WEIGHTED,
+    SIMPLE
+  } errorFunc = WEIGHTED;
+  
+  switch (errorFunc) {
+  case SIMPLE:
+    return dr+dg+db;
+  case DISTANCE:
+    return sqrt((dr*dr)+(dg*dg)+(db*db));
+  case WEIGHTED:
+  default:
+    return dr*3+dg*4+db*2;
+  }
 }
 
 

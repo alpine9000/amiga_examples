@@ -20,7 +20,8 @@ dither_getHamColor(imagecon_image_t* ic, amiga_color_t color, amiga_color_t last
 float
 _gamma(float x)
 {
-  return x * 0.55;
+     return x * 0.55;
+     //  return x;
 }
 
 static void
@@ -48,9 +49,10 @@ dither_image(imagecon_image_t* ic, amiga_color_t (*selector)(imagecon_image_t*, 
       amiga_color_t new = selector(ic, color_ditheredToAmiga(old), last);
 
       dither_color_t error;
-      error.r = old.r - new.r;
-      error.g = old.g - new.g;
-      error.b = old.b - new.b;
+      float gamma = 1.0;
+      error.r = old.r - (new.r*gamma);
+      error.g = old.g - (new.g*gamma);
+      error.b = old.b - (new.b*gamma);
 
       color_setDitheredPixel(ic, x, y, color_amigaToDithered(new));
       last = new;

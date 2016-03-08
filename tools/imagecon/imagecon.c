@@ -70,7 +70,8 @@ generateQuantizedImage(imagecon_image_t* ic, int usePalette)
   }
 
   liq_attr *attr = liq_attr_create();
-  liq_image *image = liq_image_create_rgba_rows(attr, (void**)ic->rowPointers, ic->width, ic->height, 0);
+  // TODO: What to do with gamma here ?
+  liq_image *image = liq_image_create_rgba_rows(attr, (void**)ic->rowPointers, ic->width, ic->height, /* gamma */0.0);
 
   if (usePalette) {
     for (int i = 0; i < ic->numColors; i++) {
@@ -83,12 +84,15 @@ generateQuantizedImage(imagecon_image_t* ic, int usePalette)
     }
   }
 
+
   liq_set_max_colors(attr, config.maxColors);
   // no liq_set_quality(attr, 0, 100);
   //liq_set_min_posterization(attr, 4);
   liq_set_speed(attr, 1);
   liq_result *res = liq_quantize_image(attr, image);
-  //  liq_set_dithering_level(res, 1.0);
+
+  //liq_set_output_gamma(res, 0.1);
+  //liq_set_dithering_level(res, 0);
   liq_write_remapped_image(res, image, ic->amigaImage, ic->width*ic->height);
 
   const liq_palette *pal = liq_get_palette(res);
