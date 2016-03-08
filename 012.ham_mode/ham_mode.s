@@ -39,4 +39,3 @@ copper:
 
 bitplanes:
 	incbin	"out/image-ham.bin"
-	;; 	incbin	"out/image.bin"
