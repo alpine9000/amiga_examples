@@ -1,5 +1,16 @@
 #pragma once
 
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
+#include <math.h>
+#include <getopt.h>
+#include <libgen.h>
+#include <png.h>
+#include <pngquant/libimagequant.h>
+
 #define MAX_PALETTE 32
 
 typedef struct {
@@ -13,20 +24,13 @@ typedef struct {
   int outputCopperList;
   int ehbMode;
   int hamMode;
+  int dither;
   char* overridePalette;
   int quantize;
   int verbose;
   char** argv;
 } imagecon_config_t;
 
-#if 0
-typedef struct {
-  unsigned char r;
-  unsigned char g;
-  unsigned char b;
-  unsigned char a;
-} amiga_color_t;
-#else
 typedef struct {
   int r;
   int g;
@@ -34,7 +38,11 @@ typedef struct {
   int a;
 } amiga_color_t;
 
-#endif
+typedef struct {
+  int control;
+  int data;
+  amiga_color_t pixel;
+} ham_control_t;
 
 
 typedef struct {
@@ -44,9 +52,23 @@ typedef struct {
   png_bytep* rowPointers;
   unsigned char* amigaImage;
   amiga_color_t palette[MAX_PALETTE*2]; // extra half brite mode
+  amiga_color_t* dithered;
 } imagecon_image_t;
 
 
+#include "color.h"
+#include "dither.h"
+#include "ham.h"
+#include "file.h"
+#include "palette.h"
+
 extern imagecon_config_t config;
-extern void abort_(const char * s, ...);
-extern void png_read(char* file_name, imagecon_image_t* ic);
+
+extern void 
+abort_(const char * s, ...);
+
+extern void 
+png_read(char* file_name, imagecon_image_t* ic);
+
+void
+generateQuantizedImage(imagecon_image_t* ic, int usePalette);

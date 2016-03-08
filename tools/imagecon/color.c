@@ -1,0 +1,187 @@
+#include "imagecon.h"
+
+int
+color_delta(amiga_color_t c1, amiga_color_t c2)
+{
+  int dr = abs((c1.r)-(c2.r));
+  int dg = abs((c1.g)-(c2.g));
+  int db = abs((c1.b)-(c2.b));
+  return sqrt((dr*dr)+(dg*dg)+(db*db));
+}
+
+
+void
+color_print(amiga_color_t color)
+{
+  printf("R = %03d  G = %03d  B = %03d A = %03d", color.r, color.g, color.b, color.a);
+}
+
+
+int
+color_findClosestPaletteIndex(imagecon_image_t* ic, amiga_color_t color)
+{
+  int delta = INT_MAX;
+  int index = 0;
+
+  for (int i = 0; i < ic->numColors; i++) {
+    int dc = color_delta(color, ic->palette[i]);
+    if (dc < delta) {
+      delta = dc;
+      index = i;
+    }
+  }
+  return index;
+}
+
+amiga_color_t
+color_findClosestPalettePixel(imagecon_image_t* ic, amiga_color_t color)
+{
+  return ic->palette[color_findClosestPaletteIndex(ic, color)];
+}
+
+ham_control_t
+color_findClosestHamPixel(imagecon_image_t* ic, amiga_color_t color, amiga_color_t last)
+{
+  int delta = INT_MAX;
+
+  ham_control_t ham = {0};
+
+  for (int i = 0; i < ic->numColors; i++) {
+    int dc = color_delta(color, ic->palette[i]);
+    if (dc < delta) {
+      delta = dc;
+      ham.data = i;
+      ham.pixel = ic->palette[i];
+    }
+  }
+
+  delta =  color_delta(color, ham.pixel);
+  if (last.r != -1) {
+    for (int c = 0; c <= 0xF; c++) {
+      amiga_color_t copy = last;
+      copy.r = c<<4;
+      int dc = color_delta(color, copy);
+      if (dc < delta) {
+	ham.control = 2;
+	ham.data = c;
+	ham.pixel = copy;
+	delta = dc;
+      }
+    }
+    for (int c = 0; c <= 0xF; c++) {
+      amiga_color_t copy = last;
+      copy.g = c<<4;
+      int dc = color_delta(color, copy);
+      if (dc < delta) {
+	ham.control = 3;
+	ham.data = c;
+	ham.pixel = copy;
+	delta = dc;
+      }
+    }
+    for (int c = 0; c <= 0xF; c++) {
+      amiga_color_t copy = last;
+      copy.b = c<<4;
+      int dc = color_delta(color, copy);
+      if (dc < delta) {
+	ham.control = 1;
+	ham.data = c;
+	ham.pixel = copy;
+	delta = dc;
+      }
+    }
+  }	
+
+  return ham;
+}
+
+
+amiga_color_t
+color_getOriginalPixel(imagecon_image_t* ic, int x, int y)
+{
+  png_byte* ptr = ic->rowPointers[y] + (x*4);
+  amiga_color_t color;
+  color.r = ptr[0];
+  color.g = ptr[1];
+  color.b = ptr[2];
+  color.a = ptr[3];
+  return color;
+}
+
+
+void
+color_setOriginalPixel(imagecon_image_t* ic, int x, int y, amiga_color_t color)
+{
+  png_byte* ptr = ic->rowPointers[y] + (x*4);
+  ptr[0] = color.r;
+  ptr[1] = color.g;
+  ptr[2] = color.b;
+  ptr[3] = color.a;
+}
+
+
+amiga_color_t
+color_getDitheredPixel(imagecon_image_t* ic, int x, int y)
+{
+  return ic->dithered[(y*ic->width)+x];
+}
+
+void
+color_setDitheredPixel(imagecon_image_t* ic, int x, int y, amiga_color_t color)
+{
+  amiga_color_t *d = &ic->dithered[(y*ic->width)+x];
+
+  if (color.r > 255) {
+    color.r = 255;
+  } 
+  if (color.r < 0) {
+    color.r = 0;
+  }
+  if (color.g > 255) {
+    color.g = 255;
+  } 
+  if (color.g < 0) {
+    color.g = 0;
+  }
+  if (color.b > 255) {
+    color.b = 255;
+  } 
+  if (color.b < 0) {
+    color.b = 0;
+  }
+
+  d->r = color.r;
+  d->g = color.g;
+  d->b = color.b;
+  d->a = color.a;
+}
+
+amiga_color_t
+color_getPalettedPixel(imagecon_image_t* ic, int x, int y)
+{
+  int paletteIndex = ic->amigaImage[(ic->width*y)+x];
+  amiga_color_t color;
+  color.r = ic->palette[paletteIndex].r;
+  color.g = ic->palette[paletteIndex].g;
+  color.b = ic->palette[paletteIndex].b;
+  color.a = ic->palette[paletteIndex].a;
+  return color;
+}
+
+void
+color_setPalettedPixel(imagecon_image_t* ic, int x, int y, amiga_color_t color)
+{
+  int paletteIndex = color_findClosestPaletteIndex(ic, color);
+  ic->amigaImage[(ic->width*y)+x] = paletteIndex;
+}
+
+
+void
+color_transferPalettedToOriginal(imagecon_image_t* ic)
+{
+  for (int y = 0; y < ic->height; y++) {
+    for (int x = 0; x < ic->width; x++) {
+      color_setOriginalPixel(ic, x, y, color_getPalettedPixel(ic, x, y));
+    }
+  }
+}

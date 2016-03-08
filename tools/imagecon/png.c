@@ -117,4 +117,6 @@ png_read(char* file_name, imagecon_image_t* ic)
   }
 
   ic->amigaImage = calloc(ic->width*ic->height, 1);
+
+
 }

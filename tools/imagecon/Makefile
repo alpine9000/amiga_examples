@@ -1,5 +1,5 @@
 IMAGECON=./out/imagecon
-OBJS=out/imagecon.o out/png.o
+OBJS=out/imagecon.o out/png.o out/color.o out/dither.o out/ham.o out/palette.o out/file.o
 HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -limagequant
 HOST_CFLAGS=$(HOST_WARNINGS)
 LIBS=-lpng -limagequant
@@ -28,12 +28,14 @@ REFERENCE_HAM_BASE=reference/ham
 $(IMAGECON): out bin $(OBJS) 
 	gcc $(OBJS) -o $(IMAGECON) $(LIBS)
 
-
-out/imagecon.o: imagecon.h
-out/png.o: imagecon.h
+-include $(OBJS:.o=.d)
 
 out/%.o: %.c
 	gcc -c $(HOST_CFLAGS) $< -o $@ 
+	@gcc -MM $(HOST_CFLAGS) $*.c > out/$*.d
+	@mv -f out/$*.d out/$*.d.tmp
+	@sed -e 's/.*/out\/&/' < out/$*.d.tmp > out/$*.d
+	@rm -f out/$*.d.tmp
 
 out:
 	mkdir out
