@@ -28,10 +28,11 @@ usage
 The following files can be generated:
 
 1. **&lt;output prefix>.bin** binary interleaved bitplane data
-2. **&lt;output prefix>-copper-list.s**	m68k assembler syntax copper list with no symbols
-3. **&lt;output prefix>-palette.s**	m68k assembler syntax code to install the color palette (preserves all registers)
-4. **&lt;output prefix>.pal** palette file listing the palette colors as hex
-5. **&lt;output prefix>-mask.bin** binary interleaved bitplane mask
+2. **&lt;output prefix>-ham.bin** binary interleaved bitplane data for --ham mode
+3. **&lt;output prefix>-copper-list.s**	m68k assembler syntax copper list with no symbols
+4. **&lt;output prefix>-palette.s**	m68k assembler syntax code to install the color palette (preserves all registers)
+5. **&lt;output prefix>.pal** palette file listing the palette colors as hex
+6. **&lt;output prefix>-mask.bin** binary interleaved bitplane mask
 
 options
 -------
@@ -85,7 +86,7 @@ Generate bitplane and palette data for the OCS HAM mode.
 
 **--ham-brute-force**
 
-Use a primitive brute force method to calculate the HAM base palette.
+Use a primitive brute force method to calculate the HAM base palette (Otherwise --quantize --colors 16 will be used).
 
 **--dither**
 
@@ -112,4 +113,10 @@ Create a shared palette based on two files, then use that palette to generate im
     ./imagecon --input file1.png,file2.png --output shared --quantize --colors 32 --output-palette
     ./imagecon --input file1.png --output file1 --use-palette shared.pal --output-bitplanes --output-copperlist
     ./imagecon --input file2.png --output file2 --use-palette shared.pal --output-bitplanes --output-copperlist
+```
+
+
+Create dithered HAM data
+```
+    ./imagecon --input full_color.png --output ham --ham --dither
 ```
