@@ -41,7 +41,7 @@ Then, during the vertical blank, depending on the LOF bit in the VPOSR register,
 
 This example allows your to enable/disable INTERLACE mode in the [Makefile](Makefile):
 
-	```
+    ```
 INTERLACE=1
 ```
 
