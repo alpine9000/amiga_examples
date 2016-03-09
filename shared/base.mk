@@ -5,6 +5,10 @@ HOST_CFLAGS=$(HOST_WARNINGS)
 IMAGECONDIR=../tools/imagecon
 IMAGECON=$(IMAGECONDIR)/out/imagecon
 
+ifndef BASE_ADDRESS
+BASE_ADDRESS=70000
+endif
+
 all: bin out $(MAKEADF) $(FLOPPY)
 
 gdrive: all
@@ -42,7 +46,7 @@ out/bootblock.bin: out/bootblock.o
 	vlink -brawbin1 $< -o $@
 
 out/bootblock.o: ../shared/bootblock.s out/main.bin
-	vc -c $< -o $@
+	vasmm68k_mot -DBASE_ADDRESS="\$$$(BASE_ADDRESS)" -Fhunk -phxass -opt-fconst -nowarn=62 -quiet $< -o $@ -I/usr/local/amiga/os-include
 
 out/main.o: $(MODULE) $(EXTRA)
 	@# -v
@@ -52,7 +56,7 @@ out/main.o: $(MODULE) $(EXTRA)
 
 out/main.bin: out/main.o $(EXTRAOBJS)
 	@#-T ../link.script
-	vlink -Ttext 0x70000 -brawbin1 $< $(EXTRAOBJS) -o $@
+	vlink -Ttext 0x$(BASE_ADDRESS) -brawbin1 $< $(EXTRAOBJS) -o $@
 
 clean:
 	rm -rf out bin *~

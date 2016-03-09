@@ -10,7 +10,7 @@ bootEntry:
 	;;  a6 = Exec base
 	;;  a1 = trackdisk.device I/O request pointer
 
-	lea     $70000,a5 ; main.s entry point 
+	lea     BASE_ADDRESS,a5 ; main.s entry point 
 
 	;; Load the progam from the floppy using trackdisk.device
 
