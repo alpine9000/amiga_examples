@@ -1,5 +1,89 @@
 #include "imagecon.h"
 
+static ham_control_t
+_ham_findClosestPixel(imagecon_image_t* ic, amiga_color_t color, amiga_color_t last)
+{
+  int delta = INT_MAX;
+
+  ham_control_t ham = {0};
+
+  for (int i = 0; i < ic->numColors; i++) {
+    int dc = color_delta(color, ic->palette[i]);
+    if (dc < delta) {
+      delta = dc;
+      ham.data = i;
+      ham.pixel = ic->palette[i];
+    }
+  }
+
+  delta =  color_delta(color, ham.pixel);
+  if (last.r != -1) {
+    for (int c = 0; c <= 0xF; c++) {
+      amiga_color_t copy = last;
+      copy.r = c<<4;
+      int dc = color_delta(color, copy);
+      if (dc < delta) {
+	ham.control = 2;
+	ham.data = c;
+	ham.pixel = copy;
+	delta = dc;
+      }
+    }
+    for (int c = 0; c <= 0xF; c++) {
+      amiga_color_t copy = last;
+      copy.g = c<<4;
+      int dc = color_delta(color, copy);
+      if (dc < delta) {
+	ham.control = 3;
+	ham.data = c;
+	ham.pixel = copy;
+	delta = dc;
+      }
+    }
+    for (int c = 0; c <= 0xF; c++) {
+      amiga_color_t copy = last;
+      copy.b = c<<4;
+      int dc = color_delta(color, copy);
+      if (dc < delta) {
+	ham.control = 1;
+	ham.data = c;
+	ham.pixel = copy;
+	delta = dc;
+      }
+    }
+  }	
+
+  return ham;
+}
+
+
+static amiga_color_t
+_ham_getHamColor(imagecon_image_t* ic, amiga_color_t color, amiga_color_t last)
+{
+  ham_control_t ham = _ham_findClosestPixel(ic, color, last);
+  return ham.pixel;
+}
+
+
+static ham_control_t* 
+_ham_createHams(imagecon_image_t* ic)
+{
+  ham_control_t* hams = malloc(sizeof(ham_control_t)*ic->width*ic->height);
+
+  for (int y = 0; y < ic->height; y++) {
+    amiga_color_t lastPixel = { -1, -1, -1, -1};
+    for (int x = 0; x < ic->width; x++) {
+      amiga_color_t orig = color_ditheredToAmiga(color_getDitheredPixel(ic, x, y));
+      ham_control_t ham = _ham_findClosestPixel(ic, orig, lastPixel);
+      lastPixel = ham.pixel;
+      hams[(y*ic->width)+x] = ham;
+    }
+  }
+
+  return hams;
+}
+
+
 static void
 _ham_outputBitplanes(char* outFilename, imagecon_image_t* ic)
 {
@@ -18,8 +102,8 @@ _ham_outputBitplanes(char* outFilename, imagecon_image_t* ic)
   ham_control_t* hams;
 
   if (config.dither) {
-    dither_image(ic, dither_getHamColor);
-    hams = dither_createHams(ic);
+    dither_image(ic, _ham_getHamColor);
+    hams = _ham_createHams(ic);
   } else {
     hams = malloc(sizeof(ham_control_t)*ic->width*ic->height);
     
@@ -27,7 +111,7 @@ _ham_outputBitplanes(char* outFilename, imagecon_image_t* ic)
       amiga_color_t lastPixel = { -1, -1, -1, -1};
       for (int x = 0; x < ic->width; x++) {
 	amiga_color_t orig = color_getOriginalPixel(ic, x, y);
-	ham_control_t ham = color_findClosestHamPixel(ic, orig, lastPixel);
+	ham_control_t ham = _ham_findClosestPixel(ic, orig, lastPixel);
 	lastPixel = ham.pixel;      
 	hams[(y*ic->width)+x] = ham;
       }
@@ -81,7 +165,7 @@ _score(imagecon_image_t* ic)
     amiga_color_t lastPixel = { -1, -1, -1, -1};
     for (int x = 0; x < ic->width; x++) {
       amiga_color_t color = color_getOriginalPixel(ic, x, y);
-      ham_control_t ham = color_findClosestHamPixel(ic, color, lastPixel);
+      ham_control_t ham = _ham_findClosestPixel(ic, color, lastPixel);
       error += color_delta(color, color_findClosestPalettePixel(ic, ham.pixel));
       lastPixel = ham.pixel;
     }

@@ -10,19 +10,12 @@ dither_getPalettedColor(imagecon_image_t* ic, amiga_color_t color, amiga_color_t
 }
 
 
-amiga_color_t
-dither_getHamColor(imagecon_image_t* ic, amiga_color_t color, amiga_color_t last)
-{
-  ham_control_t ham = color_findClosestHamPixel(ic, color, last);
-  return ham.pixel;
-}
-
 float
 _gamma(float x)
 {
-     return x * 0.55;
-     //  return x;
+  return x * 0.55;
 }
+
 
 static void
 _propagateError(imagecon_image_t* ic, float factor, int x, int y, dither_color_t error)
@@ -35,6 +28,7 @@ _propagateError(imagecon_image_t* ic, float factor, int x, int y, dither_color_t
     color_setDitheredPixel(ic, x, y, color);
   }
 }
+
 
 void
 dither_image(imagecon_image_t* ic, amiga_color_t (*selector)(imagecon_image_t*, amiga_color_t color, amiga_color_t last))
@@ -62,9 +56,7 @@ dither_image(imagecon_image_t* ic, amiga_color_t (*selector)(imagecon_image_t*, 
       _propagateError(ic, 5.0/16.0, x  , y+1, error);
       _propagateError(ic, 1.0/16.0, x+1, y+1, error);     
     }
-
   }
-
 }
 
 
@@ -78,24 +70,6 @@ dither_transferToPaletted(imagecon_image_t* ic)
   }
 }
 
-
-ham_control_t* 
-dither_createHams(imagecon_image_t* ic)
-{
-  ham_control_t* hams = malloc(sizeof(ham_control_t)*ic->width*ic->height);
-
-  for (int y = 0; y < ic->height; y++) {
-    amiga_color_t lastPixel = { -1, -1, -1, -1};
-    for (int x = 0; x < ic->width; x++) {
-      amiga_color_t orig = color_ditheredToAmiga(color_getDitheredPixel(ic, x, y));
-      ham_control_t ham = color_findClosestHamPixel(ic, orig, lastPixel);
-      lastPixel = ham.pixel;
-      hams[(y*ic->width)+x] = ham;
-    }
-  }
-
-  return hams;
-}
 
 
 static void

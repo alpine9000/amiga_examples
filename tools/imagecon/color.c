@@ -55,61 +55,6 @@ color_findClosestPalettePixel(imagecon_image_t* ic, amiga_color_t color)
   return ic->palette[color_findClosestPaletteIndex(ic, color)];
 }
 
-ham_control_t
-color_findClosestHamPixel(imagecon_image_t* ic, amiga_color_t color, amiga_color_t last)
-{
-  int delta = INT_MAX;
-
-  ham_control_t ham = {0};
-
-  for (int i = 0; i < ic->numColors; i++) {
-    int dc = color_delta(color, ic->palette[i]);
-    if (dc < delta) {
-      delta = dc;
-      ham.data = i;
-      ham.pixel = ic->palette[i];
-    }
-  }
-
-  delta =  color_delta(color, ham.pixel);
-  if (last.r != -1) {
-    for (int c = 0; c <= 0xF; c++) {
-      amiga_color_t copy = last;
-      copy.r = c<<4;
-      int dc = color_delta(color, copy);
-      if (dc < delta) {
-	ham.control = 2;
-	ham.data = c;
-	ham.pixel = copy;
-	delta = dc;
-      }
-    }
-    for (int c = 0; c <= 0xF; c++) {
-      amiga_color_t copy = last;
-      copy.g = c<<4;
-      int dc = color_delta(color, copy);
-      if (dc < delta) {
-	ham.control = 3;
-	ham.data = c;
-	ham.pixel = copy;
-	delta = dc;
-      }
-    }
-    for (int c = 0; c <= 0xF; c++) {
-      amiga_color_t copy = last;
-      copy.b = c<<4;
-      int dc = color_delta(color, copy);
-      if (dc < delta) {
-	ham.control = 1;
-	ham.data = c;
-	ham.pixel = copy;
-	delta = dc;
-      }
-    }
-  }	
-
-  return ham;
-}
 
 
 amiga_color_t
@@ -214,6 +159,7 @@ color_ditheredToAmiga(dither_color_t color)
 
   return c;
 }
+
 
 dither_color_t
 color_amigaToDithered(amiga_color_t color)

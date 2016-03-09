@@ -23,6 +23,7 @@ void palette_loadFile(imagecon_image_t* ic)
   ic->numColors = paletteIndex;
 }
 
+#define RGB24TORGB12(x) (x >> 4)
 
 void 
 palette_output(char* outFilename, imagecon_image_t* ic)
@@ -63,19 +64,19 @@ palette_output(char* outFilename, imagecon_image_t* ic)
       printf("%02d: hex=%03x r=%03d g=%03d b=%03d a=%03d\n", i , ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b, ic->palette[i].r, ic->palette[i].g, ic->palette[i].b, ic->palette[i].a);
     }
     if (paletteFP) {
-      fprintf(paletteFP, "%03x\n",  (ic->palette[i].r >> 4) << 8 | (ic->palette[i].g >>4) << 4 | (ic->palette[i].b >>4));
+      fprintf(paletteFP, "%03x\n",  RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b));
     }
     if (paletteAsmFP) {
-      fprintf(paletteAsmFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i, (ic->palette[i].r >> 4) << 8 | (ic->palette[i].g >>4) << 4 | (ic->palette[i].b >>4));
+      fprintf(paletteAsmFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i, RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b));
     }
     if (paletteGreyFP) {
       // TODO: this is for compat, can be better
-      unsigned grey = (((ic->palette[i].r>>4) + (ic->palette[i].g>>4) + (ic->palette[i].b>>4))/3);
+      unsigned grey = ((RGB24TORGB12(ic->palette[i].r) + RGB24TORGB12(ic->palette[i].g) + RGB24TORGB12(ic->palette[i].b))/3);
       fprintf(paletteGreyFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i, grey << 8 | grey << 4 | grey);
     }
 
     if (fp) {
-      fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+(i*2), (ic->palette[i].r >> 4) << 8 | (ic->palette[i].g >>4) << 4 | (ic->palette[i].b >>4));
+      fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+(i*2), RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b));
     }
   }
 

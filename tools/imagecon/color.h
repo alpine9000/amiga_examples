@@ -12,9 +12,6 @@ color_findClosestPalettePixel(imagecon_image_t* ic, amiga_color_t color);
 int
 color_findClosestPaletteIndex(imagecon_image_t* ic, amiga_color_t color);
 
-ham_control_t
-color_findClosestHamPixel(imagecon_image_t* ic, amiga_color_t color, amiga_color_t last);
-
 amiga_color_t
 color_getPalettedPixel(imagecon_image_t* ic, int x, int y);
 
