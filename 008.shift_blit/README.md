@@ -14,11 +14,12 @@ So the algorithm for drawing to non word aligned boundaries is as follows:
    
 [Download disk image](bin/shift_blit.adf?raw=true)
 
-Screenshot:
-
+screenshot
+----------
 ![Screenshot](screenshot.png?raw=true)
 
-Masked blit screenshot for reference:
-
-![Screenshot](../007.masked_blit/screenshot.png?raw=true)
+try it
+------
+  * [Download disk image](bin/shift_blit.adf?raw=true)
+  * <a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/shift_blit.adf" target="_blank">Run in SAE</a>
 
