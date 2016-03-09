@@ -25,7 +25,7 @@ So for this to work, we need to make some other changes.  Firstly we need twice 
 Then, during the vertical blank, depending on the LOF bit in the VPOSR register, we install the correct copper list:
 
 	```
-.mainLoop:
+ .mainLoop:
 	bsr 	waitVerticalBlank
 
 	btst.w	#VPOSRLOFBIT,VPOSR(a6)
@@ -33,14 +33,14 @@ Then, during the vertical blank, depending on the LOF bit in the VPOSR register,
 	lea	copper(pc),a0
 	move.l	a0,COP1LC(a6)
 	bra	.done
-.lof:
+ .lof:
 	lea	copperLOF(pc),a0
 	move.l	a0,COP1LC(a6)
-.done
+ .done
 	bra	.mainLoop
 ```
 
-This example allows your to enable/disable INTERLACE mode in the [Makefile](Makefile)
+This example allows your to enable/disable INTERLACE mode in the [Makefile](Makefile):
      ```
 INTERLACE=1
 ```
