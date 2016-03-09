@@ -13,8 +13,12 @@ This means a sprite and background can share the single palette.
 
 We then blit the sprite to the background.
 
-[Download disk image](bin/blit.adf?raw=true)
-
-Screenshot:
-
+screenshot
+----------
 ![Screenshot](screenshot.png?raw=true)
+
+try it
+------
+  * [Download disk image](bin/blit.adf?raw=true)
+  * <a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/blit.adf" target="_blank">Run in SAE</a>
+
