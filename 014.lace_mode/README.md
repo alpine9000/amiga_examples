@@ -5,7 +5,7 @@ For interlace mode, we can enable it by simply setting the LACE bit in BPLCON0:
 
   ```
 	move.w	#(SCREEN_BIT_DEPTH<<12)|COLOR_ON|HOMOD|LACE,BPLCON0(a6)
-``		`
+```
 
 Now each alternating frame will be offset vertically by half a scan line.
 
@@ -24,7 +24,7 @@ So for this to work, we need to make some other changes.  Firstly we need twice 
 
 Then, during the vertical blank, depending on the LOF bit in the VPOSR register, we install the correct copper list:
 
-      ```
+	```
 .mainLoop:
 	bsr 	waitVerticalBlank
 
