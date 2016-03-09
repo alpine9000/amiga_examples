@@ -22,9 +22,9 @@ Most of the sites I have used during the learning process:
 
 examples
 --------
-Each example tries to introduce only one new concept, often building on the previous examples. They are intended to process numerically. There is sometimes a limited description in each README.md file.
+Each example tries to introduce only one new concept, often building on the previous examples. 
 
-There are clicking links in each README.md file to run the example in your browser using my hacked version of [Scripted Amiga Emulator](http://scriptedamigaemulator.net/)
+See each example's README.md for a limited description as well as a clickable link to run the example in your browser using my hacked version of [Scripted Amiga Emulator](http://scriptedamigaemulator.net/)
 
 cross development environment
 -----------------------------
