@@ -55,6 +55,9 @@ At 5 bitplanes we have enough time to do 5 blits.
 
 Lots of time left over with 1 bitplane :-D
 
-[Download disk image](bin/blit_speed.adf?raw=true)
+try it
+------
+  * [Download disk image](bin/blit_speed.adf?raw=true)
+  * <a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/blit_speed.adf" target="_blank">Run in SAE</a>
 
 
