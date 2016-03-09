@@ -1,4 +1,4 @@
-Display a simple image
+display a simple image
 ======================
 
 Building on [trackdisk.device](../000.trackdisk), we now display a simple color image.
