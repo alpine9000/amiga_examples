@@ -1,4 +1,4 @@
-Hold and Modify Mode
+hold and modify mode
 ====================
 
 I added basic supprt to [imagecon](../tools/imagecon) to output HAM mode data.  The algorithm used is pretty simple so the quality of the HAM display could definately be improved.
@@ -17,6 +17,9 @@ The differences
 ---------------
 ![image differences](screenshots/diff.png?raw=true)
 
-[Download disk image](bin/ham_mode.adf?raw=true)
+try it
+------
+  * [Download disk image](bin/ham_mode.adf?raw=true)
+  * <a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/ham_mode.adf" target="_blank">Run in SAE</a>
 
 

@@ -1,4 +1,4 @@
-Extra half brite mode
+extra half brite mode
 =====================
 
 [Extra half brite mode](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0098.html) allows us to use 32 colors as well as 32 "half brite" versions of those colors.
@@ -17,10 +17,12 @@ We can see from the output that it's not earth shatteringly different.
 ---------
 ![5 bitplanes](screenshots/32-colors.png?raw=true)
 
-The differences
+the differences
 ---------------
 ![image differences](screenshots/diff.png?raw=true)
 
-[Download disk image](bin/ehb_mode.adf?raw=true)
-
+try it
+------
+  * [Download disk image](bin/ehb_mode.adf?raw=true)
+  * <a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/ehb_mode.adf" target="_blank">Run in SAE</a>
 

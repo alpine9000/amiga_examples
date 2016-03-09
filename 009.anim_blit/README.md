@@ -13,8 +13,11 @@ The main loop moves the object around the screen.
 
 We don't yet clear the background before each blit, so we get a nice trail. Also there is no double buffering.
 
-[Download disk image](bin/anim_blit.adf?raw=true)
-
-Screenshot:
-
+screenshot
+----------
 ![Screenshot](screenshot.png?raw=true)
+
+try it
+------
+  * [Download disk image](bin/anim_blit.adf?raw=true)
+  * <a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/anim_blit.adf" target="_blank">Run in SAE</a>

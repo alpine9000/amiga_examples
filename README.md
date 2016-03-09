@@ -20,6 +20,12 @@ Most of the sites I have used during the learning process:
 * [coding forum](http://ada.untergrund.net/?p=boardforums&forum=4)
 * [coding forum](http://eab.abime.net/forumdisplay.php?f=112)
 
+examples
+--------
+Each example tries to introduce only one new concept, often building on the previous examples. 
+
+See each example's README.md for a limited description as well as a clickable link to run the example in your browser using my hacked version of [Scripted Amiga Emulator](http://scriptedamigaemulator.net/)
+
 cross development environment
 -----------------------------
 

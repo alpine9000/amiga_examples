@@ -1,4 +1,4 @@
-Copper bars
+copper bars
 ===========
 
 Now I discover how vertical copper waiting works.
@@ -13,8 +13,11 @@ At copper line 255 ($FF), we run out of bits in the copper wait instruction, so 
 
 Also in this example I have remove interrupt processing and disabled most of the interrupts.
 
-[Download disk image](bin/copper_bars.adf?raw=true)
-
-Screenshot:
-
+screenshot
+----------
 ![Screenshot](screenshot.png?raw=true)
+
+try it
+------
+  * [Download disk image](bin/copper_bars.adf?raw=true)
+  * <a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/copper_bars.adf" target="_blank">Run in SAE</a>
