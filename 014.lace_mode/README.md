@@ -24,7 +24,7 @@ So for this to work, we need to make some other changes.  Firstly we need twice 
 
 Then, during the vertical blank, depending on the LOF bit in the VPOSR register, we install the correct copper list:
 
-	```
+```
  .mainLoop:
 	bsr 	waitVerticalBlank
 
