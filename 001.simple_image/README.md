@@ -11,7 +11,7 @@ The original version of this example used [vilcans amiga-startup](https://github
 
 [Download disk image](bin/image.adf?raw=true)
 
-[Run in SAE](http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/image.adf){:target="_blank"}
+<a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/image.adf" target="_blank">Run in SAE</a>
 
 Screenshot:
 
