@@ -27,7 +27,6 @@ Then, during the vertical blank, depending on the LOF bit in the VPOSR register,
 ```
  .mainLoop:
 	bsr 	waitVerticalBlank
-
 	btst.w	#VPOSRLOFBIT,VPOSR(a6)
 	beq.s	.lof
 	lea	copper(pc),a0
