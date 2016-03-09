@@ -47,8 +47,12 @@ This is then ready to be used in the LF1-7 bits of the [BLTCON0](http://amigadev
 
 We then blit the sprite to the background and notice it now has a shape!
 
-[Download disk image](bin/mask_blit.adf?raw=true)
-
-Screenshot:
-
+screenshot
+----------
 ![Screenshot](screenshot.png?raw=true)
+
+try it
+------
+  * [Download disk image](bin/mask_blit.adf?raw=true)
+  * <a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/mask_blit.adf" target="_blank">Run in SAE</a>
+
