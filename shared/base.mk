@@ -25,6 +25,10 @@ bin:
 out:
 	mkdir out
 
+
+ic:
+	make -C $(IMAGECONDIR)
+
 $(IMAGECON):
 	make -C $(IMAGECONDIR)
 
