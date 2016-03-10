@@ -178,7 +178,7 @@ _score(imagecon_image_t* ic)
 static void
 _ham_bruteForcePalette(imagecon_image_t* ic)
 {
-  int totalCombinations = 0xF*0xF*0xF;
+  int totalCombinations = 16*16*16;
   amiga_color_t *combos = malloc(sizeof(amiga_color_t)*totalCombinations);
   int index = 0;
   int length = 16;
