@@ -4,9 +4,9 @@ static void
 _dither_createDither(imagecon_image_t* ic);
 
 amiga_color_t
-dither_getPalettedColor(imagecon_image_t* ic, amiga_color_t color, amiga_color_t last)
+dither_getPalettedColor(dither_data_t data)
 {
-  return color_findClosestPalettePixel(ic, color);
+  return color_findClosestPalettePixel(data.ic, data.color);
 }
 
 
@@ -31,22 +31,28 @@ _propagateError(imagecon_image_t* ic, float factor, int x, int y, dither_color_t
 
 
 void
-dither_image(imagecon_image_t* ic, amiga_color_t (*selector)(imagecon_image_t*, amiga_color_t color, amiga_color_t last))
+dither_image(imagecon_image_t* ic, amiga_color_t (*selector)(dither_data_t data))
 {
   _dither_createDither(ic);
-  
+
+  dither_data_t data;
   for (int y = 0; y < ic->height; y++) {
     amiga_color_t last = {-1, -1, -1, -1};
     for (int x = 0; x < ic->width; x++) {
 
       dither_color_t old = color_getDitheredPixel(ic, x, y);
-      amiga_color_t new = selector(ic, color_ditheredToAmiga(old), last);
+      data.color = color_ditheredToAmiga(old);
+      data.last = last;
+      data.x = x;
+      data.y = y;
+      data.ic = ic;
+      amiga_color_t new = selector(data);
 
       dither_color_t error;
       float gamma = 1.0;
-      error.r = old.r - (new.r*gamma);
-      error.g = old.g - (new.g*gamma);
-      error.b = old.b - (new.b*gamma);
+      error.r = CLAMP(old.r - (new.r*gamma));
+      error.g = CLAMP(old.g - (new.g*gamma));
+      error.b = CLAMP(old.b - (new.b*gamma));
 
       color_setDitheredPixel(ic, x, y, color_amigaToDithered(new));
       last = new;

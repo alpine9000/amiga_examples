@@ -1,5 +1,5 @@
 IMAGECON=./out/imagecon
-OBJS=out/imagecon.o out/png.o out/color.o out/dither.o out/ham.o out/palette.o out/file.o
+OBJS=out/imagecon.o out/png.o out/color.o out/dither.o out/ham.o out/palette.o out/file.o out/sliced_ham.o out/quant.o
 WARN_ERROR=-Werror
 HOST_WARNINGS=$(WARN_ERROR) -pedantic-errors -Wfatal-errors -Wall  -Wextra -Wno-unused-parameter -Wshadow -limagequant
 HOST_CFLAGS=$(HOST_WARNINGS) -O3
@@ -39,7 +39,7 @@ out/%.o: %.c
 	gcc -c $(HOST_CFLAGS) $< -o $@ 
 	@gcc -MM $(HOST_CFLAGS) $*.c > out/$*.d
 	@mv -f out/$*.d out/$*.d.tmp
-	@sed -e 's/.*/out\/&/' < out/$*.d.tmp > out/$*.d
+	@sed  's/^.*\:/out\/&/' < out/$*.d.tmp > out/$*.d
 	@rm -f out/$*.d.tmp
 
 out:

@@ -110,6 +110,12 @@ color_setDitheredPixel(imagecon_image_t* ic, int x, int y, dither_color_t color)
   if (color.b < 0) {
     color.b = 0;
   }
+  if (color.a > 255) {
+    color.a = 255;
+  } 
+  if (color.a < 0) {
+    color.a = 0;
+  }
 
   d->r = color.r;
   d->g = color.g;

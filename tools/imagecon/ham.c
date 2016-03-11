@@ -1,7 +1,7 @@
 #include "imagecon.h"
 
-static ham_control_t
-_ham_findClosestPixel(imagecon_image_t* ic, amiga_color_t color, amiga_color_t last)
+ham_control_t
+ham_findClosestPixel(imagecon_image_t* ic, amiga_color_t color, amiga_color_t last)
 {
   int delta = INT_MAX;
 
@@ -58,9 +58,9 @@ _ham_findClosestPixel(imagecon_image_t* ic, amiga_color_t color, amiga_color_t l
 
 
 static amiga_color_t
-_ham_getHamColor(imagecon_image_t* ic, amiga_color_t color, amiga_color_t last)
+_ham_getHamColor(dither_data_t data)
 {
-  ham_control_t ham = _ham_findClosestPixel(ic, color, last);
+  ham_control_t ham = ham_findClosestPixel(data.ic, data.color, data.last);
   return ham.pixel;
 }
 
@@ -74,7 +74,7 @@ _ham_createHams(imagecon_image_t* ic)
     amiga_color_t lastPixel = { -1, -1, -1, -1};
     for (int x = 0; x < ic->width; x++) {
       amiga_color_t orig = color_ditheredToAmiga(color_getDitheredPixel(ic, x, y));
-      ham_control_t ham = _ham_findClosestPixel(ic, orig, lastPixel);
+      ham_control_t ham = ham_findClosestPixel(ic, orig, lastPixel);
       lastPixel = ham.pixel;
       hams[(y*ic->width)+x] = ham;
     }
@@ -111,7 +111,7 @@ _ham_outputBitplanes(char* outFilename, imagecon_image_t* ic)
       amiga_color_t lastPixel = { -1, -1, -1, -1};
       for (int x = 0; x < ic->width; x++) {
 	amiga_color_t orig = color_getOriginalPixel(ic, x, y);
-	ham_control_t ham = _ham_findClosestPixel(ic, orig, lastPixel);
+	ham_control_t ham = ham_findClosestPixel(ic, orig, lastPixel);
 	lastPixel = ham.pixel;      
 	hams[(y*ic->width)+x] = ham;
       }
@@ -157,7 +157,7 @@ _ham_outputBitplanes(char* outFilename, imagecon_image_t* ic)
 }
 
 
-static  int 
+static int 
 _score(imagecon_image_t* ic)
 {
   long error = 0;
@@ -165,7 +165,7 @@ _score(imagecon_image_t* ic)
     amiga_color_t lastPixel = { -1, -1, -1, -1};
     for (int x = 0; x < ic->width; x++) {
       amiga_color_t color = color_getOriginalPixel(ic, x, y);
-      ham_control_t ham = _ham_findClosestPixel(ic, color, lastPixel);
+      ham_control_t ham = ham_findClosestPixel(ic, color, lastPixel);
       error += color_delta(color, color_findClosestPalettePixel(ic, ham.pixel));
       lastPixel = ham.pixel;
     }
@@ -232,7 +232,7 @@ _ham_bruteForcePalette(imagecon_image_t* ic)
 
 
 void
-ham_process(char* outFilename, imagecon_image_t* ic)
+ham_process(imagecon_image_t* ic, char* outFilename)
 {
   config.maxColors = 16;
 
@@ -241,8 +241,7 @@ ham_process(char* outFilename, imagecon_image_t* ic)
     _ham_bruteForcePalette(ic);
         
   } else {
-    config.maxColors = 16;
-    
+   
     if (config.overridePalette) {
       palette_loadFile(ic);    
     }

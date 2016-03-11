@@ -23,7 +23,6 @@ void palette_loadFile(imagecon_image_t* ic)
   ic->numColors = paletteIndex;
 }
 
-#define RGB24TORGB12(x) (x >> 4)
 
 void 
 palette_output(char* outFilename, imagecon_image_t* ic)

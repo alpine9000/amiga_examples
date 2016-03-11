@@ -15,6 +15,7 @@ imagecon_config_t config = {
   .ehbMode = 0,
   .hamMode = 0,
   .hamBruteForce = 0,
+  .slicedHam = 0,
   .quantize = 0,
   .dither = 0,
   .overridePalette = 0
@@ -39,6 +40,7 @@ usage()
 	  "  --extra-half-brite\n"\
 	  "  --ham\n"\
 	  "  --ham-brute-force\n"\
+	  "  --sliced-ham\n"\
           "  --dither\n"\
 	  "  --use-palette <palette file>\n"\
 	  "  --verbose\n", config.argv[0]);
@@ -121,6 +123,36 @@ generateQuantizedImage(imagecon_image_t* ic, int usePalette)
 
 
 void
+generateQuant2(imagecon_image_t* ic)
+{
+  quant_image_t* image = quant_newImage(ic->width, ic->height);
+
+  for (int c = 0, y=0; y< ic->height; y++) {
+    png_byte* row = ic->rowPointers[y];
+    for (int x=0; x < ic->width; x++) {
+      png_byte* ptr = &(row[x*4]);
+      image->pix[c++] = ptr[0];
+      image->pix[c++] = ptr[1];
+      image->pix[c++] = ptr[2];
+    }
+  }
+  
+  quant_quantize(image, config.maxColors, config.dither);
+
+  for (int c = 0,y=0; y< ic->height; y++) {
+    png_byte* row = ic->rowPointers[y];
+    for (int x=0; x < ic->width; x++) {
+      png_byte* ptr = &(row[x*4]);
+      ptr[0] = image->pix[c++];
+      ptr[1] = image->pix[c++];
+      ptr[2] = image->pix[c++];
+      ptr[3] = 255;
+
+    }
+  }
+}
+
+void
 generatePalettedImage(imagecon_image_t* ic)
 {
   if (config.verbose) {
@@ -133,12 +165,11 @@ generatePalettedImage(imagecon_image_t* ic)
     for (int x=0; x < ic->width; x++) {
       png_byte* ptr = &(row[x*4]);
       
-      // TODO: this shift is probably wrong now
       amiga_color_t color;
-      color.r = ptr[0] >> 4;
-      color.g = ptr[1] >> 4;
-      color.b = ptr[2] >> 4;
-      color.a = ptr[3] >> 4;
+      color.r = ptr[0];
+      color.g = ptr[1];
+      color.b = ptr[2];
+      color.a = ptr[3];
       
       int index = -1;
       for (int i = 0; i < paletteIndex; i++) {
@@ -321,8 +352,10 @@ processFile(char* outFilename, imagecon_image_t* ic)
     printf("processFile...\n");
   }
 
-  if (config.hamMode) {
-    ham_process(outFilename, ic);
+  if (config.slicedHam) {
+    sham_process(ic, outFilename);
+  } else if (config.hamMode) {
+    ham_process(ic, outFilename);
   } else { 
     if (config.quantize || config.overridePalette) {
       if (config.ehbMode) {
@@ -439,6 +472,7 @@ main(int argc, char **argv)
       {"extra-half-brite", no_argument, &config.ehbMode, 1},
       {"ham", no_argument, &config.hamMode, 1},
       {"ham-brute-force", no_argument, &config.hamBruteForce, 1},
+      {"sliced-ham", no_argument, &config.slicedHam, 1},
       {"dither", no_argument, &config.dither, 1},
       {"use-palette", required_argument, 0, 'p'},
       {"output",  required_argument, 0, 'o'},
