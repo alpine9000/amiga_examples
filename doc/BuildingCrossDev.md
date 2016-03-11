@@ -101,3 +101,13 @@ Notes:
     # cp *.h /usr/local/include/pngquant/
     # cp *.a /usr/local/lib
 ```
+
+9. GraphicsMagick
+    ```
+    # wget http://78.108.103.11/MIRROR/ftp/GraphicsMagick/1.3/GraphicsMagick-1.3.23.tar.gz
+    # tar zxfv GraphicsMagick-1.3.23.tar.gz
+    # cd GraphicsMagick-1.3.23
+    # ./configure --prefix=/usr/local
+    # make
+    # make install
+```
