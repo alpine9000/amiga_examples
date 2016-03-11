@@ -14,7 +14,8 @@ SUBDIRS=tools/makeadf \
 	011.ehb_mode\
 	012.ham_mode\
 	013.dithered_ham\
-	014.lace_mode
+	014.lace_mode\
+	015.sliced_ham
 
 .PHONY: subdirs $(SUBDIRS)
 
