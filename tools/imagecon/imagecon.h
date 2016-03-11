@@ -15,6 +15,7 @@
 
 #define RGB24TORGB12(x) (x >> 4)
 #define CLAMP(x) (x > 255.0 ? 255.0 : (x < -255.0 ? -255.0 : x))
+#define COLOR8(x) (x > 255.0 ? 255.0 : (x < 0.0 ? 0.0 : x))
 
 typedef struct {
   int maxColors;
@@ -73,6 +74,7 @@ typedef struct {
 #include "file.h"
 #include "palette.h"
 #include "quant.h"
+#include "utils.h"
 
 extern imagecon_config_t config;
 

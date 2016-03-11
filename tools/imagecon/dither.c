@@ -13,6 +13,7 @@ dither_getPalettedColor(dither_data_t data)
 float
 _gamma(float x)
 {
+  //return x * 1.0;
   return x * 0.55;
 }
 

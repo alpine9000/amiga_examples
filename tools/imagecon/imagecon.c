@@ -61,9 +61,6 @@ abort_(const char * s, ...)
 }
 
 
-
-
-
 void
 generateQuantizedImage(imagecon_image_t* ic, int usePalette)
 {
@@ -119,6 +116,10 @@ generateQuantizedImage(imagecon_image_t* ic, int usePalette)
   }
   
   ic->numColors = pal->count;
+
+  liq_attr_destroy(attr);
+  liq_image_destroy(image);
+  liq_result_destroy(res);
 }
 
 
@@ -152,7 +153,7 @@ generateQuant2(imagecon_image_t* ic)
   }
 }
 
-void
+static void
 generatePalettedImage(imagecon_image_t* ic)
 {
   if (config.verbose) {
@@ -200,8 +201,8 @@ generatePalettedImage(imagecon_image_t* ic)
 }
 
 
-void
-outputBitplanes(char* outFilename, imagecon_image_t* ic)
+static void
+outputBitplanes(imagecon_image_t* ic, char* outFilename)
 {
   if (config.verbose) {
     printf("outputBitplanes...\n");
@@ -270,15 +271,17 @@ outputBitplanes(char* outFilename, imagecon_image_t* ic)
       fwrite(&plane[y*byteWidth], byteWidth, 1, fp);      
     }
   }
+
   fclose(fp);
+  free_vector(bitplanes, numBitPlanes);
   if (config.verbose) {
     printf("done\n\n");
   }
 }
 
 
-void
-outputMask(char* outFilename, imagecon_image_t* ic)
+static void
+outputMask(imagecon_image_t* ic, char* outFilename)
 {
   if (config.verbose) {
     printf("outputMask...\n");
@@ -316,13 +319,13 @@ outputMask(char* outFilename, imagecon_image_t* ic)
     }
   }
   fclose(fp);
-
+  free_vector(bitplanes, numBitPlanes);
   if (config.verbose) {
     printf("done\n\n");
   }
 }
 
-void
+static void
 generateEHBImage(imagecon_image_t* ic)
 {
   if (config.maxColors > 32) {
@@ -376,14 +379,14 @@ processFile(char* outFilename, imagecon_image_t* ic)
     }
 
     if (config.outputBitplanes) {
-      outputBitplanes(outFilename, ic);
+      outputBitplanes(ic, outFilename);
     }
     
     if (config.outputMask) {
-      outputMask(outFilename, ic);
+      outputMask(ic, outFilename);
     }
     
-    palette_output(outFilename, ic);
+    palette_output(ic, outFilename);
   }
 
   if (config.verbose) {
@@ -392,7 +395,7 @@ processFile(char* outFilename, imagecon_image_t* ic)
 }
 
     
-void
+static void
 splitFiles(char* inputFile, int* count, char*** vector)
 {
   char* ptr = inputFile;
@@ -423,7 +426,7 @@ splitFiles(char* inputFile, int* count, char*** vector)
 
 #define max(x,y) (x > y ? x : y)
 
-void
+static void
 combineImages(imagecon_image_t** images, int numImages, imagecon_image_t* ic)
 {
   ic->width = 0;

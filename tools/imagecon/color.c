@@ -92,35 +92,10 @@ color_setDitheredPixel(imagecon_image_t* ic, int x, int y, dither_color_t color)
 {
   dither_color_t *d = &ic->dithered[(y*ic->width)+x];
 
-  if (color.r > 255) {
-    color.r = 255;
-  } 
-  if (color.r < 0) {
-    color.r = 0;
-  }
-  if (color.g > 255) {
-    color.g = 255;
-  } 
-  if (color.g < 0) {
-    color.g = 0;
-  }
-  if (color.b > 255) {
-    color.b = 255;
-  } 
-  if (color.b < 0) {
-    color.b = 0;
-  }
-  if (color.a > 255) {
-    color.a = 255;
-  } 
-  if (color.a < 0) {
-    color.a = 0;
-  }
-
-  d->r = color.r;
-  d->g = color.g;
-  d->b = color.b;
-  d->a = color.a;
+  d->r = COLOR8(color.r);
+  d->g = COLOR8(color.g);
+  d->b = COLOR8(color.b);
+  d->a = COLOR8(color.a);
 }
 
 amiga_color_t

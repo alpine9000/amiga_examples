@@ -85,7 +85,7 @@ _ham_createHams(imagecon_image_t* ic)
 
 
 static void
-_ham_outputBitplanes(char* outFilename, imagecon_image_t* ic)
+_ham_outputBitplanes(imagecon_image_t* ic, char* outFilename)
 {
   if (config.verbose) {
     printf("outputHamBitplanes\n");
@@ -250,9 +250,9 @@ ham_process(imagecon_image_t* ic, char* outFilename)
   }
 
   if (config.outputBitplanes) {
-    _ham_outputBitplanes(outFilename, ic);
+    _ham_outputBitplanes(ic, outFilename);
   }
  
-  palette_output(outFilename, ic);  
+  palette_output(ic, outFilename);  
 }
 

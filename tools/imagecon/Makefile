@@ -1,5 +1,5 @@
 IMAGECON=./out/imagecon
-OBJS=out/imagecon.o out/png.o out/color.o out/dither.o out/ham.o out/palette.o out/file.o out/sliced_ham.o out/quant.o
+OBJS=out/imagecon.o out/png.o out/color.o out/dither.o out/ham.o out/palette.o out/file.o out/sliced_ham.o out/quant.o out/utils.o
 WARN_ERROR=-Werror
 HOST_WARNINGS=$(WARN_ERROR) -pedantic-errors -Wfatal-errors -Wall  -Wextra -Wno-unused-parameter -Wshadow -limagequant
 HOST_CFLAGS=$(HOST_WARNINGS) -O3
