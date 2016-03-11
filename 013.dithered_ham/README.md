@@ -7,7 +7,7 @@ I also added a very slow and hackish brute force palette computation that tries 
 
 dithered
 --------
-![dithered](screenshots/dithered.png?raw=true)
+![dithered](screenshots/dithered_new.png?raw=true)
 
 no dither 
 ---------
