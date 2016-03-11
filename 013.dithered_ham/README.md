@@ -11,7 +11,7 @@ dithered
 
 no dither 
 ---------
-![dithered](screenshots/ham.png?raw=true)
+![dithered](screenshots/ham_new.png?raw=true)
 
 try it
 ------
