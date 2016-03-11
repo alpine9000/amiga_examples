@@ -53,7 +53,7 @@ try it
 
 interlaced
 ----------
-![interlaced](screenshots/laced.png?raw=true)
+![interlaced](screenshots/laced_new.png?raw=true)
 
 non-interlaced
 --------------
