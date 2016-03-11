@@ -26,17 +26,17 @@ Then, during the vertical blank, depending on the LOF bit in the VPOSR register,
 
 ```
  .mainLoop:
-	bsr	waitVerticalBlank
-	btst.w	#VPOSRLOFBIT,VPOSR(a6)
-	beq.s	.lof
-	lea	copper(pc),a0
-	move.l	a0,COP1LC(a6)
-	bra	.done
+	bsr     waitVerticalBlank
+	btst.w  #VPOSRLOFBIT,VPOSR(a6)
+	beq.s   .lof
+	lea     copper(pc),a0
+	move.l  a0,COP1LC(a6)
+	bra     .done
  .lof:
-	lea	copperLOF(pc),a0
-	move.l	a0,COP1LC(a6)
+	lea     copperLOF(pc),a0
+	move.l  a0,COP1LC(a6)
  .done
-	bra	.mainLoop
+	bra     .mainLoop
 ```
 
 This example allows your to enable/disable INTERLACE mode in the [Makefile](Makefile):
