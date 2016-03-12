@@ -47,7 +47,7 @@ entry:
 	move.l	a1,(a0)
 
 	move.l	counter,d0
-	cmpi.l	#5,counter
+	cmpi.l	#2,counter
 	bne	.ok
 	move.l	#0,counter
 	move.l	copperptr,a0
@@ -56,7 +56,7 @@ entry:
 	move.l	copperptr,d0
 	cmpi.l	#end,d0
 	bne	.ok
-	move.l	#copper,copperptr
+	move.l	#out00001,copperptr
 .ok
 	addi.l	#1,counter
 	bra.b	.mainLoop

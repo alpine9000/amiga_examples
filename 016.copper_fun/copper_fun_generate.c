@@ -6,7 +6,8 @@
 #include <sys/types.h>
 #include <magick/api.h>
 
-#define HEIGHT       256+16
+#define TOP          16
+#define HEIGHT       256+TOP
 #define COPPER_WIDTH 52
 
 typedef struct {
@@ -22,7 +23,7 @@ typedef struct {
 } image_t;
 
 image_t image = {0};
-config_t config = {.blur = 0.75};
+config_t config = {.blur = 1.0, .debug=0};
 
 static void
 cleanup()
@@ -73,7 +74,7 @@ getframedata(char* inputFile)
     abort_("Failed to read image %s\n", inputFile);
   }
 
-  int width = COPPER_WIDTH;
+  int width = COPPER_WIDTH-8;
   int height = HEIGHT;
 
   image.resizeImage=ResizeImage(image.image, width, height, BesselFilter, config.blur, &exception);
@@ -95,9 +96,8 @@ main(int argc, char** argv)
   config.argv = argv;
   getframedata(argv[1]);
 
-  int startLine = 0x2c-16;
-  int screenHeight = HEIGHT;
-  int endLine = startLine+screenHeight;
+  int startLine = 0x2c-TOP;
+  int endLine = startLine+HEIGHT;
   int startHpos = 6+8;
   int i, line;
 
@@ -114,7 +114,7 @@ main(int argc, char** argv)
     }
 
     for (i = 0; i < endw; i++) {
-      PixelPacket pixel = GetOnePixel(image.resizeImage, i, line-startLine);
+      PixelPacket pixel = GetOnePixel(image.resizeImage, i-10, line-startLine);
       printf("\tdc.w COLOR00,$%x%x%x\n", pixel.red>>4, pixel.green>>4, pixel.blue>>4);
     }
 

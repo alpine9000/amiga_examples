@@ -3,6 +3,7 @@ for I in out/*.png; do
     if [ $ODD = 0 ] ; then
 	echo `echo $I | sed -e 's/\///' -e 's/\.png//'`":"
 	./out/copper_fun_generate $I
+	#mv -f resized.png $I.resized.png
 	echo "        dc.l	\$fffffffe"
 	ODD=1
 

@@ -6,6 +6,7 @@ BASE_ADDRESS=10000
 include ../shared/base.mk
 
 out/copper-new.s: assets/test.gif out/copper_fun_generate
+	rm -f out/*.png
 	/opt/ImageMagick/bin/convert assets/test.gif out/%05d.png
 	./convert.sh > out/copper-new.s
 
