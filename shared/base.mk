@@ -4,6 +4,8 @@ HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-
 HOST_CFLAGS=$(HOST_WARNINGS)
 IMAGECONDIR=../tools/imagecon
 IMAGECON=$(IMAGECONDIR)/out/imagecon
+RESIZEDIR=../tools/resize
+RESIZE=$(RESIZEDIR)/out/resize
 
 ifndef BASE_ADDRESS
 BASE_ADDRESS=70000
