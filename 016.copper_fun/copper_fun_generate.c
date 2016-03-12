@@ -118,7 +118,7 @@ main(int argc, char** argv)
       printf("\tdc.w COLOR00,$%x%x%x\n", pixel.red>>4, pixel.green>>4, pixel.blue>>4);
     }
 
-    if (line <= 255) {
+    if (line == 255) {
       printf("\tdc.w $%x,$fffe\n",line<<8|0xe1|1);
     }
   }
