@@ -38,6 +38,9 @@ ic:
 $(IMAGECON):
 	make -C $(IMAGECONDIR)
 
+$(RESIZE):
+	make -C $(RESIZEDIR)
+
 $(MAKEADF):
 	make -C $(MAKEADFDIR)
 
