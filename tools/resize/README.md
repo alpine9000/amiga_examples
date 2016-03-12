@@ -30,6 +30,7 @@ resize will resize images using filtering to try and make the resampled output s
        * BesselFilter
        * SincFilter
 
+resize will maintain the correct aspect ratio for the selected output dimensions.  It does this by cutting the largest section of the resized image from the centre that maintains this ratio.
 
 mandatory arguments
 -------------------
