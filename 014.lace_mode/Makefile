@@ -15,6 +15,7 @@ EXTRA=$(IMAGEDATA) $(BOB_IMAGEDATA) init.s utils.s constants.i Makefile
 BASE_ADDRESS=40000
 VASM_EXTRA_ARGS=-DINTERLACE=$(INTERLACE)
 USE_PALETTE=--use-palette gigi.pal
+#USE_PALETTE=--ham-brute-force --output-palette
 DITHER=--dither
 
 include ../shared/base.mk
