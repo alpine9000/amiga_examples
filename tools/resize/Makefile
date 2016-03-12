@@ -39,8 +39,8 @@ $(RESIZED_LACED): $(TEST_IMAGE) $(PROGRAM) Makefile
 	$(PROGRAM) --width=320 --height=512 --interlaced --blur=0.75 --input=$(TEST_IMAGE) --output=$(RESIZED_LACED)
 
 test: $(RESIZED_IMAGE) $(RESIZED_LACED)
-	diff $(RESIZED_IMAGE) $(REFERENCE_IMAGE);
-	diff $(RESIZED_LACED) $(REFERENCE_LACED);
+	diff $(RESIZED_IMAGE) $(REFERENCE_IMAGE)
+	diff $(RESIZED_LACED) $(REFERENCE_LACED)
 	@echo "______  ___   _____ _____ ___________  "
 	@echo "| ___ \/ _ \ /  ___/  ___|  ___|  _  \ "
 	@echo "| |_/ / /_\ \\\\\ \`--.\ \`--.| |__ | | | | "

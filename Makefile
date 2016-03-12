@@ -1,5 +1,6 @@
 SUBDIRS=tools/makeadf \
 	tools/imagecon\
+	tools/resize\
 	000.trackdisk\
 	001.simple_image\
 	002.sprite_display\
@@ -43,6 +44,12 @@ test:
 	@echo "Testing tools/imagecon..."	
 	@echo "-------------------------"
 	make -C tools/imagecon test
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "Testing tools/resize..."	
+	@echo "-------------------------"
+	make -C tools/resize test
 	@echo ""
 	@echo ""
 	@echo ""
