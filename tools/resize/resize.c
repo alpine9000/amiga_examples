@@ -156,10 +156,31 @@ main(int argc, char **argv)
   int width = image.image->columns;
   int height = image.image->rows;
 
-  float scale = (float)height/(float)config.height;
-  int newWidth = width/scale;
+  float wScale = 1.0;
+  float hScale = 1.0;
+  int newWidth = config.width;
+  int newHeight = config.height;
 
-  image.resizeImage=ResizeImage(image.image, newWidth/(config.interlaced?2:1), config.height,
+  if (width >= height) {
+    wScale = (float)height/(float)config.height;
+    newWidth = width/wScale;
+  } else {
+    hScale = (float)width/(float)config.width;
+    newHeight = height/hScale;
+    if (config.interlaced) {
+      newHeight *= 2;
+      newWidth *= 2;
+    }
+  }
+
+  if (config.verbose) {
+    printf("wScale = %f\n", wScale);
+    printf("hScale = %f\n", hScale);
+    printf("newWidth -> %d\n", newWidth);
+    printf("newHeight -> %d\n", newHeight);
+  }
+
+  image.resizeImage=ResizeImage(image.image, newWidth/(config.interlaced?2:1), newHeight,
 			   //GaussianFilter,
 			   //BoxFilter,
 			   //TriangleFilter,
@@ -179,10 +200,14 @@ main(int argc, char **argv)
 
   RectangleInfo rect = {
     .x = ((newWidth/(config.interlaced?2:1))-config.width)/2,
-    .y = 0,
+    .y = (newHeight-config.height)/2,
     .width = config.width,
     .height = config.height
   };
+
+  if (config.verbose) {
+    printf("%ld %ld %ld %ld\n", rect.x, rect.y, rect.width, rect.height);
+  }
 
   image.croppedImage = CropImage(image.resizeImage, &rect, &exception);
 
