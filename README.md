@@ -55,8 +55,9 @@ tools
 -----
 The following cross development tools have been developed to support the examples:
 
-* [imagecon](tools/imagecon)
-* [makeadf](tools/makeadf)
+* [imagecon](tools/imagecon) # create amiga compatible raw image data from true color images
+* [resize](tools/resize)     # resize images ready for imagecon
+* [makeadf](tools/makeadf)   # make ADF disk image
 
 Each tool has a test to check if any changes you have made have broken basic functionality:
 
