@@ -7,7 +7,7 @@ Next a shell script [convert.sh](convert.sh) calls a C program [copper_fun_gener
 
 Finally in the asm code [copper_fun.s](copper_fun.s) we cycle through the copper lists to make an animation.
 
-Obviously this is the lease efficent way to generate a super low res animation, however it's way fun :-)
+Obviously this is the least efficent way to generate a super low res animation, however it's a fun way :-)
 
 There are two configurations:
 
