@@ -3,13 +3,13 @@ dual playfield
 
 We now try and set up a dual playfield screen with 3 bitplanes per playfield. This gives us 7 colors + transparent for each playfield.
 
-Set the number of bitplanes per playfield in [constants.i](constants.i]
+Set the number of bitplanes per playfield in [constants.i](constants.i)
 
   ```
   SCREEN_BIT_DEPTH	equ 3   ; 3 bitplanes per playfield
 ```
 
-New copper list that assigns bitplanes to each playfield after poking in [dual_playfield_mode.s](dual_playfield_mod.s]
+New copper list that assigns bitplanes to each playfield after poking in [dual_playfield_mode.s](dual_playfield_mod.s)
 
   ```
 copper:
@@ -34,7 +34,7 @@ pf2_bitplanepointers:
 	dc.l	$fffffffe
 ```
 
-Poke the copper list with the bitplane pointer addresses:
+Poke the copper list with the bitplane pointer addresses in [init.s](init.s):
 
   ```
 	;; poke playfield 1 bitplane pointers
@@ -48,7 +48,7 @@ Poke the copper list with the bitplane pointer addresses:
 	bsr.s   pokeBitplanePointers	
 ```
 
-Enable 2x the bitplanes, and optionally re-order the bitplanes:
+Enable 2x the bitplanes, and optionally re-order the bitplanes in [init.s](init.s):
 
   ```
 	;; enable 2x the bitplanes as 2x playfields
@@ -61,6 +61,8 @@ try it
 ------
   * [Download disk image](bin/dual_playfield_mode.adf?raw=true)
   * <a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/dual_playfield_mode.adf" target="_blank">Run in SAE</a>
+
+Screenshots:
 
 playfield 1
 -----------
