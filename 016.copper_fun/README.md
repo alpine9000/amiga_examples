@@ -12,6 +12,7 @@ Obviously this is the lease efficent way to generate a super low res animation, 
 There are two configurations:
 
       1.  A pattern that will run an 512mb chip ram
+   
        ```
  # make
 ```
