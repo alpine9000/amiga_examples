@@ -2,6 +2,7 @@
 	include "hardware/dmabits.i"
 	include "hardware/intbits.i"
 	include "constants.i"
+
 	
 entry:
 	lea 	CUSTOM,a6	
@@ -43,7 +44,7 @@ copper:
 pf1_bitplanepointers:
 	;; this is where bitplanes are assigned to playfields
 	;; http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0079.html
-	;; for 3 bitplanes per playfield, playfield1 gets bitplanes 1,3,5
+	;; 3 bitplanes per playfield, playfield1 gets bitplanes 1,3,5
 	dc.w	BPL1PTL,0
 	dc.w	BPL1PTH,0
 	dc.w	BPL3PTL,0
@@ -51,14 +52,13 @@ pf1_bitplanepointers:
 	dc.w	BPL5PTL,0
 	dc.w	BPL5PTH,0
 pf2_bitplanepointers:
-	;; for 3 bitplanes per playfield, playfield2 gets bitplanes 2,4,6
+	;; 3 bitplanes per playfield, playfield2 gets bitplanes 2,4,6
 	dc.w	BPL2PTL,0
 	dc.w	BPL2PTH,0
 	dc.w	BPL4PTL,0
 	dc.w	BPL4PTH,0
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
-
 	dc.l	$fffffffe
 
 pf1_bitplanes:
