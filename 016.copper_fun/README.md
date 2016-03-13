@@ -16,6 +16,7 @@ There are two configurations:
        ```
  # make
 ```
+
       2. A video that needs 1bm chip ram
 	
        ```
