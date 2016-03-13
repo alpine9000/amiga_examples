@@ -11,15 +11,15 @@ Obviously this is the lease efficent way to generate a super low res animation, 
 
 There are two configurations:
 
-      1.  A pattern that will run an 512mb chip ram
+1.  A pattern that will run an 512mb chip ram
    
-       ```
+	```
  # make
 ```
 
-      2. A video that needs 1bm chip ram
+2. A video that needs 1bm chip ram
 	
-       ```
+	```
  # make video
 ```
 
