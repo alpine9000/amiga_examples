@@ -5,7 +5,7 @@ In this example I extract a series of PNG files from an animated gif using Image
 
 Next a shell script [convert.sh](convert.sh) calls a C program [copper_fun_generate.c](copper_fun_generate.c) that resizes the PNG to 52x276 pixels, then converts this into a copper list that changes the color at the corresponding beam position to try and re-create the image.
 
-Finally in the asm code [copper_fun.s] we cycle through the copper lists to make an animation.
+Finally in the asm code [copper_fun.s](copper_fun.s) we cycle through the copper lists to make an animation.
 
 Obviously this is the lease efficent way to generate a super low res animation, however it's way fun :-)
 
@@ -17,7 +17,7 @@ There are two configurations:
  # make
 ```
 
-2. A video that needs 1bm chip ram
+2. A video that needs 1mb chip ram
 	
 	```
  # make video
