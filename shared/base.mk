@@ -6,9 +6,14 @@ IMAGECONDIR=../tools/imagecon
 IMAGECON=$(IMAGECONDIR)/out/imagecon
 RESIZEDIR=../tools/resize
 RESIZE=$(RESIZEDIR)/out/resize
-
+A500_RUN_SCRIPT=~/Google\ Drive/Amiga/amiga500.sh
+A600_RUN_SCRIPT=~/Google\ Drive/Amiga/amiga600.sh
 ifndef BASE_ADDRESS
 BASE_ADDRESS=70000
+endif
+
+ifndef RUN_SCRIPT
+RUN_SCRIPT=$(A500_RUN_SCRIPT)
 endif
 
 all: bin out $(MAKEADF) $(FLOPPY)
@@ -20,7 +25,7 @@ test: all
 	cp $(FLOPPY) ~/Projects/amiga/test.adf
 
 go: test
-	 ~/Google\ Drive/Amiga/amiga500.sh
+	 $(RUN_SCRIPT)
 
 list:
 	m68k-amigaos-objdump  -b binary --disassemble-all out/bootblock.bin -m m68k > out/bootblock.txt
@@ -30,7 +35,6 @@ bin:
 
 out:
 	mkdir out
-
 
 ic:
 	make -C $(IMAGECONDIR)
@@ -46,6 +50,8 @@ $(MAKEADF):
 
 $(FLOPPY): out/bootblock.bin
 	$(MAKEADF) out/bootblock.bin > $(FLOPPY)
+	@ls -lh out/bootblock.bin
+	@ls -lh $(FLOPPY)
 
 out/bootblock.bin: out/bootblock.o
 	vlink -brawbin1 $< -o $@

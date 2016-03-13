@@ -31,10 +31,8 @@ entry:
 	move.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES,BPL1MOD(a6)
 	
 	;; install copper list, then enable dma and selected interrupts
-	if 0
 	lea	copper(pc),a0	
 	move.l	a0,COP1LC(a6)
-	endif
 	move.w  COPJMP1(a6),d0
 	move.w	#(DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 	move.w	#(INTF_SETCLR|INTF_INTEN|INTF_EXTER),INTENA(a6)
@@ -47,7 +45,7 @@ entry:
 	move.l	a1,(a0)
 
 	move.l	counter,d0
-	cmpi.l	#2,counter
+	cmpi.l	#FRAMERATE/2,counter
 	bne	.ok
 	move.l	#0,counter
 	move.l	copperptr,a0

@@ -23,7 +23,7 @@ typedef struct {
 } image_t;
 
 image_t image = {0};
-config_t config = {.blur = 1.0, .debug=0};
+config_t config = {.blur = 0.75, .debug=0};
 
 static void
 cleanup()
