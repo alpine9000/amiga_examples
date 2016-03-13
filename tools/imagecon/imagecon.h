@@ -31,6 +31,7 @@ typedef struct {
   int slicedHam;
   int dither;
   char* overridePalette;
+  int paletteOffset;
   int quantize;
   int verbose;
   char** argv;

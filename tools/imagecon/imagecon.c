@@ -18,7 +18,8 @@ imagecon_config_t config = {
   .slicedHam = 0,
   .quantize = 0,
   .dither = 0,
-  .overridePalette = 0
+  .overridePalette = 0,
+  .paletteOffset = 0
 };
 
 
@@ -43,6 +44,7 @@ usage()
 	  "  --sliced-ham\n"\
           "  --dither\n"\
 	  "  --use-palette <palette file>\n"\
+	  "  --palette-offset <index>\n"\
 	  "  --verbose\n", config.argv[0]);
   exit(1);
 }
@@ -478,6 +480,7 @@ main(int argc, char **argv)
       {"sliced-ham", no_argument, &config.slicedHam, 1},
       {"dither", no_argument, &config.dither, 1},
       {"use-palette", required_argument, 0, 'p'},
+      {"palette-offset", required_argument, 0, 'l'},
       {"output",  required_argument, 0, 'o'},
       {"colors",  required_argument, 0, 'c'},
       {"input",   required_argument, 0, 'i'},
@@ -502,6 +505,11 @@ main(int argc, char **argv)
       break;	
     case 'p':
       config.overridePalette = optarg;
+      break;
+    case 'l':
+      if (sscanf(optarg, "%d", &config.paletteOffset) != 1) {
+	abort_("invalid palette offset");
+      }
       break;
     case 'c':
       if (sscanf(optarg, "%d", &config.maxColors) != 1) {
