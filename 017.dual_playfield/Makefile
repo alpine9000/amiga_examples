@@ -1,8 +1,8 @@
 MODULE=dual_playfield_mode.s
 FLOPPY=bin/dual_playfield_mode.adf
 IMAGEDATA=out/playfield1-palette.s out/playfield2-palette.s out/playfield1.bin out/playfield2.bin
-PF1_FILE=../assets/playfield1.png
-PF2_FILE=../assets/playfield2.png
+PF1_FILE=../assets/playfield1_8.png
+PF2_FILE=../assets/playfield2_8.png
 
 EXTRA=$(IMAGEDATA) init.s utils.s constants.i Makefile
 BASE_ADDRESS=10000

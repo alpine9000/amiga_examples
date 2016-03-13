@@ -8,10 +8,12 @@ init:
 	;; set up default palette
 	bsr.s	installColorPalette
 
+	;; poke playfield 1 bitplane pointers
 	lea 	pf1_bitplanepointers(pc),a0
 	lea	pf1_bitplanes(pc),a1
 	bsr.s	pokeBitplanePointers
 
+	;; poke playfield 2 bitplane pointers
 	lea 	pf2_bitplanepointers(pc),a0
 	lea	pf2_bitplanes(pc),a1
 	bsr.s	pokeBitplanePointers	
@@ -19,13 +21,17 @@ init:
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)
 	move.w	#((RASTER_Y_STOP-256)<<8)|(RASTER_X_STOP-256),DIWSTOP(a6)
-
+	
 	move.w	#(RASTER_X_START/2-SCREEN_RES),DDFSTRT(a6)
 	move.w	#(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1)),DDFSTOP(a6)
 
+	;; enabled 2x the bitplanes as 2x playfields
 	move.w	#((SCREEN_BIT_DEPTH*2)<<12)|COLOR_ON|DBLPF,BPLCON0(a6)
+	;; set playfield2 to have priority
+	move.w	#PF2PRI, BPLCON2(a6)
 	move.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES,BPL1MOD(a6)
 	move.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES,BPL2MOD(a6)
+
 	
 
 	;; install copper list, then enable dma and selected interrupts
