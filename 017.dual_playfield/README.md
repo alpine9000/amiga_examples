@@ -9,7 +9,7 @@ Set the number of bitplanes per playfield in [constants.i](constants.i)
   SCREEN_BIT_DEPTH	equ 3   ; 3 bitplanes per playfield
 ```
 
-New copper list that assigns bitplanes to each playfield after poking in [dual_playfield_mode.s](dual_playfield_mod.s)
+New copper list that assigns bitplanes to each playfield after poking in [dual_playfield_mode.s](dual_playfield_mode.s)
 
   ```
 copper:
