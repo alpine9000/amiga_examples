@@ -1,6 +1,8 @@
 dual playfield
 ==============
 
+[hardware reference link](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0078.html)
+
 We now try and set up a dual playfield screen with 3 bitplanes per playfield. This gives us 7 colors + transparent for each playfield.
 
 Set the number of bitplanes per playfield in [constants.i](constants.i)
