@@ -38,23 +38,23 @@ Poke the copper list with the bitplane pointer addresses:
 
   ```
 	;; poke playfield 1 bitplane pointers
-	lea	pf1_bitplanepointers(pc),a0
-	lea	pf1_bitplanes(pc),a1
-	bsr.s	pokeBitplanePointers
+	lea     pf1_bitplanepointers(pc),a0
+	lea     pf1_bitplanes(pc),a1
+	bsr.s   pokeBitplanePointers
 
 	;; poke playfield 2 bitplane pointers
-	lea	pf2_bitplanepointers(pc),a0
-	lea	pf2_bitplanes(pc),a1
-	bsr.s	pokeBitplanePointers	
+	lea     pf2_bitplanepointers(pc),a0
+	lea     pf2_bitplanes(pc),a1
+	bsr.s   pokeBitplanePointers	
 ```
 
 Enable 2x the bitplanes, and optionally re-order the bitplanes:
 
   ```
 	;; enable 2x the bitplanes as 2x playfields
-	move.w	#((SCREEN_BIT_DEPTH*2)<<12)|COLOR_ON|DBLPF,BPLCON0(a6)
+	move.w #((SCREEN_BIT_DEPTH*2)<<12)|COLOR_ON|DBLPF,BPLCON0(a6)
 	;; set playfield2 to have priority
-	move.w	#PF2PRI, BPLCON2(a6)
+	move.w #PF2PRI, BPLCON2(a6)
 ```
 
 try it
@@ -70,11 +70,19 @@ playfield 2
 -----------
 ![playfield 2](../assets/playfield2_8.png?raw=true)
 
-
 dual playfields, playfield 2 in front
 -------------------------------------
-![dual playfields, playfield 2 in front](screenshots/screenshot.png?raw=true)
+	
+```
+	move.w #PF2PRI, BPLCON2(a6)
+```
 
+![dual playfields, playfield 2 in front](screenshots/screenshot.png?raw=true)
 dual playfields, playfield 1 in front
 -------------------------------------
+
+```
+	move.w #0, BPLCON2(a6)
+```
+
 ![dual playfields, playfield 1 in front](screenshots/screenshot2.png?raw=true)
