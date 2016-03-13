@@ -50,7 +50,7 @@ Poke the copper list with the bitplane pointer addresses in [init.s](init.s):
 	bsr.s   pokeBitplanePointers	
 ```
 
-Enable 2x the bitplanes, and optionally re-order the bitplanes in [init.s](init.s):
+Enable 2x the bitplanes, set the DBLPF bit in BPLCON0 to enable dual bitplanes. Optionally re-order the playfields with PF2PRI in BPLCON2. See [init.s](init.s):
 
   ```
 	;; enable 2x the bitplanes as 2x playfields
