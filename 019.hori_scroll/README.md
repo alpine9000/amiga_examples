@@ -11,7 +11,7 @@ Firstly, we need to [modify the data fetch](http://amigadev.elowar.com/read/ADCD
   move.w  #(RASTER_X_START/2-SCREEN_RES)-8,DDFSTRT(a6)
 ```
 
-Then we need to adjust the modulo to account for this. Also the modulo needs to also account for the new large bitmap size. We change the base screen width bytes symbole in [constants.i](constants.i) to allow for the new 2x wider bitplane:
+Then we need to adjust the modulo to account for this. Also the modulo needs to also account for the new large bitmap size. We change the base screen width bytes symbol in [constants.i](constants.i) to allow for the new 2x wider bitplane:
 
  ```
   SCREEN_WIDTH_BYTES      equ (2*SCREEN_WIDTH/8)
@@ -20,9 +20,20 @@ Then we need to adjust the modulo to account for this. Also the modulo needs to 
 We set the modulo with extra bytes for the extra width, and [two less counts](http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node008A.html) for the extra scrolling byte.
  
   ```
-  move.w  #(SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES)+(SCREEN_WIDTH_BYTES/\
-2)-2,BPL1MOD(a6)
+  move.w  #(SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES)+(SCREEN_WIDTH_BYTES/2)-2,BPL1MOD(a6)
 ```
+
+Calculate the number of bits to scroll:
+
+ ```
+ move.l  hpos,d0         ; number of pixels we want to scroll
+ lsr.l   #3,d0           ; bytes to scroll                                               
+ add.l   d0,bitplaneAddress  ; used to set the bitplane pointers when combined with vertical scrolling
+ move.l  hpos,d1         ; pixels = 0xf - (hpos - (hpos_bytes*8))
+ and.l   #$F,d1
+ move.l  #$F,d0
+ sub.l   d1,d0           ; bits to delay
+        ```
 
 Finally we set the delay for the pixel portion of the scroll in BPLCON1:
 
