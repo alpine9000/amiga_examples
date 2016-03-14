@@ -1,7 +1,7 @@
 MODULE=shift_blit.s
 FLOPPY=bin/shift_blit.adf
 IMAGEDATA=out/image-palette.s out/image.bin
-IMAGEFILE=../assets/mission-beach.png
+IMAGEFILE=../assets/quake.png
 BOB_BASE=out/emoji
 BOB_IMAGEDATA=$(BOB_BASE).bin $(BOB_BASE)-mask.bin
 BOB_IMAGEFILE=../assets/emoji.png
