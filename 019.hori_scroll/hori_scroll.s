@@ -13,14 +13,15 @@ entry:
 	bsr 	waitVerticalBlank
 	;; 	bsr	scrollPlayfield
 	bsr 	horiScrollPlayfield
+	bsr	updateHoriScrollPos
 	bra	.mainLoop
 
 
 setupBitScroll:
 	;; d0 = number of bits to scroll
 	movem.l	d0/d1,-(sp)
-	lsl.w	#4,d0
-	move.w	hpos,d1
+	move.l	d0,d1
+	lsl.w	#4,d1
 	or.w	d1,d0
 	move.w  d0,BPLCON1(a6)
 	movem.l (sp)+,d0/d1
@@ -28,20 +29,43 @@ setupBitScroll:
 	
 horiScrollPlayfield:
 	movem.l	d0-a6,-(sp)
-	move.l	#0,d0
+	move.l	hpos,d0
+	lsr.l	#3,d0		;bytes to scroll
 	lea 	copper(pc),a0
 	bsr	pokeBitplanePointers
-	add.w	#1,hpos
-	cmp.w	#7,hpos
-	ble	.ok
-	move.w	#0,hpos
-.ok
-	move.w	hpos,d0
+	move.l	hpos,d1
+	and.l	#$F,d1
+	move.l	#$F,d0
+	sub.l	d1,d0
 	bsr	setupBitScroll
 .done:
 	movem.l (sp)+,d0-a6
 	rts
-	
+
+updateHoriScrollPos:
+	movem.l	d0-a6,-(sp)
+	cmp.l	#1,directionLeft
+	beq	.left
+	add.l	#1,hpos
+	cmp.l	#SCREEN_WIDTH,hpos
+	bge	.switchToLeft
+	bra	.done
+.switchToLeft:
+	move.l	#1,directionLeft
+	move.l	#SCREEN_WIDTH,hpos
+	bra	.done
+.left:
+	sub.l	#1,hpos
+	cmp.l	#0,hpos
+	ble	.switchToRight
+	bra	.done
+.switchToRight:
+	move.l	#0,directionLeft
+	move.l	#0,hpos
+	bra	.done
+.done:
+	movem.l (sp)+,d0-a6
+	rts
 	
 scrollPlayfield:
 	movem.l	d0-a6,-(sp)
@@ -97,11 +121,15 @@ installColorPalette:
 	include "out/image-palette.s"
 	rts
 
+counter:
+	dc.l	0
 vpos:
 	dc.l	0
 hpos:
-	dc.w	7
+	dc.l	0
 directionUp:
+	dc.l	0
+directionLeft:
 	dc.l	0
 	
 copper:
