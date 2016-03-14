@@ -33,6 +33,7 @@ typedef struct {
   char* overridePalette;
   int paletteOffset;
   int quantize;
+  int outputPng;
   int verbose;
   char** argv;
 } imagecon_config_t;
@@ -83,7 +84,10 @@ extern void
 abort_(const char * s, ...);
 
 extern void 
-png_read(char* file_name, imagecon_image_t* ic);
+png_read(imagecon_image_t* ic, char* file_name);
+
+extern void 
+png_write(imagecon_image_t* ic, char* file_name);
 
 void
 generateQuantizedImage(imagecon_image_t* ic, int usePalette);

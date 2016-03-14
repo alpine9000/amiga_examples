@@ -12,6 +12,7 @@ imagecon_config_t config = {
   .outputPaletteGrey = 0,
   .outputBitplanes = 0,
   .outputCopperList = 0,
+  .outputPng = 0,
   .ehbMode = 0,
   .hamMode = 0,
   .hamBruteForce = 0,
@@ -38,6 +39,7 @@ usage()
 	  "  --output-palette-asm\n"\
 	  "  --output-grey-palette-asm\n"\
 	  "  --output-palette\n"\
+	  "  --output-png\n"\
 	  "  --extra-half-brite\n"\
 	  "  --ham\n"\
 	  "  --ham-brute-force\n"\
@@ -391,6 +393,12 @@ processFile(char* outFilename, imagecon_image_t* ic)
     palette_output(ic, outFilename);
   }
 
+  if (config.outputPng) {
+    char pngFilename[255];
+    sprintf(pngFilename, "%s-converted.png", outFilename);
+    png_write(ic, pngFilename);
+  }
+
   if (config.verbose) {
     printf("done\n\n");
   }
@@ -474,6 +482,7 @@ main(int argc, char **argv)
       {"output-palette-asm", no_argument, &config.outputPaletteAsm, 1},
       {"output-grey-palette-asm", no_argument, &config.outputPaletteGrey, 1},
       {"output-mask", no_argument, &config.outputMask, 1},
+      {"output-png", no_argument, &config.outputPng, 1},
       {"extra-half-brite", no_argument, &config.ehbMode, 1},
       {"ham", no_argument, &config.hamMode, 1},
       {"ham-brute-force", no_argument, &config.hamBruteForce, 1},
@@ -545,7 +554,7 @@ main(int argc, char **argv)
   
   if (strchr(inputFile, ',') == 0) {
     imagecon_image_t ic = {0};
-    png_read(inputFile, &ic);
+    png_read(&ic, inputFile);
     processFile(outputFile, &ic); 
   } else {
     char** files;
@@ -556,7 +565,7 @@ main(int argc, char **argv)
 
     for (int i = 0; i < numFiles; i++) {
       images[i] = calloc(sizeof(imagecon_image_t), 1);
-      png_read(files[i], images[i]);
+      png_read(images[i], files[i]);
     }
     
     imagecon_image_t combined;
