@@ -11,7 +11,8 @@ bootEntry:
 	;;  a1 = trackdisk.device I/O request pointer
 
 	lea     BASE_ADDRESS,a5 ; main.s entry point 
-
+	;; move.l #$ff000,a7
+	
 	;; Load the progam from the floppy using trackdisk.device
 
 	move.l  #mainEnd-mainStart,IO_LENGTH(a1)
