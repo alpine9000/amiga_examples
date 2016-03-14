@@ -33,7 +33,7 @@ Calculate the number of bits to scroll:
  and.l   #$F,d1
  move.l  #$F,d0
  sub.l   d1,d0           ; bits to delay
-        ```
+```
 
 Finally we set the delay for the pixel portion of the scroll in BPLCON1:
 
