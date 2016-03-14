@@ -1,6 +1,6 @@
 FLOPPY=bin/music.adf
 EXTRA=out/image-copper-list.s out/image.bin
-IMAGEFILE=../assets/mission-beach.png
+IMAGEFILE=../assets/quake.png
 
 MODULE=music.s
 
