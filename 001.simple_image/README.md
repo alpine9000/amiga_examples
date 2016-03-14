@@ -14,6 +14,11 @@ screenshot
 
 ![Screenshot](screenshot.png?raw=true)
 
+original image
+--------------
+
+![Original](../assets/quake.png?raw=true)
+
 try it
 ------
   * [Download disk image](bin/image.adf?raw=true)
