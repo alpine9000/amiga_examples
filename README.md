@@ -26,6 +26,8 @@ Each example tries to introduce only one new concept, often building on the prev
 
 See each example's README.md for a limited description as well as a clickable link to run the example in your browser using my hacked version of [Scripted Amiga Emulator](http://scriptedamigaemulator.net/)
 
+Most of the examples are only tested on a 512kb chip ram A500. Some examples have an option extended versoin that might require more chip ram, and in that case an A600 would be the best option.
+
 cross development environment
 -----------------------------
 
@@ -50,6 +52,10 @@ Individual examples can be built by entering the directory and running make:
 # cd 001.simple_image
 # make
 ```
+
+this will create a bootable ADF image in the ```bin``` directory.
+
+Load this file directly into your emulator of choice, or even better, run it on the real hardware.
 
 tools
 -----
