@@ -60,7 +60,7 @@ UpdateHoriScrollPos:
 	bra	.done
 .switchToLeft:
 	move.l	#1,directionLeft
-	move.l	#SCREEN_WIDTH,hpos
+	move.l	#SCREEN_WIDTH-1,hpos
 	bra	.done
 .left:
 	sub.l	#1,hpos
