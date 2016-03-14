@@ -1,16 +1,16 @@
 	include "../include/bplconbits.i"
 	;; custom chip base globally in a6
-init:
+Init:
 	movem.l	d0-a6,-(sp)
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6) ; disable all interrupts	
 
 	;; set up default palette
-	bsr.s	installColorPalette
+	bsr.s	InstallColorPalette
 
 	moveq.l	#0,d0
 	lea 	copper(pc),a0
-	bsr.s	pokeBitplanePointers	
+	bsr.s	PokeBitplanePointers	
 	
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)

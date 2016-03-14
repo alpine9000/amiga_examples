@@ -4,45 +4,53 @@
 	
 	include "constants.i"
 
-entry:
+Entry:
 	lea 	CUSTOM,a6	
-	bsr	init
+	bsr	Init
 
 
 .mainLoop:
-	bsr 	waitVerticalBlank
-	;; 	bsr	scrollPlayfield
-	bsr 	horiScrollPlayfield
-	bsr	updateHoriScrollPos
+	bsr 	WaitVerticalBlank
+
+	move.l	#0,bitplaneAddress
+	bsr 	HoriScrollPlayfield
+	bsr	VertScrollPlayfield
+	lea 	copper(pc),a0
+	move.l	bitplaneAddress,d0
+	bsr	PokeBitplanePointers
+
+	bsr	UpdateHoriScrollPos
+	bsr	UpdateVertScrollPos
 	bra	.mainLoop
 
 
-setupBitScroll:
+SetupHoriScrollBitDelay:
 	;; d0 = number of bits to scroll
 	movem.l	d0/d1,-(sp)
-	move.l	d0,d1
+	move.w	d0,d1
 	lsl.w	#4,d1
 	or.w	d1,d0
 	move.w  d0,BPLCON1(a6)
 	movem.l (sp)+,d0/d1
 	rts
-	
-horiScrollPlayfield:
+
+
+HoriScrollPlayfield:
 	movem.l	d0-a6,-(sp)
 	move.l	hpos,d0
 	lsr.l	#3,d0		;bytes to scroll
-	lea 	copper(pc),a0
-	bsr	pokeBitplanePointers
+	add.l	d0,bitplaneAddress
 	move.l	hpos,d1
 	and.l	#$F,d1
 	move.l	#$F,d0
-	sub.l	d1,d0
-	bsr	setupBitScroll
+	sub.l	d1,d0		;bits to delay
+	bsr	SetupHoriScrollBitDelay
 .done:
 	movem.l (sp)+,d0-a6
 	rts
 
-updateHoriScrollPos:
+
+UpdateHoriScrollPos:
 	movem.l	d0-a6,-(sp)
 	cmp.l	#1,directionLeft
 	beq	.left
@@ -66,12 +74,10 @@ updateHoriScrollPos:
 .done:
 	movem.l (sp)+,d0-a6
 	rts
-	
-scrollPlayfield:
+
+
+UpdateVertScrollPos:
 	movem.l	d0-a6,-(sp)
-	move.l	vpos,d0
-	lea 	copper(pc),a0
-	bsr	pokeBitplanePointers
 	cmp.l	#1,directionUp
 	beq	.up
 	add.l	#SCROLL_SPEED*SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH,vpos
@@ -94,11 +100,17 @@ scrollPlayfield:
 .done:
 	movem.l (sp)+,d0-a6
 	rts
+
+
+VertScrollPlayfield:
+	movem.l	d0-a6,-(sp)
+	move.l	vpos,d0
+	add.l	d0,bitplaneAddress
+	movem.l (sp)+,d0-a6
+	rts
 	
-	include "init.s"
-	include "utils.s"
-	
-pokeBitplanePointers:
+
+PokeBitplanePointers:
 	;; d0 = scroll offset
 	;; a0 = BPLP copper list address
 	movem.l	d0-a6,-(sp)
@@ -115,13 +127,15 @@ pokeBitplanePointers:
 	dbra	d0,.bitplaneloop
 	movem.l (sp)+,d0-a6
 	rts
-
 	
-installColorPalette:
+InstallColorPalette:
 	include "out/image-palette.s"
 	rts
 
-counter:
+	include "init.s"
+	include "utils.s"
+
+bitplaneAddress:
 	dc.l	0
 vpos:
 	dc.l	0
