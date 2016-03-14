@@ -64,7 +64,7 @@ The following are the emulators I have used so far:
    * [Scripted Amiga Emulator](http://scriptedamigaemulator.net/)
    * [WinUAE](http://www.winuae.net/)
    
-they each have strengths and weaknesses, so it's worth given them all a try.
+they each have strengths and weaknesses, so it's worth giving them each a try.
 
 tools
 -----
