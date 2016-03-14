@@ -44,8 +44,6 @@ building
 
 Build all examples by running ``make`` at the top level directory.
 
-Each example will have an ADF file in it's ``bin`` directory.  These files can be loaded directly as DF0: on [FS-UAE](http://fs-uae.net/) or [Scripted Amiga Emulator](http://scriptedamigaemulator.net/) using the AROS ROM.
-
 Individual examples can be built by entering the directory and running make:
 
   ```
@@ -55,7 +53,7 @@ Individual examples can be built by entering the directory and running make:
 
 this will create a bootable ADF image in the ```bin``` directory.
 
-Load this file directly into your emulator of choice, or even better, run it on the real hardware.
+Load this file directly into your emulator of choice as ```DF0:```, or even better, run it on the real hardware.
 
 emulators
 ---------
