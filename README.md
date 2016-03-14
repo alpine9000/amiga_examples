@@ -57,6 +57,15 @@ this will create a bootable ADF image in the ```bin``` directory.
 
 Load this file directly into your emulator of choice, or even better, run it on the real hardware.
 
+emulators
+---------
+The following are the emulators I have used so far:
+   * [FS-UAE](http://fs-uae.net/) 
+   * [Scripted Amiga Emulator](http://scriptedamigaemulator.net/)
+   * [WinUAE](http://www.winuae.net/)
+   
+they each have strengths and weaknesses, so it's worth given them all a try.
+
 tools
 -----
 The following cross development tools have been developed to support the examples:
