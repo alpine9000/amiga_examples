@@ -1,7 +1,7 @@
 MODULE=blit.s
 FLOPPY=bin/blit.adf
 IMAGEDATA=out/image-palette.s out/image.bin
-IMAGEFILE=../assets/mission-beach.png
+IMAGEFILE=../assets/quake.png
 TC_IMAGEDATA=out/tc.bin out/tc-mask.bin
 TC_IMAGEFILE=../assets/tc.png
 EXTRA=$(IMAGEDATA) $(TC_IMAGEDATA)
