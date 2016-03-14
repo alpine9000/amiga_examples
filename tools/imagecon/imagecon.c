@@ -353,7 +353,7 @@ generateEHBImage(imagecon_image_t* ic)
 
 
 static void
-processFile(char* outFilename, imagecon_image_t* ic)
+processFile(imagecon_image_t* ic, char* outFilename)
 {
   if (config.verbose) {
     printf("processFile...\n");
@@ -555,7 +555,7 @@ main(int argc, char **argv)
   if (strchr(inputFile, ',') == 0) {
     imagecon_image_t ic = {0};
     png_read(&ic, inputFile);
-    processFile(outputFile, &ic); 
+    processFile(&ic, outputFile); 
   } else {
     char** files;
     int numFiles;
@@ -570,7 +570,7 @@ main(int argc, char **argv)
     
     imagecon_image_t combined;
     combineImages(images, numFiles, &combined);
-    processFile(outputFile, &combined);       
+    processFile(&combined, outputFile);       
   }
  
   return 0;

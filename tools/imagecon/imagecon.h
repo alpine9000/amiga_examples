@@ -77,17 +77,12 @@ typedef struct {
 #include "palette.h"
 #include "quant.h"
 #include "utils.h"
+#include "png.h"
 
 extern imagecon_config_t config;
 
 extern void 
 abort_(const char * s, ...);
-
-extern void 
-png_read(imagecon_image_t* ic, char* file_name);
-
-extern void 
-png_write(imagecon_image_t* ic, char* file_name);
 
 void
 generateQuantizedImage(imagecon_image_t* ic, int usePalette);
