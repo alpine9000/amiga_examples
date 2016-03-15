@@ -22,7 +22,6 @@ Crunching...
 
 Original  After 1st pass  After 2nd pass
    51752       27545.297       26682.832
-   
 ```
 
 For comparison:
