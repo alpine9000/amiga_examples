@@ -72,6 +72,11 @@ The following cross development tools have been developed to support the example
 * [resize](tools/resize)     # resize images ready for imagecon
 * [makeadf](tools/makeadf)   # make ADF disk image
 
+external tools
+--------------
+The following cross development tools have been sourced from external authors:
+* [shrinkler](tools/external/shrinkler) # compress executables
+
 Each tool has a test to check if any changes you have made have broken basic functionality:
 
   ```
