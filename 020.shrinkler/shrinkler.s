@@ -1,31 +1,29 @@
-	include "../include/registers.i"
-	include "hardware/dmabits.i"
-	include "hardware/intbits.i"
-	
-	include "constants.i"
+	include "includes.i"
+
+	xref	InstallColorPalette
+	xref 	PokeBitplanePointers
+	xref	copperList
+	xref 	copperListAlternate
 	
 Entry:
 	lea 	CUSTOM,a6	
-	bsr	Init
+	jsr	Init
 	
 .mainLoop:
-	bsr 	WaitVerticalBlank
+	jsr 	WaitVerticalBlank
 
 	if INTERLACE == 1
 	btst.w	#VPOSRLOFBIT,VPOSR(a6)
 	beq.s	.lof
-	lea	copper(pc),a0
+	lea	copperListAlternate(pc),a0
 	move.l	a0,COP1LC(a6)
 	bra	.done
 .lof:
-	lea	copperLOF(pc),a0
+	lea	copperList(pc),a0
 	move.l	a0,COP1LC(a6)
 .done
-	endif
+	endif			; INTERLACE == 1
 	bra	.mainLoop
-	
-	include "init.s"
-	include "utils.s"
 
 	
 PokeBitplanePointers: 		; d0 = frame offset in bytes, a0 = BPLP copper list address
@@ -50,7 +48,7 @@ InstallColorPalette:
 	rts
 
 	if INTERLACE == 1
-copper:
+copperListAlternate:
 	;; bitplane pointers must be first else poking addresses will be incorrect
 	dc.w	BPL1PTL,0
 	dc.w	BPL1PTH,0
@@ -64,10 +62,10 @@ copper:
 	dc.w	BPL5PTH,0
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
-
 	dc.l	$fffffffe
-	endif
-copperLOF:
+	endif			; INTERLACE == 1
+	
+copperList:
 	;; bitplane pointers must be first else poking addresses will be incorrect
 	dc.w	BPL1PTL,0
 	dc.w	BPL1PTH,0

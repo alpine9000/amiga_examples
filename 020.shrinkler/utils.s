@@ -1,3 +1,6 @@
+	xref 	WaitVerticalBlank
+	xref	WaitRaster
+	
 WaitVerticalBlank:	
 	movem.l d0-a6,-(sp)
 .loop	move.l	$dff004,d0

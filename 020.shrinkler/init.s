@@ -1,4 +1,8 @@
-	include "../include/bplconbits.i"
+
+	include "includes.i"
+
+	xref Init
+	
 	;; custom chip base globally in a6
 Init:
 	movem.l	d0-a6,-(sp)
@@ -6,18 +10,18 @@ Init:
 	move	#$7fff,INTENA(a6) ; disable all interrupts	
 
 	;; set up default palette
-	bsr.s	InstallColorPalette
+	jsr	InstallColorPalette
 
 	if INTERLACE == 1
 	;; poke the bitplane pointers for the two copper lists.
 	move.l	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH,d0
-	lea 	copper(pc),a0
-	bsr.s	PokeBitplanePointers
+	lea 	copperListAlternate(pc),a0
+	jsr	PokeBitplanePointers
 	endif
 	
 	moveq.l	#0,d0
-	lea 	copperLOF(pc),a0
-	bsr.s	PokeBitplanePointers	
+	lea 	copperList,a0
+	jsr	PokeBitplanePointers	
 	
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)
@@ -43,7 +47,7 @@ HAMBIT	equ 0
 	endif	
 
 	;; install copper list, then enable dma and selected interrupts
-	lea	copperLOF(pc),a0
+	lea	copperList,a0
 	move.l	a0,COP1LC(a6)
  	move.w  COPJMP1(a6),d0
 	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)

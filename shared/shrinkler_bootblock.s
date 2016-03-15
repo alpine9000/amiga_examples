@@ -39,7 +39,7 @@ BootEntry:
 	else				; SHRINKER == 1
 
 	; a0 = compressed data
-	lea	$10000,a0
+	lea	DECOMPRESS_ADDRESS,a0
 	; a1 = decompressed data destination
 	lea	BASE_ADDRESS,a1
 	; a2 = progress callback, can be zero if no callback is desired.
@@ -55,7 +55,7 @@ Callback:
 	;; a0 = Callback argument
 	move.l	a6,-(sp)
 	lea 	CUSTOM,a6
-	move.w  d0,COLOR00(a6)
+	move.w  d0,COLOR00(a6)		;  Set wild background colors as we decompress
 	move.l	(sp)+,a6
 	rts
 
