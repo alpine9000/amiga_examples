@@ -77,7 +77,6 @@ $(MAKEADF):
 $(FLOPPY): out/bootblock.bin
 	$(MAKEADF) out/bootblock.bin > $(FLOPPY)
 	@ls -lh out/bootblock.bin
-	@ls -lh $(FLOPPY)
 
 out/bootblock.bin: out/bootblock.o
 	vlink -brawbin1 $< -o $@
