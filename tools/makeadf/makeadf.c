@@ -45,22 +45,28 @@ int main(int argc,char *argv[])
   if (argc == 2) {
     if ((f = fopen(argv[1],"rb"))) {
       len = fread(image,1,DISKSIZE,f);
-      if (len > 0) {
-        if (len < DISKSIZE) {
-          memset(image+len,0,DISKSIZE-len);
+      char temp;
+      if (fread(&temp,1,1,f) != 0) {
+	fprintf(stderr, "%s: input data will not fit on a floppy!\n", argv[0]);
+	rc = 2;
+      } else {
+	if (len > 0) {
+	  if (len < DISKSIZE) {
+	    memset(image+len,0,DISKSIZE-len);
+	  }
+	  boot_chksum(image);
+	  fwrite(image,1,DISKSIZE,stdout);
+	  rc = 0;
+	} else {
+	  fprintf(stderr,"%s: image read error!\n", argv[0]);
 	}
-        boot_chksum(image);
-        fwrite(image,1,DISKSIZE,stdout);
-        rc = 0;
       }
-      else
-        fprintf(stderr,"%s: image read error!\n", argv[0]);
-    }
-    else
+    } else {
       fprintf(stderr,"%s: file to open open %s\n", argv[0], argv[1]);  
-  }
-  else
+    }
+  } else {
     fprintf(stderr,"usage: %s <image data>\n", argv[0]);
+  }
 
   return rc;
 }
