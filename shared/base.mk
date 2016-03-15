@@ -16,6 +16,14 @@ ifndef RUN_SCRIPT
 RUN_SCRIPT=$(A500_RUN_SCRIPT)
 endif
 
+ifndef BOOTBLOCK_ASM
+BOOTBLOCK_ASM=../shared/bootblock.s
+endif
+
+ifndef PROGRAM_BIN
+PROGRAM_BIN=out/main.bin
+endif
+
 all: bin out $(MAKEADF) $(FLOPPY)
 
 gdrive: all
@@ -56,8 +64,8 @@ $(FLOPPY): out/bootblock.bin
 out/bootblock.bin: out/bootblock.o
 	vlink -brawbin1 $< -o $@
 
-out/bootblock.o: ../shared/bootblock.s out/main.bin
-	vasmm68k_mot -DBASE_ADDRESS="\$$$(BASE_ADDRESS)" -Fhunk -phxass -opt-fconst -nowarn=62 -quiet $< -o $@ -I/usr/local/amiga/os-include
+out/bootblock.o: $(BOOTBLOCK_ASM) $(PROGRAM_BIN)
+	vasmm68k_mot $(VASM_EXTRA_BOOTBLOCK_ARGS) -DBASE_ADDRESS="\$$$(BASE_ADDRESS)" -Fhunk -phxass -opt-fconst -nowarn=62 -quiet $< -o $@ -I/usr/local/amiga/os-include
 
 out/main.o: $(MODULE) $(EXTRA)
 	@# -v
