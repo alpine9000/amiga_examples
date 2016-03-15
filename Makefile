@@ -1,6 +1,7 @@
 SUBDIRS=tools/makeadf \
 	tools/imagecon\
 	tools/resize\
+	tools/external/shrinkler\
 	000.trackdisk\
 	001.simple_image\
 	002.sprite_display\
@@ -19,7 +20,9 @@ SUBDIRS=tools/makeadf \
 	015.sliced_ham\
 	016.copper_fun\
 	017.dual_playfield\
-	018.vert_scroll
+	018.vert_scroll\
+	019.hori_scroll\
+	020.shrinkler
 
 .PHONY: subdirs $(SUBDIRS)
 
