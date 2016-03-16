@@ -28,7 +28,9 @@ Entry:
 
 ;===========================================================
 	if 0
-PokeBitplanePointers: 		; d0 = frame offset in bytes, a0 = BPLP copper list address
+PokeBitplanePointers:
+	; d0 = frame offset in bytes;
+	; a0 = BPLP copper list address 
 	movem.l	d0-a6,-(sp)
 	move.l	bitplanes,a1
 	add.l	d0,a1 ; Offset for odd/even frames

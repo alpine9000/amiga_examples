@@ -14,7 +14,8 @@ PokeBitplanePointers(unsigned short* copper, unsigned char* bitplanes, unsigned 
 
 static unsigned short _copperData;
 static unsigned char _bitplaneData;
-static void
+
+void
 TestCall()
 {
   PokeBitplanePointers(&_copperData, &_bitplaneData, 3, 4, 5);

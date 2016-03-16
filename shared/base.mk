@@ -93,6 +93,7 @@ out/%.o: %.s
 out/%.o: %.c
 	vc -O3 -c $< -o $@
 	-@vc -O3 -S $< -o out/$*.s > /dev/null 2> /dev/null
+	-@vc -O0 -S $< -o out/$*-noopt.s > /dev/null 2> /dev/null
 
 out/main.bin: out/main.o $(OBJS)
 	@#-T ../link.script

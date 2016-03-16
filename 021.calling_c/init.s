@@ -19,14 +19,15 @@ Init:
 	jsr	PokeBitplanePointers
 	endif
 
-	;; 	void PokeBitplanePointers(unsigned short* copper, unsigned char* bitplanes, unsigned offset, unsigned numBitplanes, unsigned screenWidthBytes)
-	move.l 	#SCREEN_WIDTH_BYTES,-(sp)
-	move.l 	#SCREEN_BIT_DEPTH,-(sp)
-	move.l	#0,-(sp)
-	pea	bitplanes
-	pea	copperList
-	jsr	_PokeBitplanePointers	
-	add.l   #20,sp
+	;; Make a call to a C function with the following prototype:
+	;; void PokeBitplanePointers(unsigned short* copper, unsigned char* bitplanes, unsigned offset, unsigned numBitplanes, unsigned screenWidthBytes)
+	move.l 	#SCREEN_WIDTH_BYTES,-(sp) ; arguments are pushed onto the stack...
+	move.l 	#SCREEN_BIT_DEPTH,-(sp)	  ; in reverse order
+	move.l	#0,-(sp)		  ; offset == 0
+	pea	bitplanes                 ; make sure you push the address...
+	pea	copperList                ; of variables, not the value
+	jsr	_PokeBitplanePointers	  ; C adds an _ to all global symbols
+	add.l   #20,sp          	  ; Need to pop the arguments from the stack
 	
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)
