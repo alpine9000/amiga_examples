@@ -1,6 +1,9 @@
 typedef union {
   unsigned char* ptr;
-  unsigned short word[2];
+  struct {
+    unsigned short hi;
+    unsigned short lo;
+  } words;
 } word_extract_t;
 
 void 
@@ -12,8 +15,8 @@ PokeBitplanePointers(unsigned short* copper, unsigned char* bitplanes, unsigned 
   for (i = 0; i < numBitplanes; i++) {
     word_extract_t extract;
     extract.ptr = bitplanes;
-    *(copper+1) = extract.word[1];
-    *(copper+3) = extract.word[0];
+    *(copper+1) = extract.words.lo;
+    *(copper+3) = extract.words.hi;
     bitplanes += screenWidthBytes;
     copper += 4;
   } 
