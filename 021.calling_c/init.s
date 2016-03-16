@@ -21,7 +21,7 @@ Init:
 	move.l 	#SCREEN_BIT_DEPTH,-(sp)	  ; in reverse order. 16 bit variables are passed as 32 bits.
 	move.l	#1,-(sp)		  ; interlace line.
 	pea	bitplanes                 ; make sure you push the address...
-	pea	copperListAlternate       ; of variables, not the value.
+	pea	copperListAlternate       ; of pointers, not the value they point to.
 	jsr	_PokeBitplanePointers	  ; C adds an _ to all global symbols.
 	add.l   #20,sp          	  ; Need to pop the arguments from the stack.
 	endif
@@ -30,7 +30,7 @@ Init:
 	move.l 	#SCREEN_BIT_DEPTH,-(sp)	  ; in reverse order.
 	move.l	#0,-(sp)		  ; normal line.
 	pea	bitplanes                 ; make sure you push the address...
-	pea	copperList                ; of variables, not the value.
+	pea	copperList                ; of pointers, not the value they point to.
 	jsr	_PokeBitplanePointers	  ; C adds an _ to all global symbols.
 	add.l   #20,sp          	  ; Need to pop the arguments from the stack.
 	

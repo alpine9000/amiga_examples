@@ -1,7 +1,7 @@
 	include "includes.i"
 
 	xref	InstallColorPalette
-	xref	PokeBitplanePointers
+	;; xref	PokeBitplanePointers ;; We don't need the ASM version of this for this example
 	xref	copperList
 	xref 	copperListAlternate
 	xref	bitplanes
@@ -27,7 +27,8 @@ Entry:
 	bra	.mainLoop
 
 ;===========================================================
-	if 1
+; We don't need the ASM version of this for this example
+	if 0
 PokeBitplanePointers:
 	; d0 = frame offset in bytes;
 	; a0 = BPLP copper list address 
