@@ -90,10 +90,13 @@ out/main.o: $(MODULE) $(EXTRA)
 out/%.o: %.s
 	vasmm68k_mot $(VASM_EXTRA_ARGS) -Fhunk -phxass -opt-fconst -nowarn=62 -quiet $< -o $@ -I/usr/local/amiga/os-include
 
+out/%.o: %.c
+	vc -O3 -c $< -o $@
+	-@vc -O3 -S $< -o out/$*.s > /dev/null 2> /dev/null
+
 out/main.bin: out/main.o $(OBJS)
 	@#-T ../link.script
 	vlink -Ttext 0x$(BASE_ADDRESS) -brawbin1 $< $(OBJS) -o $@
-
 
 out/shrunk.bin: $(SHRINKLER_EXE) out/main.bin
 	$(SHRINKLEREXE) -d out/main.bin out/shrunk.bin

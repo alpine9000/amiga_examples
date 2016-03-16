@@ -22,7 +22,8 @@ SUBDIRS=tools/makeadf \
 	017.dual_playfield\
 	018.vert_scroll\
 	019.hori_scroll\
-	020.shrinkler
+	020.shrinkler\
+	021.calling_c
 
 .PHONY: subdirs $(SUBDIRS)
 
