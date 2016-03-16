@@ -1,7 +1,7 @@
 	include "includes.i"
 
 	xref	InstallColorPalette
-	;;xref	PokeBitplanePointers
+	xref	PokeBitplanePointers
 	xref	copperList
 	xref 	copperListAlternate
 	xref	bitplanes
@@ -27,12 +27,12 @@ Entry:
 	bra	.mainLoop
 
 ;===========================================================
-	if 0
+	if 1
 PokeBitplanePointers:
 	; d0 = frame offset in bytes;
 	; a0 = BPLP copper list address 
 	movem.l	d0-a6,-(sp)
-	move.l	bitplanes,a1
+	lea	bitplanes,a1
 	add.l	d0,a1 ; Offset for odd/even frames
 	moveq	#SCREEN_BIT_DEPTH-1,d0
 .bitplaneloop:

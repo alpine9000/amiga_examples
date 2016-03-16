@@ -6,27 +6,28 @@ typedef union {
   } words;
 } word_extract_t;
 
+typedef struct {
+  unsigned short pad1;
+  unsigned short lo;
+  unsigned short pad2;
+  unsigned short hi;
+} copper_layout_t
+
+
 void 
-PokeBitplanePointers(unsigned short* copper, unsigned char* bitplanes, unsigned offset, unsigned numBitplanes, unsigned screenWidthBytes)
+PokeBitplanePointers(unsigned short* copper, unsigned char* bitplanes, unsigned short interlace, unsigned short numBitplanes, unsigned short screenWidthBytes)
 {
-  int i;
-  copper += offset;
+  char i;
+  word_extract_t extract;
+  copper_layout_t *ptr = copper;
+
+  bitplanes += interlace ? screenWidthBytes*numBitplanes : 0;
 
   for (i = 0; i < numBitplanes; i++) {
-    word_extract_t extract;
     extract.ptr = bitplanes;
-    *(copper+1) = extract.words.lo;
-    *(copper+3) = extract.words.hi;
+    ptr->lo = extract.words.lo;
+    ptr->hi = extract.words.hi;
     bitplanes += screenWidthBytes;
-    copper += 4;
+    ptr++;
   } 
-}
-
-static unsigned short _copperData;
-static unsigned char _bitplaneData;
-
-void
-TestCall()
-{
-  PokeBitplanePointers(&_copperData, &_bitplaneData, 3, 4, 5);
 }

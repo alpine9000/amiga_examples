@@ -12,22 +12,27 @@ Init:
 	;; set up default palette
 	jsr	InstallColorPalette
 
+	;; Make a call to a C function with the following prototype:
+	;; void PokeBitplanePointers(unsigned short* copper, unsigned char* bitplanes, unsigned short interlace, unsigned short numBitplanes, unsigned short screenWidthBytes)
+	
 	if INTERLACE == 1
 	;; poke the bitplane pointers for the two copper lists.
-	move.l	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH,d0
-	lea 	copperListAlternate,a0
-	jsr	PokeBitplanePointers
+	move.l 	#SCREEN_WIDTH_BYTES,-(sp) ; arguments are pushed onto the stack...
+	move.l 	#SCREEN_BIT_DEPTH,-(sp)	  ; in reverse order. 16 bit variables are passed as 32 bits.
+	move.l	#1,-(sp)		  ; interlace line.
+	pea	bitplanes                 ; make sure you push the address...
+	pea	copperListAlternate       ; of variables, not the value.
+	jsr	_PokeBitplanePointers	  ; C adds an _ to all global symbols.
+	add.l   #20,sp          	  ; Need to pop the arguments from the stack.
 	endif
 
-	;; Make a call to a C function with the following prototype:
-	;; void PokeBitplanePointers(unsigned short* copper, unsigned char* bitplanes, unsigned offset, unsigned numBitplanes, unsigned screenWidthBytes)
 	move.l 	#SCREEN_WIDTH_BYTES,-(sp) ; arguments are pushed onto the stack...
-	move.l 	#SCREEN_BIT_DEPTH,-(sp)	  ; in reverse order
-	move.l	#0,-(sp)		  ; offset == 0
+	move.l 	#SCREEN_BIT_DEPTH,-(sp)	  ; in reverse order.
+	move.l	#0,-(sp)		  ; normal line.
 	pea	bitplanes                 ; make sure you push the address...
-	pea	copperList                ; of variables, not the value
-	jsr	_PokeBitplanePointers	  ; C adds an _ to all global symbols
-	add.l   #20,sp          	  ; Need to pop the arguments from the stack
+	pea	copperList                ; of variables, not the value.
+	jsr	_PokeBitplanePointers	  ; C adds an _ to all global symbols.
+	add.l   #20,sp          	  ; Need to pop the arguments from the stack.
 	
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)
