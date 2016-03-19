@@ -158,14 +158,22 @@ main(int argc, char **argv)
 
   float wScale = 1.0;
   float hScale = 1.0;
+  float configRatio = (float)config.width/(config.interlaced ? (float)config.height/2.0 : (float)config.height);
   int newWidth = config.width;
   int newHeight = config.height;
+  
+  if (config.verbose) {
+    printf("width = %d, height = %d = %f\n", width, height, (float)width/(float)height);
+    printf("config.width = %d, config.height = %d = %f\n", config.width, config.height, configRatio);
+  }
 
-  if (width >= height) {
-    wScale = (float)height/(float)config.height;
+  wScale = (float)height/(float)config.height;
+  hScale = (float)width/(float)config.width;
+  
+  if (width > height && wScale >= configRatio) {
     newWidth = width/wScale;
   } else {
-    hScale = (float)width/(float)config.width;
+
     newHeight = height/hScale;
     if (config.interlaced) {
       newHeight *= 2;
