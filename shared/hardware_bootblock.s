@@ -104,7 +104,7 @@ LoadScript:				;At $120, sysinfo in 4 regs, a6=$dff002
 	moveq 	#2,d0			;from sector 2
 	move.w 	#-((mainEnd-mainStart)/512),d1;num sectors, - == Step0
 	jsr 	LoadMFMB
-	lea 	$dff000,a6			;restore plain custombase addr for demo
+	lea 	$dff000,a6		;restore plain custombase addr for demo
 
 	if SHRINKLER == 0
 
@@ -171,7 +171,7 @@ LoadMFMB:		;loadsectors.a0=dst,d0=startsec.W,d1=nrsecs.W(-=Step0)
 	not.w	d0			;=neg+sub#1
 .StOut:	bsr.s	StepOut
 	dbf	d0,.StIn
-.StRdy:	swap	d0				;startsec within cyl
+.StRdy:	swap	d0			;startsec within cyl
 	cmp.w	#11,d0
 	blt.s	.Head0
 	sub.w	#11,d0
@@ -179,12 +179,12 @@ LoadMFMB:		;loadsectors.a0=dst,d0=startsec.W,d1=nrsecs.W(-=Step0)
 .Head0:	bset	#2,(a4)
 	lea	MFMhead(PC),a1
 	clr.w	(a1)
-	bsr	LoadTrak			;read track+decode
+	bsr	LoadTrak		;read track+decode
 	beq.s	.End
 .Head1:	bclr	#2,(a4)			;Head 1
 	lea	MFMhead(PC),a1
 	move.w	#1,(a1)
-	bsr	LoadTrak			;read track+decode
+	bsr	LoadTrak		;read track+decode
 	beq.s	.End
 	bsr.s	StepIn			;1 cyl forward
 	bra.s	.Head0
@@ -253,12 +253,12 @@ LoadTrak:		;loadtrack+decode.a0=dst,d0=secoffs,d1=secsleft
 	lea	(MFMbuf).w,a1
 	move.w	#2,$9c-2(a6)		;Clr Req
 	move.l	a1,$20-2(a6)
-	move.w	#$8210,$96-2(a6)		;DskEna
+	move.w	#$8210,$96-2(a6)	;DskEna
 	move.w	#MFMsync,$7e-2(a6)
 	move.w	#$9500,$9e-2(a6)
 	move.w	#$4000,$24-2(a6)
-	move.w	#$8000+MFMlen/2,$24-2(a6)	;DskLen(12980)+DmaEn
-	move.w	#$8000+MFMlen/2,$24-2(a6)	;start reading MFMdata
+	move.w	#$8000+MFMlen/2,$24-2(a6);DskLen(12980)+DmaEn
+	move.w	#$8000+MFMlen/2,$24-2(a6);start reading MFMdata
 .Wrdy:
 	btst	#1,$1f-2(a6)		;wait until data read
 	beq.s	.Wrdy
@@ -275,7 +275,7 @@ LoadTrak:		;loadtrack+decode.a0=dst,d0=secoffs,d1=secsleft
 	bne.s	.FindS
 	cmp.b	(a1),d3			;search for 0-nibble
 	bne.s	.FindS
-	move.l	(a1)+,d4			;decode fmtbyte/trk#,sec#,eow#
+	move.l	(a1)+,d4		;decode fmtbyte/trk#,sec#,eow#
 	move.l	(a1)+,d5
 	and.w	d3,d4
 	and.w	d3,d5
@@ -288,12 +288,12 @@ LoadTrak:		;loadtrack+decode.a0=dst,d0=secoffs,d1=secsleft
 	blt.s	.DeCode
 .Skip:	lea	48+1024(a1),a1		;nope
 	bra.s	.FindS
-.DeCode:lea	40(a1),a1			;found a sec,skip unnecessary data
+.DeCode:lea	40(a1),a1		;found a sec,skip unnecessary data
 	move.l	a1,d6
 	lea	MFMchk(PC),a1
 	clr.l	(a1)
 	move.l	d6,a1
-	move.l	(a1)+,d6			;decode data chksum.L
+	move.l	(a1)+,d6		;decode data chksum.L
 	move.l	(a1)+,d5
 	and.l	d3,d6
 	and.l	d3,d5
@@ -313,15 +313,15 @@ LoadTrak:		;loadtrack+decode.a0=dst,d0=secoffs,d1=secsleft
 	add.l	d4,d4
 	or.l	d5,d4
 	move.l	d4,(a3)+
-	dbf	d7,.DClup			;chksum should now be 0 if correct
+	dbf	d7,.DClup		;chksum should now be 0 if correct
 	lea	MFMchk(PC),a1
 	or.l	d6,(a1)			;or with track total chksum
 	move.l	a2,a1
-	dbf	d1,.FindS			;decode next sec
+	dbf	d1,.FindS		;decode next sec
 	MOVE.W	(SP)+,D1
 	MOVE.W	(SP)+,D0
 	move.l	MFMchk(PC),d3		;track total chksum OK?
-	bne	LoadTrak			;no,retry
+	bne	LoadTrak		;no,retry
 	moveq	#0,d0			;set to start of track
 	move.w	d2,d3
 	add.w	d3,d3
@@ -333,7 +333,7 @@ LoadTrak:		;loadtrack+decode.a0=dst,d0=secoffs,d1=secsleft
 NullCop:
 	dc.w	$1fc,0
 	dc.w	$100,$0200
-	dc.w	$96,$0020			;ensure sprite DMA is off until needed
+	dc.w	$96,$0020		;ensure sprite DMA is off until needed
 	dc.w	$ffdf,$fffe
 	dc.l	-2
 
@@ -344,7 +344,8 @@ BootE:
 
 	*** Boot Block ends here ***
 
-	dc.b	"BootLoader by Photon/Scoopex"	;pad with random bytes
+	dc.b	"BootLoader by Photon/Scoopex"
+	;pad bootblock to correct size
 	cnop	0,1024
 
 ;MFMbuf is placed here after bootblock end, $3c0.w or so when copied.

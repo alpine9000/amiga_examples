@@ -23,7 +23,8 @@ SUBDIRS=tools/makeadf \
 	018.vert_scroll\
 	019.hori_scroll\
 	020.shrinkler\
-	021.calling_c
+	021.calling_c\
+	022.photons_bootloader
 
 .PHONY: subdirs $(SUBDIRS)
 
