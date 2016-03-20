@@ -9,15 +9,6 @@ ShortWt:MACRO				;CPU-independent nop;nop replacement
 	tst.w 	(a6)
 	ENDM
 
-WaitEOF:
-	btst	 #0,5-2(a6)
-	beq.s	 WaitEOF
-.w1:	cmp.b	#$37,6-2(a6)
-	bne.s	.w1
-.w2:	cmp.b	#$37,6-2(a6)		;wait for last PAL line, $138
-	beq.s	.w2
-	rts
-
 MFMcyl:		dc.w 0
 MFMhead:	dc.w 0
 MFMdrv:		dc.w 0
@@ -206,15 +197,6 @@ LoadTrak:		;loadtrack+decode.a0=dst,d0=secoffs,d1=secsleft
 	add.w	d3,a0
 	sub.w	d2,d1			;sub #secs loaded
 	RTS
-
-NullCop:
-	dc.w	$1fc,0
-	dc.w	$100,$0200
-	dc.w	$96,$0020		;ensure sprite DMA is off until needed
-	dc.w	$ffdf,$fffe
-	dc.l	-2
-BootE:
-
 
 ;MFMbuf is placed here after bootblock end, $3c0.w or so when copied.
 MFMbuf:	
