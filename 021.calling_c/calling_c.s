@@ -13,8 +13,8 @@ Entry:
 .mainLoop:
 	jsr 	WaitVerticalBlank
 
-	if INTERLACE == 1
-	btst.w	#VPOSRLOFBIT,VPOSR(a6)
+	if INTERLACE==1
+	btst	#VPOSRLOFBIT,VPOSR(a6)
 	beq.s	.lof
 	lea	copperListAlternate(pc),a0
 	move.l	a0,COP1LC(a6)
@@ -23,7 +23,7 @@ Entry:
 	lea	copperList(pc),a0
 	move.l	a0,COP1LC(a6)
 .done
-	endif			; INTERLACE == 1
+	endif; INTERLACE==1
 	bra	.mainLoop
 
 ;===========================================================
@@ -53,7 +53,7 @@ InstallColorPalette:
 	include "out/image-palette.s"
 	rts
 
-	if INTERLACE == 1
+	if INTERLACE==1
 copperListAlternate:
 	;; bitplane pointers must be first else poking addresses will be incorrect
 	dc.w	BPL1PTL,0
@@ -69,7 +69,7 @@ copperListAlternate:
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
 	dc.l	$fffffffe
-	endif			; INTERLACE == 1
+	endif; INTERLACE==1
 	
 copperList:
 	;; bitplane pointers must be first else poking addresses will be incorrect
@@ -89,7 +89,7 @@ copperList:
 	dc.l	$fffffffe		
 
 bitplanes:
-	if HAM_MODE == 1
+	if HAM_MODE==1
 	incbin	"out/image-ham.bin"
 	else
 	incbin	"out/image.bin"

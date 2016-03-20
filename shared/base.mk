@@ -11,6 +11,9 @@ RESIZE=$(RESIZEDIR)/out/resize
 A500_RUN_SCRIPT=~/Google\ Drive/Amiga/amiga500.sh
 A600_RUN_SCRIPT=~/Google\ Drive/Amiga/amiga600.sh
 
+#VASM_ARGS=-phxass -Fhunk -quiet -spaces
+VASM_ARGS=-Fhunk -quiet -esc 
+
 ifndef FLOPPY
 FLOPPY=bin/$(EXAMPLE_NAME).adf
 endif
@@ -41,7 +44,7 @@ ifndef BOOTBLOCK_ASM
 BOOTBLOCK_ASM=../shared/shrinkler_bootblock.s
 endif
 PROGRAM_BIN=out/shrunk.bin
-VASM_EXTRA_BOOTBLOCK_ARGS=-DDECOMPRESS_ADDRESS="\$$$(DECOMPRESS_ADDRESS)" -DSHRINKLER=$(SHRINKLER)
+VASM_EXTRA_BOOTBLOCK_ARGS=-DSHRINKLER=$(SHRINKLER) -DDECOMPRESS_ADDRESS="\$$$(DECOMPRESS_ADDRESS)"
 else
 ifndef BOOTBLOCK_ASM
 BOOTBLOCK_ASM=../shared/bootblock.s
@@ -97,13 +100,13 @@ out/bootblock.bin: out/bootblock.o
 	vlink -brawbin1 $< -o $@
 
 out/bootblock.o: $(BOOTBLOCK_ASM) $(PROGRAM_BIN)
-	vasmm68k_mot $(VASM_EXTRA_BOOTBLOCK_ARGS) -DUSERSTACK_ADDRESS="\$$$(USERSTACK_ADDRESS)" -DBASE_ADDRESS="\$$$(BASE_ADDRESS)" -Fhunk -phxass -opt-fconst -nowarn=62 -quiet $< -o $@ -I/usr/local/amiga/os-include
+	vasmm68k_mot $(VASM_ARGS) $(VASM_EXTRA_BOOTBLOCK_ARGS) -DUSERSTACK_ADDRESS="\$$$(USERSTACK_ADDRESS)" -DBASE_ADDRESS="\$$$(BASE_ADDRESS)"  $< -o $@ -I/usr/local/amiga/os-include
 
 out/main.o: $(MODULE) $(EXTRA)
-	vasmm68k_mot $(VASM_EXTRA_ARGS) -Fhunk -phxass -opt-fconst -nowarn=62 -quiet $< -o $@ -I/usr/local/amiga/os-include
+	vasmm68k_mot $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ -I/usr/local/amiga/os-include
 
 out/%.o: %.s
-	vasmm68k_mot $(VASM_EXTRA_ARGS) -Fhunk -phxass -opt-fconst -nowarn=62 -quiet $< -o $@ -I/usr/local/amiga/os-include
+	vasmm68k_mot $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ -I/usr/local/amiga/os-include
 
 out/%.o: %.c
 	vc -O3 -c $< -o $@

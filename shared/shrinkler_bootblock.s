@@ -14,7 +14,7 @@ BootEntry:
 	;;  a6 = exec base
 	;;  a1 = trackdisk.device I/O request pointer
 
-	if SHRINKLER == 1
+	if SHRINKLER==1
 	lea     DECOMPRESS_ADDRESS,a5	; load shrinkler compressed data here
 	else
 	lea	BASE_ADDRESS,a5 	; main.s entry point
@@ -32,11 +32,10 @@ BootEntry:
 	move.w  #TD_MOTOR,IO_COMMAND(a1)
 	jsr     _LVODoIO(a6)
 
-	if SHRINKLER == 0
-
+	if SHRINKLER==0
 	jmp     (a5)			; -> main.s entry point
 
-	else				; SHRINKER == 1
+	else				; SHRINKER==1
 
 	; a0 = compressed data
 	lea	DECOMPRESS_ADDRESS,a0
@@ -59,21 +58,21 @@ Callback:
 	move.l	(sp)+,a6
 	rts
 
-	endif 				; SHRINKLER == 1
+	endif 				; SHRINKLER==1
 	
 	;; Pad the remainder of the bootblock
 	cnop    0,1024
 	
 mainStart:
-	if SHRINKLER == 1
+	if SHRINKLER==1
 
 	incbin  "out/shrunk.bin"
 
-	else				; SHRINKLER == 0
+	else				; SHRINKLER==0
 
 	incbin  "out/main.bin"
 
-	endif				; SHRINKLER == 0
+	endif				; SHRINKLER==0
 	cnop    0,512
 mainEnd:
 	end

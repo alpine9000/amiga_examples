@@ -96,21 +96,21 @@ LoadScript:				;At $120, sysinfo in 4 regs, a6=$dff002
 
     *--- load first part ---*
 
-	if SHRINKLER == 1
+	if SHRINKLER==1
 	lea     DECOMPRESS_ADDRESS,a0	; load shrinkler compressed data here
 	else
 	lea	BASE_ADDRESS,a0 	; main entry point
 	endif	
 	moveq 	#2,d0			;from sector 2
-	move.w 	#-((mainEnd-mainStart)/512),d1;num sectors, - == Step0
+	move.w 	#-((mainEnd-mainStart)/512),d1;num sectors, - ==Step0
 	jsr 	LoadMFMB
 	lea 	$dff000,a6		;restore plain custombase addr for demo
 
-	if SHRINKLER == 0
+	if SHRINKLER==0
 
 	jmp     (a0)			; -> main entry point
 
-	else				; SHRINKER == 1
+	else				; SHRINKER==1
 
 	; a0 = compressed data
 	lea	DECOMPRESS_ADDRESS,a0
@@ -131,7 +131,7 @@ CompressCallback:
 	move.l	(sp)+,a6
 	rts
 
-	endif 				; SHRINKLER == 1
+	endif 				; SHRINKLER==1
 	
 
 
@@ -337,7 +337,7 @@ NullCop:
 	dc.w	$ffdf,$fffe
 	dc.l	-2
 
-	if SHRINKLER == 1	
+	if SHRINKLER==1	
 	include "../tools/external/shrinkler/ShrinklerDecompress.S"
 	endif
 BootE:
@@ -353,15 +353,15 @@ MFMbuf	equ	LoaderVars+(BootE-CopyStart)
 MFMbufE	equ 	MFMbuf+MFMlen	;lowest free address. $372e for a full bootblock.
 	
 mainStart:
-	if SHRINKLER == 1
+	if SHRINKLER==1
 
 	incbin  "out/shrunk.bin"
 
-	else				; SHRINKLER == 0
+	else				; SHRINKLER==0
 
 	incbin  "out/main.bin"
 
-	endif				; SHRINKLER == 0
+	endif				; SHRINKLER==0
 	cnop    0,512
 mainEnd:	
 	end

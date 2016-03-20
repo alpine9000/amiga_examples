@@ -12,16 +12,16 @@ Init:
 	;; set up default palette
 	jsr	InstallColorPalette
 
-	if INTERLACE == 1
+	if INTERLACE==1
 	;; poke the bitplane pointers for the two copper lists.
 	move.l	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH,d0
-	lea 	copperListAlternate(pc),a0
+	lea 	copperListAlternate,a0
 	jsr	PokeBitplanePointers
 	endif
 	
 	moveq.l	#0,d0
 	lea 	copperList,a0
-	jsr	PokeBitplanePointers	
+	jsr	PokeBitplanePointers
 	
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)
@@ -30,13 +30,13 @@ Init:
 	move.w	#(RASTER_X_START/2-SCREEN_RES),DDFSTRT(a6)
 	move.w	#(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1)),DDFSTOP(a6)
 
-	if HAM_MODE == 1
+	if HAM_MODE==1
 HAMBIT	equ HOMOD
 	else
 HAMBIT	equ 0
 	endif
 	
-	if INTERLACE == 1
+	if INTERLACE==1
 	move.w	#(SCREEN_BIT_DEPTH<<12)|COLOR_ON|HAMBIT|LACE,BPLCON0(a6)
 	move.w	#2*SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES,BPL1MOD(a6)
 	move.w	#2*SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES,BPL2MOD(a6)

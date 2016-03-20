@@ -6,11 +6,11 @@ init:
 	move	#$7fff,INTENA(a6) ; disable all interrupts	
 
 	;; set up default palette
-	bsr.s	installColorPalette
+	bsr	installColorPalette
 
 	moveq.l	#0,d0
 	lea 	copper(pc),a0
-	bsr.s	pokeBitplanePointers	
+	bsr	pokeBitplanePointers	
 	
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)

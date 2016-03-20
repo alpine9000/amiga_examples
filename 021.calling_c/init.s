@@ -15,7 +15,7 @@ Init:
 	;; Make a call to a C function with the following prototype:
 	;; void PokeBitplanePointers(unsigned short* copper, unsigned char* bitplanes, unsigned short interlace, unsigned short numBitplanes, unsigned short screenWidthBytes)
 	
-	if INTERLACE == 1
+	if INTERLACE==1
 	;; poke the bitplane pointers for the two copper lists.
 	move.l 	#SCREEN_WIDTH_BYTES,-(sp) ; arguments are pushed onto the stack...
 	move.l 	#SCREEN_BIT_DEPTH,-(sp)	  ; in reverse order. 16 bit variables are passed as 32 bits.
@@ -41,13 +41,13 @@ Init:
 	move.w	#(RASTER_X_START/2-SCREEN_RES),DDFSTRT(a6)
 	move.w	#(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1)),DDFSTOP(a6)
 
-	if HAM_MODE == 1
+	if HAM_MODE==1
 HAMBIT	equ HOMOD
 	else
 HAMBIT	equ 0
 	endif
 	
-	if INTERLACE == 1
+	if INTERLACE==1
 	move.w	#(SCREEN_BIT_DEPTH<<12)|COLOR_ON|HAMBIT|LACE,BPLCON0(a6)
 	move.w	#2*SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES,BPL1MOD(a6)
 	move.w	#2*SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES,BPL2MOD(a6)

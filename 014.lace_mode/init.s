@@ -6,18 +6,18 @@ init:
 	move	#$7fff,INTENA(a6) ; disable all interrupts	
 
 	;; set up default palette
-	bsr.s	installColorPalette
+	bsr	installColorPalette
 
-	if INTERLACE == 1
+	if INTERLACE==1
 	;; poke the bitplane pointers for the two copper lists.
 	move.l	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH,d0
 	lea 	copper(pc),a0
-	bsr.s	pokeBitplanePointers
+	bsr	pokeBitplanePointers
 	endif
 	
 	moveq.l	#0,d0
 	lea 	copperLOF(pc),a0
-	bsr.s	pokeBitplanePointers	
+	bsr	pokeBitplanePointers	
 	
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)
@@ -26,7 +26,7 @@ init:
 	move.w	#(RASTER_X_START/2-SCREEN_RES),DDFSTRT(a6)
 	move.w	#(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1)),DDFSTOP(a6)
 
-	if INTERLACE == 1
+	if INTERLACE==1
 	move.w	#(SCREEN_BIT_DEPTH<<12)|COLOR_ON|HOMOD|LACE,BPLCON0(a6)
 	move.w	#2*SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES,BPL1MOD(a6)
 	move.w	#2*SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES,BPL2MOD(a6)

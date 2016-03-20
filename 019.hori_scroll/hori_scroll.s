@@ -37,13 +37,13 @@ SetupHoriScrollBitDelay:
 
 HoriScrollPlayfield:
 	movem.l	d0-a6,-(sp)
-	move.l	hpos,d0
-	lsr.l	#3,d0		;bytes to scroll
-	add.l	d0,bitplaneAddress
-	move.l	hpos,d1
-	and.l	#$F,d1
-	move.l	#$F,d0
-	sub.l	d1,d0		;bits to delay
+	move.l  hpos,d0	; number of pixels we want to scroll
+	lsr.l   #3,d0		; bytes to scroll
+	add.l   d0,bitplaneAddress ; used to set the bitplane pointers when combined with vertical scrolling
+	move.l  hpos,d1	    ; pixels = 0xf - (hpos - (hpos_bytes*8))
+	and.l   #$F,d1
+	move.l  #$F,d0
+	sub.l   d1,d0		; bits to delay	
 	bsr	SetupHoriScrollBitDelay
 .done:
 	movem.l (sp)+,d0-a6
@@ -115,7 +115,7 @@ PokeBitplanePointers:
 	;; a0 = BPLP copper list address
 	movem.l	d0-a6,-(sp)
 	lea	bitplanes(pc),a1
-	add.l	d0, a1
+	add.l	d0,a1
 	moveq	#SCREEN_BIT_DEPTH-1,d0
 .bitplaneloop:
 	move.l 	a1,d1

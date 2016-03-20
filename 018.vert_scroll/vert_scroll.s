@@ -51,7 +51,7 @@ pokeBitplanePointers:
 	;; a0 = BPLP copper list address
 	movem.l	d0-a6,-(sp)
 	lea	bitplanes(pc),a1
-	add.l	d0, a1
+	add.l	d0,a1
 	moveq	#SCREEN_BIT_DEPTH-1,d0
 .bitplaneloop:
 	move.l 	a1,d1

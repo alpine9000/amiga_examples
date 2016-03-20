@@ -11,8 +11,8 @@ entry:
 .mainLoop:
 	bsr 	waitVerticalBlank
 
-	if INTERLACE == 1
-	btst.w	#VPOSRLOFBIT,VPOSR(a6)
+	if INTERLACE==1
+	btst	#VPOSRLOFBIT,VPOSR(a6)
 	beq.s	.lof
 	lea	copper(pc),a0
 	move.l	a0,COP1LC(a6)
