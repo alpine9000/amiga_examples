@@ -1,0 +1,26 @@
+MEMORY
+{
+ram: org = 0x10000, len = 0x100000
+}
+
+SECTIONS
+{
+load : { 
+      startCode = .;
+      *(.text) 
+      *(.bss)
+      *(.data)
+      *(CODE)
+      *(DATA)
+      . = . + 0x1000;
+      userstack = .;
+      endCode = .;
+      } > ram
+
+photo ALIGN(512) : {
+      startData = .;
+      *(.photo)
+      endData = .;
+      } > ram
+}
+
