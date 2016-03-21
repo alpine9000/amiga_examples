@@ -2,6 +2,7 @@ SUBDIRS=tools/makeadf \
 	tools/imagecon\
 	tools/resize\
 	tools/external/shrinkler\
+	tools/external/doynamite68k\
 	000.trackdisk\
 	001.simple_image\
 	002.sprite_display\

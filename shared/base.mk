@@ -1,13 +1,16 @@
-MAKEADFDIR=../tools/makeadf/
-MAKEADF=$(MAKEADFDIR)/out/makeadf
 HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow
 HOST_CFLAGS=$(HOST_WARNINGS)
+
+MAKEADFDIR=../tools/makeadf/
+MAKEADF=$(MAKEADFDIR)/out/makeadf
 IMAGECONDIR=../tools/imagecon
 IMAGECON=$(IMAGECONDIR)/out/imagecon
 SHRINKLERDIR=../tools/external/shrinkler
 SHRINKLEREXE=$(SHRINKLERDIR)/build/native/Shrinkler
 RESIZEDIR=../tools/resize
 RESIZE=$(RESIZEDIR)/out/resize
+DOYNAMITE68KDIR=../tools/external/doynamite68k
+DOYNAMITE68K=$(DOYNAMITE68KDIR)/out/lz
 A500_RUN_SCRIPT=~/Google\ Drive/Amiga/amiga500.sh
 A600_RUN_SCRIPT=~/Google\ Drive/Amiga/amiga600.sh
 
@@ -57,7 +60,7 @@ ifndef LINK_COMMANDLINE
 LINK_COMMANDLINE=vlink -Ttext 0x$(BASE_ADDRESS) -brawbin1 $< $(OBJS) -o $@
 endif
 
-all: bin out $(MAKEADF) $(FLOPPY)
+all: bin out $(MAKEADF) $(IMAGECON) $(RESIZE) $(DOYNAMITE68K) $(FLOPPY)
 
 gdrive: all
 	cp $(FLOPPY) ~/Google\ Drive
@@ -91,6 +94,9 @@ $(RESIZE):
 
 $(MAKEADF):
 	make -C $(MAKEADFDIR)
+
+$(DOYNAMITE68K):
+	make -C $(DOYNAMITE68KDIR)
 
 $(FLOPPY): out/bootblock.bin
 	$(MAKEADF) out/bootblock.bin > $(FLOPPY)
