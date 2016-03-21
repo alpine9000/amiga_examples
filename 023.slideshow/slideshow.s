@@ -5,12 +5,6 @@
 	xref	Level3InterruptHandler
 	xref	copperList
 	xref 	copperListAlternate
-	xref 	InstallColorPalette
-	xref 	InstallColorPalette2
-	xref 	InstallColorPalette3
-	xref 	InstallColorPalette4
-	xref 	InstallColorPalette5
-	xref 	InstallColorPalette6
 	xref 	bitplanesp1
 	xref 	bitplanesp2
 	xref 	bitplanesp3
@@ -30,10 +24,14 @@ Entry:
 .mainLoop:
 	jsr 	WaitVerticalBlank
 
+	if 0
 	cmp.l	#50*5,counter
 	bne	.updateCounter
 	jsr	LoadNextImage
 	move.l	#0,counter
+	else
+	jsr	LoadNextImage
+	endif
 
 .updateCounter:
 	add.l	#1,counter
@@ -127,27 +125,7 @@ copperList:
 	dc.w	BPL6PTH,0
 	dc.l	$fffffffe		
 
-InstallColorPalette:
-	include "out/mr-palette.s"
-	rts	
-InstallColorPalette2:
-	include "out/catwoman-palette.s"
-	rts
-InstallColorPalette3:
-	include "out/batgirl-palette.s"
-	rts
-InstallColorPalette4:
-	include "out/kb-palette.s"
-	rts
-InstallColorPalette5:
-	include "out/fe-palette.s"
-	rts
-InstallColorPalette6:
-	include "out/ww-palette.s"
-	rts
-
 	align	4
-
 
 bitplanesp1:
 	dc.l	endCode

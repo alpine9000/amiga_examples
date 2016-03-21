@@ -3,23 +3,26 @@ EXAMPLE_NAME=slideshow
 SHRINKLER=0
 INTERLACE=1
 HAM_MODE=1
+COMPRESSED_IMAGES=0
 
 BOOTBLOCK_ASM=alpine_bootblock.s
 
 OBJS=out/init.o out/utils.o out/trackloader.o out/image.o
 
-IMAGES=mr.png batgirl.png catwoman.png kb.png fe.png ww.png
+IMAGES=mr.png mr2.png mr3.png mr4.png mr5.png mr6.png mr7.png
 
 USERSTACK_ADDRESS=7fffc
 BASE_ADDRESS=10000
 DECOMPRESS_ADDRESS=10000
 
+#--use-palette=palettes/$*.pal
+
 ifeq ($(HAM_MODE),1)
-VASM_EXTRA_ARGS=-DINTERLACE=$(INTERLACE) -DHAM_MODE=$(HAM_MODE)
+VASM_EXTRA_ARGS=-DINTERLACE=$(INTERLACE) -DHAM_MODE=$(HAM_MODE) -DCOMPRESSED_IMAGES=$(COMPRESSED_IMAGES)
 IMAGECON_ARGS= --dither --ham
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=-ham.bin))
 else
-VASM_EXTRA_ARGS=-DINTERLACE=$(INTERLACE) -DHAM_MODE=$(HAM_MODE) 
+VASM_EXTRA_ARGS=-DINTERLACE=$(INTERLACE) -DHAM_MODE=$(HAM_MODE) -DCOMPRESSED_IMAGES=$(COMPRESSED_IMAGES)
 IMAGECON_ARGS=--colors 32 --quantize 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 endif
@@ -48,7 +51,7 @@ out/%.bin.sz: out/%.bin
 
 
 out/%-ham.bin: out/%.sized.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette $(DITHER) --output out/$* --use-palette=palettes/$*.pal
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette $(DITHER) --output out/$* 
 
 out/main.o: $(SIZEDIMAGEDATA) $(IMAGEDATA) $(SHRUNKDATA) constants.i Makefile link.script
 out/init.o: constants.i Makefile
