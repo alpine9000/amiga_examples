@@ -34,7 +34,8 @@ LoadImage1:
 	movem.l	d0-a6,-(sp)	
 	bsr	doynaxdepack
 	movem.l (sp)+,d0-a6
-	
+
+	jsr 	WaitVerticalBlank	
 	jsr	(a2)
 	bsr	SetupImage
 	rts
@@ -52,6 +53,7 @@ LoadImage2:
 	bsr	doynaxdepack
 	movem.l (sp)+,d0-a6
 
+	jsr 	WaitVerticalBlank	
 	jsr	(a2)
 	bsr	SetupImage
 	rts	
