@@ -3,13 +3,13 @@ EXAMPLE_NAME=slideshow
 SHRINKLER=0
 INTERLACE=1
 HAM_MODE=1
-COMPRESSED_IMAGES=0
+COMPRESSED_IMAGES=1
 
 BOOTBLOCK_ASM=alpine_bootblock.s
 
 OBJS=out/init.o out/utils.o out/trackloader.o out/image.o
 
-IMAGES=mr.png mr2.png mr3.png mr4.png mr5.png mr6.png mr7.png
+IMAGES=mr.png mr2.png mr3.png mr4.png mr5.png mr6.png mr7.png mr8.png
 
 USERSTACK_ADDRESS=7fffc
 BASE_ADDRESS=10000
@@ -27,7 +27,7 @@ IMAGECON_ARGS=--colors 32 --quantize
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 endif
 
-SHRUNKDATA=$(IMAGEDATA:.bin=.bin.sz)
+SHRUNKDATA=$(IMAGEDATA:.bin=.lz)
 SIZEDIMAGEDATA=$(addprefix out/, $(IMAGES:.png=.sized.png))
 
 ifeq ($(INTERLACE),1)
@@ -46,9 +46,8 @@ out/%.sized.png: ../assets/%.png
 out/%.bin: out/%.sized.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette $(DITHER) --output out/$*
 
-out/%.bin.sz: out/%.bin
-	 $(SHRINKLEREXE) -d $< $@
-
+out/%.lz: out/%.bin
+	$(DOYNAMITE68K) $<
 
 out/%-ham.bin: out/%.sized.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette $(DITHER) --output out/$* 

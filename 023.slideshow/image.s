@@ -21,52 +21,21 @@ LoadNextImage:
 	movem.l (sp)+,d0-a6
 	rts
 
-Callback:
-	;; d0 = Number of bytes decompressed so far
-	;; a0 = Callback argument
-	move.l	a6,-(sp)
-	lea 	CUSTOM,a6
-	move.w  d0,COLOR00(a6)		;  Set wild background colors as we decompress
-	move.l	(sp)+,a6
-	rts	
 	
 LoadImage1:
 	;; d0 - size
 	;; a1 - start address
 	;; a2 - InstallColorPalette(X) address
-	if COMPRESSED_IMAGES==1
 
-	move.l	a2,a3
 	move.l	bitplanesp3,a0	; Load compressed data into bitplanes3
-
-	else; COMPRESSED_IMAGES==0
-
-	move.l	bitplanesp1,a0		
-
-	endif; COMPRESSED_IMAGES==1
-
-
 	bsr	DoLoadImage
 
-	if COMPRESSED_IMAGES==1
-
-	;; Decompress
-	; a0 = compressed data
-	; a1 = decompressed data destination
 	move.l	bitplanesp1,a1
-	; a2 = progress callback, can be zero if no callback is desired.
-	lea	Callback(pc),a2
-	bsr 	ShrinklerDecompress 	; -> decompress!
-	jsr	(a3)
-
-	else; COMPRESSED_IMAGES==10
-
-	jsr	(a2)	
-
-	endif; COMPRESSED_IMAGES==1 
+	movem.l	d0-a6,-(sp)	
+	bsr	doynaxdepack
+	movem.l (sp)+,d0-a6
 	
-
-	move.l	bitplanesp1,a1
+	jsr	(a2)
 	bsr	SetupImage
 	rts
 
@@ -74,34 +43,16 @@ LoadImage2:
 	;; d0 - size
 	;; a1 - start address
 	;; a2 - InstallColorPalette(X) address
-	if COMPRESSED_IMAGES==1 
-	move.l	a2,a3
-	move.l	bitplanesp3,a0	; Load compressed data into bitplanes3
-	else; COMPRESSED_IMAGES==0
-	move.l	bitplanesp2,a0	
-	endif; COMPRESSED_IMAGES==1 
 
+	move.l	bitplanesp3,a0	; Load compressed data into bitplanes3
 	bsr	DoLoadImage
 
-	if COMPRESSED_IMAGES==1 
-
-	;; Decompress
-	; a0 = compressed data
-	; a1 = decompressed data destination
 	move.l	bitplanesp2,a1
-	; a2 = progress callback, can be zero if no callback is desired.
-	lea	Callback(pc),a2
-	bsr 	ShrinklerDecompress 	; -> decompress!
-	jsr	(a3)
-
-	else; COMPRESSED_IMAGES==0
+	movem.l	d0-a6,-(sp)	
+	bsr	doynaxdepack
+	movem.l (sp)+,d0-a6
 
 	jsr	(a2)
-
-	endif; COMPRESSED_IMAGES==1 
-	
-
-	move.l	bitplanesp2,a1
 	bsr	SetupImage
 	rts	
 	
@@ -178,12 +129,16 @@ imageLookupTable:
 	dc.l	imageData6
 	dc.l	endImageData6-imageData6				
 	dc.l	LoadImage1
-	dc.l	0
 	
 	dc.l	InstallColorPalette7
 	dc.l	imageData7
 	dc.l	endImageData7-imageData7
 	dc.l	LoadImage2
+
+	dc.l	InstallColorPalette8
+	dc.l	imageData8
+	dc.l	endImageData8-imageData8
+	dc.l	LoadImage1
 	dc.l	0
 
 imageIndex:
@@ -209,128 +164,83 @@ InstallColorPalette6:
 	rts
 InstallColorPalette7:
 	include "out/mr7-palette.s"
-	rts	
+	rts
+InstallColorPalette8:
+	include "out/mr8-palette.s"
+	rts		
 
-	
-	include "../tools/external/shrinkler/ShrinklerDecompress.S"
+	include "../tools/external/doynamite68k/depacker_doynax.asm"
 	
 	section .photo		
 
 	cnop	0,512
 imageData1:	
-	if COMPRESSED_IMAGES==1 
 	if HAM_MODE==1
-	incbin	"out/mr-ham.bin.sz"
+	incbin	"out/mr-ham.lz"
 	else
-	incbin	"out/mr.bin.sz"
-	endif
-	else
-	if HAM_MODE==1
-	incbin	"out/mr-ham.bin"
-	else
-	incbin	"out/mr.bin"
-	endif
+	incbin	"out/mr.lz"
 	endif
 endImageData1:	
 	
 	cnop	0,512
 imageData2:	
-	if COMPRESSED_IMAGES==1 
 	if HAM_MODE==1
-	incbin	"out/mr2-ham.bin.sz"
+	incbin	"out/mr2-ham.lz"
 	else
-	incbin	"out/mr2.bin.sz"
-	endif
-	else
-	if HAM_MODE==1
-	incbin	"out/mr2-ham.bin"
-	else
-	incbin	"out/mr2.bin"
-	endif
+	incbin	"out/mr2.lz"
 	endif
 endImageData2:		
 
 	cnop	0,512
 imageData3:
-	if COMPRESSED_IMAGES==1 
 	if HAM_MODE==1
-	incbin	"out/mr3-ham.bin.sz"
+	incbin	"out/mr3-ham.lz"
 	else
-	incbin	"out/mr3.bin.sz"
-	endif
-	else
-	if HAM_MODE==1
-	incbin	"out/mr3-ham.bin"
-	else
-	incbin	"out/mr3.bin"
-	endif
+	incbin	"out/mr3.lz"
 	endif
 endImageData3:
 	
 	cnop	0,512
 imageData4:	
-	if COMPRESSED_IMAGES==1 
 	if HAM_MODE==1
-	incbin	"out/mr4-ham.bin.sz"
+	incbin	"out/mr4-ham.lz"
 	else
-	incbin	"out/mr4.bin.sz"
-	endif
-	else
-	if HAM_MODE==1
-	incbin	"out/mr4-ham.bin"
-	else
-	incbin	"out/mr4.bin"
-	endif
+	incbin	"out/mr4.lz"
 	endif
 endImageData4:	
 	
 	cnop	0,512
 imageData5:
-	if COMPRESSED_IMAGES==1 	
 	if HAM_MODE==1
-	incbin	"out/mr5-ham.bin.sz"
+	incbin	"out/mr5-ham.lz"
 	else
-	incbin	"out/mr5.bin.sz"
-	endif
-	else
-	if HAM_MODE==1
-	incbin	"out/mr5-ham.bin"
-	else
-	incbin	"out/mr5.bin"
-	endif
+	incbin	"out/mr5.lz"
 	endif
 endImageData5:	
 	
 	cnop	0,512
 imageData6:	
-	if COMPRESSED_IMAGES==1 
 	if HAM_MODE==1
-	incbin	"out/mr6-ham.bin.sz"
+	incbin	"out/mr6-ham.lz"
 	else
-	incbin	"out/mr6.bin.sz"
-	endif
-	else
-	if HAM_MODE==1
-	incbin	"out/mr6-ham.bin"
-	else
-	incbin	"out/mr6.bin"
-	endif
+	incbin	"out/mr6.lz"
 	endif
 endImageData6:
 
 	cnop	0,512
 imageData7:	
-	if COMPRESSED_IMAGES==1 
 	if HAM_MODE==1
-	incbin	"out/mr7-ham.bin.sz"
+	incbin	"out/mr7-ham.lz"
 	else
-	incbin	"out/mr7.bin.sz"
+	incbin	"out/mr7.lz"
 	endif
-	else
+endImageData7:
+
+	cnop	0,512
+imageData8:	
 	if HAM_MODE==1
-	incbin	"out/mr7-ham.bin"
+	incbin	"out/mr8-ham.lz"
 	else
-	incbin	"out/mr7.bin"
+	incbin	"out/mr8.lz"
 	endif
-	endif
-endImageData7:			
+endImageData8:
