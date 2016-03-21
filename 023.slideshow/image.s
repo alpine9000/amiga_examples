@@ -16,8 +16,8 @@ LoadNextImage:
 	move.l	4(a3),a1	; address of compressed image on disk
 	move.l	8(a3),d0	; size of compressed image
 	move.l	12(a3),a3	; address of LoadImage(X)
-	jsr	(a3)
-	add.l	#16,imageIndex
+	jsr	(a3)		; call the appropriate LoadImage
+	add.l	#16,imageIndex  ; 4 words of data in LUT per image
 	movem.l (sp)+,d0-a6
 	rts
 
@@ -27,17 +27,17 @@ LoadImage1:
 	;; a1 - start address
 	;; a2 - InstallColorPalette(X) address
 
-	move.l	bitplanesp3,a0	; Load compressed data into bitplanes3
-	bsr	DoLoadImage
+	move.l	bitplanesp3,a0		; load compressed data into bitplanes3
+	bsr	DoLoadImage		; load data from disk
 
-	move.l	bitplanesp1,a1
+	move.l	bitplanesp1,a1		; decompress into bitplanesp1
 	movem.l	d0-a6,-(sp)	
-	bsr	doynaxdepack
+	bsr	doynaxdepack		; decompress data
 	movem.l (sp)+,d0-a6
 
-	jsr 	WaitVerticalBlank	
-	jsr	(a2)
-	bsr	SetupImage
+	jsr 	WaitVerticalBlank	; avoid tearing when we show the new image
+	jsr	(a2)			; install new color palette
+	bsr	SetupImage		; display new image
 	rts
 
 LoadImage2:
@@ -45,17 +45,17 @@ LoadImage2:
 	;; a1 - start address
 	;; a2 - InstallColorPalette(X) address
 
-	move.l	bitplanesp3,a0	; Load compressed data into bitplanes3
-	bsr	DoLoadImage
+	move.l	bitplanesp3,a0	 	; load compressed data into bitplanes3
+	bsr	DoLoadImage		; load data from disk
 
-	move.l	bitplanesp2,a1
+	move.l	bitplanesp2,a1		; decompress into bitplanesp2
 	movem.l	d0-a6,-(sp)	
-	bsr	doynaxdepack
+	bsr	doynaxdepack		; decompress data 
 	movem.l (sp)+,d0-a6
 
-	jsr 	WaitVerticalBlank	
-	jsr	(a2)
-	bsr	SetupImage
+	jsr 	WaitVerticalBlank 	; avoid tearing when we show the new image
+	jsr	(a2)			; install new color palette
+	bsr	SetupImage		; display new image
 	rts	
 	
 
@@ -80,7 +80,7 @@ DoLoadImage:
 	;; a1 - start address
 	;; d0 - size
 	movem.l	d0-a6,-(sp)
-	lea 	$dff002,a6			;Loader uses this custom base addr
+	lea 	$dff002,a6	; LoadMFMB uses this custom base addr
 
 	move.l	d0,d1
 	
@@ -96,16 +96,16 @@ DoLoadImage:
 	lsr.l	#6,d1		; bytes -> sectors
 	lsr.l	#3,d1
 	neg.w	d1
-	jsr 	LoadMFMB	
+	jsr 	LoadMFMB	; load the data!
 	
 	movem.l (sp)+,d0-a6
 	rts
 
-imageLookupTable:
-	dc.l	InstallColorPalette
-	dc.l	imageData1
-	dc.l	endImageData1-imageData1
-	dc.l	LoadImage2
+imageLookupTable:				; configure slideshow here
+	dc.l	InstallColorPalette 		; palette installation routine
+	dc.l	imageData1			; compressed image data
+	dc.l	endImageData1-imageData1	; compressed image data size
+	dc.l	LoadImage2			; TODO: this will go when I am not as lazy
 	
 	dc.l	InstallColorPalette2
 	dc.l	imageData2
@@ -141,7 +141,7 @@ imageLookupTable:
 	dc.l	imageData8
 	dc.l	endImageData8-imageData8
 	dc.l	LoadImage1
-	dc.l	0
+	dc.l	0		; terminate list
 
 imageIndex:
 	dc.l	0
@@ -171,12 +171,12 @@ InstallColorPalette8:
 	include "out/mr8-palette.s"
 	rts		
 
+	;; this is one FAST decompression routine!
 	include "../tools/external/doynamite68k/depacker_doynax.asm"
 	
-	section .photo		
-
-	cnop	0,512
-imageData1:	
+	section .photo		; data in this section will not be loaded by the bootloader
+	cnop	0,512		; each image must be aligned to a sector boundary
+imageData1:			; because I am too lazy to read non aligned data
 	if HAM_MODE==1
 	incbin	"out/mr-ham.lz"
 	else
@@ -184,8 +184,8 @@ imageData1:
 	endif
 endImageData1:	
 	
-	cnop	0,512
-imageData2:	
+	cnop	0,512		; each image must be aligned to a sector boundary
+imageData2:			; because I am too lazy to read non aligned data
 	if HAM_MODE==1
 	incbin	"out/mr2-ham.lz"
 	else
@@ -193,7 +193,7 @@ imageData2:
 	endif
 endImageData2:		
 
-	cnop	0,512
+	cnop	0,512		; each image must be aligned to a sector boundary
 imageData3:
 	if HAM_MODE==1
 	incbin	"out/mr3-ham.lz"
@@ -202,7 +202,7 @@ imageData3:
 	endif
 endImageData3:
 	
-	cnop	0,512
+	cnop	0,512		; each image must be aligned to a sector boundary
 imageData4:	
 	if HAM_MODE==1
 	incbin	"out/mr4-ham.lz"
@@ -211,7 +211,7 @@ imageData4:
 	endif
 endImageData4:	
 	
-	cnop	0,512
+	cnop	0,512		; each image must be aligned to a sector boundary
 imageData5:
 	if HAM_MODE==1
 	incbin	"out/mr5-ham.lz"
@@ -220,7 +220,7 @@ imageData5:
 	endif
 endImageData5:	
 	
-	cnop	0,512
+	cnop	0,512		; each image must be aligned to a sector boundary
 imageData6:	
 	if HAM_MODE==1
 	incbin	"out/mr6-ham.lz"
@@ -229,7 +229,7 @@ imageData6:
 	endif
 endImageData6:
 
-	cnop	0,512
+	cnop	0,512		; each image must be aligned to a sector boundary
 imageData7:	
 	if HAM_MODE==1
 	incbin	"out/mr7-ham.lz"
@@ -238,7 +238,7 @@ imageData7:
 	endif
 endImageData7:
 
-	cnop	0,512
+	cnop	0,512		; each image must be aligned to a sector boundary
 imageData8:	
 	if HAM_MODE==1
 	incbin	"out/mr8-ham.lz"
