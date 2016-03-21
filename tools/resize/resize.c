@@ -163,14 +163,15 @@ main(int argc, char **argv)
   int newHeight = config.height;
   
   if (config.verbose) {
-    printf("width = %d, height = %d = %f\n", width, height, (float)width/(float)height);
-    printf("config.width = %d, config.height = %d = %f\n", config.width, config.height, configRatio);
+    printf("width = %d, height = %d ratio = %f\n", width, height, (float)width/(float)height);
+    printf("config.width = %d, config.height = %d configRatio = %f\n", config.width, config.height, configRatio);
   }
 
+  float ratio = (float)width/(float)height;
   wScale = (float)height/(float)config.height;
   hScale = (float)width/(float)config.width;
   
-  if (width > height && wScale >= configRatio) {
+  if (ratio >= configRatio) {
     newWidth = width/wScale;
   } else {
 
