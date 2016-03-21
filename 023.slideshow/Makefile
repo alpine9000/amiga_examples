@@ -24,6 +24,7 @@ IMAGECON_ARGS=--colors 32 --quantize
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 endif
 
+SHRUNKDATA=$(IMAGEDATA:.bin=.bin.sz)
 SIZEDIMAGEDATA=$(addprefix out/, $(IMAGES:.png=.sized.png))
 
 ifeq ($(INTERLACE),1)
@@ -42,8 +43,12 @@ out/%.sized.png: ../assets/%.png
 out/%.bin: out/%.sized.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette $(DITHER) --output out/$*
 
+out/%.bin.sz: out/%.bin
+	 $(SHRINKLEREXE) -d $< $@
+
+
 out/%-ham.bin: out/%.sized.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette $(DITHER) --output out/$* --use-palette=palettes/$*.pal
 
-out/main.o: $(SIZEDIMAGEDATA) $(IMAGEDATA) constants.i Makefile link.script
+out/main.o: $(SIZEDIMAGEDATA) $(IMAGEDATA) $(SHRUNKDATA) constants.i Makefile link.script
 out/init.o: constants.i Makefile

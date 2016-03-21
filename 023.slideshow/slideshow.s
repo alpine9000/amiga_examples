@@ -5,15 +5,16 @@
 	xref	Level3InterruptHandler
 	xref	copperList
 	xref 	copperListAlternate
-	xref	imageSize
-	xref 	bitplanes
-	xref 	bitplanes2
 	xref 	InstallColorPalette
 	xref 	InstallColorPalette2
 	xref 	InstallColorPalette3
 	xref 	InstallColorPalette4
 	xref 	InstallColorPalette5
 	xref 	InstallColorPalette6
+	xref 	bitplanesp1
+	xref 	bitplanesp2
+	xref 	bitplanesp3
+
 	
 byteMap:
 	dc.l	Entry
@@ -126,76 +127,32 @@ copperList:
 	dc.w	BPL6PTH,0
 	dc.l	$fffffffe		
 
-imageSize:
-	dc.l	endbitplanes-InstallColorPalette		
-	
-	section .photo		
 InstallColorPalette:
 	include "out/mr-palette.s"
-	rts
-bitplanes:
-	if HAM_MODE==1
-	incbin	"out/mr-ham.bin"
-	else
-	incbin	"out/mr.bin"
-	endif
-endbitplanes:
-
-
-	cnop	0,512
+	rts	
 InstallColorPalette2:
 	include "out/catwoman-palette.s"
 	rts
-bitplanes2:	
-	if HAM_MODE==1
-	incbin	"out/catwoman-ham.bin"
-	else
-	incbin	"out/catwoman.bin"
-	endif
-endbitplanes2:
-
-
-	cnop	0,512	
 InstallColorPalette3:
 	include "out/batgirl-palette.s"
 	rts
-	if HAM_MODE==1
-	incbin	"out/batgirl-ham.bin"
-	else
-	incbin	"out/batgirl.bin"
-	endif
-endbitplanes3:
-
-
-	cnop	0,512
 InstallColorPalette4:
 	include "out/kb-palette.s"
 	rts
-	if HAM_MODE==1
-	incbin	"out/kb-ham.bin"
-	else
-	incbin	"out/kb.bin"
-	endif
-endbitplanes4:
-
-	cnop	0,512
 InstallColorPalette5:
 	include "out/fe-palette.s"
 	rts
-	if HAM_MODE==1
-	incbin	"out/fe-ham.bin"
-	else
-	incbin	"out/fe.bin"
-	endif
-endbitplanes5:
-
-	cnop	0,512
 InstallColorPalette6:
 	include "out/ww-palette.s"
 	rts
-	if HAM_MODE==1
-	incbin	"out/ww-ham.bin"
-	else
-	incbin	"out/ww.bin"
-	endif
-endbitplanes6:		
+
+	align	4
+
+
+bitplanesp1:
+	dc.l	endCode
+bitplanesp2:
+	dc.l	endCode+(512)+IMAGESIZE
+bitplanesp3:
+	dc.l	endCode+(512*2)+(2*IMAGESIZE)
+	
