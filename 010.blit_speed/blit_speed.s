@@ -7,7 +7,7 @@
 entry:
 	lea 	CUSTOM,a6
 	bsr	init
-	bsr.s	installColorPalette
+	bsr	installColorPalette
 	
 	lea	bitplanes(pc),a0
 	lea	emoji,a1
@@ -19,7 +19,7 @@ entry:
 .blitLoop:
 	bsr	moveBlitterObject
 	dbra	d0,.blitLoop
-	bsr.s	installColorPalette
+	bsr	installColorPalette
 	bra.s	.mainLoop
 
 	include	"blit.s"
@@ -31,7 +31,7 @@ moveBlitterObject:
 	lea	ypos(pc),a4
 	add.l	#1,xpos		; move the blitter object one pixel to the left
 	add.l	#1,ypos		; move the blitter object one pixel down
-	bsr.s 	blitMaskedObject64	; blit 64 pixel object (x=d0,y=d1,background=a0,object=a1,mask=a2)
+	bsr 	blitMaskedObject64	; blit 64 pixel object (x=d0,y=d1,background=a0,object=a1,mask=a2)
 	cmp.l	#SCREEN_WIDTH-BLIT_BOB_WIDTH64+16,xpos	; check if we need to wrap the x
 	bne.s	.skip
 	move.l	#0,xpos					; wrap x back to 0

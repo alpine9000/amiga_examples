@@ -6,7 +6,7 @@ init:
 	move	#$7fff,INTENA(a6) ; disable all interrupts	
 
 	;; set up default palette
-	bsr.s	installColorPalette
+	bsr	installColorPalette
 	
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)

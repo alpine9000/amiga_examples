@@ -7,7 +7,7 @@
 entry:
 	lea 	CUSTOM,a6
 	bsr	init
-	bsr.s	installColorPalette
+	bsr	installColorPalette
 	
 .mainLoop:
 	bsr 	waitVerticalBlank
