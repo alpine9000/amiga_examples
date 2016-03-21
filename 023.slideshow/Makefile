@@ -6,7 +6,7 @@ HAM_MODE=1
 
 BOOTBLOCK_ASM=alpine_bootblock.s
 
-OBJS=out/init.o out/utils.o out/trackloader.o
+OBJS=out/init.o out/utils.o out/trackloader.o out/image.o
 
 IMAGES=mr.png batgirl.png catwoman.png kb.png fe.png ww.png
 
@@ -32,7 +32,8 @@ else
 FLAGS=--height=256
 endif
 
-LINK_COMMANDLINE=vlink -T link.script -brawbin1 $< $(OBJS) -M -o  $@
+#-M
+LINK_COMMANDLINE=vlink -T link.script -brawbin1 $< $(OBJS)  -o  $@
 include ../shared/base.mk
 
 out/%.sized.png: ../assets/%.png
@@ -42,8 +43,7 @@ out/%.bin: out/%.sized.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette $(DITHER) --output out/$*
 
 out/%-ham.bin: out/%.sized.png
-	echo $(IMAGEDATA)
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette $(DITHER) --output out/$*
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette $(DITHER) --output out/$* --use-palette=palettes/$*.pal
 
 out/main.o: $(SIZEDIMAGEDATA) $(IMAGEDATA) constants.i Makefile link.script
 out/init.o: constants.i Makefile

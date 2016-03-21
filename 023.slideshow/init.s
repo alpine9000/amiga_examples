@@ -10,7 +10,7 @@ Init:
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6) ; disable all interrupts	
 
-	lea	level3InterruptHandler,a3
+	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR	
 	
 	;; set up playfield

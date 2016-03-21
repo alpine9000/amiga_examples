@@ -2,13 +2,19 @@
 
 	xref	InstallColorPalette
 	xref 	PokeBitplanePointers
+	xref	Level3InterruptHandler
 	xref	copperList
 	xref 	copperListAlternate
-	xref 	MFMbuf
-	xref	level3InterruptHandler
-
-IMAGESIZE	equ	endbitplanes-InstallColorPalette
-
+	xref	imageSize
+	xref 	bitplanes
+	xref 	bitplanes2
+	xref 	InstallColorPalette
+	xref 	InstallColorPalette2
+	xref 	InstallColorPalette3
+	xref 	InstallColorPalette4
+	xref 	InstallColorPalette5
+	xref 	InstallColorPalette6
+	
 byteMap:
 	dc.l	Entry
 	dc.l	endCode-byteMap
@@ -17,79 +23,25 @@ Entry:
 	move.l	#userstack,a7
 	lea 	CUSTOM,a6
 	
-	lea	InstallColorPalette,a1
-	bsr	LoadImage1
+	jsr	LoadNextImage
 	jsr	Init	
 	
 .mainLoop:
 	jsr 	WaitVerticalBlank
 
-	cmp.l	#0,doLoad
-	beq	.updateCounter
-
-.image1:
-	cmp.l	#0,imageIndex
-	bne	.image2
-	lea	InstallColorPalette2,a1
-	bsr	LoadImage2
-
-.image2:
-	cmp.l	#1,imageIndex
-	bne	.image3
-	lea	InstallColorPalette3,a1
-	bsr	LoadImage1
-
-.image3:
-	cmp.l	#2,imageIndex
-	bne	.image4
-	lea	InstallColorPalette4,a1
-	bsr	LoadImage2
-
-.image4:
-	cmp.l	#3,imageIndex
-	bne	.image5
-	lea	InstallColorPalette5,a1
-	bsr	LoadImage1
-
-.image5:
-	cmp.l	#4,imageIndex
-	bne	.image6	
-	lea	InstallColorPalette6,a1
-	bsr	LoadImage2
-
-.image6:
-	cmp.l	#5,imageIndex
-	bne	.image7	
-	lea	InstallColorPalette,a1
-	bsr	LoadImage1
-	move.l	#0,imageIndex
-	bra	.updateCounter
-
-.image7:
-.incr
-	add.l	#1,imageIndex
+	cmp.l	#50*5,counter
+	bne	.updateCounter
+	jsr	LoadNextImage
+	move.l	#0,counter
 
 .updateCounter:
-	move.l	#0,doLoad
-	cmp.l	#50*5,counter
-	beq	.display
 	add.l	#1,counter
-	bra	.done
-
-.display:
-	move.l	#0,counter
-	move.l	#1,doLoad	
-.done
 	bra	.mainLoop
 
-doLoad:
-	dc.l	0
 counter:
 	dc.l	0
-imageIndex:
-	dc.l	0
 
-level3InterruptHandler:
+Level3InterruptHandler:
 	movem.l	d0-a6,-(sp)
 	lea	CUSTOM,a6
 .checkVerticalBlank:
@@ -120,68 +72,7 @@ level3InterruptHandler:
 .interruptComplete:
 	movem.l	(sp)+,d0-a6
 	rte	
-	
-LoadImage1:
-	;; a1 - start address
-	lea	InstallColorPalette,a0
-	move.l	#IMAGESIZE,d0
-	bsr	DoLoadImage
-	jsr	InstallColorPalette
-	lea	bitplanes,a1
-	bsr	SetupImage
-	rts
-	
-LoadImage2:
-	;; a1 - start address
-	lea	InstallColorPalette2,a0
-	move.l	#IMAGESIZE,d0
-	bsr	DoLoadImage
-	jsr	InstallColorPalette2
-	lea	bitplanes2,a1
-	bsr	SetupImage
-	rts
 
-SetupImage:
-	;; a1 - bitplanes address
-	movem.l	d0-a6,-(sp)
-	if INTERLACE==1
-	;; poke the bitplane pointers for the two copper lists.
-	move.l	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH,d0
-	lea 	copperListAlternate,a0
-	jsr	PokeBitplanePointers
-	endif
-	
-	moveq.l	#0,d0
-	lea 	copperList,a0
-	jsr	PokeBitplanePointers
-	movem.l (sp)+,d0-a6
-	rts
-
-DoLoadImage:
-	;; a0 - destination address
-	;; a1 - start address
-	;; d0 - size
-	movem.l	d0-a6,-(sp)
-	lea 	$dff002,a6			;Loader uses this custom base addr
-
-	move.l	d0,d1
-	
-	move.l	a1,d0
-	move.l	#startCode,d2
-	sub.l	d2,d0		; offset from start of this module
-	lsr.l	#6,d0		; bytes -> sectors
-	lsr.l	#3,d0		
-	add.l	#2,d0		; offset for bootblock
-
-	
-	add.l	#512,d1
-	lsr.l	#6,d1		; bytes -> sectors
-	lsr.l	#3,d1
-	neg.w	d1
-	jsr 	LoadMFMB	
-	
-	movem.l (sp)+,d0-a6
-	rts
 	
 PokeBitplanePointers:
 	; d0 = frame offset in bytes
@@ -235,6 +126,9 @@ copperList:
 	dc.w	BPL6PTH,0
 	dc.l	$fffffffe		
 
+imageSize:
+	dc.l	endbitplanes-InstallColorPalette		
+	
 	section .photo		
 InstallColorPalette:
 	include "out/mr-palette.s"
