@@ -8,17 +8,20 @@ BOOTBLOCK_ASM=alpine_bootblock.s
 
 OBJS=out/init.o out/utils.o out/trackloader.o out/image.o
 
-IMAGES=mr.png mr2.png mr3.png mr4.png mr5.png mr6.png mr7.png mr8.png
+ifeq ($(INTERLACE),0)
+NOINTERLACE_EXTRA=mr8.png
+endif
 
+IMAGES=mr.png mr2.png mr3.png mr4.png  mr6.png mr9.png mr10.png $(NOINTERLACE_EXTRA)
 USERSTACK_ADDRESS=7fffc # userstack used by bootblock
 BASE_ADDRESS=10000	# if you change this you must also change link.script
 
-#--use-palette=palettes/$*.pal
+USE_PALETTES=--use-palette=palettes/$*.pal
 
 VASM_EXTRA_ARGS=-DSECONDS_WAIT=$(SECONDS_WAIT) -DINTERLACE=$(INTERLACE) -DHAM_MODE=$(HAM_MODE)
 
 ifeq ($(HAM_MODE),1)
-IMAGECON_ARGS= --dither --ham
+IMAGECON_ARGS= --dither --ham $(USE_PALETTES)
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=-ham.bin))
 else
 IMAGECON_ARGS=--colors 32 --quantize 

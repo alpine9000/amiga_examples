@@ -119,11 +119,12 @@ imageLookupTable:				; configure slideshow here
 	dc.l	imageData6
 	dc.l	endImageData6-imageData6				
 
-	if	INTERLACE==0	
+
 	dc.l	InstallColorPalette7
 	dc.l	imageData7
 	dc.l	endImageData7-imageData7
 
+	if	INTERLACE==0		
 	dc.l	InstallColorPalette8
 	dc.l	imageData8
 	dc.l	endImageData8-imageData8
@@ -169,17 +170,19 @@ InstallColorPalette4:
 	include "out/mr4-palette.s"
 	rts
 InstallColorPalette5:
-	include "out/mr5-palette.s"
+	include "out/mr9-palette.s"
 	rts
 InstallColorPalette6:
 	include "out/mr6-palette.s"
 	rts
 InstallColorPalette7:
-	include "out/mr7-palette.s"
+	include "out/mr10-palette.s"
 	rts
+	if INTERLACE==0
 InstallColorPalette8:
 	include "out/mr8-palette.s"
-	rts		
+	rts
+	endif; INTERLACE==0
 	
 	section .photo		; data in this section will not be loaded by the bootloader
 	cnop	0,512		; each image must be aligned to a sector boundary
@@ -221,9 +224,9 @@ endImageData4:
 	cnop	0,512		; each image must be aligned to a sector boundary
 imageData5:
 	if HAM_MODE==1
-	incbin	"out/mr5-ham.lz"
+	incbin	"out/mr9-ham.lz"
 	else
-	incbin	"out/mr5.lz"
+	incbin	"out/mr9.lz"
 	endif
 endImageData5:	
 	
@@ -236,16 +239,16 @@ imageData6:
 	endif
 endImageData6:
 
-	if INTERLACE==0	
 	cnop	0,512		; each image must be aligned to a sector boundary
 imageData7:	
 	if HAM_MODE==1
-	incbin	"out/mr7-ham.lz"
+	incbin	"out/mr10-ham.lz"
 	else
-	incbin	"out/mr7.lz"
+	incbin	"out/mr10.lz"
 	endif
 endImageData7:
 
+	if INTERLACE==0		
 	cnop	0,512		; each image must be aligned to a sector boundary
 imageData8:	
 	if HAM_MODE==1
