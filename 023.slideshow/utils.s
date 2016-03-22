@@ -1,5 +1,6 @@
 	xref 	WaitVerticalBlank
 	xref	WaitRaster
+	xref	Depack
 	
 WaitVerticalBlank:	
 	movem.l d0-a6,-(sp)
@@ -9,9 +10,7 @@ WaitVerticalBlank:
 	bne.b	.loop
 	movem.l (sp)+,d0-a6
 	rts	
-
-
-
+	
 WaitRaster:		;wait for rasterline d0.w. Modifies d0-d2/a0.
 	movem.l d0-a6,-(sp)
 	move.l #$1ff00,d2
@@ -24,3 +23,14 @@ WaitRaster:		;wait for rasterline d0.w. Modifies d0-d2/a0.
 	bne.s .wr
 	movem.l (sp)+,d0-a6
 	rts
+
+Depack:
+	;a0 = input buffer to be decompressed. Must be 16-bit aligned!
+	;a1 = output buffer. Points to the end of the data at exit
+	movem.l	d0-a6,-(sp)	
+	bsr	doynaxdepack		; decompress data
+	movem.l (sp)+,d0-a6
+	rts
+
+	;; this is one FAST decompression routine!
+	include "../tools/external/doynamite68k/depacker_doynax.asm"	

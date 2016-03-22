@@ -7,11 +7,11 @@
 	;; custom chip base globally in a6
 Init:
 	movem.l	d0-a6,-(sp)
-	move	#$7ff,DMACON(a6)	; disable all dma
-	move	#$7fff,INTENA(a6) ; disable all interrupts	
+	;; move	#$7ff,DMACON(a6)	; disable all dma
+	;; 	move	#$7fff,INTENA(a6) ; disable all interrupts	
 
-	lea	Level3InterruptHandler,a3
- 	move.l	a3,LVL3_INT_VECTOR	
+	;; 	lea	Level3InterruptHandler,a3
+	;;  	move.l	a3,LVL3_INT_VECTOR	
 	
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)

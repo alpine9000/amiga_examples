@@ -1,6 +1,7 @@
 	include "includes.i"
 
 	xref LoadNextImage	
+	xref LoadModule
 	
 LoadNextImage:
 	movem.l	d0-a6,-(sp)
@@ -30,9 +31,9 @@ LoadImage:
 
 	move.l	nextbitplane,a1		; decompress into offscreen bitplanesp(1/2)
 	move.l	(a1),a1		
-	movem.l	d0-a6,-(sp)	
-	bsr	doynaxdepack		; decompress data
-	movem.l (sp)+,d0-a6
+	;a0 = Input buffer to be decompressed. Must be 16-bit aligned!
+	;a1 = Output buffer. Points to the end of the data at exit
+	jsr	Depack
 
 	jsr 	WaitVerticalBlank	; avoid tearing when we show the new image
 	jsr	(a2)			; install new color palette
@@ -117,12 +118,12 @@ imageLookupTable:				; configure slideshow here
 	dc.l	InstallColorPalette6
 	dc.l	imageData6
 	dc.l	endImageData6-imageData6				
-	
+
+	if	INTERLACE==0	
 	dc.l	InstallColorPalette7
 	dc.l	imageData7
 	dc.l	endImageData7-imageData7
 
-	if	INTERLACE==0
 	dc.l	InstallColorPalette8
 	dc.l	imageData8
 	dc.l	endImageData8-imageData8
@@ -133,6 +134,27 @@ imageIndex:
 	dc.l	0
 nextbitplane:
 	dc.l	bitplanesp1
+
+LoadModule:
+	;; a0 - destination address
+	;; a1 - start address
+	;; d0 - size
+	movem.l	d0-a6,-(sp)
+	lea	endCode,a0
+	lea	compressedModule,a1
+	move.l	#endCompressedModule,d0
+	sub.l	#compressedModule,d0
+	jsr	DoLoadImage
+
+	;a0 = input buffer to be decompressed. Must be 16-bit aligned!
+	;a1 = output buffer. Points to the end of the data at exit
+	lea	endCode,a0
+	lea	Module1,a1
+	move.l	(a1),a1
+	jsr	Depack
+	
+	movem.l (sp)+,d0-a6
+	rts
 	
 InstallColorPalette:
 	include "out/mr-palette.s"
@@ -158,9 +180,6 @@ InstallColorPalette7:
 InstallColorPalette8:
 	include "out/mr8-palette.s"
 	rts		
-
-	;; this is one FAST decompression routine!
-	include "../tools/external/doynamite68k/depacker_doynax.asm"
 	
 	section .photo		; data in this section will not be loaded by the bootloader
 	cnop	0,512		; each image must be aligned to a sector boundary
@@ -217,6 +236,7 @@ imageData6:
 	endif
 endImageData6:
 
+	if INTERLACE==0	
 	cnop	0,512		; each image must be aligned to a sector boundary
 imageData7:	
 	if HAM_MODE==1
@@ -226,7 +246,6 @@ imageData7:
 	endif
 endImageData7:
 
-	if INTERLACE==0
 	cnop	0,512		; each image must be aligned to a sector boundary
 imageData8:	
 	if HAM_MODE==1
@@ -236,3 +255,9 @@ imageData8:
 	endif
 endImageData8:
 	endif; INTERLACE==0
+
+	cnop	0,512
+compressedModule:
+	incbin "../assets/P61.breath_of_life.lz"
+endCompressedModule:
+

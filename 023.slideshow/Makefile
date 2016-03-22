@@ -1,5 +1,6 @@
 EXAMPLE_NAME=slideshow
 
+SECONDS_WAIT=10
 INTERLACE=1
 HAM_MODE=1
 
@@ -9,18 +10,17 @@ OBJS=out/init.o out/utils.o out/trackloader.o out/image.o
 
 IMAGES=mr.png mr2.png mr3.png mr4.png mr5.png mr6.png mr7.png mr8.png
 
-USERSTACK_ADDRESS=7fffc
-BASE_ADDRESS=10000
-DECOMPRESS_ADDRESS=10000
+USERSTACK_ADDRESS=7fffc # userstack used by bootblock
+BASE_ADDRESS=10000	# if you change this you must also change link.script
 
 #--use-palette=palettes/$*.pal
 
+VASM_EXTRA_ARGS=-DSECONDS_WAIT=$(SECONDS_WAIT) -DINTERLACE=$(INTERLACE) -DHAM_MODE=$(HAM_MODE)
+
 ifeq ($(HAM_MODE),1)
-VASM_EXTRA_ARGS=-DINTERLACE=$(INTERLACE) -DHAM_MODE=$(HAM_MODE)
 IMAGECON_ARGS= --dither --ham
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=-ham.bin))
 else
-VASM_EXTRA_ARGS=-DINTERLACE=$(INTERLACE) -DHAM_MODE=$(HAM_MODE)
 IMAGECON_ARGS=--colors 32 --quantize 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 endif
@@ -34,8 +34,8 @@ else
 FLAGS=--height=256
 endif
 
-#-M
-LINK_COMMANDLINE=vlink -T link.script -brawbin1 $< $(OBJS)  -o  $@
+#SYMBOL_INFO=-M
+LINK_COMMANDLINE=vlink -T link.script -brawbin1 $< $(OBJS) $(SYMBOL_INFO) -o $@
 include ../shared/base.mk
 
 out/%.sized.png: ../assets/%.png
