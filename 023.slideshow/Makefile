@@ -1,6 +1,6 @@
 EXAMPLE_NAME=slideshow
 
-INTERLACE=0
+INTERLACE=1
 HAM_MODE=1
 
 BOOTBLOCK_ASM=alpine_bootblock.s

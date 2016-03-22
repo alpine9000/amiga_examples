@@ -15,22 +15,21 @@ LoadNextImage:
 	move.l	(a1),a2		; address of InsallColorPalette(X)
 	move.l	4(a3),a1	; address of compressed image on disk
 	move.l	8(a3),d0	; size of compressed image
-	move.l	12(a3),a3	; address of LoadImage(X)
-	jsr	(a3)		; call the appropriate LoadImage
-	add.l	#16,imageIndex  ; 4 words of data in LUT per image
+	jsr	LoadImage
+	add.l	#12,imageIndex  ; 3 words of data in LUT per image
 	movem.l (sp)+,d0-a6
 	rts
-
 	
-LoadImage1:
+LoadImage:
 	;; d0 - size
 	;; a1 - start address
 	;; a2 - InstallColorPalette(X) address
-
+	
 	move.l	bitplanesp3,a0		; load compressed data into bitplanes3
 	bsr	DoLoadImage		; load data from disk
 
-	move.l	bitplanesp1,a1		; decompress into bitplanesp1
+	move.l	nextbitplane,a1		; decompress into offscreen bitplanesp(1/2)
+	move.l	(a1),a1		
 	movem.l	d0-a6,-(sp)	
 	bsr	doynaxdepack		; decompress data
 	movem.l (sp)+,d0-a6
@@ -38,25 +37,18 @@ LoadImage1:
 	jsr 	WaitVerticalBlank	; avoid tearing when we show the new image
 	jsr	(a2)			; install new color palette
 	bsr	SetupImage		; display new image
+
+
+	;; toggle offscreen bitplane
+	cmp.l	#bitplanesp1,nextbitplane
+	beq	.setbitplanesp2
+.setbitplanesp1:
+	move.l	#bitplanesp1,nextbitplane
+	bra	.done
+.setbitplanesp2:
+	move.l	#bitplanesp2,nextbitplane	
+.done:
 	rts
-
-LoadImage2:
-	;; d0 - size
-	;; a1 - start address
-	;; a2 - InstallColorPalette(X) address
-
-	move.l	bitplanesp3,a0	 	; load compressed data into bitplanes3
-	bsr	DoLoadImage		; load data from disk
-
-	move.l	bitplanesp2,a1		; decompress into bitplanesp2
-	movem.l	d0-a6,-(sp)	
-	bsr	doynaxdepack		; decompress data 
-	movem.l (sp)+,d0-a6
-
-	jsr 	WaitVerticalBlank 	; avoid tearing when we show the new image
-	jsr	(a2)			; install new color palette
-	bsr	SetupImage		; display new image
-	rts	
 	
 
 SetupImage:
@@ -105,47 +97,43 @@ imageLookupTable:				; configure slideshow here
 	dc.l	InstallColorPalette 		; palette installation routine
 	dc.l	imageData1			; compressed image data
 	dc.l	endImageData1-imageData1	; compressed image data size
-	dc.l	LoadImage2			; TODO: this will go when I am not as lazy
 	
 	dc.l	InstallColorPalette2
 	dc.l	imageData2
 	dc.l	endImageData2-imageData2
-	dc.l	LoadImage1
 
 	dc.l	InstallColorPalette3
 	dc.l	imageData3
 	dc.l	endImageData3-imageData3	
-	dc.l	LoadImage2	
 
 	dc.l	InstallColorPalette4
 	dc.l	imageData4
 	dc.l	endImageData4-imageData4		
-	dc.l	LoadImage1	
 
 	dc.l	InstallColorPalette5
 	dc.l	imageData5
 	dc.l	endImageData5-imageData5			
-	dc.l	LoadImage2	
 
 	dc.l	InstallColorPalette6
 	dc.l	imageData6
 	dc.l	endImageData6-imageData6				
-	dc.l	LoadImage1
 	
 	dc.l	InstallColorPalette7
 	dc.l	imageData7
 	dc.l	endImageData7-imageData7
-	dc.l	LoadImage2
 
+	if	INTERLACE==0
 	dc.l	InstallColorPalette8
 	dc.l	imageData8
 	dc.l	endImageData8-imageData8
-	dc.l	LoadImage1
+	endif; INTERLACE==0
 	dc.l	0		; terminate list
 
 imageIndex:
 	dc.l	0
-
+nextbitplane:
+	dc.l	bitplanesp1
+	
 InstallColorPalette:
 	include "out/mr-palette.s"
 	rts	
@@ -238,6 +226,7 @@ imageData7:
 	endif
 endImageData7:
 
+	if INTERLACE==0
 	cnop	0,512		; each image must be aligned to a sector boundary
 imageData8:	
 	if HAM_MODE==1
@@ -246,3 +235,4 @@ imageData8:
 	incbin	"out/mr8.lz"
 	endif
 endImageData8:
+	endif; INTERLACE==0

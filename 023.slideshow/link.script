@@ -12,8 +12,6 @@ load : {
       *(.data)
       *(CODE)
       *(DATA)
-      . = . + 0x1000;
-      userstack = .;
       endCode = .;
       } > ram
 

@@ -15,7 +15,7 @@ byteMap:
 	dc.l	endCode-byteMap
 
 Entry:
-	move.l	#userstack,a7
+	move.l	userstack,a7
 	lea 	CUSTOM,a6
 	
 	jsr	LoadNextImage
@@ -133,4 +133,5 @@ bitplanesp2:
 	dc.l	endCode+(512)+IMAGESIZE
 bitplanesp3:
 	dc.l	endCode+(512*2)+(2*IMAGESIZE)
-	
+userstack:
+	dc.l	endCode+(512*3)+(3*IMAGESIZE)+$1000
