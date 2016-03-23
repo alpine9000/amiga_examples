@@ -262,6 +262,6 @@ endImageData8:
 
 	cnop	0,512
 compressedModule:
-	incbin "../assets/P61.breath_of_life.lz"
+	incbin "out/P61.breath_of_life.lz"
 endCompressedModule:
 
