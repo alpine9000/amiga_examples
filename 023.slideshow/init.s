@@ -1,7 +1,7 @@
 
 	include "includes.i"
 
-	xref Init
+	xdef Init
 
 	section CODE
 	;; custom chip base globally in a6

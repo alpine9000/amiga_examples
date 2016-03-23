@@ -6,7 +6,7 @@ HAM_MODE=1
 
 BOOTBLOCK_ASM=alpine_bootblock.s
 
-OBJS=out/init.o out/utils.o out/trackloader.o out/image.o
+OBJS=out/init.o out/utils.o out/trackloader.o out/image.o out/blitter.o
 
 ifeq ($(INTERLACE),0)
 NOINTERLACE_EXTRA=mr8.png

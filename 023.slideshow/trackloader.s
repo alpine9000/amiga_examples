@@ -1,6 +1,6 @@
 *** MFMLoader.S by Photon ***	;requires a6=$dff002
 
-	xref LoadMFMB
+	xdef 	LoadMFMB
 
 MFMsync		equ	$4489		;AmigaDOS standard sync marker.
 MFMlen		equ	12980		;Legacy trackdata read length in bytes	

@@ -1,14 +1,14 @@
 	include "includes.i"
 	include "P6112-Options.i"
 	
-	xref 	PokeBitplanePointers
-	xref	Level3InterruptHandler
-	xref	copperList
-	xref 	copperListAlternate
-	xref 	bitplanesp1
-	xref 	bitplanesp2
-	xref 	bitplanesp3
-	xref	Module1
+	xdef 	PokeBitplanePointers
+	xdef	Level3InterruptHandler
+	xdef	copperList
+	xdef 	copperListAlternate
+	xdef 	bitplanesp1
+	xdef 	bitplanesp2
+	xdef 	bitplanesp3
+	xdef	Module1
 	
 byteMap:
 	dc.l	Entry
@@ -36,6 +36,16 @@ Entry:
 	jsr 	P61_Init
 
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
+
+	move.l	bitplanesp2,a0	; setup an empty bitplane
+	move.l	#IMAGESIZE,d0
+	jsr	ClearMemory	; clear it
+	jsr	WaitBlitter	; make sure it's clear
+
+	move.l	a0,a1
+	bsr	SetupImage	; select it
+	
+	jsr	Init		; enable the playfield
 	
 	move.l	#50*10,d0
 .loop:
@@ -44,7 +54,7 @@ Entry:
 	
 	jsr	LoadNextImage				
 
-	jsr	Init
+
 
 .mainLoop:
 	jsr 	WaitVerticalBlank

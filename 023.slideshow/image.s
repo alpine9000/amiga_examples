@@ -1,7 +1,8 @@
 	include "includes.i"
 
-	xref LoadNextImage	
-	xref LoadModule
+	xdef 	LoadNextImage	
+	xdef	LoadModule
+	xdef 	SetupImage
 	
 LoadNextImage:
 	movem.l	d0-a6,-(sp)
