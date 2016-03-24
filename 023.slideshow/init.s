@@ -1,9 +1,7 @@
-
 	include "includes.i"
 
 	xdef Init
 
-	section CODE
 	;; custom chip base globally in a6
 Init:
 	movem.l	d0-a6,-(sp)

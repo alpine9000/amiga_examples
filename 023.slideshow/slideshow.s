@@ -17,7 +17,7 @@ Entry:
 	lea	userstack,a7
 	lea 	CUSTOM,a6
 
-	;; move	#$7ff,DMACON(a6)	; disable all dma
+	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6) 	; disable all interrupts		
 	
 	move.w  d0,COLOR00(a6)		; black screen
@@ -34,6 +34,7 @@ Entry:
 	jsr 	P61_Init
 
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
+
 	lea	bitplanes2,a0
 	move.l	#IMAGESIZE/4,d0
 .clear:
@@ -44,6 +45,8 @@ Entry:
 	bsr	SetupImage	; select it
 
 	jsr 	WaitVerticalBlank	
+
+	
 	jsr	Init		; enable the playfield
 	
 	move.l	#50*10,d0
@@ -173,8 +176,8 @@ bitplanes2:
 	ds.b	IMAGESIZE+(512*2)
 bitplanes3:
 	ds.b	IMAGESIZE+(512*3)
+Module:
+	ds.b	111700		; size of uncompressed module
 startUserstack:
-	ds.b	$1000
-userstack:	
-endUserstack:
-Module:	
+	ds.b	$1000		; size of stack
+userstack:

@@ -8,7 +8,7 @@ USERSTACK_ADDRESS=7fffc # userstack used by bootblock
 BASE_ADDRESS=800	# if you change this you must also change link.script.x
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/trackloader.o out/image.o out/blitter.o out/module.o out/disk.o out/data.o
+OBJS=out/init.o out/utils.o out/trackloader.o out/image.o out/module.o out/disk.o out/data.o
 
 ifeq ($(INTERLACE),0)
 NOINTERLACE_EXTRA=image8.png
