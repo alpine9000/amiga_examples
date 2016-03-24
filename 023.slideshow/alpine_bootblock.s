@@ -240,7 +240,8 @@ MotorOff:
 LoadTrak:		;loadtrack+decode.a0=dst,d0=secoffs,d1=secsleft
 	MOVE.W	D0,-(SP)
 	MOVE.W	D1,-(SP)
-	lea	(MFMbuf).w,a1
+	;; 	lea	(MFMbuf).w,a1
+	lea	(MFMbuf),a1
 	move.w	#2,$9c-2(a6)		;Clr Req
 	move.l	a1,$20-2(a6)
 	move.w	#$8210,$96-2(a6)	;DskEna
@@ -335,7 +336,8 @@ BootE:
 	cnop	0,1024
 
 ;MFMbuf is placed here after bootblock end, $3c0.w or so when copied.
-MFMbuf	equ	LoaderVars+(BootE-CopyStart)
+MFMbuf	equ	$E0000
+;; MFMbuf	equ	LoaderVars+(BootE-CopyStart)
 MFMbufE	equ 	MFMbuf+MFMlen	;lowest free address. $372e for a full bootblock.
 	
 mainStart:

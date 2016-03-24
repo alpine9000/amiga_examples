@@ -2,23 +2,22 @@
 	include "P6112-Options.i"
 	
 	xdef 	PokeBitplanePointers
-	xdef	Level3InterruptHandler
 	xdef	copperList
 	xdef 	copperListAlternate
-	xdef 	bitplanesp1
-	xdef 	bitplanesp2
-	xdef 	bitplanesp3
-	xdef	Module1
+	xdef 	bitplanes1
+	xdef 	bitplanes2
+	xdef 	bitplanes3
+	xdef	Module
 	
 byteMap:
 	dc.l	Entry
 	dc.l	endCode-byteMap
 
 Entry:
-	move.l	userstack,a7
+	lea	userstack,a7
 	lea 	CUSTOM,a6
 
-	move	#$7ff,DMACON(a6)	; disable all dma
+	;; move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6) 	; disable all interrupts		
 	
 	move.w  d0,COLOR00(a6)		; black screen
@@ -28,23 +27,23 @@ Entry:
  	move.l	a3,LVL3_INT_VECTOR			
 	
 	;; initialise P61
-	lea 	Module1,a0
-	move.l	(a0),a0
+	lea	Module,a0
 	sub.l 	a1,a1
 	sub.l 	a2,a2
 	moveq 	#0,d0
 	jsr 	P61_Init
 
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
-
-	move.l	bitplanesp2,a0	; setup an empty bitplane
-	move.l	#IMAGESIZE,d0
-	jsr	ClearMemory	; clear it
-	jsr	WaitBlitter	; make sure it's clear
-
-	move.l	a0,a1
-	bsr	SetupImage	; select it
+	lea	bitplanes2,a0
+	move.l	#IMAGESIZE/4,d0
+.clear:
+	move.l	#0,(a0)+
+	dbra	d0,.clear
 	
+	lea	bitplanes2,a1
+	bsr	SetupImage	; select it
+
+	jsr 	WaitVerticalBlank	
 	jsr	Init		; enable the playfield
 	
 	move.l	#50*10,d0
@@ -82,9 +81,6 @@ Level3InterruptHandler:
 
 .verticalBlank:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
-	movem.l	d0-a6,-(sp)
-	;; jsr 	P61_Music		; and call the playroutine manually.
-	movem.l	(sp)+,d0-a6	
 
 	if INTERLACE==1
 	btst	#VPOSRLOFBIT,VPOSR(a6)
@@ -166,19 +162,19 @@ copperList:
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
 	dc.l	$fffffffe		
-
-	;; Module1:
-	;; incbin "../assets/P61.sowhat-intro"			;usecode $9410
 	
 	align	4
-	
-bitplanesp1:
-	dc.l	endCode
-bitplanesp2:
-	dc.l	endCode+(512)+IMAGESIZE
-bitplanesp3:
-	dc.l	endCode+(512*2)+(2*IMAGESIZE)
-userstack:
-	dc.l	endCode+(512*3)+(3*IMAGESIZE)+$1000
-Module1:
-	dc.l	endCode+(512*3)+(3*IMAGESIZE)+$1000+4
+
+	section .bss
+
+bitplanes1:	
+	ds.b	IMAGESIZE+512
+bitplanes2:
+	ds.b	IMAGESIZE+(512*2)
+bitplanes3:
+	ds.b	IMAGESIZE+(512*3)
+startUserstack:
+	ds.b	$1000
+userstack:	
+endUserstack:
+Module:	

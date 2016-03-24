@@ -5,16 +5,16 @@ INTERLACE=1
 HAM_MODE=1
 
 USERSTACK_ADDRESS=7fffc # userstack used by bootblock
-BASE_ADDRESS=10000	# if you change this you must also change link.script
+BASE_ADDRESS=800	# if you change this you must also change link.script.x
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/trackloader.o out/image.o out/blitter.o
+OBJS=out/init.o out/utils.o out/trackloader.o out/image.o out/blitter.o out/module.o out/disk.o out/data.o
 
 ifeq ($(INTERLACE),0)
-NOINTERLACE_EXTRA=mr8.png
+NOINTERLACE_EXTRA=image8.png
 endif
 
-IMAGES=mr.png mr2.png mr3.png mr4.png  mr6.png mr9.png mr10.png $(NOINTERLACE_EXTRA)
+IMAGES=image1.png image2.png image3.png image4.png image5.png image6.png image7.png $(NOINTERLACE_EXTRA)
 
 P61MODULE=out/P61.breath_of_life.lz
 
@@ -30,6 +30,8 @@ IMAGECON_ARGS=--colors 32 --quantize
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 endif
 
+
+
 SHRUNKDATA=$(IMAGEDATA:.bin=.lz)
 SIZEDIMAGEDATA=$(addprefix out/, $(IMAGES:.png=.sized.png))
 
@@ -40,11 +42,12 @@ FLAGS=--height=256
 endif
 
 #SYMBOL_INFO=-M
-LINK_COMMANDLINE=vlink -T link.script -brawbin1 $< $(OBJS) $(SYMBOL_INFO) -o $@
+#LINK_COMMANDLINE=vlink -T link.script.x -brawbin1 $< $(OBJS) $(SYMBOL_INFO) -osec=out/main && cat out/main.load out/main.photo > out/main.bin
+LINK_COMMANDLINE=vlink -T link.script.x -brawbin1 $< $(OBJS) $(SYMBOL_INFO) -o out/main.bin
+
 include ../shared/base.mk
 
-
-out/%.sized.png: ../assets/%.png
+out/%.sized.png: assets/%.png
 	$(RESIZE) --width=320  $(FLAGS) --blur=0.75 --input=$< --output=$@
 
 out/%.bin: out/%.sized.png
@@ -59,5 +62,5 @@ out/%.lz: ../assets/%.mod
 out/%-ham.bin: out/%.sized.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette $(DITHER) --output out/$* 
 
-out/main.o: $(P61MODULE) $(SIZEDIMAGEDATA) $(IMAGEDATA) $(SHRUNKDATA) constants.i Makefile link.script
+out/main.o: $(P61MODULE) $(SIZEDIMAGEDATA) $(IMAGEDATA) $(SHRUNKDATA) constants.i Makefile link.script.x
 out/init.o: constants.i Makefile
