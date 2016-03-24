@@ -2,14 +2,17 @@
 	xdef	WaitRaster
 	xdef	Depack
 	
-	
 WaitVerticalBlank:	
-	movem.l d0-a6,-(sp)
-.loop	move.l	$dff004,d0
+	movem.l	d0,-(sp)
+.loop:	move.l	$dff004,d0
 	and.l	#$1ff00,d0
-	cmp.l	#303<<8,d0
+	cmp.l	#303<<8,d0	; wait for the scan line
 	bne.b	.loop
-	movem.l (sp)+,d0-a6
+.loop2	move.l	$dff004,d0
+	and.l	#$1ff00,d0
+	cmp.l	#303<<8,d0	; wait for the scal line to pass (A4000 is fast!)
+	beq.b	.loop2
+	movem.l (sp)+,d0
 	rts	
 
 

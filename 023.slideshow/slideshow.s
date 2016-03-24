@@ -8,6 +8,8 @@
 	xdef 	bitplanes2
 	xdef 	bitplanes3
 	xdef	Module
+	xdef	copperListBplPtr
+	xdef	copperListAlternateBplPtr
 	
 byteMap:
 	dc.l	Entry
@@ -84,16 +86,17 @@ Level3InterruptHandler:
 
 .verticalBlank:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
-
 	if INTERLACE==1
 	btst	#VPOSRLOFBIT,VPOSR(a6)
 	beq.s	.lof
 	lea	copperListAlternate,a0
 	move.l	a0,COP1LC(a6)
+ 	move.w  COPJMP1(a6),d0
 	bra	.done
 .lof:
 	lea	copperList,a0
 	 move.l	a0,COP1LC(a6)
+ 	move.w  COPJMP1(a6),d0
 .done
 	endif ; INTERLACE==1
 
@@ -134,7 +137,7 @@ Playrtn:
 	
 	if INTERLACE==1
 copperListAlternate:
-	;; bitplane pointers must be first else poking addresses will be incorrect
+copperListAlternateBplPtr:
 	dc.w	BPL1PTL,0
 	dc.w	BPL1PTH,0
 	dc.w	BPL2PTL,0
@@ -147,11 +150,14 @@ copperListAlternate:
 	dc.w	BPL5PTH,0
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
+	dc.w	$106,$c00	;AGA sprites, palette and dual playfield reset
+	dc.w	$1FC,0		;AGA sprites and burst reset
+	dc.l	$fffffffe
 	dc.l	$fffffffe
 	endif; INTERLACE==1
 	
 copperList:
-	;; bitplane pointers must be first else poking addresses will be incorrect
+copperListBplPtr:
 	dc.w	BPL1PTL,0
 	dc.w	BPL1PTH,0
 	dc.w	BPL2PTL,0
@@ -164,7 +170,10 @@ copperList:
 	dc.w	BPL5PTH,0
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
-	dc.l	$fffffffe		
+	dc.w	$106,$c00	;AGA sprites, palette and dual playfield reset
+	dc.w	$1FC,0		;AGA sprites and burst reset
+	dc.l	$fffffffe
+	dc.l	$fffffffe			
 	
 	align	4
 

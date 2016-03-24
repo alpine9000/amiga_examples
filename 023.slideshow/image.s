@@ -57,12 +57,12 @@ SetupImage:
 	if INTERLACE==1
 	;; poke the bitplane pointers for the two copper lists.
 	move.l	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH,d0
-	lea 	copperListAlternate,a0
+	lea 	copperListAlternateBplPtr,a0
 	jsr	PokeBitplanePointers
 	endif
 	
 	moveq.l	#0,d0
-	lea 	copperList,a0
+	lea 	copperListBplPtr,a0
 	jsr	PokeBitplanePointers
 	movem.l (sp)+,d0-a6
 	rts
