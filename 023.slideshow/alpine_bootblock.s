@@ -33,15 +33,20 @@ BootCode:	;gathers some data, turns off OS, copies itself to $100
 					;from floppy. No GetVBR needed.
     *--- Fastmem available? ---*
 
+	if 1
 	move.l	#$20004,d1		;fast+largest
+	else
+	move.l	#$20002,d1		;chip+largest
+	endif
 	jsr 	-216(a6)		;AvailMem()
 	move.l 	d0,d5
+
 	sub.l	#2048,d5		;leave room for stacks to grow
 	moveq 	#4,d1
 	jsr 	-198(a6)		;AllocMem()
 	and.l 	#-8,d0
 	move.l 	d0,a5			;Start Address
-
+	
     *--- OS off ---*			;you're nice'n all, but now you die.
 
 	lea 	$dff002,a6		;Loader uses this custom base addr
@@ -336,8 +341,7 @@ BootE:
 	cnop	0,1024
 
 ;MFMbuf is placed here after bootblock end, $3c0.w or so when copied.
-MFMbuf	equ	$E0000
-;; MFMbuf	equ	LoaderVars+(BootE-CopyStart)
+MFMbuf	equ	LoaderVars+(BootE-CopyStart)
 MFMbufE	equ 	MFMbuf+MFMlen	;lowest free address. $372e for a full bootblock.
 	
 mainStart:

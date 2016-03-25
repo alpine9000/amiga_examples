@@ -5,7 +5,8 @@ INTERLACE=1
 HAM_MODE=1
 
 USERSTACK_ADDRESS=7fffc # userstack used by bootblock
-BASE_ADDRESS=800	# if you change this you must also change link.script.x
+BASE_ADDRESS=4000	# if you change this you must also change link.script.x
+			# note: this must be high enough not to conflict with MFMbufE
 
 BOOTBLOCK_ASM=alpine_bootblock.s
 OBJS=out/init.o out/utils.o out/trackloader.o out/image.o out/module.o out/disk.o out/data.o
@@ -41,7 +42,7 @@ else
 FLAGS=--height=256
 endif
 
-#SYMBOL_INFO=-M
+SYMBOL_INFO=-M
 #LINK_COMMANDLINE=vlink -T link.script.x -brawbin1 $< $(OBJS) $(SYMBOL_INFO) -osec=out/main && cat out/main.load out/main.photo > out/main.bin
 LINK_COMMANDLINE=vlink -T link.script.x -brawbin1 $< $(OBJS) $(SYMBOL_INFO) -o out/main.bin
 

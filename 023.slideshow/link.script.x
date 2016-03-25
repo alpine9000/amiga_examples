@@ -1,6 +1,6 @@
 MEMORY 
 {
-    disk: org = 0x800, len = 0xDB800
+    disk: org = 0x4000, len = 901120-0x4000
     ram: org = 0x00000, len = 0x80000
 }
 
