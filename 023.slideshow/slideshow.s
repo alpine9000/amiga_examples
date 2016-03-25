@@ -89,12 +89,12 @@ Level3InterruptHandler:
 	if INTERLACE==1
 	btst	#VPOSRLOFBIT,VPOSR(a6)
 	beq.s	.lof
-	lea	copperListAlternate,a0
+	lea	copperList,a0
 	move.l	a0,COP1LC(a6)
  	move.w  COPJMP1(a6),d0
 	bra	.done
 .lof:
-	lea	copperList,a0
+	lea	copperListAlternate,a0
 	 move.l	a0,COP1LC(a6)
  	move.w  COPJMP1(a6),d0
 .done
