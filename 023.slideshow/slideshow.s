@@ -38,7 +38,7 @@ Entry:
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
 
 	lea	bitplanes2,a0
-	move.l	#IMAGESIZE/4,d0
+	move.l	#(IMAGESIZE/4)-1,d0
 .clear:
 	move.l	#0,(a0)+
 	dbra	d0,.clear
@@ -51,7 +51,7 @@ Entry:
 	
 	jsr	Init		; enable the playfield
 	
-	move.l	#50*10,d0
+	move.l	#(50*10)-1,d0
 .loop:
 	jsr 	WaitVerticalBlank
 	dbra	d0,.loop

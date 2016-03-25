@@ -47,7 +47,7 @@ level3InterruptHandler:
 .resetBitplanePointers:
 	lea	bitplanes(pc),a1
 	lea     BPL1PTH(a5),a2
-	moveq	#SCREEN_BIT_DEPTH,d0
+	moveq	#SCREEN_BIT_DEPTH-1,d0
 .bitplaneloop:
 	move.l	a1,(a2)
 	lea	SCREEN_WIDTH_BYTES(a1),a1 ; bit plane data is interleaved
