@@ -2,9 +2,8 @@
 	
 	xdef 	PokeBitplanePointers
 	xdef	copperList
-	xdef 	bitplanes1
-	xdef 	bitplanes2
-	xdef 	bitplanes3
+	xdef	onscreen
+	xdef	offscreen
 	xdef	copperListBplPtr
 	
 byteMap:
@@ -25,52 +24,58 @@ Entry:
 	
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
 
-	lea	bitplanes1,a0
-	move.l	#4,d0		;color
+	move.l	offscreen,a0
+	move.l	#4,d0		; color#
 	jsr	CpuFillColor
-
-
-	jsr	DisplayBitplane	; select it	
-
-	if 0
-	lea	bitplanes2,a0
-	move.l	#3,d0		;color
-	jsr	CpuFillColor
-	endif
-
+	move.l	onscreen,a0
+	move.l	#4,d0		; color#
+	jsr	CpuFillColor	
+	
+	jsr	SwitchBuffers
 	
 	jsr	Init		; enable the playfield
 	
 .mainLoop:
-	jsr 	WaitVerticalBlank
-	jsr 	WaitVerticalBlank
-	jsr 	WaitVerticalBlank
-	jsr 	WaitVerticalBlank
-	jsr 	WaitVerticalBlank	
+	move.l	offscreen,a0
+	move.l	#4,d0		; color#
+	jsr	CpuFillColor
 
-	;; blitobject64
-	;; d0 - xpos
-	;; d1 - ypos
-	;; a0 - display
-	;; a1 - object
-	;; a2 - mask
-
-	;; add.l	#1,xpos
-	move.b	#0,d3
-	move.l  #0,xpos
+	move.l	direction,d0
+	add.l	d0,xpos
 	move.l	xpos,d0
 	move.l	#50,d1
-	lea	bitplanes1,a0
+	move.l	offscreen,a0
 	lea	text,a1
 	jsr	DrawText
+
+	jsr 	WaitVerticalBlank	
+	jsr	SwitchBuffers
+
+	cmp.l	#320-(26*8),xpos
+	ble	.notright
+	move.l	direction,d0
+	muls.w	#-1,d0
+	move.l	d0,direction
+	bra	.mainLoop
+.notright:
+	cmp.l	#0,xpos
+	bne	.mainLoop
+	move.l	direction,d0
+	muls.w	#-1,d0
+	move.l	d0,direction	
+	
 	bra	.mainLoop
 
+	
 text:
 	dc.b	"My first text on an Amiga!"
 	dc.b	0
 	align	4
 xpos:
 	dc.l	0
+direction:
+	dc.l	1
+	
 Level3InterruptHandler:
 	movem.l	d0-a6,-(sp)
 	lea	CUSTOM,a6
@@ -116,13 +121,15 @@ copperListBplPtr:
 InstallPalette:
 	include	"out/font-palette.s"
 	rts
+onscreen:
+	dc.l	bitplanes1
+offscreen:
+	dc.l	bitplanes2
 	section .bss	
 bitplanes1:
 	ds.b	IMAGESIZE+(512)
 bitplanes2:
 	ds.b	IMAGESIZE+(512*2)
-bitplanes3:
-	ds.b	IMAGESIZE+(512*3)
 startUserstack:
 	ds.b	$1000		; size of stack
 userstack:

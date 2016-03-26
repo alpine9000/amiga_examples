@@ -1,31 +1,13 @@
 	include "includes.i"
 
-	xdef DisplayBitplane
+	xdef SwitchBuffers
 		
-LoadImage:
-	;; d0 - size
-	;; a1 - start address
-	;; a2 - InstallColorPalette(X) address
-
-	lea	bitplanes3,a0
-	bsr	LoadDiskData		; load data from disk
-
-	;; move.l	nextbitplane,a1		; decompress into offscreen bitplanesp(1/2)
-	
-	;; a0 = Input buffer to be decompressed. Must be 16-bit aligned!
-	;; a1 = Output buffer. Points to the end of the data at exit
-	jsr	Depack
-
-	jsr 	WaitVerticalBlank	; avoid tearing when we show the new image
-	jsr	(a2)			; install new color palette
-	jsr	DisplayBitplane		; display new image
-
-	rts
-	
-
-DisplayBitplane:
-	;; a0 - bitplane address
+SwitchBuffers:
+	;; offscreen - bitplane address
 	movem.l	d0/a0-a1,-(sp)
+	move.l	offscreen,a0
+	move.l	onscreen,offscreen
+	move.l	a0,onscreen
 	moveq.l	#0,d0
 	move.l	a0,a1
 	lea 	copperListBplPtr,a0
