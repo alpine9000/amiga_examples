@@ -4,7 +4,11 @@ void palette_loadFile(imagecon_image_t* ic)
 {
   FILE* fp = file_openRead(config.overridePalette);
   int paletteIndex;
-  
+
+  if (config.verbose) {  
+    printf("palette_loadFile:\n");
+  }
+
   for (paletteIndex = 0; paletteIndex < MAX_PALETTE; paletteIndex++) {
 
     char buffer[255];
@@ -13,22 +17,29 @@ void palette_loadFile(imagecon_image_t* ic)
       break;
     }
 
-#if 1
-    unsigned int c;
-    sscanf(buffer, "%x\n", &c);
-    
-    ic->palette[paletteIndex].r = (c >> 8 & 0xF) << 4;
-    ic->palette[paletteIndex].g = (c >> 4 & 0xF) << 4;
-    ic->palette[paletteIndex].b = (c >> 0 & 0xF) << 4;
-    ic->palette[paletteIndex].a = 255;
-#else // 24 bit palette version
-    sscanf(buffer, "%d %d %d %d\n",
-	   &ic->palette[paletteIndex].r,
-	   &ic->palette[paletteIndex].g,
-	   &ic->palette[paletteIndex].b,
-	   &ic->palette[paletteIndex].a);
-	   
-#endif
+    if (!config.fullColorPaletteFile) {
+      unsigned int c;
+      sscanf(buffer, "%x\n", &c);
+      
+      ic->palette[paletteIndex].r = (c >> 8 & 0xF) << 4;
+      ic->palette[paletteIndex].g = (c >> 4 & 0xF) << 4;
+      ic->palette[paletteIndex].b = (c >> 0 & 0xF) << 4;
+      ic->palette[paletteIndex].a = 255;
+      
+      if (config.verbose) {
+	printf("%03d %03d %03d\n", ic->palette[paletteIndex].r, ic->palette[paletteIndex].g, ic->palette[paletteIndex].b);
+      }
+    } else {
+      sscanf(buffer, "%d %d %d %d\n",
+	     &ic->palette[paletteIndex].r,
+	     &ic->palette[paletteIndex].g,
+	     &ic->palette[paletteIndex].b,
+	     &ic->palette[paletteIndex].a);
+      
+      if (config.verbose) {
+	printf("r: %03d g: %03d b: %03d a: %03d\n", ic->palette[paletteIndex].r, ic->palette[paletteIndex].g, ic->palette[paletteIndex].b, ic->palette[paletteIndex].a);
+      }
+    }   
   }
 
   ic->numColors = paletteIndex;
@@ -74,11 +85,12 @@ palette_output(imagecon_image_t* ic, char* outFilename)
       printf("%02d: hex=%03x r=%03d g=%03d b=%03d a=%03d\n", i , ic->palette[i].r << 8 | ic->palette[i].g << 4 | ic->palette[i].b, ic->palette[i].r, ic->palette[i].g, ic->palette[i].b, ic->palette[i].a);
     }
     if (paletteFP) {
-#if 1
-      fprintf(paletteFP, "%03x\n",  RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b));
-#else // 24 bit palette
-      fprintf(paletteFP, "%03d %03d %03d %03d\n",  ic->palette[i].r , ic->palette[i].g , ic->palette[i].b, ic->palette[i].a);
-#endif
+
+      if (!config.fullColorPaletteFile) {
+	fprintf(paletteFP, "%03x\n",  RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b));
+      } else {
+	fprintf(paletteFP, "%03d %03d %03d %03d\n",  ic->palette[i].r , ic->palette[i].g , ic->palette[i].b, ic->palette[i].a);
+      }
     }
     if (paletteAsmFP) {
       fprintf(paletteAsmFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i+config.paletteOffset, RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b));

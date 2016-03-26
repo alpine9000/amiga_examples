@@ -18,6 +18,13 @@
 #define COLOR8(x) (x > 255.0 ? 255.0 : (x < 0.0 ? 0.0 : x))
 
 typedef struct {
+  int r;
+  int g;
+  int b;
+  int a;
+} amiga_color_t;
+
+typedef struct {
   int maxColors;
   int outputPalette;
   int outputPaletteAsm;
@@ -31,19 +38,15 @@ typedef struct {
   int slicedHam;
   int dither;
   char* overridePalette;
+  amiga_color_t* maskTransparentColor;
   int paletteOffset;
+  int fullColorPaletteFile;
   int quantize;
   int outputPng;
   int verbose;
-  char** argv;
+  char** argv;  
 } imagecon_config_t;
 
-typedef struct {
-  int r;
-  int g;
-  int b;
-  int a;
-} amiga_color_t;
 
 typedef struct {
   float r;

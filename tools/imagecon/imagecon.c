@@ -20,7 +20,9 @@ imagecon_config_t config = {
   .quantize = 0,
   .dither = 0,
   .overridePalette = 0,
-  .paletteOffset = 0
+  .paletteOffset = 0,
+  .maskTransparentColor = 0,
+  .fullColorPaletteFile = 0
 };
 
 
@@ -45,7 +47,9 @@ usage()
 	  "  --ham-brute-force\n"\
 	  "  --sliced-ham\n"\
           "  --dither\n"\
+	  "  --transparent-color <r,g,b>\n"\
 	  "  --use-palette <palette file>\n"\
+	  "  --full-color-palette-file\n"\
 	  "  --palette-offset <index>\n"\
 	  "  --verbose\n", config.argv[0]);
   exit(1);
@@ -304,7 +308,15 @@ outputMask(imagecon_image_t* ic, char* outFilename)
       for (int bit = 0; bit < 8; bit++) {	
 	int x = byte * 8 + 7 - bit;	
 	amiga_color_t c = color_getOriginalPixel(ic, x, y);
-	int bitmask = c.a > 0 ? 0xFF : 0;
+	int bitmask;
+	if (config.maskTransparentColor == 0) {
+	  bitmask = c.a > 0 ? 0xFF : 0;
+	} else {
+	  bitmask = 
+	    (c.r == config.maskTransparentColor->r &&
+	     c.g == config.maskTransparentColor->g &&
+	     c.b == config.maskTransparentColor->b) ? 0 : 0xff;
+	}
 	for (int plane_index = 0; plane_index < numBitPlanes; plane_index++) {
 	  char* plane = bitplanes[plane_index];
 	  plane[writeIndex] |= ((bitmask >> plane_index) & 1) << bit;
@@ -488,11 +500,13 @@ main(int argc, char **argv)
       {"ham-brute-force", no_argument, &config.hamBruteForce, 1},
       {"sliced-ham", no_argument, &config.slicedHam, 1},
       {"dither", no_argument, &config.dither, 1},
+      {"full-color-palette-file", no_argument, &config.fullColorPaletteFile, 1},
       {"use-palette", required_argument, 0, 'p'},
       {"palette-offset", required_argument, 0, 'l'},
       {"output",  required_argument, 0, 'o'},
       {"colors",  required_argument, 0, 'c'},
       {"input",   required_argument, 0, 'i'},
+      {"transparent-color",   required_argument, 0, 't'},
       {0, 0, 0, 0}
     };
     
@@ -528,6 +542,15 @@ main(int argc, char **argv)
 	abort_("Number of colors exceeds limit (%d colors)", MAX_PALETTE);
       }
       break;	      
+    case 't':
+      {
+	static amiga_color_t color;
+	if (sscanf(optarg, "%d,%d,%d",&color.r, &color.g, &color.b) != 3) {
+	  abort_("invalid transparent color");
+	}
+	config.maskTransparentColor = &color;
+      }
+      break;
     case '?':
       usage();
       break;	
