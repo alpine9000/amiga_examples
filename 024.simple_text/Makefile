@@ -1,0 +1,25 @@
+EXAMPLE_NAME=simple_text
+
+USERSTACK_ADDRESS=7fffc # userstack used by bootblock
+BASE_ADDRESS=4000	# if you change this you must also change link.script.x
+			# note: this must be high enough not to conflict with MFMbufE
+
+BOOTBLOCK_ASM=alpine_bootblock.s
+OBJS=out/init.o out/utils.o out/trackloader.o out/image.o  out/disk.o out/blit.o out/cpu.o
+
+
+IMAGES=font.png
+IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
+VASM_EXTRA_ARGS=
+
+#SYMBOL_INFO=-M
+LINK_COMMANDLINE=vlink -T link.script.x -brawbin1 $< $(OBJS) $(SYMBOL_INFO) -o out/main.bin
+
+include ../shared/base.mk
+
+
+out/%.bin: ../assets/%.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette --output out/$* --colors=16 --use-palette palette.pal --output-mask
+
+out/main.o: $(IMAGEDATA) constants.i Makefile link.script.x palette.pal
+out/init.o: constants.i Makefile
