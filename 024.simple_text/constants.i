@@ -1,6 +1,8 @@
+FONT_WIDTH		equ 8
 SCREEN_WIDTH		equ 320
 SCREEN_HEIGHT		equ 256
 SCREEN_WIDTH_BYTES	equ (SCREEN_WIDTH/8)
+SCREEN_WIDTH_WORDS	equ SCREEN_WIDTH_BYTES/2
 SCREEN_BIT_DEPTH	equ 4
 SCREEN_RES		equ 8 	; 8=lo resolution, 4=hi resolution
 RASTER_X_START		equ $81	; hard coded coordinates from hardware manual

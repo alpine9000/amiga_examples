@@ -1,6 +1,17 @@
+	include "includes.i"
+	
 	xdef 	WaitVerticalBlank
 	xdef	WaitRaster
+	xdef	WaitBlitter
 	xdef	Depack
+
+WaitBlitter:
+	tst	DMACONR(a6)		;for compatibility
+.waitblit:
+	btst	#6,DMACONR(a6)
+	bne.s 	.waitblit
+	rts
+
 	
 WaitVerticalBlank:	
 	movem.l	d0,-(sp)

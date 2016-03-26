@@ -30,24 +30,18 @@ BLIT_BOB_HEIGHT		equ 10
 BLIT_BOB_WIDTH_BYTES	equ BLIT_BOB_WIDTH/8
 BLIT_BOB_WIDTH_WORDS	equ BLIT_BOB_WIDTH/16
 	
-blitWait:
-	tst	DMACONR(a6)		;for compatibility
-.waitblit:
-	btst	#6,DMACONR(a6)
-	bne.s 	.waitblit
-	rts
 
-	;; blitobject
+	;; BlitText
 	;; d0 - xpos
 	;; d1 - ypos
 	;; d3 - odd character
 	;; a0 - display
 	;; a1 - object
 	;; a2 - mask
-blitText: 
+BlitText: 
 	movem.l	d0-a6,-(sp)
-	bsr	 blitWait
 
+	jsr	WaitBlitter
 	;; d0 = XPOS
 	;; d1 = YPOS
 	;; d3 = odd character
@@ -101,20 +95,19 @@ blitText:
 	movem.l (sp)+,d0-a6
 	rts
 
+	
 DrawText:
 	;; a0 - bitplane
 	;; a1 - text
 	;; d0 - xpos
-	;; d1 - ypos
-	
-
+	;; d1 - ypos	
 .loop:
 	clr.l	d2
 	move.b	(a1)+,d2
 	cmp.b	#0,d2
 	beq	.done
 	jsr	DrawChar
-	add.l	#8,d0
+	add.l	#FONT_WIDTH,d0
 	bra	.loop
 .done:
 	rts
@@ -153,7 +146,7 @@ DrawChar:
 
 	add.l	d2,a1
 	add.l	d2,a2
-	jsr	blitText
+	jsr	BlitText
 	movem.l	(sp)+,d0-a6
 	rts
 

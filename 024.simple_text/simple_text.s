@@ -21,29 +21,33 @@ Entry:
 
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR			
+
+	jsr	SwitchBuffers		
 	
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
+ 	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_MASTER),DMACON(a6) 		
 
-	move.l	offscreen,a0
-	move.l	#4,d0		; color#
-	jsr	CpuFillColor
 	move.l	onscreen,a0
-	move.l	#4,d0		; color#
-	jsr	CpuFillColor	
-	
-	jsr	SwitchBuffers
-	
-	jsr	Init		; enable the playfield
-	
+	move.l	#4,d0		 ; color#
+	move.w	#SCREEN_HEIGHT,d1 ; height
+	jsr	BlitFillColor
+	move.l	offscreen,a0
+	move.l	#4,d0		 ; color#
+	move.w	#SCREEN_HEIGHT,d1 ; height
+	jsr	BlitFillColor	
+
+	jsr	Init		; enable the playfield		
+
 .mainLoop:
 	move.l	offscreen,a0
 	move.l	#4,d0		; color#
-	jsr	CpuFillColor
+	move.w	#25,d1
+	jsr	BlitFillColor
 
 	move.l	direction,d0
 	add.l	d0,xpos
 	move.l	xpos,d0
-	move.l	#50,d1
+	move.l	#15,d1
 	move.l	offscreen,a0
 	lea	text,a1
 	jsr	DrawText
@@ -51,30 +55,30 @@ Entry:
 	jsr 	WaitVerticalBlank	
 	jsr	SwitchBuffers
 
-	cmp.l	#320-(26*8),xpos
-	ble	.notright
+	cmp.l	#SCREEN_WIDTH-((endText-text)*FONT_WIDTH),xpos
+	ble	.notRightEdge
 	move.l	direction,d0
 	muls.w	#-1,d0
 	move.l	d0,direction
 	bra	.mainLoop
-.notright:
+.notRightEdge:
 	cmp.l	#0,xpos
-	bne	.mainLoop
+	bne	.notLeftEdge
 	move.l	direction,d0
 	muls.w	#-1,d0
-	move.l	d0,direction	
-	
+	move.l	d0,direction
+.notLeftEdge:
 	bra	.mainLoop
-
 	
 text:
 	dc.b	"My first text on an Amiga!"
+endText:	
 	dc.b	0
 	align	4
 xpos:
 	dc.l	0
 direction:
-	dc.l	1
+	dc.l	2
 	
 Level3InterruptHandler:
 	movem.l	d0-a6,-(sp)
