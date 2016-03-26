@@ -5,7 +5,7 @@ BASE_ADDRESS=4000	# if you change this you must also change link.script.x
 			# note: this must be high enough not to conflict with MFMbufE
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/trackloader.o out/image.o  out/disk.o out/blittext.o out/cpu.o out/blit.o
+OBJS=out/init.o out/utils.o out/image.o out/blittext.o out/cpu.o out/blit.o
 
 IMAGES=font.png
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
