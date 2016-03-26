@@ -2,13 +2,10 @@
 	
 	xdef 	PokeBitplanePointers
 	xdef	copperList
-	xdef 	copperListAlternate
 	xdef 	bitplanes1
 	xdef 	bitplanes2
 	xdef 	bitplanes3
-	xdef	Module
 	xdef	copperListBplPtr
-	xdef	copperListAlternateBplPtr
 	
 byteMap:
 	dc.l	Entry
@@ -59,19 +56,19 @@ Entry:
 	;; a2 - mask
 
 	;; add.l	#1,xpos
-	move.l  #4,xpos
+	move.b	#0,d3
+	move.l  #0,xpos
 	move.l	xpos,d0
 	move.l	#50,d1
 	lea	bitplanes1,a0
-	if 1
-	sub.l	#2,a0
-	endif
-	lea	font,a1
-	lea	fontMask,a2
-	jsr	blitObject64
-
+	lea	text,a1
+	jsr	DrawText
 	bra	.mainLoop
 
+text:
+	dc.b	"My first text on an Amiga!"
+	dc.b	0
+	align	4
 xpos:
 	dc.l	0
 Level3InterruptHandler:
@@ -119,12 +116,6 @@ copperListBplPtr:
 InstallPalette:
 	include	"out/font-palette.s"
 	rts
-
-font:
-	incbin	"out/font.bin"
-fontMask:
-	incbin	"out/font-mask.bin"	
-
 	section .bss	
 bitplanes1:
 	ds.b	IMAGESIZE+(512)
