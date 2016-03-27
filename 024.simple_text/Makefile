@@ -11,7 +11,7 @@ IMAGES=font.png
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 VASM_EXTRA_ARGS=
 
-SYMBOL_INFO=-M
+#SYMBOL_INFO=-M
 LINK_COMMANDLINE=vlink -T link.script.x -brawbin1 $< $(OBJS) $(SYMBOL_INFO) -o out/main.bin
 
 include ../shared/base.mk

@@ -33,12 +33,14 @@ Entry:
 	move.w	#SCREEN_HEIGHT,d1 ; height
 	move.w	#0,d2		  ; ypos
 	jsr	BlitFillColor
+
 	move.l	offscreen,a0
 	move.l	#4,d0		  ; color#
 	move.w	#SCREEN_HEIGHT,d1 ; height
 	move.w	#0,d2		  ; ypos	
-	jsr	BlitFillColor	
-
+	jsr	BlitFillColor
+	
+	jsr     WaitBlitter	
 	jsr	Init		  ; enable the playfield		
 
 MainLoop:		
@@ -50,7 +52,8 @@ MainLoop:
 	move.w	#FONT_HEIGHT,d1	  ; height
 	move.l	ypos,d2		  ; ypos	
 	jsr	BlitFillColor
-
+	
+	move.l	offscreen,a0	
 	move.l	ypos2,d2	
 	jsr	BlitFillColor
 
