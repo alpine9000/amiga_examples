@@ -40,7 +40,7 @@ Entry:
 	move.w	#0,d2		  ; ypos	
 	jsr	BlitFillColor
 	
-	jsr     WaitBlitter	
+	WaitBlitter	
 	jsr	Init		  ; enable the playfield		
 
 MainLoop:		
@@ -70,7 +70,7 @@ MainLoop:
 
 	jsr	SwitchBuffers
 	
-	cmp.l	#SCREEN_WIDTH-((endText-text)*FONT_WIDTH),xpos
+	cmp.l	#SCREEN_WIDTH-1-((endText-text)*FONT_WIDTH),xpos
 	ble	.notRightEdge
 	move.l	direction,d0
 	muls.w	#-1,d0

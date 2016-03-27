@@ -20,7 +20,8 @@ include ../shared/base.mk
 out/%.bin: ../assets/%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/$* --colors=16 --use-palette palette.pal --full-color-palette-file --output-mask --transparent-color=0,0,0 --output-png
 
-out/blittext.o: constants.i
-out/blit.o: constants.i
-out/main.o: $(IMAGEDATA) constants.i Makefile link.script.x palette.pal
+out/simple_image.o: constants.i macros.i
+out/blittext.o: constants.i macros.i
+out/blit.o: constants.i macros.i
+out/main.o: $(IMAGEDATA) constants.i macros.i Makefile link.script.x palette.pal
 out/init.o: constants.i Makefile

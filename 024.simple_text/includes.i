@@ -6,3 +6,4 @@
 	include "hardware/dmabits.i"
 	include "hardware/intbits.i"	
 	include "constants.i"
+	include "macros.i"

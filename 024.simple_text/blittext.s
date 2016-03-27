@@ -11,7 +11,7 @@ DrawText8:
 	;; d0 - xpos
 	;; d1 - ypos	
 	movem.l	d0-d5/a0-a3,-(sp)
-	jsr	WaitBlitter	
+	WaitBlitter	
 	;; blitter config that is shared for every character
 	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTAMOD(a6)	; A modulo
 	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTBMOD(a6)	; B modulo	
@@ -82,7 +82,7 @@ DrawChar8:
  	move.l	d0,d2	
 	lsr.w	#3,d4					; d4 = XPOS_BYTES
 	
-	jsr	WaitBlitter
+	WaitBlitter
 	
 	btst	#0,d3
 	beq	.evenChar
