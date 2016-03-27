@@ -13,6 +13,7 @@ DOYNAMITE68KDIR=../tools/external/doynamite68k
 DOYNAMITE68K=$(DOYNAMITE68KDIR)/out/lz
 A500_RUN_SCRIPT=~/Google\ Drive/Amiga/amiga500.sh
 A600_RUN_SCRIPT=~/Google\ Drive/Amiga/amiga600.sh
+A1200_RUN_SCRIPT=~/Google\ Drive/Amiga/amiga1200.sh
 
 #VASM_ARGS=-phxass -Fhunk -quiet -spaces
 VASM_ARGS=-Fhunk -quiet -esc 
@@ -70,6 +71,9 @@ test: all
 
 go: test
 	 $(RUN_SCRIPT)
+
+aga: test
+	 $(A1200_RUN_SCRIPT)
 
 list:
 	m68k-amigaos-objdump  -b binary --disassemble-all out/bootblock.bin -m m68k > out/bootblock.txt

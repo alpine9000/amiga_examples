@@ -1,3 +1,11 @@
+MASKED_FONT		equ 0
+
+			if MASKED_FONT==1
+BACKGROUND_COLOR	equ 4
+			else
+BACKGROUND_COLOR	equ 3
+			endif
+
 FONT_WIDTH		equ 8
 FONT_HEIGHT		equ 10
 SCREEN_WIDTH		equ 320

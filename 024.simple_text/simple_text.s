@@ -29,14 +29,14 @@ Entry:
  	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_MASTER),DMACON(a6) 		
 
 	move.l	onscreen,a0
-	move.l	#4,d0		  ; color#
-	move.w	#SCREEN_HEIGHT,d1 ; height
+	move.l	#BACKGROUND_COLOR,d0
+	move.w	#SCREEN_HEIGHT,d1 
 	move.w	#0,d2		  ; ypos
 	jsr	BlitFillColor
 
 	move.l	offscreen,a0
-	move.l	#4,d0		  ; color#
-	move.w	#SCREEN_HEIGHT,d1 ; height
+	move.l	#BACKGROUND_COLOR,d0
+	move.w	#SCREEN_HEIGHT,d1 
 	move.w	#0,d2		  ; ypos	
 	jsr	BlitFillColor
 	
@@ -48,8 +48,8 @@ MainLoop:
 	jsr	InstallPalette	
 
 	move.l	offscreen,a0
-	move.l	#4,d0		  ; color#
-	move.w	#FONT_HEIGHT,d1	  ; height
+	move.l	#BACKGROUND_COLOR,d0
+	move.w	#FONT_HEIGHT,d1	 
 	move.l	ypos,d2		  ; ypos	
 	jsr	BlitFillColor
 	
@@ -67,7 +67,6 @@ MainLoop:
 
 	move.l	ypos2,d1
 	jsr	DrawText8
-
 
 	jsr	SwitchBuffers
 	
