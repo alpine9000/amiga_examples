@@ -11,14 +11,14 @@ IMAGES=font.png
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 VASM_EXTRA_ARGS=
 
-#SYMBOL_INFO=-M
+SYMBOL_INFO=-M
 LINK_COMMANDLINE=vlink -T link.script.x -brawbin1 $< $(OBJS) $(SYMBOL_INFO) -o out/main.bin
 
 include ../shared/base.mk
 
 
 out/%.bin: ../assets/%.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes  --output-palette-asm --output-palette --output out/$* --colors=16 --use-palette palette.pal --full-color-palette-file --output-mask --transparent-color=0,0,0
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/$* --colors=16 --use-palette palette.pal --full-color-palette-file --output-mask --transparent-color=0,0,0
 
 out/main.o: $(IMAGEDATA) constants.i Makefile link.script.x palette.pal
 out/init.o: constants.i Makefile

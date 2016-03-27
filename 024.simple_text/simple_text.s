@@ -5,6 +5,7 @@
 	xdef	onscreen
 	xdef	offscreen
 	xdef	copperListBplPtr
+	xdef	Test
 	
 byteMap:
 	dc.l	Entry
@@ -28,39 +29,51 @@ Entry:
  	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_MASTER),DMACON(a6) 		
 
 	move.l	onscreen,a0
-	move.l	#4,d0		 ; color#
+	move.l	#4,d0		  ; color#
 	move.w	#SCREEN_HEIGHT,d1 ; height
+	move.w	#0,d2		  ; ypos
 	jsr	BlitFillColor
 	move.l	offscreen,a0
-	move.l	#4,d0		 ; color#
+	move.l	#4,d0		  ; color#
 	move.w	#SCREEN_HEIGHT,d1 ; height
+	move.w	#0,d2		  ; ypos	
 	jsr	BlitFillColor	
 
-	jsr	Init		; enable the playfield		
+	jsr	Init		  ; enable the playfield		
 
-.mainLoop:
+MainLoop:		
+	jsr 	WaitVerticalBlank
+	jsr	InstallPalette	
+
 	move.l	offscreen,a0
-	move.l	#4,d0		; color#
-	move.w	#25,d1
+	move.l	#4,d0		  ; color#
+	move.w	#FONT_HEIGHT,d1	  ; height
+	move.l	ypos,d2		  ; ypos	
+	jsr	BlitFillColor
+
+	move.l	ypos2,d2	
 	jsr	BlitFillColor
 
 	move.l	direction,d0
 	add.l	d0,xpos
 	move.l	xpos,d0
-	move.l	#15,d1
+	move.l	ypos,d1		  ; ypos
 	move.l	offscreen,a0
 	lea	text,a1
-	jsr	DrawText
+	jsr	DrawText8
 
-	jsr 	WaitVerticalBlank	
+	move.l	ypos2,d1
+	jsr	DrawText8
+
+
 	jsr	SwitchBuffers
-
+	
 	cmp.l	#SCREEN_WIDTH-((endText-text)*FONT_WIDTH),xpos
 	ble	.notRightEdge
 	move.l	direction,d0
 	muls.w	#-1,d0
 	move.l	d0,direction
-	bra	.mainLoop
+	bra	.notLeftEdge
 .notRightEdge:
 	cmp.l	#0,xpos
 	bne	.notLeftEdge
@@ -68,7 +81,9 @@ Entry:
 	muls.w	#-1,d0
 	move.l	d0,direction
 .notLeftEdge:
-	bra	.mainLoop
+
+	jsr 	GreyPalette
+	bra	MainLoop
 	
 text:
 	dc.b	"My first text on an Amiga!"
@@ -77,9 +92,13 @@ endText:
 	align	4
 xpos:
 	dc.l	0
+ypos:
+	dc.l	1
+ypos2:
+	dc.l	SCREEN_HEIGHT-FONT_HEIGHT-1
 direction:
 	dc.l	2
-	
+
 Level3InterruptHandler:
 	movem.l	d0-a6,-(sp)
 	lea	CUSTOM,a6
@@ -90,7 +109,6 @@ Level3InterruptHandler:
 
 .verticalBlank:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
-	
 .checkCopper:
 	move.w	INTREQR(a6),d0
 	and.w	#INTF_COPER,d0	
@@ -117,18 +135,20 @@ copperListBplPtr:
 	dc.w	BPL5PTH,0
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
-	dc.w	$106,$c00	;AGA sprites, palette and dual playfield reset
-	dc.w	$1FC,0		;AGA sprites and burst reset
-	dc.l	$fffffffe
 	dc.l	$fffffffe			
 
 InstallPalette:
 	include	"out/font-palette.s"
 	rts
+
+GreyPalette:
+	include	"out/font-grey.s"
+	rts	
 onscreen:
 	dc.l	bitplanes1
 offscreen:
 	dc.l	bitplanes2
+
 	section .bss	
 bitplanes1:
 	ds.b	IMAGESIZE+(512)
