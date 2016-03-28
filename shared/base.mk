@@ -57,8 +57,8 @@ PROGRAM_BIN=out/main.bin
 VASM_EXTRA_BOOTBLOCK_ARGS=-DSHRINKLER=$(SHRINKLER)
 endif
 
-ifndef LINK_COMMANDLINE
-LINK_COMMANDLINE=vlink -Ttext 0x$(BASE_ADDRESS) -brawbin1 $< $(OBJS) -o $@
+ifndef LINKER_OPTIONS
+LINKER_OPTIONS=-Ttext 0x$(BASE_ADDRESS)
 endif
 
 all: bin out $(MAKEADF) $(IMAGECON) $(RESIZE) $(DOYNAMITE68K) $(FLOPPY)
@@ -124,8 +124,9 @@ out/%.o: %.c
 	-@vc -O0 -S $< -o out/$*-noopt.s > /dev/null 2> /dev/null
 
 out/main.bin: out/main.o $(OBJS)
-	@#-T ../link.script
-	$(LINK_COMMANDLINE)
+	vlink $(LINKER_OPTIONS)  -brawbin1 $< $(OBJS) -o $@
+	@vlink $(LINKER_OPTIONS) -brawbin1 $< $(OBJS) -M -o /tmp/main.bin | grep ", value " | cut -d " " -f3,7 | cut -d "," -f1 > ~/Projects/amiga/debugger.syms
+
 
 out/shrunk.bin: $(SHRINKLER_EXE) out/main.bin
 	$(SHRINKLEREXE) -d out/main.bin out/shrunk.bin

@@ -43,8 +43,7 @@ FLAGS=--height=256
 endif
 
 SYMBOL_INFO=-M
-#LINK_COMMANDLINE=vlink -T link.script.x -brawbin1 $< $(OBJS) $(SYMBOL_INFO) -osec=out/main && cat out/main.load out/main.photo > out/main.bin
-LINK_COMMANDLINE=vlink -T link.script.x -brawbin1 $< $(OBJS) $(SYMBOL_INFO) -o out/main.bin
+LINKER_OPTIONS=-T link.script.x
 
 include ../shared/base.mk
 
