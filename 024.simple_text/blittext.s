@@ -21,8 +21,14 @@ DrawText8:
 	move.w	#$0000,BLTALWM(a6) 			; mask out extra word used for shifting
 	move.w	#$ffff,BLTADAT(a6) 			; preload source mask so only BLTA?WM mask is used
 	move.l	a1,a3
-	move.l	#font,d6
+	move.l	#font,a5
 	move.l	#fontMask,d7	
+	move.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3
+	if MASKED_FONT==1
+	move.w   #BLIT_SRCA|BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d6
+	else
+	move.w	#BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d6
+	endif
 .loop:
 	clr.l	d2
 	move.b	(a3)+,d2	; get next character
@@ -37,22 +43,27 @@ DrawText8:
 	rts
 
 DrawChar8:
-	;; kills d2,d3,d4,d5,a1,a2,a4
+	;; kills d2,d4,d5,a1,a2,a4
 	;; d0 - xpos
 	;; d1 - ypos bytes
 	;; d2 - char
+	;; d3 - bytes per font line
+	;; d6 - bplcon0 value
 	;; a4 - bitplane
+	;; a5 - #font
+	;; d7 - #fontMask
+
+	;; calculating the font offset will be simplier when we have a less weird font image
 	sub.w	#'!',d2		; index = char - '!'
 	move.w	d2,d5
-	lsr.w	#5,d5		; char / 32 = fontmap line
 	
-	move.w	d5,d4		;
-	lsl.w	#5,d4		; line * 32 = start of line
-	sub.w	d4,d2		; char index in line
+	lsr.w	#5,d5		; char / 32 = fontmap line
+	andi.w	#$1f,d2		; char index in line (char index - start of line index)
 	
 	add.w	#1,d5		; while we have a weird font image, '!' starts on second line
-	move.l	d6,a1		; #font
-	mulu.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d5
+	move.l	a5,a1		; #font
+
+	mulu.w	d3,d5 		; d5 *= #SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
 
 	if	MASKED_FONT==1
 	move.l	d7,a2		; #fontMask
@@ -71,6 +82,8 @@ DrawChar8:
 	;; d0 - xpos
 	;; d1 - ypos bytes
 	;; d2.0 - odd character = 1, even character = 0
+	;; d3 - bytes per font line
+	;; d6 - bplcon0 value
 	;; a4 - display
 	;; a1 - object
 	;; a2 - mask	
@@ -100,13 +113,11 @@ DrawChar8:
 	move.w	d5,BLTCON1(A6)
 
 	if MASKED_FONT==1
-	ori.w   #BLIT_SRCA|BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d5
 	move.l 	a2,BLTAPTH(a6)				; mask bitplane
-	else
-	ori.w   #BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d5
 	endif
 
 	move.l 	a1,BLTBPTH(a6)				; source bitplane		
+	or.w	d6,d5					; d5 = BLTCON0 value
 	move.w	d5,BLTCON0(a6)				; set minterm, dma channel and shift
 
 	add.l 	d4,a4					; dest += XPOS_BYTES
