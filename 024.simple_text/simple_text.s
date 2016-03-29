@@ -28,17 +28,17 @@ Entry:
 
 	move.l	onscreen,a0
 	move.l	#BACKGROUND_COLOR,d0
-	move.w	#SCREEN_HEIGHT,d1 
+	move.w	#SCREEN_HEIGHT,d1
 	move.w	#0,d2		  ; ypos
 	jsr	BlitFillColor
 
 	move.l	offscreen,a0
 	move.l	#BACKGROUND_COLOR,d0
 	move.w	#SCREEN_HEIGHT,d1 
-	move.w	#0,d2		  ; ypos	
+	move.w	#0,d2		  ; ypos
 	jsr	BlitFillColor
 	
-	WaitBlitter	
+	WaitBlitter
 	jsr	Init		  ; enable the playfield		
 
 MainLoop:		
@@ -47,12 +47,16 @@ MainLoop:
 
 	move.l	offscreen,a0
 	move.l	#BACKGROUND_COLOR,d0
-	move.w	#FONT_HEIGHT,d1	 
+	move.w	#FONT_HEIGHT,d1
 	move.l	ypos,d2		  ; ypos	
 	jsr	BlitFillColor
 	
-	move.l	offscreen,a0	
-	move.l	ypos2,d2	
+	move.l	offscreen,a0
+	move.l	ypos2,d2
+	jsr	BlitFillColor
+
+	move.l	offscreen,a0
+	move.l	ypos3,d2
 	jsr	BlitFillColor
 
 	move.l	direction,d0
@@ -64,6 +68,9 @@ MainLoop:
 	jsr	DrawText8
 
 	move.l	ypos2,d1
+	jsr	DrawText8
+
+	move.l	ypos3,d1
 	jsr	DrawText8
 
 	jsr	SwitchBuffers
@@ -96,6 +103,8 @@ ypos:
 	dc.l	1
 ypos2:
 	dc.l	SCREEN_HEIGHT-FONT_HEIGHT-1
+ypos3:
+	dc.l	(SCREEN_HEIGHT-FONT_HEIGHT-1)/2
 direction:
 	dc.l	2
 
@@ -138,11 +147,11 @@ copperListBplPtr:
 	dc.l	$fffffffe			
 
 InstallPalette:
-	include	"out/font-palette.s"
+	include	"out/font8x10-palette.s"
 	rts
 
 GreyPalette:
-	include	"out/font-grey.s"
+	include	"out/font8x10-grey.s"
 	rts	
 onscreen:
 	dc.l	bitplanes1

@@ -4,6 +4,7 @@
 BLIT_LF_MINTERM		equ $ca		; cookie cut
 BLIT_WIDTH_WORDS	equ 2		; blit 2 words to allow shifting
 BLIT_WIDTH_BYTES	equ 4
+FONTMAP_WIDTH_BYTES	equ 32
 
 DrawText8:
 	;; a0 - bitplane
@@ -16,11 +17,11 @@ DrawText8:
 	;; blitter config that is shared for every character
 	if MASKED_FONT==1
 	move.w  #BLIT_SRCA|BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d6 ; BLTCON0 value (masked version)
-	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTAMOD(a6)	; A modulo (only used for masked version)
+	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTAMOD(a6)	; A modulo (only used for masked version)
 	else
 	move.w	#BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d6 	; BLTCON0 value
 	endif
-	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTBMOD(a6)	; B modulo	
+	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTBMOD(a6)	; B modulo
 	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
 	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
         mulu.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH,d1			; ypos bytes
@@ -29,7 +30,7 @@ DrawText8:
 	move.l	a1,a3							; character pointer
 	move.l	#font,a5						; font pointer
 	move.l	#fontMask,d7						; font mask pointer
-	move.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 	; bytes per font line 
+	move.w	#FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 	; bytes per font line
 .loop:
 	clr.l	d2
 	move.b	(a3)+,d2	; get next character
@@ -37,7 +38,7 @@ DrawText8:
 	beq	.done
 	move.l	a0,a4		; bitplane pointer
 	bsr	DrawChar8	; draw it
-	add.w	#FONT_WIDTH,d0	; increment the x position
+	add.l	#FONT_WIDTH,d0	; increment the x position
 	bra	.loop
 .done:
 	movem.l	(sp)+,d0-d7/a0-a4
@@ -60,10 +61,25 @@ DrawChar8:
 	lsr.w	#5,d5		; char / 32 = fontmap line
 	andi.w	#$1f,d2		; char index in line (char index - start of line index)
 	
-	add.w	#1,d5		; while we have a weird font image, '!' starts on second line
+	add.l	#1,d5		; while we have a weird font image, '!' starts on second line
 	move.l	a5,a1		; #font
 
-	mulu.w	d3,d5 		; d5 *= #SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
+	if 0
+	mulu.w	d3,d5 		; d5 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
+	else
+	move.w	d5,d3
+	lsl.w	#7,d3		; d5 *= FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH
+	move.w	d3,d5
+	add.l	d3,d5
+	add.l	d3,d5
+	add.l	d3,d5
+	add.l	d3,d5
+	add.l	d3,d5
+	add.l	d3,d5
+	add.l	d3,d5
+	add.l	d3,d5
+	add.l	d3,d5
+	endif
 
 	if	MASKED_FONT==1
 	move.l	d7,a2		; #fontMask
@@ -74,7 +90,7 @@ DrawChar8:
 
 	add.w	d2,a1		; add offset into font
 	if MASKED_FONT==1
-	add.w	d2,a2		; add offset into mask
+	add.l	d2,a2		; add offset into mask
 	endif
 
 .blitChar8:
@@ -129,6 +145,6 @@ DrawChar8:
 	rts
 
 font:
-	incbin	"out/font.bin"
+	incbin	"out/font8x10.bin"
 fontMask:
-	incbin	"out/font-mask.bin"	
+	incbin	"out/font8x10-mask.bin"
