@@ -11,30 +11,31 @@ DrawText8:
 	;; d0 - xpos
 	;; d1 - ypos	
 	movem.l	d0-d7/a0-a4,-(sp)
-	WaitBlitter	
+	WaitBlitter
+
 	;; blitter config that is shared for every character
-	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTAMOD(a6)	; A modulo
+	if MASKED_FONT==1
+	move.w  #BLIT_SRCA|BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d6 ; BLTCON0 value (masked version)
+	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTAMOD(a6)	; A modulo (only used for masked version)
+	else
+	move.w	#BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d6 	; BLTCON0 value
+	endif
 	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTBMOD(a6)	; B modulo	
 	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
 	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
         mulu.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH,d1			; ypos bytes
-	move.w	#$0000,BLTALWM(a6) 			; mask out extra word used for shifting
-	move.w	#$ffff,BLTADAT(a6) 			; preload source mask so only BLTA?WM mask is used
-	move.l	a1,a3
-	move.l	#font,a5
-	move.l	#fontMask,d7	
-	move.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3
-	if MASKED_FONT==1
-	move.w   #BLIT_SRCA|BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d6
-	else
-	move.w	#BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d6
-	endif
+	move.w	#$0000,BLTALWM(a6) 					; mask out extra word used for shifting
+	move.w	#$ffff,BLTADAT(a6) 					; preload source mask so only BLTA?WM mask is used
+	move.l	a1,a3							; character pointer
+	move.l	#font,a5						; font pointer
+	move.l	#fontMask,d7						; font mask pointer
+	move.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 	; bytes per font line 
 .loop:
 	clr.l	d2
 	move.b	(a3)+,d2	; get next character
 	cmp.b	#0,d2		; 0 terminates the string
 	beq	.done
-	move.l	a0,a4
+	move.l	a0,a4		; bitplane pointer
 	bsr	DrawChar8	; draw it
 	add.w	#FONT_WIDTH,d0	; increment the x position
 	bra	.loop
@@ -44,16 +45,15 @@ DrawText8:
 
 DrawChar8:
 	;; kills d2,d4,d5,a1,a2,a4
-	;; d0 - xpos
-	;; d1 - ypos bytes
-	;; d2 - char
-	;; d3 - bytes per font line
-	;; d6 - bplcon0 value
-	;; a4 - bitplane
-	;; a5 - #font
-	;; d7 - #fontMask
+	;; d0  - xpos
+	;; d1  - ypos bytes
+	;; d2* - char
+	;; d3  - bytes per font line
+	;; d6  - bltcon0 value
+	;; a4* - bitplane
+	;; a5  - #font
+	;; d7  - #fontMask
 
-	;; calculating the font offset will be simplier when we have a less weird font image
 	sub.w	#'!',d2		; index = char - '!'
 	move.w	d2,d5
 	
@@ -83,24 +83,23 @@ DrawChar8:
 	;; d1 - ypos bytes
 	;; d2.0 - odd character = 1, even character = 0
 	;; d3 - bytes per font line
-	;; d6 - bplcon0 value
+	;; d6 - bltcon0 value
 	;; a4 - display
 	;; a1 - object
 	;; a2 - mask	
 
- 	move.l	d0,d4
- 	move.l	d0,d5	
-	lsr.w	#3,d4					; d4 = XPOS_BYTES
+ 	move.l	d0,d4					; xpos
+ 	move.l	d0,d5					; xpos
+	lsr.w	#3,d4					; d4 = xpos bytes
 	
 	WaitBlitter
 	
-	btst	#0,d2
-	beq	.evenChar
+	btst	#0,d2					; check if odd or even char
+	beq	.evenChar				;
 .oddChar
 	subq	#8,d5					; offset the x position for the odd character
 	move.w	#$00FF,BLTAFWM(a6)			; select the second (odd) character in the word
-
-	subq	#1,a4	
+	subq	#1,a4					; move the destination pointer left by one byte
 	bra	.continue
 .evenChar:
 	move.w	#$FF00,BLTAFWM(a6)			; select the first character in the word
@@ -108,9 +107,9 @@ DrawChar8:
 
 	;; this shift will give us the bits to shift (bits 0-3) in bits (12-15) of d5
 	swap	d5					; d5 << 12
-	lsr.l	#4,d5
+	lsr.l	#4,d5					; 
 	
-	move.w	d5,BLTCON1(A6)
+	move.w	d5,BLTCON1(A6)				; set the shift bits 12-15, bits 00-11 cleared
 
 	if MASKED_FONT==1
 	move.l 	a2,BLTAPTH(a6)				; mask bitplane
