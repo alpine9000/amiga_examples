@@ -44,10 +44,10 @@ DrawChar8:
 	;; a4 - bitplane
 	sub.w	#'!',d2		; index = char - '!'
 	move.w	d2,d5
-	lsr.w	#5,d5		; fontmap y offset
+	lsr.w	#5,d5		; char / 32 = fontmap line
 	
-	move.w	d5,d4
-	lsl.w	#5,d4		; start of line
+	move.w	d5,d4		;
+	lsl.w	#5,d4		; line * 32 = start of line
 	sub.w	d4,d2		; char index in line
 	
 	add.w	#1,d5		; while we have a weird font image, '!' starts on second line
@@ -94,8 +94,8 @@ DrawChar8:
 .continue:
 
 	;; this shift will give us the bits to shift (bits 0-3) in bits (12-15) of d5
-	lsl.w	#8,d5					; BLIT_SOURCE_SHIFT<<BLIT_ASHIFTSHIFT
-	lsl.w	#4,d5 					; BLIT_SOURCE_SHIFT<<BLIT_ASHIFTSHIFT
+	swap	d5					; d5 << 12
+	lsr.l	#4,d5
 	
 	move.w	d5,BLTCON1(A6)
 

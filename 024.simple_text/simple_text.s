@@ -1,11 +1,9 @@
 	include "includes.i"
 	
-	xdef 	PokeBitplanePointers
 	xdef	copperList
 	xdef	onscreen
 	xdef	offscreen
 	xdef	copperListBplPtr
-	xdef	Test
 	
 byteMap:
 	dc.l	Entry
@@ -151,7 +149,7 @@ onscreen:
 offscreen:
 	dc.l	bitplanes2
 
-	section .bss	
+	section .bss
 bitplanes1:
 	ds.b	IMAGESIZE+(512)
 bitplanes2:
