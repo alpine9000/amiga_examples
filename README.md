@@ -75,7 +75,8 @@ The following cross development tools have been developed to support the example
 external tools
 --------------
 The following cross development tools have been sourced from external authors:
-* [shrinkler](tools/external/shrinkler) # compress executables
+* [shrinkler](tools/external/shrinkler) # compress for maximum compression, slow decompression
+* [doynamite68k](tools/external/doynamite68k) # compress for fast decompression
 
 Each tool has a test to check if any changes you have made have broken basic functionality:
 
