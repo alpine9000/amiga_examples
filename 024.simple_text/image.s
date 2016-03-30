@@ -8,7 +8,7 @@ SwitchBuffers:
 	move.l	offscreen,a0
 	move.l	onscreen,offscreen
 	move.l	a0,onscreen
-	moveq.l	#0,d0
+	moveq.l	#LEFT_SCREEN_BUFFER_BYTES,d0
 	move.l	a0,a1
 	lea 	copperListBplPtr,a0
 	jsr	PokeBitplanePointers
