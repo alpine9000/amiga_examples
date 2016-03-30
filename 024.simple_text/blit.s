@@ -10,7 +10,7 @@ BlitFillColor:
 	;; d2 - ypos
 
 	;; 	movem.l	d2-d5/a0,-(sp)
-	mulu.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH,d2
+	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d2
 	add.l	d2,a0
 	move.b	#0,d3				; bitplane #
 .loop:
@@ -26,14 +26,14 @@ BlitFillColor:
 
 	move.w	#0,BLTCON1(A6)
 	move.w  d5,BLTCON0(A6)
-	move.w 	#SCREEN_WIDTH_BYTES*(SCREEN_BIT_DEPTH-1),BLTDMOD(a6)
+	move.w 	#BITPLANE_WIDTH_BYTES*(SCREEN_BIT_DEPTH-1),BLTDMOD(a6)
 	move.l 	a0,BLTDPTH(a6) 
 
 	lsl.w	#6,d4	
-	ori.w	#SCREEN_WIDTH_WORDS,d4
+	ori.w	#BITPLANE_WIDTH_WORDS,d4
         move.w	d4,BLTSIZE(a6)
 	add.b	#1,d3
-	add.w	#SCREEN_WIDTH_BYTES,a0
+	add.w	#BITPLANE_WIDTH_BYTES,a0
 	cmp.b	#SCREEN_BIT_DEPTH,d3 		; all planes for a single line done ?	
 	bne	.loop				; no ? do the next plane
 

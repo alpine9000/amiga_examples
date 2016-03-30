@@ -27,7 +27,7 @@ PokeBitplanePointers:
 	move.w	d1,2(a0)
 	swap	d1
 	move.w  d1,6(a0)
-	lea	SCREEN_WIDTH_BYTES(a1),a1
+	lea	BITPLANE_WIDTH_BYTES(a1),a1
 	addq	#8,a0
 	dbra	d0,.bitplaneloop
 	movem.l (sp)+,d0-a6

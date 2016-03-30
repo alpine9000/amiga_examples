@@ -22,9 +22,9 @@ DrawText8:
 	move.w	#BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d6 	; BLTCON0 value
 	endif
 	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTBMOD(a6)	; B modulo
-	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
-	move.w 	#SCREEN_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
-        mulu.w	#SCREEN_WIDTH_BYTES*SCREEN_BIT_DEPTH,d1			; ypos bytes
+	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
+	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
+        mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d1		; ypos bytes
 	move.w	#$0000,BLTALWM(a6) 					; mask out extra word used for shifting
 	move.w	#$ffff,BLTADAT(a6) 					; preload source mask so only BLTA?WM mask is used
 	move.l	a1,a3							; character pointer

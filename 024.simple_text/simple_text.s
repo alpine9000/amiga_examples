@@ -75,7 +75,7 @@ MainLoop:
 
 	jsr	SwitchBuffers
 	
-	cmp.l	#SCREEN_WIDTH-1-((endText-text)*FONT_WIDTH),xpos
+	cmp.l	#(BITPLANE_WIDTH_WORDS*16)-1-((endText-text)*FONT_WIDTH),xpos
 	ble	.notRightEdge
 	move.l	direction,d0
 	muls.w	#-1,d0
