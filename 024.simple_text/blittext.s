@@ -64,7 +64,7 @@ DrawChar8:
 	add.l	#1,d5		; while we have a weird font image, '!' starts on second line
 	move.l	a5,a1		; #font
 
-	if 0
+	if 1
 	mulu.w	d3,d5 		; d5 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
 	else
 	move.w	d5,d3
@@ -145,6 +145,6 @@ DrawChar8:
 	rts
 
 font:
-	incbin	"out/font8x10.bin"
+	incbin	"out/font8x8.bin"
 fontMask:
-	incbin	"out/font8x10-mask.bin"
+	incbin	"out/font8x8-mask.bin"

@@ -147,11 +147,11 @@ copperListBplPtr:
 	dc.l	$fffffffe			
 
 InstallPalette:
-	include	"out/font8x10-palette.s"
+	include	"out/font8x8-palette.s"
 	rts
 
 GreyPalette:
-	include	"out/font8x10-grey.s"
+	include	"out/font8x8-grey.s"
 	rts	
 onscreen:
 	dc.l	bitplanes1
