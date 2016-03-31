@@ -49,12 +49,11 @@ MainLoop:
 .wrapText:
 	lea     text,a3
 .moreText:	
-	move.b	(a3)+,charbuffer
+	move.b	(a3)+,d2
 	move.l	#BITPLANE_WIDTH-16,d0	; xpos
 	move.l	#16,d1		  	; ypos
 	move.l	onscreen,a0
-	lea	charbuffer,a1
-	jsr	DrawText8
+	jsr	BlitChar8
 	move.l	#0,shiftcounter
 .shift:
 	move.l	onscreen,a0

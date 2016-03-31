@@ -9,7 +9,7 @@ BASE_ADDRESS=4000
 NUM_COLORS=16
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blittext.o out/cpu.o out/blit.o
+OBJS=out/init.o out/utils.o out/image.o out/blitchar.o out/cpu.o out/blit.o
 
 IMAGES=font8x8.png
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
