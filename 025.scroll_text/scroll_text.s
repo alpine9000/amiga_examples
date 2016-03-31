@@ -51,8 +51,6 @@ MainLoop:
 	lea	charbuffer,a1
 	jsr	DrawText8
 
-	;; 	bra	MainLoop
-
 	;; kills a0,d2,d3,d5,d5
 	;; a0 - bitplane
 	;; d0 - color#

@@ -67,18 +67,21 @@ BlitScroll:
 
 	WaitBlitter
 
-	move.w	#$2,BLTCON1(a6)
-	move.w  #$1000|BLIT_SRCA|BLIT_DEST|$f0,BLTCON0(a6)
-	move.w 	#-2,BLTAMOD(a6)
-	move.w 	#-2,BLTDMOD(a6)
-	move.l 	a0,BLTAPTH(a6) 	
+	move.w	#$1002,BLTCON1(a6)
+	move.w  #$1000|BLIT_SRCB|BLIT_SRCC|BLIT_DEST|$ca,BLTCON0(a6)
+	move.w	#$ffff,BLTADAT(a6); preload source mask so only BLTA?WM mask is used	
+	move.w 	#0,BLTBMOD(a6)
+	move.w 	#0,BLTCMOD(a6)
+	move.w 	#0,BLTDMOD(a6)
+	move.l 	a0,BLTBPTH(a6) 	
+	move.l 	a0,BLTCPTH(a6) 	
 	move.l 	a0,BLTDPTH(a6)
-	move.w	#$0000,BLTAFWM(a6)
+	move.w	#$0fff,BLTAFWM(a6)
 	move.w	#$ffff,BLTALWM(a6)	
 	
 	mulu.w	#SCREEN_BIT_DEPTH,d1
 	lsl.w	#6,d1	
-	ori.w	#BITPLANE_WIDTH_WORDS+1,d1
+	ori.w	#BITPLANE_WIDTH_WORDS,d1
         move.w	d1,BLTSIZE(a6)
 
 	;; movem.l (sp)+,d2-d5/a0
