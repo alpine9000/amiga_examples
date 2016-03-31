@@ -38,40 +38,41 @@ Entry:
 	lea	text,a3
 MainLoop:		
 	jsr 	WaitVerticalBlank
-	jsr	InstallPalette	
+	;; 	jsr	InstallPalette	
 
+	cmp.l	#8,shiftcounter
+	bne	.shift
+
+.drawtext:
 	cmp.b	#0,(a3)
-	bne	.c1
+	bne	.moreText
+.wrapText:
 	lea     text,a3
-.c1:
+.moreText:	
 	move.b	(a3)+,charbuffer
 	move.l	#BITPLANE_WIDTH-16,d0	; xpos
 	move.l	#16,d1		  	; ypos
 	move.l	onscreen,a0
 	lea	charbuffer,a1
 	jsr	DrawText8
-
-	;; kills a0,d2,d3,d5,d5
-	;; a0 - bitplane
-	;; d0 - color#
-	;; d1 - height
-	;; d2 - ypos
-
-	move.l	#8-1,d0
-.loop:
+	move.l	#0,shiftcounter
+.shift:
 	move.l	onscreen,a0
 	move.l	#FONT_HEIGHT,d1
 	move.l	#16,d2
 	jsr	BlitScroll
-	jsr 	WaitVerticalBlank
-	dbra	d0,.loop
+	add.l	#1,shiftcounter
+
+	;; 	jsr	GreyPalette	
 	
 	bra	MainLoop
 
 charbuffer:
 	dc.b	0
 	dc.b	0
-	
+
+shiftcounter:
+	dc.l	8
 text:
 	dc.b	"ABCDEFEGHIJLMNOPQRSTUVWXYZabcdefghijlklmnopqrstuvwxyz" 
 endText:	
