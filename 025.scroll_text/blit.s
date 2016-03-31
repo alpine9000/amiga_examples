@@ -76,7 +76,7 @@ BlitScroll:
 	move.l 	a0,BLTBPTH(a6) 	
 	move.l 	a0,BLTCPTH(a6) 	
 	move.l 	a0,BLTDPTH(a6)
-	move.w	#$0fff,BLTAFWM(a6)
+	move.w	#$0000,BLTAFWM(a6)
 	move.w	#$ffff,BLTALWM(a6)	
 	
 	mulu.w	#SCREEN_BIT_DEPTH,d1
