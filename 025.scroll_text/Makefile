@@ -6,7 +6,7 @@ USERSTACK_ADDRESS=7fffc
 BASE_ADDRESS=4000
 # note: this must be high enough not to conflict with MFMbufE
 
-NUM_COLORS=2
+NUM_COLORS=4
 
 BOOTBLOCK_ASM=alpine_bootblock.s
 OBJS=out/init.o out/utils.o out/image.o out/blitchar.o out/cpu.o out/blit.o

@@ -6,6 +6,7 @@
 	xdef	copperListBplPtr
 
 Y_POS	equ	8
+NUM_LINES	equ	27
 	
 byteMap:
 	dc.l	Entry
@@ -43,7 +44,6 @@ Entry:
 	WaitBlitter
 	jsr	Init		  ; enable the playfield		
 
-	lea	text,a3
 MainLoop:		
 	jsr 	WaitVerticalBlank
 
@@ -52,20 +52,18 @@ MainLoop:
 	bne	.shift
 
 .drawtext:
-	cmp.b	#0,(a3)
-	bne	.moreText
-.wrapText:
-	lea     text,a3
-.moreText:	
-	sub.l	d2,d2
-	move.b	(a3)+,d2
+	
 	move.l	#BITPLANE_WIDTH-16,d0	; xpos
 	move.l	#Y_POS,d1		; ypos
 	move.l	onscreen,a0
 
 	move.l	#Y_POS,d1		; ypos	
-	move.l	#27-1,d3
+	move.l	#NUM_LINES-1,d3
+
+	
 .loopBlitChar8:	
+	move.l	d3,d4
+	bsr	GetNextChar
 	jsr	BlitChar8
 	add.l	#FONT_HEIGHT+1,d1
 	dbra	d3,.loopBlitChar8
@@ -77,7 +75,7 @@ MainLoop:
 	move.l	#FONT_HEIGHT,d1
 
 	move.l	#Y_POS,d2
-	move.l	#27-1,d0	
+	move.l	#NUM_LINES-1,d0	
 .blitScrollLoop:
 	jsr	BlitScroll
 	add.l	#FONT_HEIGHT+1,d2
@@ -88,7 +86,7 @@ MainLoop:
 
 	;; jsr	GreyPalette	
 
-	move.w #$500,COLOR00(a6)
+	;; move.w #$500,COLOR00(a6)
 	
 	jsr	SwitchBuffers			
 	
@@ -100,12 +98,108 @@ charbuffer:
 
 shiftcounter:
 	dc.l	8
-text:
-	dc.b	"ABCDEFEGHIJLMNOPQRSTUVWXYZabcdefghijlklmnopqrstuvwxyz" 
+
+textlut:
+	dc.l	text1+1
+	dc.l	text2+2	
+	dc.l	text3+3
+	dc.l	text4+4
+	dc.l	text5+5
+	dc.l	text4+6
+	dc.l	text3+7
+	dc.l	text2+8
+	dc.l	text1+9
+	dc.l	text2+10
+	dc.l	text3+11
+	dc.l	text4+12
+	dc.l	text1+13
+	dc.l	text3+14
+	dc.l	text5+15
+	dc.l	text1+16
+	dc.l	text1+17
+	dc.l	text2+16
+	dc.l	text3+15
+	dc.l	text1+14
+	dc.l	text5+12
+	dc.l	text5+11
+	dc.l	text4+10
+	dc.l	text4+9
+	dc.l	text2+8
+	dc.l	text4+7
+	dc.l	text1+6
+	dc.l	text2+5
+	dc.l	text4+4
+	dc.l	text5+3
+	dc.l	text2+2
+	dc.l	text3+1
+	dc.l	text1+2
+	dc.l	text3+3
+	dc.l	text3+4
+	dc.l	text4+5
+	dc.l	text5+6
+	dc.l	text2+7
+	dc.l	text3+8
+	dc.l	text3+9
+	dc.l	text1+10
+	dc.l	text4+11
+	dc.l	text4+12
+	dc.l	text3+13
+	dc.l	text2+14
+	dc.l	text3+15
+	dc.l	text4+16
+	dc.l	text5+15
+	dc.l	text1+14
+	dc.l	text2+13
+	dc.l	text3+12
+	dc.l	text4+11
+	dc.l	text3+10
+	dc.l	text2+9
+	dc.l	text1+8
+	dc.l	text2+7
+	dc.l	text3+6
+	dc.l	text4+5
+	dc.l	text4+4
+	dc.l	text5+3	
+
+	
+text1:
+	dc.b	"In this chapter, you will learn how to use the Amiga's graphics coprocessor (or Copper) and its simple instruction set to organize mid-screen register value modifications and pointer register set-up during the  vertical blanking  interval. The chapter shows how to organize Copperinstructions into Copper lists, how to use Copper lists in interlacedmode, and how to use the Copper with the blitter. The Copper is discussed	in this chapter in a general fashion. The chapters that deal withplayfields, sprites, audio, and the blitter contain more specificsuggestions for using the Copper."
+	dc.b	0
+text2:	
+	dc.b	"The Amiga is a family of personal computers sold by Commodore in the 1980s and 1990s. Based on the Motorola 68000 family of microprocessors, the machine has a custom chipset with graphics and sound capabilities that were unprecedented for the price, and a pre-emptive multitasking operating system called AmigaOS."
+	dc.b	0
+text3:	
+	dc.b	"This repo contains example programs I have written as I re-learn how to program an amiga. The programs are written in assembler and directly access the hardware. The target is an Amiga 500 (my long lost friend). Currently I do not own an amiga, so I can only test using UAE, so it's possible they will not work on the real hardware."
+	dc.b	0
+text4:	
+	dc.b	"The Amiga 1000 was officially released in July 1985, but a series of production problems meant it did not become widely available until early 1986. The best selling model, the Amiga 500, was introduced in 1987 and became one of the leading home computers of the late 1980s and early 1990s with four to six million sold.[1] The A3000, introduced in 1990, started the second generation of Amiga systems, followed by the A500+ and the A600. Finally, as the third generation, the A1200 and the A4000 were released in 1992. The platform became particularly popular for gaming and programming demos. It also found a prominent role in the desktop video, video production, and show control business, leading to affordable video editing systems such as the Video Toaster. The Amiga's native ability to simultaneously play back multiple digital sound samples made it a popular platform for early 'tracker' music software. The relatively powerful processor and ability to access several megabytes of memory led to the development of several 3D rendering packages, including LightWave 3D, Imagine, Aladdin 4D, and TurboSilver."
+	dc.b	0
+text5:	
+	dc.b	"Although early Commodore advertisements attempt to cast the computer as an all-purpose business machine, especially when outfitted with the Amiga Sidecar PC compatibility addon, the Amiga was most commercially successful as a home computer, with a wide range of games and creative software.[2][3] It was also a less expensive alternative to the Apple Macintosh and IBM PC as a general-purpose business or home computer. Initially, the Amiga was developed alongside various Commodore PC clones, but Commodore later left the PC market. Poor marketing and the failure of the later models to repeat the technological advances of the first systems meant that the Amiga quickly lost its market share to competing platforms, such as the fourth generation game consoles, Apple Macintosh, and later IBM PC compatibles.[1] Commodore ultimately went bankrupt in April 1994 after the 'make or break' Amiga CD32 model failed in the marketplace."
+	dc.b	0
 endText:	
 	dc.b	0
 	align	4
 
+
+GetNextChar:
+	movem.l	a2-a3,-(sp)
+	lea.l	textlut,a2
+	mulu.w	#8,d4		;
+	add.l	d4,a2		; index into LUT
+	move.l	(a2),a3		; address of next char
+	cmp.b	#0,(a3)
+	bne	.moreText
+.wrapText:
+	move.l  4(a2),(a2)
+.moreText:	
+	sub.l	d2,d2
+	move.l	(a2),a3
+	move.b	(a3),d2
+	add.l	#1,(a2)
+	movem.l	(sp)+,a2-a3
+	rts
+	
 Level3InterruptHandler:
 	movem.l	d0-a6,-(sp)
 	lea	CUSTOM,a6
