@@ -20,39 +20,44 @@ BlitChar8:
 	;; d1 - ypos	
 	;; d2 - char
 	movem.l	d0-d3/a0-a2,-(sp)
-	WaitBlitter
-
-	;; blitter config that is shared for every character
-	if MASKED_FONT==1
-	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTAMOD(a6)	; A modulo (only used for masked version)
-	endif
-	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTBMOD(a6)	; B modulo
-	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
-	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
         mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d1		; ypos bytes
-	move.w	#$ffff,BLTAFWM(a6) 					; don't mask first word
-	move.l	#font,a1						; font pointer
-	move.l	#fontMask,a2						; font mask pointer
+	lea	font(pc),a1						; font pointer
+	lea	fontMask,a2						; font mask pointer
 
 	sub.w	#'!',d2		; index = char - '!'
 	move.w	d2,d3	
 	lsr.w	#5,d3		; char / 32 = fontmap line
 	andi.w	#$1f,d2		; char index in line (char index - start of line index)	
 	add.l	#1,d3		; while we have a weird font image, '!' starts on second line
-	mulu.w	#FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 		; d3 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
+	mulu.w	#FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 	; d3 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
 
 	if MASKED_FONT==1
 	add.w	d3,a2		; add y offset in lines to fontMask address
 	add.l	d2,a2		; add offset into mask
 	endif
-	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a1
+	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a1 ; last word - descending mode
 	
 	add.w	d3,a1		; add y offset in lines to font address
 	add.w	d2,a1		; add offset into font
-	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a2
+	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a2 ; last word - descending mode
 		
+	lsr.w	#3,d0		; d0 = xpos bytes	
+
+	add.l 	d0,a0		; dest += XPOS_BYTES
+	add.l	d1,a0		; dest += YPOS_BYTES
+	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*BITPLANE_WIDTH_BYTES)-BITPLANE_WIDTH_BYTES+0,a0 ; last word - descending mode
 	
-	lsr.w	#3,d0					; d0 = xpos bytes	
+	WaitBlitter
+
+	if MASKED_FONT==1
+	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTAMOD(a6)	; A modulo (only used for masked version)
+	endif
+	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTBMOD(a6)	; B modulo
+	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
+	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
+	move.w	#$ffff,BLTAFWM(a6) 					; don't mask first word
+	
+
 	btst	#0,d2					; check if odd or even char
 	beq	.evenChar				;
 .oddChar:
@@ -72,11 +77,6 @@ BlitChar8:
 	endif
 
 	move.l 	a1,BLTBPTH(a6)				; source bitplane		
-
-	add.l 	d0,a0					; dest += XPOS_BYTES
-	add.l	d1,a0					; dest += YPOS_BYTES
-
-	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*BITPLANE_WIDTH_BYTES)-BITPLANE_WIDTH_BYTES+0,a0
 	
 	move.l 	a0,BLTCPTH(a6) 				; background top left corner
 	move.l 	a0,BLTDPTH(a6) 				; destination top left corner
