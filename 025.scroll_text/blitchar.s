@@ -1,6 +1,8 @@
 	include "includes.i"
+
 	xdef BlitChar8
-	
+
+DESCENDING		equ 1
 BLIT_LF_MINTERM		equ $ca		; cookie cut
 BLIT_WIDTH_WORDS	equ 2		; blit 2 words to allow shifting
 BLIT_WIDTH_BYTES	equ 4
@@ -25,7 +27,11 @@ BlitChar8:
 	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
 	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
         mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d1		; ypos bytes
+	if DESCENDING==1
+	move.w	#$0000,BLTAFWM(a6) 					; mask out extra word used for shifting
+	else
 	move.w	#$0000,BLTALWM(a6) 					; mask out extra word used for shifting
+	endif
 	move.w	#$ffff,BLTADAT(a6) 					; preload source mask so only BLTA?WM mask is used
 	move.l	#font,a5						; font pointer
 	move.l	#fontMask,d7						; font mask pointer
@@ -57,22 +63,8 @@ DrawChar8:
 	add.l	#1,d5		; while we have a weird font image, '!' starts on second line
 	move.l	a5,a1		; #font
 
-	if 1
+
 	mulu.w	d3,d5 		; d5 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
-	else
-	move.w	d5,d3
-	lsl.w	#7,d3		; d5 *= FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH
-	move.w	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	endif
 
 	if	MASKED_FONT==1
 	move.l	d7,a2		; #fontMask
@@ -97,6 +89,12 @@ DrawChar8:
 	;; a1 - object
 	;; a2 - mask	
 
+	if DESCENDING==1	
+	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+2,a1
+	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+2,a2
+	endif
+		
+	
  	move.l	d0,d4					; xpos
  	move.l	d0,d5					; xpos
 	lsr.w	#3,d4					; d4 = xpos bytes
@@ -106,23 +104,45 @@ DrawChar8:
 	btst	#0,d2					; check if odd or even char
 	beq	.evenChar				;
 .oddChar
+
+
+	if DESCENDING==1
+	move.w	#$00ff,BLTALWM(a6)			; select the second (odd) character in the word
+	move.w	#$8000,d5
+	else
 	subq	#8,d5					; offset the x position for the odd character
 	move.w	#$00FF,BLTAFWM(a6)			; select the second (odd) character in the word
 	subq	#1,a4					; move the destination pointer left by one byte
+	endif
+
 	bra	.continue
 .evenChar:
+	if DESCENDING==1
+	move.w	#$FF00,BLTALWM(a6)			; select the first character in the word
+	move.w	#0,d5
+	else
 	move.w	#$FF00,BLTAFWM(a6)			; select the first character in the word
+	endif
 .continue:
 
+
+
+	if DESCENDING==1
+	ori.l	#2,d5
+	move.w	d5,BLTCON1(A6)				; set the shift bits 12-15, bits 00-11 cleared
+	else
 	;; this shift will give us the bits to shift (bits 0-3) in bits (12-15) of d5
 	swap	d5					; d5 << 12
 	lsr.l	#4,d5					; 
-	
 	move.w	d5,BLTCON1(A6)				; set the shift bits 12-15, bits 00-11 cleared
+	endif; 
 
+
+	
 	if MASKED_FONT==1
 	move.l 	a2,BLTAPTH(a6)				; mask bitplane
 	endif
+
 
 	move.l 	a1,BLTBPTH(a6)				; source bitplane		
 	or.w	d6,d5					; d5 = BLTCON0 value
@@ -131,6 +151,10 @@ DrawChar8:
 	add.l 	d4,a4					; dest += XPOS_BYTES
 	add.l	d1,a4					; dest += YPOS_BYTES
 
+	if DESCENDING==1
+	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*BITPLANE_WIDTH_BYTES)-BITPLANE_WIDTH_BYTES+2,a4
+	endif	
+	
 	move.l 	a4,BLTCPTH(a6) 				; background top left corner
 	move.l 	a4,BLTDPTH(a6) 				; destination top left corner
 

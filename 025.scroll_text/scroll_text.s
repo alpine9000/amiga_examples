@@ -40,6 +40,17 @@ MainLoop:
 	jsr 	WaitVerticalBlank
 	;; 	jsr	InstallPalette	
 
+	if 0
+	;; test
+	move.b	#'B',d2
+	move.l	#32,d0			; xpos
+	move.l	#100,d1		  	; ypos
+	move.l	onscreen,a0
+	jsr	BlitChar8		
+	bra	MainLoop
+	;; test
+	endif
+	
 	cmp.l	#8,shiftcounter
 	bne	.shift
 

@@ -61,7 +61,7 @@ BlitScroll:
 	;; d2 - ypos
 
 	;; 	movem.l	d2-d5/a0,-(sp)
-	add.l	d1,d2	;point to end of data for ascending mode
+	add.l	d1,d2	;point to end of data for descending mode
 	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d2
 	add.l	d2,a0
 
