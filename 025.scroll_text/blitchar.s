@@ -8,6 +8,12 @@ BLIT_WIDTH_WORDS	equ 1		; blit 2 words to allow shifting
 BLIT_WIDTH_BYTES	equ BLIT_WIDTH_WORDS*2
 FONTMAP_WIDTH_BYTES	equ 32
 
+	if MASKED_FONT==1
+BLTCON0_VALUE		equ BLIT_SRCA|BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM
+	else
+BLTCON0_VALUE		equ BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM
+	endif
+	
 BlitChar8:
 	;; a0 - bitplane
 	;; d0 - xpos
@@ -18,19 +24,14 @@ BlitChar8:
 
 	;; blitter config that is shared for every character
 	if MASKED_FONT==1
-	move.w  #BLIT_SRCA|BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d6 ; BLTCON0 value (masked version)
 	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTAMOD(a6)	; A modulo (only used for masked version)
-	else
-	move.w	#BLIT_SRCB|BLIT_SRCC|BLIT_DEST|BLIT_LF_MINTERM,d6 	; BLTCON0 value
 	endif
 	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTBMOD(a6)	; B modulo
 	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
 	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
         mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d1		; ypos bytes
-
-	move.w	#$ffff,BLTAFWM(a6) 					; mask out extra word used for shifting
-	move.w	#$ffff,BLTADAT(a6) 					;???  preload source mask so only BLTA?WM mask is used
-	move.l	#font,a5						; font pointer
+	move.w	#$ffff,BLTAFWM(a6) 					; don't mask first word
+	move.l	#font,a1						; font pointer
 	move.l	#fontMask,d7						; font mask pointer
 	move.w	#FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 	; bytes per font line
 
@@ -46,9 +47,8 @@ DrawChar8:
 	;; d1  - ypos bytes
 	;; d2* - char
 	;; d3  - bytes per font line
-	;; d6  - bltcon0 value
 	;; a4* - bitplane
-	;; a5  - #font
+	;; a1  - #font
 	;; d7  - #fontMask
 
 	sub.w	#'!',d2		; index = char - '!'
@@ -58,8 +58,6 @@ DrawChar8:
 	andi.w	#$1f,d2		; char index in line (char index - start of line index)
 	
 	add.l	#1,d5		; while we have a weird font image, '!' starts on second line
-	move.l	a5,a1		; #font
-
 
 	mulu.w	d3,d5 		; d5 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
 
@@ -76,58 +74,36 @@ DrawChar8:
 	endif
 
 .blitChar8:
-	;; kills a4,d2,d4,d5
-	;; d0 - xpos
-	;; d1 - ypos bytes
-	;; d2.0 - odd character = 1, even character = 0
-	;; d3 - bytes per font line
-	;; d6 - bltcon0 value
-	;; a4 - display
-	;; a1 - object
-	;; a2 - mask	
 
 	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a1
 	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a2
 		
 	
  	move.l	d0,d4					; xpos
- 	move.l	d0,d5					; xpos
 	lsr.w	#3,d4					; d4 = xpos bytes
-	
-	WaitBlitter
 	
 	btst	#0,d2					; check if odd or even char
 	beq	.evenChar				;
-.oddChar
-
-
+.oddChar:
 	move.w	#$00ff,BLTALWM(a6)			; select the second (odd) character in the word
-	move.w	#$8000,d5
-
+	move.w	#BLTCON0_VALUE|$8000,BLTCON0(a6)
+	move.w	#$8002,BLTCON1(a6)			; set the shift bits 12-15, bits 00-11 cleared
 	bra	.continue
 .evenChar:
 	move.w	#$FF00,BLTALWM(a6)			; select the first character in the word
-	move.w	#0,d5
+	move.w	#BLTCON0_VALUE,BLTCON0(a6)	
+	move.w	#$2,BLTCON1(a6)				; set the shift bits 12-15, bits 00-11 cleared
 .continue:
-
-
-
-	ori.l	#2,d5
-	move.w	d5,BLTCON1(A6)				; set the shift bits 12-15, bits 00-11 cleared
 
 	
 	if MASKED_FONT==1
 	move.l 	a2,BLTAPTH(a6)				; mask bitplane
 	endif
 
-
 	move.l 	a1,BLTBPTH(a6)				; source bitplane		
-	or.w	d6,d5					; d5 = BLTCON0 value
-	move.w	d5,BLTCON0(a6)				; set minterm, dma channel and shift
 
 	add.l 	d4,a4					; dest += XPOS_BYTES
 	add.l	d1,a4					; dest += YPOS_BYTES
-
 
 	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*BITPLANE_WIDTH_BYTES)-BITPLANE_WIDTH_BYTES+0,a4
 	
