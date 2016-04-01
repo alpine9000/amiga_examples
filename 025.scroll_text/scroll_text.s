@@ -5,7 +5,7 @@
 	xdef	offscreen
 	xdef	copperListBplPtr
 
-Y_POS	equ	16
+Y_POS	equ	100
 	
 byteMap:
 	dc.l	Entry
@@ -40,18 +40,6 @@ Entry:
 	lea	text,a3
 MainLoop:		
 	jsr 	WaitVerticalBlank
-	;; 	jsr	InstallPalette	
-
-	if 0
-	;; test
-	move.b	#'B',d2
-	move.l	#16,d0			; xpos
-	move.l	#0,d1		  	; ypos
-	move.l	onscreen,a0
-	jsr	BlitChar8		
-	bra	MainLoop
-	;; test
-	endif
 	
 	cmp.l	#8,shiftcounter
 	bne	.shift
@@ -62,6 +50,7 @@ MainLoop:
 .wrapText:
 	lea     text,a3
 .moreText:	
+	sub.l	d2,d2
 	move.b	(a3)+,d2
 	move.l	#BITPLANE_WIDTH-16,d0	; xpos
 	move.l	#Y_POS,d1		; ypos
