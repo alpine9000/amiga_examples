@@ -19,7 +19,7 @@ BlitChar8:
 	;; d0 - xpos
 	;; d1 - ypos	
 	;; d2 - char
-	movem.l	d0-d7/a0-a4,-(sp)
+	movem.l	d0-d5/a0-a2,-(sp)
 	WaitBlitter
 
 	;; blitter config that is shared for every character
@@ -32,24 +32,21 @@ BlitChar8:
         mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d1		; ypos bytes
 	move.w	#$ffff,BLTAFWM(a6) 					; don't mask first word
 	move.l	#font,a1						; font pointer
-	move.l	#fontMask,d7						; font mask pointer
-	move.w	#FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 	; bytes per font line
+	move.l	#fontMask,a2						; font mask pointer
 
-	move.l	a0,a4		; bitplane pointer
 	bsr	DrawChar8	; draw it
 
-	movem.l	(sp)+,d0-d7/a0-a4
+	movem.l	(sp)+,d0-d5/a0-a2
 	rts
 
 DrawChar8:
-	;; kills d2,d4,d5,a1,a2,a4
+	;; kills d2,d4,d5,a0,a1,a2
 	;; d0  - xpos
 	;; d1  - ypos bytes
 	;; d2* - char
-	;; d3  - bytes per font line
-	;; a4* - bitplane
+	;; a0  - bitplane
 	;; a1  - #font
-	;; d7  - #fontMask
+	;; a2  - #fontMask
 
 	sub.w	#'!',d2		; index = char - '!'
 	move.w	d2,d5
@@ -59,10 +56,9 @@ DrawChar8:
 	
 	add.l	#1,d5		; while we have a weird font image, '!' starts on second line
 
-	mulu.w	d3,d5 		; d5 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
+	mulu.w	#FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d5 		; d5 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
 
-	if	MASKED_FONT==1
-	move.l	d7,a2		; #fontMask
+	if MASKED_FONT==1
 	add.w	d5,a2		; add y offset in lines to fontMask address
 	endif
 
@@ -102,13 +98,13 @@ DrawChar8:
 
 	move.l 	a1,BLTBPTH(a6)				; source bitplane		
 
-	add.l 	d4,a4					; dest += XPOS_BYTES
-	add.l	d1,a4					; dest += YPOS_BYTES
+	add.l 	d4,a0					; dest += XPOS_BYTES
+	add.l	d1,a0					; dest += YPOS_BYTES
 
-	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*BITPLANE_WIDTH_BYTES)-BITPLANE_WIDTH_BYTES+0,a4
+	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*BITPLANE_WIDTH_BYTES)-BITPLANE_WIDTH_BYTES+0,a0
 	
-	move.l 	a4,BLTCPTH(a6) 				; background top left corner
-	move.l 	a4,BLTDPTH(a6) 				; destination top left corner
+	move.l 	a0,BLTCPTH(a6) 				; background top left corner
+	move.l 	a0,BLTDPTH(a6) 				; destination top left corner
 
 	move.w 	#(FONT_HEIGHT*SCREEN_BIT_DEPTH)<<6|(BLIT_WIDTH_WORDS),BLTSIZE(a6)	;rectangle size, starts blit
 	rts
