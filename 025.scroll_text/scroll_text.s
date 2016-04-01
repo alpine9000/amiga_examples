@@ -5,7 +5,7 @@
 	xdef	offscreen
 	xdef	copperListBplPtr
 
-Y_POS	equ	100
+Y_POS	equ	8
 	
 byteMap:
 	dc.l	Entry
@@ -33,6 +33,12 @@ Entry:
 	move.w	#SCREEN_HEIGHT,d1
 	move.w	#0,d2		  ; ypos
 	jsr	BlitFillColor
+
+	move.l	offscreen,a0
+	move.l	#BACKGROUND_COLOR,d0
+	move.w	#SCREEN_HEIGHT,d1
+	move.w	#0,d2		  ; ypos
+	jsr	BlitFillColor	
 	
 	WaitBlitter
 	jsr	Init		  ; enable the playfield		
@@ -40,7 +46,8 @@ Entry:
 	lea	text,a3
 MainLoop:		
 	jsr 	WaitVerticalBlank
-	
+
+	jsr	InstallPalette	
 	cmp.l	#8,shiftcounter
 	bne	.shift
 
@@ -55,16 +62,35 @@ MainLoop:
 	move.l	#BITPLANE_WIDTH-16,d0	; xpos
 	move.l	#Y_POS,d1		; ypos
 	move.l	onscreen,a0
+
+	move.l	#Y_POS,d1		; ypos	
+	move.l	#27-1,d3
+.loopBlitChar8:	
 	jsr	BlitChar8
+	add.l	#FONT_HEIGHT+1,d1
+	dbra	d3,.loopBlitChar8
+	
 	move.l	#0,shiftcounter
 .shift:
-	move.l	onscreen,a0
+	move.l	offscreen,a0 	; dest
+	move.l	onscreen,a1	; src
 	move.l	#FONT_HEIGHT,d1
+
 	move.l	#Y_POS,d2
+	move.l	#27-1,d0	
+.blitScrollLoop:
 	jsr	BlitScroll
+	add.l	#FONT_HEIGHT+1,d2
+	dbra	d0,.blitScrollLoop
+
+
 	add.l	#1,shiftcounter
 
-	;; 	jsr	GreyPalette	
+	;; jsr	GreyPalette	
+
+	move.w #$500,COLOR00(a6)
+	
+	jsr	SwitchBuffers			
 	
 	bra	MainLoop
 

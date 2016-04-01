@@ -55,15 +55,17 @@ BlitFillColor:
 
 
 BlitScroll:
-	;; kills a0,d1,d2
-	;; a0 - bitplane
+	;; kills a0,a1,d1,d2
+	;; a0 - dest
+	;; a1 - source
 	;; d1 - height
 	;; d2 - ypos
 
-	;; 	movem.l	d2-d5/a0,-(sp)
+	movem.l	d1-d2/a0-a1,-(sp)
 	add.l	d1,d2	;point to end of data for descending mode
 	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d2
 	add.l	d2,a0
+	add.l	d2,a1
 
 	WaitBlitter
 
@@ -73,8 +75,8 @@ BlitScroll:
 	move.w 	#0,BLTBMOD(a6)
 	move.w 	#0,BLTCMOD(a6)
 	move.w 	#0,BLTDMOD(a6)
-	move.l 	a0,BLTBPTH(a6) 	
-	move.l 	a0,BLTCPTH(a6) 	
+	move.l 	a1,BLTBPTH(a6) 	
+	move.l 	a1,BLTCPTH(a6) 	
 	move.l 	a0,BLTDPTH(a6)
 	move.w	#$0000,BLTAFWM(a6)
 	move.w	#$ffff,BLTALWM(a6)	
@@ -84,6 +86,6 @@ BlitScroll:
 	ori.w	#BITPLANE_WIDTH_WORDS,d1
         move.w	d1,BLTSIZE(a6)
 
-	;; movem.l (sp)+,d2-d5/a0
+	movem.l (sp)+,d1-d2/a0-a1
 	rts
 		
