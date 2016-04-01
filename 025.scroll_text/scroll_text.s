@@ -4,6 +4,8 @@
 	xdef	onscreen
 	xdef	offscreen
 	xdef	copperListBplPtr
+
+Y_POS	equ	16
 	
 byteMap:
 	dc.l	Entry
@@ -43,8 +45,8 @@ MainLoop:
 	if 0
 	;; test
 	move.b	#'B',d2
-	move.l	#32,d0			; xpos
-	move.l	#100,d1		  	; ypos
+	move.l	#16,d0			; xpos
+	move.l	#0,d1		  	; ypos
 	move.l	onscreen,a0
 	jsr	BlitChar8		
 	bra	MainLoop
@@ -62,14 +64,14 @@ MainLoop:
 .moreText:	
 	move.b	(a3)+,d2
 	move.l	#BITPLANE_WIDTH-16,d0	; xpos
-	move.l	#16,d1		  	; ypos
+	move.l	#Y_POS,d1		; ypos
 	move.l	onscreen,a0
 	jsr	BlitChar8
 	move.l	#0,shiftcounter
 .shift:
 	move.l	onscreen,a0
 	move.l	#FONT_HEIGHT,d1
-	move.l	#16,d2
+	move.l	#Y_POS,d2
 	jsr	BlitScroll
 	add.l	#1,shiftcounter
 

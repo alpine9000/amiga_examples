@@ -22,7 +22,6 @@ BlitChar8:
 	movem.l	d0-d3/a0-a2,-(sp)
         mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d1		; ypos bytes
 	lea	font(pc),a1						; font pointer
-	lea	fontMask,a2						; font mask pointer
 
 	sub.w	#'!',d2		; index = char - '!'
 	move.w	d2,d3	
@@ -31,16 +30,10 @@ BlitChar8:
 	add.l	#1,d3		; while we have a weird font image, '!' starts on second line
 	mulu.w	#FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 	; d3 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
 
-	if MASKED_FONT==1
-	add.w	d3,a2		; add y offset in lines to fontMask address
-	add.l	d2,a2		; add offset into mask
-	endif
 	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a1 ; last word - descending mode
 	
 	add.w	d3,a1		; add y offset in lines to font address
 	add.w	d2,a1		; add offset into font
-	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a2 ; last word - descending mode
-		
 	lsr.w	#3,d0		; d0 = xpos bytes	
 
 	add.l 	d0,a0		; dest += XPOS_BYTES
@@ -72,11 +65,13 @@ BlitChar8:
 .continue:
 
 	
-	if MASKED_FONT==1
-	move.l 	a2,BLTAPTH(a6)				; mask bitplane
-	endif
-
 	move.l 	a1,BLTBPTH(a6)				; source bitplane		
+
+	if MASKED_FONT==1
+	add.l	#fontMask-font,a1
+	move.l 	a1,BLTAPTH(a6)				; mask bitplane
+	endif
+	
 	
 	move.l 	a0,BLTCPTH(a6) 				; background top left corner
 	move.l 	a0,BLTDPTH(a6) 				; destination top left corner
