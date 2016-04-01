@@ -19,7 +19,7 @@ BlitChar8:
 	;; d0 - xpos
 	;; d1 - ypos	
 	;; d2 - char
-	movem.l	d0-d5/a0-a2,-(sp)
+	movem.l	d0-d3/a0-a2,-(sp)
 	WaitBlitter
 
 	;; blitter config that is shared for every character
@@ -34,50 +34,25 @@ BlitChar8:
 	move.l	#font,a1						; font pointer
 	move.l	#fontMask,a2						; font mask pointer
 
-	bsr	DrawChar8	; draw it
-
-	movem.l	(sp)+,d0-d5/a0-a2
-	rts
-
-DrawChar8:
-	;; kills d2,d4,d5,a0,a1,a2
-	;; d0  - xpos
-	;; d1  - ypos bytes
-	;; d2* - char
-	;; a0  - bitplane
-	;; a1  - #font
-	;; a2  - #fontMask
-
 	sub.w	#'!',d2		; index = char - '!'
-	move.w	d2,d5
-	
-	lsr.w	#5,d5		; char / 32 = fontmap line
-	andi.w	#$1f,d2		; char index in line (char index - start of line index)
-	
-	add.l	#1,d5		; while we have a weird font image, '!' starts on second line
-
-	mulu.w	#FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d5 		; d5 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
+	move.w	d2,d3	
+	lsr.w	#5,d3		; char / 32 = fontmap line
+	andi.w	#$1f,d2		; char index in line (char index - start of line index)	
+	add.l	#1,d3		; while we have a weird font image, '!' starts on second line
+	mulu.w	#FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 		; d3 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
 
 	if MASKED_FONT==1
-	add.w	d5,a2		; add y offset in lines to fontMask address
-	endif
-
-	add.w	d5,a1		; add y offset in lines to font address
-
-	add.w	d2,a1		; add offset into font
-	if MASKED_FONT==1
+	add.w	d3,a2		; add y offset in lines to fontMask address
 	add.l	d2,a2		; add offset into mask
 	endif
-
-.blitChar8:
-
 	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a1
+	
+	add.w	d3,a1		; add y offset in lines to font address
+	add.w	d2,a1		; add offset into font
 	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a2
 		
 	
- 	move.l	d0,d4					; xpos
-	lsr.w	#3,d4					; d4 = xpos bytes
-	
+	lsr.w	#3,d0					; d0 = xpos bytes	
 	btst	#0,d2					; check if odd or even char
 	beq	.evenChar				;
 .oddChar:
@@ -98,7 +73,7 @@ DrawChar8:
 
 	move.l 	a1,BLTBPTH(a6)				; source bitplane		
 
-	add.l 	d4,a0					; dest += XPOS_BYTES
+	add.l 	d0,a0					; dest += XPOS_BYTES
 	add.l	d1,a0					; dest += YPOS_BYTES
 
 	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*BITPLANE_WIDTH_BYTES)-BITPLANE_WIDTH_BYTES+0,a0
@@ -107,6 +82,8 @@ DrawChar8:
 	move.l 	a0,BLTDPTH(a6) 				; destination top left corner
 
 	move.w 	#(FONT_HEIGHT*SCREEN_BIT_DEPTH)<<6|(BLIT_WIDTH_WORDS),BLTSIZE(a6)	;rectangle size, starts blit
+
+	movem.l	(sp)+,d0-d3/a0-a2
 	rts
 
 font:
