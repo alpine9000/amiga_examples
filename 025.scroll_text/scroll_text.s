@@ -48,50 +48,58 @@ MainLoop:
 	jsr 	WaitVerticalBlank
 
 	jsr	InstallPalette	
-	cmp.l	#8,shiftcounter
-	bne	.shift
 
-.drawtext:
-	
-	move.l	#BITPLANE_WIDTH-16,d0	; xpos
-	move.l	#Y_POS,d1		; ypos
-	move.l	onscreen,a0
-
-	move.l	#Y_POS,d1		; ypos	
-	move.l	#NUM_LINES-1,d3
-
-	
-.loopBlitChar8:	
-	move.l	d3,d4
-	bsr	GetNextChar
-	jsr	BlitChar8
-	add.l	#FONT_HEIGHT+1,d1
-	dbra	d3,.loopBlitChar8
-	
-	move.l	#0,shiftcounter
-.shift:
-	move.l	offscreen,a0 	; dest
-	move.l	onscreen,a1	; src
-	move.l	#FONT_HEIGHT,d1
-
-	move.l	#Y_POS,d2
-	move.l	#NUM_LINES-1,d0	
-.blitScrollLoop:
-	jsr	BlitScroll
-	add.l	#FONT_HEIGHT+1,d2
-	dbra	d0,.blitScrollLoop
-
-
-	add.l	#1,shiftcounter
 
 	;; jsr	GreyPalette	
 
 	;; move.w #$500,COLOR00(a6)
 	
 	jsr	SwitchBuffers			
+
+	move.l	#NUM_LINES-1,d3
+.loop:
+	bsr	UpdateLine
+	dbra	d3,.loop
+	
 	
 	bra	MainLoop
 
+
+UpdateLine:
+	;; d3 - line number
+	movem.l	d0-a6,-(sp)
+	lea.l	textlut,a2
+	move.l  d3,d4
+	mulu.w	#16,d4
+	add.l	d4,a2		; index into LUT	
+	cmp.l	#8,8(a2)
+	bne	.shift
+
+.drawtext:
+	move.l	#BITPLANE_WIDTH-16,d0	; xpos
+	move.l	onscreen,a0
+	move.l	#FONT_HEIGHT+1,d1	; ypos	
+	move.l	d3,d4
+	mulu.w	d3,d1
+	bsr	GetNextChar
+	jsr	BlitChar8	
+	move.l	#0,8(a2)
+.shift:
+	move.l	offscreen,a0 	; dest
+	move.l	onscreen,a1	; src
+	move.l	#FONT_HEIGHT,d1	; height
+	move.l	#FONT_HEIGHT+1,d2 ; ypos
+	mulu.w	d3,d2
+Test:	
+
+	;; move.l	#1,d0
+ 	move.l	12(a2),d0
+	jsr	BlitScroll
+	;; add.l	#1,8(a2)
+	add.l	d0,8(a2)
+	movem.l	(sp)+,d0-a6
+	rts
+	
 charbuffer:
 	dc.b	0
 	dc.b	0
@@ -100,67 +108,127 @@ shiftcounter:
 	dc.l	8
 
 textlut:
-	dc.l	text1+1
-	dc.l	text2+2	
-	dc.l	text3+3
-	dc.l	text4+4
-	dc.l	text5+5
-	dc.l	text4+6
-	dc.l	text3+7
-	dc.l	text2+8
-	dc.l	text1+9
-	dc.l	text2+10
-	dc.l	text3+11
-	dc.l	text4+12
-	dc.l	text1+13
-	dc.l	text3+14
-	dc.l	text5+15
-	dc.l	text1+16
-	dc.l	text1+17
-	dc.l	text2+16
-	dc.l	text3+15
-	dc.l	text1+14
-	dc.l	text5+12
-	dc.l	text5+11
-	dc.l	text4+10
-	dc.l	text4+9
-	dc.l	text2+8
-	dc.l	text4+7
-	dc.l	text1+6
-	dc.l	text2+5
-	dc.l	text4+4
-	dc.l	text5+3
-	dc.l	text2+2
-	dc.l	text3+1
-	dc.l	text1+2
-	dc.l	text3+3
-	dc.l	text3+4
-	dc.l	text4+5
-	dc.l	text5+6
-	dc.l	text2+7
-	dc.l	text3+8
-	dc.l	text3+9
-	dc.l	text1+10
-	dc.l	text4+11
-	dc.l	text4+12
-	dc.l	text3+13
-	dc.l	text2+14
-	dc.l	text3+15
-	dc.l	text4+16
-	dc.l	text5+15
-	dc.l	text1+14
-	dc.l	text2+13
-	dc.l	text3+12
-	dc.l	text4+11
-	dc.l	text3+10
-	dc.l	text2+9
-	dc.l	text1+8
-	dc.l	text2+7
-	dc.l	text3+6
-	dc.l	text4+5
-	dc.l	text4+4
-	dc.l	text5+3	
-
+	dc.l	text1
+	dc.l	text2
+	dc.l	8
+	dc.l	1
+	dc.l	text3
+	dc.l	text4
+	dc.l	8
+	dc.l	2
+	dc.l	text5
+	dc.l	text4
+	dc.l	8
+	dc.l	4
+	dc.l	text3
+	dc.l	text2
+	dc.l	8
+	dc.l	8
+	dc.l	text1
+	dc.l	text2
+	dc.l	8
+	dc.l	4
+	dc.l	text3
+	dc.l	text4
+	dc.l	8
+	dc.l	2
+	dc.l	text1
+	dc.l	text3
+	dc.l	8
+	dc.l	1
+	dc.l	text5
+	dc.l	text1
+	dc.l	8
+	dc.l	2
+	dc.l	text1
+	dc.l	text2
+	dc.l	8
+	dc.l	4
+	dc.l	text3
+	dc.l	text1
+	dc.l	8
+	dc.l	8
+	dc.l	text5
+	dc.l	text5
+	dc.l	8
+	dc.l	4
+	dc.l	text4
+	dc.l	text4
+	dc.l	8
+	dc.l	2
+	dc.l	text2
+	dc.l	text4
+	dc.l	8
+	dc.l	1
+	dc.l	text1
+	dc.l	text2
+	dc.l	8
+	dc.l	2
+	dc.l	text4
+	dc.l	text5
+	dc.l	8
+	dc.l	4
+	dc.l	text2
+	dc.l	text3
+	dc.l	8
+	dc.l	8
+	dc.l	text1
+	dc.l	text3
+	dc.l	8
+	dc.l	4
+	dc.l	text3
+	dc.l	text4
+	dc.l	8
+	dc.l	2
+	dc.l	text5
+	dc.l	text2
+	dc.l	8
+	dc.l	1
+	dc.l	text3
+	dc.l	text3
+	dc.l	8
+	dc.l	2
+	dc.l	text1
+	dc.l	text4
+	dc.l	8
+	dc.l	4
+	dc.l	text4
+	dc.l	text3
+	dc.l	8
+	dc.l	8
+	dc.l	text2
+	dc.l	text3
+	dc.l	8
+	dc.l	4
+	dc.l	text4
+	dc.l	text5
+	dc.l	8
+	dc.l	2
+	dc.l	text1
+	dc.l	text2
+	dc.l	8
+	dc.l	1
+	dc.l	text3
+	dc.l	text4
+	dc.l	8
+	dc.l	2
+	dc.l	text3
+	dc.l	text2
+	dc.l	8
+	dc.l	4
+	dc.l	text1
+	dc.l	text2
+	dc.l	8
+	dc.l	8
+	dc.l	text3
+	dc.l	text4
+	dc.l	8
+	dc.l	4
+	dc.l	text4
+	dc.l	text5
+	dc.l	8
+	dc.l	2
+	
 	
 text1:
 	dc.b	"In this chapter, you will learn how to use the Amiga's graphics coprocessor (or Copper) and its simple instruction set to organize mid-screen register value modifications and pointer register set-up during the  vertical blanking  interval. The chapter shows how to organize Copperinstructions into Copper lists, how to use Copper lists in interlacedmode, and how to use the Copper with the blitter. The Copper is discussed	in this chapter in a general fashion. The chapters that deal withplayfields, sprites, audio, and the blitter contain more specificsuggestions for using the Copper."
@@ -185,7 +253,7 @@ endText:
 GetNextChar:
 	movem.l	a2-a3,-(sp)
 	lea.l	textlut,a2
-	mulu.w	#8,d4		;
+	mulu.w	#16,d4		;
 	add.l	d4,a2		; index into LUT
 	move.l	(a2),a3		; address of next char
 	cmp.b	#0,(a3)

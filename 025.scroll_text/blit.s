@@ -55,13 +55,14 @@ BlitFillColor:
 
 
 BlitScroll:
-	;; kills a0,a1,d1,d2
+	;; kills a0,a1,d0,d1,d2
 	;; a0 - dest
 	;; a1 - source
+	;; d0 - shift pixels
 	;; d1 - height
 	;; d2 - ypos
 
-	movem.l	d1-d2/a0-a1,-(sp)
+	movem.l	d0-d2/a0-a1,-(sp)
 	add.l	d1,d2	;point to end of data for descending mode
 	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d2
 	add.l	d2,a0
@@ -69,8 +70,21 @@ BlitScroll:
 
 	WaitBlitter
 
+
+	if 0
 	move.w	#$1002,BLTCON1(a6)
 	move.w  #$1000|BLIT_SRCB|BLIT_SRCC|BLIT_DEST|$ca,BLTCON0(a6)
+	else
+	lsl.w	#6,d0
+	lsl.w	#6,d0	
+	move.w	#$2,d3
+	or.w	d0,d3
+	move.w	d3,BLTCON1(a6)
+	move.w	#BLIT_SRCB|BLIT_SRCC|BLIT_DEST|$ca,d3
+	or.w	d0,d3
+	move.w	d3,BLTCON0(a6)
+	endif
+	
 	move.w	#$ffff,BLTADAT(a6); preload source mask so only BLTA?WM mask is used	
 	move.w 	#0,BLTBMOD(a6)
 	move.w 	#0,BLTCMOD(a6)
@@ -86,6 +100,6 @@ BlitScroll:
 	ori.w	#BITPLANE_WIDTH_WORDS,d1
         move.w	d1,BLTSIZE(a6)
 
-	movem.l (sp)+,d1-d2/a0-a1
+	movem.l (sp)+,d0-d2/a0-a1
 	rts
 		
