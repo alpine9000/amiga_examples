@@ -304,8 +304,61 @@ copperListBplPtr:
 	dc.w	BPL5PTH,0
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
-	dc.l	$fffffffe			
-
+	dc.w	$3507,$fffe
+	dc.w 	COLOR01,$0f0	
+	dc.w	$3e07,$fffe
+	dc.w 	COLOR01,$f00
+	dc.w	$4707,$fffe
+	dc.w 	COLOR01,$00f
+	dc.w	$5007,$fffe
+	dc.w 	COLOR01,$0ff
+	dc.w	$5907,$fffe
+	dc.w 	COLOR01,$ff0
+	dc.w	$6207,$fffe
+	dc.w 	COLOR01,$f0f
+	dc.w	$6b07,$fffe
+	dc.w 	COLOR01,$555
+	dc.w	$7407,$fffe
+	dc.w 	COLOR01,$70e
+	dc.w	$7d07,$fffe
+	dc.w 	COLOR01,$e07
+	dc.w	$8607,$fffe
+	dc.w 	COLOR01,$e70
+	dc.w	$8f07,$fffe
+	dc.w 	COLOR01,$7e7
+	dc.w	$9807,$fffe
+	dc.w 	COLOR01,$e77
+	dc.w	$a107,$fffe
+	dc.w 	COLOR01,$77e
+	dc.w	$aa07,$fffe
+	dc.w 	COLOR01,$25e
+	dc.w	$b307,$fffe
+	dc.w 	COLOR01,$e52
+	dc.w	$bc07,$fffe
+	dc.w 	COLOR01,$5e2
+	dc.w	$c507,$fffe
+	dc.w 	COLOR01,$ABC
+	dc.w	$ce07,$fffe
+	dc.w 	COLOR01,$486
+	dc.w	$d707,$fffe
+	dc.w 	COLOR01,$787
+	dc.w	$e007,$fffe
+	dc.w 	COLOR01,$500
+	dc.w	$e907,$fffe
+	dc.w 	COLOR01,$9fa
+	dc.w	$f207,$fffe
+	dc.w 	COLOR01,$222
+	dc.w	$fb07,$fffe
+	dc.w 	COLOR01,$ccc
+	dc.w	$ffdf,$fffe
+	dc.w	$407,$fffe
+	dc.w 	COLOR01,$f00
+	dc.w	$d07,$fffe
+	dc.w 	COLOR01,$0f0
+	dc.w	$1607,$fffe
+	dc.w 	COLOR01,$00f		
+	dc.l	$fffffffe
+ 
 InstallPalette:
 	include	"out/font8x8-palette.s"
 	rts
