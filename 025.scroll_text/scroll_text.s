@@ -40,27 +40,19 @@ Entry:
 	move.w	#SCREEN_HEIGHT,d1
 	move.w	#0,d2		  ; ypos
 	jsr	BlitFillColor	
-	
+
 	WaitBlitter
 	jsr	Init		  ; enable the playfield		
 
 MainLoop:		
 	jsr 	WaitVerticalBlank
-
-	jsr	InstallPalette	
-
-
-	;; jsr	GreyPalette	
-
-	;; move.w #$500,COLOR00(a6)
 	
-	jsr	SwitchBuffers			
-
 	move.l	#NUM_LINES-1,d3
 .loop:
 	bsr	UpdateLine
 	dbra	d3,.loop
-	
+
+	jsr	SwitchBuffers
 	
 	bra	MainLoop
 
@@ -68,10 +60,10 @@ MainLoop:
 UpdateLine:
 	;; d3 - line number
 	movem.l	d0-a6,-(sp)
-	lea.l	textlut,a2
+	lea.l	textLookupTable,a2
 	move.l  d3,d4
-	mulu.w	#16,d4
-	add.l	d4,a2		; index into LUT	
+	mulu.w	#16,d4			; #16 is size of lookup table entry
+	add.l	d4,a2			; address of line's entry in the textLookupTable
 	cmp.l	#8,8(a2)
 	bne	.shift
 
@@ -79,44 +71,73 @@ UpdateLine:
 	move.l	#BITPLANE_WIDTH-16,d0	; xpos
 	move.l	onscreen,a0
 	move.l	#FONT_HEIGHT+1,d1	; ypos	
-	move.l	d3,d4
-	mulu.w	d3,d1
-	bsr	GetNextChar
-	jsr	BlitChar8	
-	move.l	#0,8(a2)
-.shift:
-	move.l	offscreen,a0 	; dest
-	move.l	onscreen,a1	; src
-	move.l	#FONT_HEIGHT,d1	; height
-	move.l	#FONT_HEIGHT+1,d2 ; ypos
-	mulu.w	d3,d2
-Test:	
+	move.l	d3,d4			; line number
 
-	;; move.l	#1,d0
- 	move.l	12(a2),d0
-	jsr	BlitScroll
-	;; add.l	#1,8(a2)
-	add.l	d0,8(a2)
+	bsr	GetNextChar
+	mulu.w	d3,d1			; y pos
+	jsr	BlitChar8	
+	move.l	#0,8(a2)		; reset shift counter
+.shift:
+	move.l	offscreen,a0 		; dest
+	move.l	onscreen,a1		; src
+	move.l	#FONT_HEIGHT,d1		; height
+	move.l	#FONT_HEIGHT+1,d2	; ypos
+	mulu.w	d3,d2
+
+ 	move.l	12(a2),d0		; bits to shift per frame
+	jsr	BlitScroll		; scroll line
+	add.l	d0,8(a2)		; current shift counter += bits to shift per frame
 	movem.l	(sp)+,d0-a6
 	rts
+
+GetNextChar:
+	;; d4 - line number
+	;; a2 - address of textLookupTable entry
+	;; d2 (out) - next char
+	movem.l	a3,-(sp)
+	move.l	(a2),a3			; address of next char
+	cmp.b	#0,(a3)			; check for null termination
+	bne	.moreText
+.wrapText:
+	move.l  4(a2),(a2)		; reset current char pointer to reset value
+.moreText:	
+	add.l	#1,(a2)			; increment current char pointer	
+	sub.l	d2,d2			; clear d2
+	move.b	(a3),d2			; d2 (out) = next char
+	movem.l	(sp)+,a3
+	rts
 	
-charbuffer:
-	dc.b	0
-	dc.b	0
+Level3InterruptHandler:
+	movem.l	d0-a6,-(sp)
+	lea	CUSTOM,a6
+.checkVerticalBlank:
+	move.w	INTREQR(a6),d0
+	and.w	#INTF_VERTB,d0	
+	beq.s	.checkCopper
 
-shiftcounter:
-	dc.l	8
-
-textlut:
-	dc.l	text1
-	dc.l	text2
-	dc.l	8
-	dc.l	1
-	dc.l	text3
-	dc.l	text4
-	dc.l	8
-	dc.l	2
-	dc.l	text5
+.verticalBlank:
+	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
+.checkCopper:
+	move.w	INTREQR(a6),d0
+	and.w	#INTF_COPER,d0	
+	beq.s	.interruptComplete
+.copperInterrupt:
+	move.w	#INTF_COPER,INTREQ(a6)	; clear interrupt bit	
+	
+.interruptComplete:
+	movem.l	(sp)+,d0-a6
+	rte	
+	
+textLookupTable:
+	dc.l	text1		; line 1 - current char pointer
+	dc.l	text2		; line 1 - reset to this address on null
+	dc.l	8		; line 1 - current shift counter
+	dc.l	1		; line 1 - bits to shift per frame (scroll speed)
+	dc.l	text3		; line 2 - current char pointer
+	dc.l	text4		; line 2 - reset to this address on null
+	dc.l	8		; line 2 - current shift counter
+	dc.l	2		; line 2 - bits to shift per frame (scroll speed)
+	dc.l	text5		; etc
 	dc.l	text4
 	dc.l	8
 	dc.l	4
@@ -249,46 +270,6 @@ endText:
 	dc.b	0
 	align	4
 
-
-GetNextChar:
-	movem.l	a2-a3,-(sp)
-	lea.l	textlut,a2
-	mulu.w	#16,d4		;
-	add.l	d4,a2		; index into LUT
-	move.l	(a2),a3		; address of next char
-	cmp.b	#0,(a3)
-	bne	.moreText
-.wrapText:
-	move.l  4(a2),(a2)
-.moreText:	
-	sub.l	d2,d2
-	move.l	(a2),a3
-	move.b	(a3),d2
-	add.l	#1,(a2)
-	movem.l	(sp)+,a2-a3
-	rts
-	
-Level3InterruptHandler:
-	movem.l	d0-a6,-(sp)
-	lea	CUSTOM,a6
-.checkVerticalBlank:
-	move.w	INTREQR(a6),d0
-	and.w	#INTF_VERTB,d0	
-	beq.s	.checkCopper
-
-.verticalBlank:
-	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
-.checkCopper:
-	move.w	INTREQR(a6),d0
-	and.w	#INTF_COPER,d0	
-	beq.s	.interruptComplete
-.copperInterrupt:
-	move.w	#INTF_COPER,INTREQ(a6)	; clear interrupt bit	
-	
-.interruptComplete:
-	movem.l	(sp)+,d0-a6
-	rte	
-
 	
 copperList:
 copperListBplPtr:
@@ -304,6 +285,7 @@ copperListBplPtr:
 	dc.w	BPL5PTH,0
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
+	dc.w 	COLOR01,$fff		
 	dc.w	$3507,$fffe
 	dc.w 	COLOR01,$0f0	
 	dc.w	$3e07,$fffe

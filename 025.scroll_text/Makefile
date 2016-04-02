@@ -25,7 +25,7 @@ out/%.bin: ../assets/%.png
 
 
 out/simple_image.o: constants.i macros.i
-out/blittext.o: constants.i macros.i
+out/blitchar.o: constants.i macros.i
 out/blit.o: constants.i macros.i
 out/main.o: $(IMAGEDATA) constants.i macros.i Makefile link.script.x palette.pal
 out/init.o: constants.i Makefile

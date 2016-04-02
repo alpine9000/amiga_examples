@@ -29,10 +29,10 @@ BlitFillColor:
 	move.w	d1,d4		
 	btst	d3,d0				; is the color's bit set in this plane?
 	beq	.zero
-	move.w	#BLIT_DEST|$FF,d5		; yes ? all ones
+	move.w	#BC0F_DEST|$FF,d5		; yes ? all ones
 	bra	.doblit
 .zero
-	move.w	#BLIT_DEST|$0,d5			; no ? all zeros
+	move.w	#BC0F_DEST|$0,d5			; no ? all zeros
 .doblit
 	WaitBlitter
 
@@ -55,12 +55,11 @@ BlitFillColor:
 
 
 BlitScroll:
-	;; kills a0,a1,d0,d1,d2
-	;; a0 - dest
-	;; a1 - source
-	;; d0 - shift pixels
-	;; d1 - height
-	;; d2 - ypos
+	;; a0 - dest bitplane pointer
+	;; a1 - source bitplane pointer
+	;; d0 - number of shift pixels to left shift
+	;; d1 - height in pixels
+	;; d2 - y position
 
 	movem.l	d0-d2/a0-a1,-(sp)
 	add.l	d1,d2	;point to end of data for descending mode
@@ -70,30 +69,23 @@ BlitScroll:
 
 	WaitBlitter
 
-
-	if 0
-	move.w	#$1002,BLTCON1(a6)
-	move.w  #$1000|BLIT_SRCB|BLIT_SRCC|BLIT_DEST|$ca,BLTCON0(a6)
-	else
-	lsl.w	#6,d0
-	lsl.w	#6,d0	
-	move.w	#$2,d3
-	or.w	d0,d3
-	move.w	d3,BLTCON1(a6)
-	move.w	#BLIT_SRCB|BLIT_SRCC|BLIT_DEST|$ca,d3
-	or.w	d0,d3
-	move.w	d3,BLTCON0(a6)
-	endif
+	swap	d0			; lsl.l #ASHIFTSHIFT,d0
+	lsr.l   #4,d0			;
+	ori.w	#BC1F_DESC,d0		; BLTCON1 value. shift and descending mode
+	move.w	d0,BLTCON1(a6)
+	and.w	#$f000,d0		; keep the shift, remove the rest
+	ori.w	#BC0F_SRCB|BC0F_SRCC|BC0F_DEST|$ca,d0 ; BLTCON0 value. shift, dma and logic function
+	move.w	d0,BLTCON0(a6)
 	
-	move.w	#$ffff,BLTADAT(a6); preload source mask so only BLTA?WM mask is used	
-	move.w 	#0,BLTBMOD(a6)
-	move.w 	#0,BLTCMOD(a6)
-	move.w 	#0,BLTDMOD(a6)
-	move.l 	a1,BLTBPTH(a6) 	
-	move.l 	a1,BLTCPTH(a6) 	
-	move.l 	a0,BLTDPTH(a6)
-	move.w	#$0000,BLTAFWM(a6)
-	move.w	#$ffff,BLTALWM(a6)	
+	move.w 	#0,BLTBMOD(a6)		; no modulo, blitting full width data
+	move.w 	#0,BLTCMOD(a6)		;
+	move.w 	#0,BLTDMOD(a6)		;
+	move.l 	a1,BLTBPTH(a6) 		; source
+	move.l 	a1,BLTCPTH(a6) 		; background
+	move.l 	a0,BLTDPTH(a6)		; dest
+	move.w	#$0000,BLTAFWM(a6) 	; A DMA is disabled, but the channel is still used in the logic function
+	move.w	#$ffff,BLTALWM(a6) 	; we use it for masking
+	move.w	#$ffff,BLTADAT(a6) 	; preload source mask so only BLTA?WM mask is used		
 	
 	mulu.w	#SCREEN_BIT_DEPTH,d1
 	lsl.w	#6,d1	
