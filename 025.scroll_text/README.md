@@ -50,7 +50,7 @@ then enable descending mode:
 
 Now we can do a blit with left shift.
 
-We use a simplified version of the text renderer used in the previous example to render a single character off screen, we then wait until that character has been fully shifted on screen and render the next one. The logic can be seen in [scroll_text.s)](scroll_text.s). Finally we throw in a copper list to make it look a little less boring.
+We use a simplified version of the text renderer used in the previous example to render a single character off screen, we then wait until that character has been fully shifted on screen and render the next one. The logic can be seen in [scroll_text.s](scroll_text.s). Finally we throw in a copper list to make it look a little less boring.
 
 screenshot
 ----------
