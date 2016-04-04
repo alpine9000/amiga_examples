@@ -32,7 +32,7 @@ BlitFillColor:
 	move.w	#BC0F_DEST|$FF,d5		; yes ? all ones
 	bra	.doblit
 .zero
-	move.w	#BC0F_DEST|$0,d5			; no ? all zeros
+	move.w	#BC0F_DEST|$0,d5		; no ? all zeros
 .doblit
 	WaitBlitter
 
@@ -55,24 +55,25 @@ BlitFillColor:
 
 
 BlitScroll:
+	;; left scroll a screen wide region
 	;; a0 - dest bitplane pointer
 	;; a1 - source bitplane pointer
-	;; d0 - number of shift pixels to left shift
+	;; d0 - number of pixels to left shift on blit
 	;; d1 - height in pixels
-	;; d2 - y position
+	;; d2 - y destination in pixels
 
 	movem.l	d0-d2/a0-a1,-(sp)
-	add.l	d1,d2	;point to end of data for descending mode
+	add.l	d1,d2			; point to end of data for descending mode
 	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d2
-	add.l	d2,a0
-	add.l	d2,a1
+	add.l	d2,a0			; end of dest bitplane
+	add.l	d2,a1			; end of source bitplane
 
 	WaitBlitter
 
 	swap	d0			; lsl.l #ASHIFTSHIFT,d0
-	lsr.l   #4,d0			;
+	lsr.l   #4,d0			; d0 has ASHIFTSHIFT bits set
 	ori.w	#BC1F_DESC,d0		; BLTCON1 value. shift and descending mode
-	move.w	d0,BLTCON1(a6)
+	move.w	d0,BLTCON1(a6)		;
 	and.w	#$f000,d0		; keep the shift, remove the rest
 	ori.w	#BC0F_SRCB|BC0F_SRCC|BC0F_DEST|$ca,d0 ; BLTCON0 value. shift, dma and logic function
 	move.w	d0,BLTCON0(a6)
@@ -84,7 +85,7 @@ BlitScroll:
 	move.l 	a1,BLTCPTH(a6) 		; background
 	move.l 	a0,BLTDPTH(a6)		; dest
 	move.w	#$0000,BLTAFWM(a6) 	; A DMA is disabled, but the channel is still used in the logic function
-	move.w	#$ffff,BLTALWM(a6) 	; we use it for masking
+	move.w	#$ffff,BLTALWM(a6) 	; as we use it for masking
 	move.w	#$ffff,BLTADAT(a6) 	; preload source mask so only BLTA?WM mask is used		
 	
 	mulu.w	#SCREEN_BIT_DEPTH,d1
