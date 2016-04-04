@@ -20,7 +20,7 @@ BlitFillColor:
 	move.w	#BLIT_DEST|$FF,d5		; yes ? all ones
 	bra	.doblit
 .zero
-	move.w	#BLIT_DEST|$0,d5			; no ? all zeros
+	move.w	#BLIT_DEST|$0,d5		; no ? all zeros
 .doblit
 	WaitBlitter
 

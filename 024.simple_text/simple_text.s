@@ -25,7 +25,6 @@ Entry:
 	
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
  	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_MASTER),DMACON(a6) 		
-
 	move.l	onscreen,a0
 	move.l	#BACKGROUND_COLOR,d0
 	move.w	#SCREEN_HEIGHT,d1
@@ -48,7 +47,7 @@ MainLoop:
 	move.l	offscreen,a0
 	move.l	#BACKGROUND_COLOR,d0
 	move.w	#FONT_HEIGHT,d1
-	move.l	ypos,d2		  ; ypos	
+	move.l	ypos,d2
 	jsr	BlitFillColor
 	
 	move.l	offscreen,a0
