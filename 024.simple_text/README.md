@@ -57,6 +57,8 @@ See the [Makefile](Makefile)
    NUM_COLORS=16
 ```
 
+Lastly, we switch the palette to greyscale after all the work has been done so we can see how long things are taking.
+
 screenshot
 ----------
 
