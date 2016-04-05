@@ -36,20 +36,20 @@ MainLoop:
 	jsr 	HoriScrollPlayfield ; returns bitplane pointer offset in d0
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
 	add.l	#1,d1
-	cmp.l	#15,d2
-	bne	.s1
+	;;  	cmp.l	#15,d2	
+	;;  	bne	.s1
 .backfill:
 	move.l	onscreen,a1
 	add.l	d0,a1
 	;; sub.l	#2,a1
 	move.l	a1,a0
-	add.l	#BITPLANE_WIDTH_BYTES,a0 ; dest
+	add.l	#BITPLANE_WIDTH_BYTES-2,a0 ; dest
 	jsr	BlitTile
 	move.l	offscreen,a1
 	add.l	d0,a1
-	;; sub.l	#2,a1	
+	;; 	sub.l	#2,a1	
 	move.l	a1,a0
-	add.l	#BITPLANE_WIDTH_BYTES,a0
+	add.l	#BITPLANE_WIDTH_BYTES-2,a0
 	jsr	BlitTile	
 	move.l	#0,d2
 	bra	.s2
@@ -110,10 +110,10 @@ offscreen:
 
 bitplanes1:
 	incbin "out/gigi_full.bin"
-	ds.b	BITPLANE_WIDTH_BYTES*10
+	ds.b	BITPLANE_WIDTH_BYTES*20
 bitplanes2:
 	incbin "out/gigi_full.bin"	
-	ds.b	BITPLANE_WIDTH_BYTES*10
+	ds.b	BITPLANE_WIDTH_BYTES*20
 	
 	section .bss
 startUserstack:

@@ -9,7 +9,7 @@ HoriScrollPlayfield:
 	movem.l	d1-a6,-(sp)
 	move.l	d0,d1
 	lsr.l   #3,d0		; bytes to scroll
-	move.l   d0,d3		; save bitplane pointer increment (bytes) for return value
+	move.l  d0,d3		; save bitplane pointer increment (bytes) for return value
 	and.l   #$F,d1		; pixels = 0xf - (hpos - (hpos_bytes*8))
 	move.l  #$F,d0
 	sub.l   d1,d0		; bits to delay	

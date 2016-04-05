@@ -109,8 +109,8 @@ BlitTile:
 	move.w	#0,BLTCON1(a6)		;
 	move.w	#BC0F_SRCA|BC0F_DEST|$f0,BLTCON0(a6)
 	
-	move.w 	#SCREEN_WIDTH_BYTES,BLTAMOD(a6)
-	move.w 	#SCREEN_WIDTH_BYTES,BLTDMOD(a6)		;
+	move.w 	#BITPLANE_WIDTH_BYTES-2,BLTAMOD(a6)
+	move.w 	#BITPLANE_WIDTH_BYTES-2,BLTDMOD(a6)		;
 	move.l 	a1,BLTAPTH(a6) 		; source
 	move.l 	a0,BLTDPTH(a6)		; dest
 	move.w	#$ffff,BLTAFWM(a6)

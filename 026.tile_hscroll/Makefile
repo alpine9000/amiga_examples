@@ -23,7 +23,7 @@ include ../shared/base.mk
 
 
 out/%.sized.png: ../assets/%.png
-	$(RESIZE) --width=336 --height=256 --blur=0.75 --input=$< --output=$@
+	$(RESIZE) --width=352 --height=256 --blur=0.75 --input=$< --output=$@
 
 out/%.bin: out/%.sized.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --quantize --colors $(NUM_COLORS) --output-bitplanes  --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output out/$*
