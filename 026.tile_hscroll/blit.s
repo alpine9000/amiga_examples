@@ -102,27 +102,24 @@ BlitScroll:
 BlitTile:
 	;; a0 - dest bitplane pointer
 	;; a1 - source bitplane pointer
-	;; d2 - y destination in pixels
+	;; d2 - y tile index
 
 	WaitBlitter
-
+	movem.l	d2,-(sp)
 	move.w	#0,BLTCON1(a6)		;
 	move.w	#BC0F_SRCA|BC0F_DEST|$f0,BLTCON0(a6)
 	
 	move.w 	#BITPLANE_WIDTH_BYTES-2,BLTAMOD(a6)
 	move.w 	#BITPLANE_WIDTH_BYTES-2,BLTDMOD(a6)		;
+
+	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16,d2
+	add.l	d2,a0
+	add.l	d2,a1
 	move.l 	a1,BLTAPTH(a6) 		; source
 	move.l 	a0,BLTDPTH(a6)		; dest
 	move.w	#$ffff,BLTAFWM(a6)
 	move.w	#$ffff,BLTALWM(a6)
-	move.w 	#((SCREEN_HEIGHT/2)*SCREEN_BIT_DEPTH)<<6|(1),BLTSIZE(a6)	;rectangle size, starts blit
-
-	WaitBlitter
-
-	add.l	#BITPLANE_WIDTH_BYTES*(SCREEN_HEIGHT/2)*SCREEN_BIT_DEPTH,a0
-	add.l	#BITPLANE_WIDTH_BYTES*(SCREEN_HEIGHT/2)*SCREEN_BIT_DEPTH,a1
-	move.l 	a1,BLTAPTH(a6) 		; source
-	move.l 	a0,BLTDPTH(a6)		; dest
-	move.w 	#((SCREEN_HEIGHT/2)*SCREEN_BIT_DEPTH)<<6|(1),BLTSIZE(a6)	;rectangle size, starts blit	
+	move.w 	#(16*SCREEN_BIT_DEPTH)<<6|(1),BLTSIZE(a6)	;rectangle size, starts blit
+	movem.l	(sp)+,d2
 	rts
 			

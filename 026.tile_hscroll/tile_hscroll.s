@@ -36,8 +36,6 @@ MainLoop:
 	jsr 	HoriScrollPlayfield ; returns bitplane pointer offset in d0
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
 	add.l	#1,d1
-	;;  	cmp.l	#15,d2	
-	;;  	bne	.s1
 .backfill:
 	move.l	onscreen,a1
 	add.l	d0,a1
@@ -51,6 +49,10 @@ MainLoop:
 	move.l	a1,a0
 	add.l	#BITPLANE_WIDTH_BYTES-2,a0
 	jsr	BlitTile	
+
+
+	cmp.l	#15,d2	
+	bne	.s1	
 	move.l	#0,d2
 	bra	.s2
 .s1:
