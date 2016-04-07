@@ -6,7 +6,7 @@
 
 config_t config = {
   .verbose = 0,
-  .bitDepth = 4,
+  .bitDepth = 0,
   .inputFile = 0
 
 };
@@ -15,7 +15,9 @@ config_t config = {
 static unsigned
 get_tile_address(tmx_map *m, unsigned int gid)
 {
-  printf("get_tile_address %d\n", gid);
+  if (config.verbose) {
+    printf("get_tile_address %d\n", gid);
+  }
   
   tmx_tileset* ts = m->ts_head;
   unsigned baseAddress = 0;
@@ -24,7 +26,9 @@ get_tile_address(tmx_map *m, unsigned int gid)
       tmx_tile* t = ts->tiles;
       if (t[i].id+ts->firstgid == gid) {
 	unsigned address = baseAddress + (t[i].ul_y * ((ts->image->width/8) * config.bitDepth)) + (t[i].ul_x/8);
-	printf("%s - baseAddress = %d address = %d\n", ts->name, baseAddress, address);
+	if (config.verbose) {
+	  printf("%s - baseAddress = %d address = %d\n", ts->name, baseAddress, address);
+	}
 	return address;
       }
     }
@@ -73,7 +77,7 @@ void
 usage()
 {
   fprintf(stderr, 
-	  "%s:  --input <input.tmx>\n"\
+	  "%s:  --input <input.tmx> --depth <num bitplanes>\n"\
 	  "options:\n"\
 	  "  --help\n"\
 	  "  --verbose\n", config.argv[0]);
@@ -94,6 +98,7 @@ main(int argc, char *argv[])
       {"verbose", no_argument, &config.verbose, 1},
       {"help", no_argument, 0, '?'},
       {"input",   required_argument, 0, 'i'},
+      {"depth",   required_argument, 0, 'd'},
       {0, 0, 0, 0}
     };
     
@@ -110,6 +115,9 @@ main(int argc, char *argv[])
     case 'i':
       config.inputFile = optarg;
       break;	
+    case 'd':
+      sscanf(optarg, "%d", &config.bitDepth);
+      break;	
     case '?':
       usage();
       break;	
@@ -120,7 +128,7 @@ main(int argc, char *argv[])
   }
   
 
-  if (config.inputFile == 0) {
+  if (config.inputFile == 0 || config.bitDepth == 0) {
     usage();
     abort();
   }  
