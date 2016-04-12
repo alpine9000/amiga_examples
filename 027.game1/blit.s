@@ -106,7 +106,7 @@ BlitTile:
 	;; d2 - y tile index
 
 	WaitBlitter
-	movem.l	d2,-(sp)
+	movem.l	d0-a6,-(sp)
 	move.w	#0,BLTCON1(a6)		;
 	move.w	#BC0F_SRCA|BC0F_DEST|$f0,BLTCON0(a6)
 	
@@ -121,7 +121,7 @@ BlitTile:
 	move.w	#$ffff,BLTAFWM(a6)
 	move.w	#$ffff,BLTALWM(a6)
 	move.w 	#(16*SCREEN_BIT_DEPTH)<<6|(1),BLTSIZE(a6)	;rectangle size, starts blit
-	movem.l	(sp)+,d2
+	movem.l	(sp)+,d0-a6
 	rts
 
 

@@ -11,9 +11,9 @@ NUM_COLORS=8
 BOOTBLOCK_ASM=alpine_bootblock.s
 OBJS=out/init.o out/utils.o out/image.o out/blit.o out/scroll.o
 
-#IMAGES=gigi_full.png
-#IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
-#SIZEDIMAGEDATA=$(addprefix out/, $(IMAGES:.png=.sized.png))
+IMAGES=gigi_full.png
+IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
+SIZEDIMAGEDATA=$(addprefix out/, $(IMAGES:.png=.sized.png))
 
 TILEMAPS=2222.png background_tiles.png
 TILEMAPDATA=$(addprefix out/, $(TILEMAPS:.png=.bin))
@@ -26,11 +26,11 @@ LINKER_OPTIONS=-T link.script.x
 include ../shared/base.mk
 
 
-#out/%.sized.png: ../assets/%.png
-#	$(RESIZE) --width=352 --height=256 --blur=0.75 --input=$< --output=$@
+out/%.sized.png: ../assets/%.png
+	$(RESIZE) --width=352 --height=256 --blur=0.75 --input=$< --output=$@
 
-#out/%.bin: out/%.sized.png
-#	$(IMAGECON) --input $< $(IMAGECON_ARGS) --quantize --colors $(NUM_COLORS) --output-bitplanes  --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output out/$*
+out/%.bin: out/%.sized.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --quantize --colors $(NUM_COLORS) --output-bitplanes  --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output out/$*
 
 out/%.bin: assets/%.png
 	$(IMAGECON) --use-palette=assets/fg.pal --input $< $(IMAGECON_ARGS) --quantize --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output-png --output out/$*

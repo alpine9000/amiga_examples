@@ -6,6 +6,7 @@
 	xdef	copperListBpl1Ptr
 	xdef	copperListBpl2Ptr	
 	xdef    backgroundTiles
+	xdef 	bg_bitplanes
 	
 byteMap:
 	dc.l	Entry
@@ -23,6 +24,10 @@ Entry:
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR			
 
+	;; d0 - fg bitplane pointer offset
+	;; d1 - bg bitplane pointer offset
+	move.l	#0,d0
+	move.l	#1,d1
 	jsr	SwitchBuffers		
 	
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
@@ -31,36 +36,42 @@ Entry:
 	jsr	Init		  ; enable the playfield		
 
 Reset:
-	move.l	#0,d1 			; x pos 
-	move.l	#0,d2			; shift counter
-	move.l	#0,d3			; tile index
-
+	move.l	#0,fg_xpos		; x pos 	(d1)
+	move.l	#0,fg_shift		; shift counter (d2)
+	move.l	#0,fg_tileIndex		; tile index	(d3)
+	move.l	#0,bg_xpos
+	
 	jsr 	BlueFill
 	
-MainLoop:		
-	jsr 	WaitVerticalBlank
+MainLoop:
+	add.l	#1,fg_xpos
 	jsr	WaitVerticalBlank
-
+	jsr 	WaitVerticalBlank
 	bsr	RenderNextFrame
 	jsr	UpdateShiftCounter
-	add.l	#1,d1
+	jsr 	UpdateBackgroundXpos
+	
+	;; d0 - fg bitplane pointer offset
+	;; d1 - bg bitplane pointer offset
+
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
 	bra	MainLoop
 	
 RenderNextFrame:
-	move.l	d1,d0		    ; x position in pixels
+	move.l	fg_xpos,d0		    ; fg x position in pixels
+	move.l	bg_xpos,d1		    ; bg x position in pixels
 	lea	map,a2
-	add.l	d3,a2
+	add.l	fg_tileIndex,a2
 	cmp.w	#0,20(a2)
 	bne	.skip
 	bra	Reset
 .skip:
-	jsr 	HoriScrollPlayfield ; returns bitplane pointer offset in d0	
+	jsr 	HoriScrollPlayfield ; returns fg bitplane pointer offset in d0		
 	move.l	onscreen,a0
 	bsr	RenderTile
 	move.l	offscreen,a0
 	bsr	RenderTile
-	add.l	#2,d3			; increment tile index
+	add.l	#2,fg_tileIndex    	  ; increment tile index
 	rts
 	
 RenderTile:
@@ -70,18 +81,30 @@ RenderTile:
 	lea 	tilemap,a1	
 	add.l	#BITPLANE_WIDTH_BYTES-2,a0 ; dest
 	add.w	(a2),a1 	; source tile
+	move.l	fg_shift,d2
 	jsr	BlitTile
 	rts
 	
 UpdateShiftCounter:	
-	cmp.l	#15,d2	
-	bne	.s1	
-	move.l	#0,d2
+	cmp.l	#15,fg_shift	
+	bne	.s1
+	move.l	#0,fg_shift
 	bra	.s2
 .s1:
-	add.l	#1,d2
+	add.l	#1,fg_shift
 .s2:
 	rts
+
+UpdateBackgroundXpos:	
+	cmp.l	#1,bg_delay
+	bne	.s1
+	move.l	#0,bg_delay
+	add.l	#1,bg_xpos
+	bra	.s2
+.s1:
+	add.l	#1,bg_delay
+.s2:
+	rts	
 	
 Level3InterruptHandler:
 	movem.l	d0-a6,-(sp)
@@ -162,6 +185,9 @@ bitplanes1:
 bitplanes2:
 	ds.b	IMAGESIZE
 	ds.b	BITPLANE_WIDTH_BYTES*20
+
+bg_bitplanes:
+	incbin	"out/gigi_full.bin"
 	
 map:
 	include "out/main-map.s"
@@ -170,7 +196,28 @@ map:
 backgroundTiles:
 	include "out/background_tiles.bin"
 	
+
+fg_shift:
+	dc.l	0
+fg_xpos:
+	dc.l	0
+fg_tileIndex:
+	dc.l	0
+
+bg_shift:
+	dc.l	0
+bg_xpos:
+	dc.l	0
+bg_tileIndex:
+	dc.l	0
+
+bg_delay:
+	dc.l	0
+	
 	section .bss
+
+
+
 startUserstack:
 	ds.b	$1000		; size of stack
 userstack:

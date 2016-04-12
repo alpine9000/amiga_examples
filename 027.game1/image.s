@@ -1,10 +1,11 @@
 	include "includes.i"
 
 	xdef SwitchBuffers
-		
+	
 SwitchBuffers:
 	;; offscreen - bitplane address
-	;; d0 - bitplane pointer offset
+	;; d0 - fg bitplane pointer offset
+	;; d1 - bg bitplane pointer offset
 	movem.l	d0/a0-a1,-(sp)
 	move.l	offscreen,a0
 	move.l	onscreen,offscreen
@@ -14,8 +15,9 @@ SwitchBuffers:
 	jsr	PokeBitplanePointers
 
 
-	lea	backgroundTiles,a1
+	lea	bg_bitplanes,a1
 	lea 	copperListBpl2Ptr,a0
+	move.l	d1,d0
 	jsr	PokeBitplanePointers	
 	movem.l (sp)+,d0/a0-a1
 	rts
