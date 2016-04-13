@@ -56,7 +56,7 @@ BlitFillColor:
 
 
 
-BlitScroll:
+_BlitScroll:
 	;; left scroll a screen wide region
 	;; a0 - dest bitplane pointer
 	;; a1 - source bitplane pointer
@@ -105,8 +105,8 @@ BlitTile:
 	;; a1 - source tile pointer
 	;; d2 - y tile index
 
-	WaitBlitter
-	movem.l	d0-a6,-(sp)
+	WaitBlitter	
+	movem.l	d2/a0,-(sp)
 	move.w	#0,BLTCON1(a6)		;
 	move.w	#BC0F_SRCA|BC0F_DEST|$f0,BLTCON0(a6)
 	
@@ -115,13 +115,12 @@ BlitTile:
 
 	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16,d2
 	add.l	d2,a0
-	;; add.l	d2,a1
 	move.l 	a1,BLTAPTH(a6) 		; source
 	move.l 	a0,BLTDPTH(a6)		; dest
 	move.w	#$ffff,BLTAFWM(a6)
 	move.w	#$ffff,BLTALWM(a6)
 	move.w 	#(16*SCREEN_BIT_DEPTH)<<6|(1),BLTSIZE(a6)	;rectangle size, starts blit
-	movem.l	(sp)+,d0-a6
+	movem.l	(sp)+,d2/a0
 	rts
 
 
@@ -142,7 +141,21 @@ BlueFill:
 	move.l	#0,d0
 	move.l	#256,d1
 	move.l	#0,d2
-	jsr	BlitFillColor	
+	jsr	BlitFillColor
+	jsr     WaitVerticalBlank
+	jsr	SwitchBuffers
+	move.l	backgroundOffscreen,a0
+	move.l	#0,d0
+	move.l	#256,d1
+	move.l	#0,d2
+	jsr	BlitFillColor
+	jsr     WaitVerticalBlank
+	jsr	SwitchBuffers
+	move.l	backgroundOffscreen,a0
+	move.l	#0,d0
+	move.l	#256,d1
+	move.l	#0,d2
+	jsr	BlitFillColor			
 	movem.l	(sp)+,d0-a6
 	rts	
 

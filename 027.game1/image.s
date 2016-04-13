@@ -4,9 +4,10 @@
 	
 SwitchBuffers:
 	;; offscreen - bitplane address
-	;; d0 - fg bitplane pointer offset
-	;; d1 - bg bitplane pointer offset
-	movem.l	d0/a0-a1,-(sp)
+	;; 	movem.l	d0/a0-a1,-(sp)
+
+	move.l	fg_xpos,d0
+	lsr.l   #3,d0		; bytes to scroll
 	move.l	offscreen,a0
 	move.l	onscreen,offscreen
 	move.l	a0,onscreen
@@ -14,19 +15,23 @@ SwitchBuffers:
 	lea 	copperListBpl1Ptr,a0
 	jsr	PokeBitplanePointers
 
-
-	lea	bg_bitplanes,a1
+	move.l	bg_xpos,d0
+	lsr.l   #3,d0		; bytes to scroll		
+	move.l	backgroundOffscreen,a0
+	move.l	backgroundOnscreen,backgroundOffscreen
+	move.l	a0,backgroundOnscreen
+	move.l	a0,a1
 	lea 	copperListBpl2Ptr,a0
-	move.l	d1,d0
 	jsr	PokeBitplanePointers	
-	movem.l (sp)+,d0/a0-a1
+	
+	;; 	movem.l (sp)+,d0/a0-a1
 	rts
 
 PokeBitplanePointers:
 	; d0 = frame offset in bytes
 	; a0 = BPLP copper list address
 	; a1 = bitplanes pointer
-	movem.l	d0-a6,-(sp)
+	;; 	movem.l	d0-a6,-(sp)
 	add.l	d0,a1 ; bitplane offset
 	moveq	#SCREEN_BIT_DEPTH-1,d0
 .bitplaneloop:
@@ -37,7 +42,7 @@ PokeBitplanePointers:
 	lea	BITPLANE_WIDTH_BYTES(a1),a1
 	addq	#8,a0
 	dbra	d0,.bitplaneloop
-	movem.l (sp)+,d0-a6
+	;; 	movem.l (sp)+,d0-a6
 	rts
 
 	

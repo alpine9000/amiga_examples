@@ -11,11 +11,11 @@ NUM_COLORS=8
 BOOTBLOCK_ASM=alpine_bootblock.s
 OBJS=out/init.o out/utils.o out/image.o out/blit.o out/scroll.o
 
-IMAGES=gigi_full.png
-IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
-SIZEDIMAGEDATA=$(addprefix out/, $(IMAGES:.png=.sized.png))
+#IMAGES=gigi_full.png
+#IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
+#SIZEDIMAGEDATA=$(addprefix out/, $(IMAGES:.png=.sized.png))
 
-TILEMAPS=2222.png background_tiles.png
+TILEMAPS=foreground.png background.png
 TILEMAPDATA=$(addprefix out/, $(TILEMAPS:.png=.bin))
 
 VASM_EXTRA_ARGS=-DNUM_COLORS=$(NUM_COLORS)
@@ -26,19 +26,27 @@ LINKER_OPTIONS=-T link.script.x
 include ../shared/base.mk
 
 
-out/%.sized.png: ../assets/%.png
-	$(RESIZE) --width=352 --height=256 --blur=0.75 --input=$< --output=$@
+#out/%.sized.png: ../assets/%.png
+#	$(RESIZE) --width=352 --height=256 --blur=0.75 --input=$< --output=$@
 
 out/%.bin: out/%.sized.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --quantize --colors $(NUM_COLORS) --output-bitplanes  --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output out/$*
 
-out/%.bin: assets/%.png
-	$(IMAGECON) --use-palette=assets/fg.pal --input $< $(IMAGECON_ARGS) --quantize --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output-png --output out/$*
+out/foreground.bin: assets/tilemap.png
+	$(IMAGECON) --use-palette=assets/foreground.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output out/foreground
 
-out/main-map.s: map.tmx
-	../tools/mapgen/out/mapgen --depth=3 --input=map.tmx
-	mv main-map.s out
+out/background.bin: assets/tilemap.png
+	$(IMAGECON) --use-palette=assets/background.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output out/background
+
+
+out/foreground-map.s: foreground.tmx
+	../tools/mapgen/out/mapgen --depth=3 --input=foreground.tmx
+	mv foreground-map.s out
+
+out/background-map.s: background.tmx
+	../tools/mapgen/out/mapgen --depth=3 --input=background.tmx
+	mv background-map.s out
 
 out/blit.o: constants.i macros.i
-out/main.o: out/main-map.s $(TILEMAPDATA) $(IMAGEDATA) constants.i macros.i Makefile link.script.x palette.pal
+out/main.o: out/background-map.s out/foreground-map.s $(TILEMAPDATA) $(IMAGEDATA) constants.i macros.i Makefile link.script.x assets/palette.pal
 out/init.o: constants.i Makefile
