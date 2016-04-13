@@ -101,7 +101,7 @@ BlitScroll:
 
 BlitTile:
 	;; a0 - dest bitplane pointer
-	;; a1 - source bitplane pointer
+	;; a1 - source tile pointer
 	;; d2 - y tile index
 
 	WaitBlitter
@@ -109,12 +109,12 @@ BlitTile:
 	move.w	#0,BLTCON1(a6)		;
 	move.w	#BC0F_SRCA|BC0F_DEST|$f0,BLTCON0(a6)
 	
-	move.w 	#BITPLANE_WIDTH_BYTES-2,BLTAMOD(a6)
+	move.w 	#TILEMAP_WIDTH_BYTES-2,BLTAMOD(a6)
 	move.w 	#BITPLANE_WIDTH_BYTES-2,BLTDMOD(a6)		;
 
 	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16,d2
 	add.l	d2,a0
-	add.l	d2,a1
+	;; add.l	d2,a1
 	move.l 	a1,BLTAPTH(a6) 		; source
 	move.l 	a0,BLTDPTH(a6)		; dest
 	move.w	#$ffff,BLTAFWM(a6)

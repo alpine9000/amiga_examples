@@ -30,6 +30,7 @@ Entry:
 
 	move.l	#0,d1 			; x pos 
 	move.l	#0,d2			; shift counter
+	move.l	#0,d3
 MainLoop:		
 	jsr 	WaitVerticalBlank
 	move.l	d1,d0		    ; x position in pixels
@@ -37,20 +38,25 @@ MainLoop:
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
 	add.l	#1,d1
 .backfill:
-	move.l	onscreen,a1
-	add.l	d0,a1
-	;; sub.l	#2,a1
-	move.l	a1,a0
+	move.l	onscreen,a0
+	add.l	d0,a0
 	add.l	#BITPLANE_WIDTH_BYTES-2,a0 ; dest
+	lea 	tilemap,a1
+	lea	map,a2
+	add.l	d3,a2
+	add.w	(a2),a1 	; source tile
 	jsr	BlitTile
-	move.l	offscreen,a1
-	add.l	d0,a1
-	;; 	sub.l	#2,a1	
-	move.l	a1,a0
-	add.l	#BITPLANE_WIDTH_BYTES-2,a0
+
+	move.l	offscreen,a0
+	add.l	d0,a0
+	add.l	#BITPLANE_WIDTH_BYTES-2,a0 ; dest
+	lea 	tilemap,a1
+	lea	map,a2
+	add.l	d3,a2
+	add.w	(a2),a1 	; source tile
 	jsr	BlitTile	
-
-
+	add.l	#2,d3
+	
 	cmp.l	#15,d2	
 	bne	.s1	
 	move.l	#0,d2
@@ -99,23 +105,26 @@ copperListBplPtr:
 	dc.l	$fffffffe
  
 InstallPalette:
-	include	"out/gigi_full-palette.s"
+	include	"out/tilemap-palette.s"
 	rts
 
-GreyPalette:
-	include	"out/gigi_full-grey.s"
-	rts	
 onscreen:
 	dc.l	bitplanes1
 offscreen:
 	dc.l	bitplanes2
 
+tilemap:
+	incbin "out/tilemap.bin"
+	
 bitplanes1:
-	incbin "out/gigi_full.bin"
+	ds.b	IMAGESIZE
 	ds.b	BITPLANE_WIDTH_BYTES*20
 bitplanes2:
-	incbin "out/gigi_full.bin"	
+	ds.b	IMAGESIZE
 	ds.b	BITPLANE_WIDTH_BYTES*20
+	
+map:
+	include "out/main-map.s"
 	
 	section .bss
 startUserstack:

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="left-up" width="100" height="16" tilewidth="16" tileheight="16" nextobjectid="1">
+ <tileset firstgid="1" name="test" tilewidth="16" tileheight="16" tilecount="256" columns="16">
+  <image source="Projects/amiga/amiga_examples/026.tile_hscroll/tilemap.png" width="256" height="256"/>
+ </tileset>
+ <layer name="main" width="100" height="16" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJzt2FOQXEEUxvGObdvWxk42djKxk4lt27Zt27ZtY2NzY+Ofyu2azkVetpJUpfrhV9Ona6q/U/fcnofxFkJ4a37iD/4RAAERCIERBEERDMERAiERCqERBmGN70l/qkevv/g8/nVWOIRHBEREJERGFERFNERHDMRELMRGHMQVv84jHuIjARIiERIjCZIiGZIjBVIiFVIjjVGb97x+83x0lv256jzSIh3SIwMyIhMyIwuyIhuyIwdyIhdyG7V5T/boMj6bo4Wx1ln256rzyIO8yIf8KICCKITCKIKiKIbiKIGSKGXU5j2XwY1u6I4e6KmzbLNcpnmURhmURTmURwVURCVURhVURTVURw3UNGrznlvpeRiGYwRG6izbLLdpHrVQG3VQF/VQHw3QEI3QGE3QFM2E5662NNVyLXuehumYgZk6yzFLnUcrtEYbtEU7tEcHdEQndEYXdBXWu6rWci17XoblWIGVOssxS51HL/RGH/RFP/THAAzEIAzGEAwV1ruq1nIte96G7diBnTrLMUudxyiMxhiMxTiMxwRMxCRMxhRMFda7qtZyLXs+huM4gZM6yzFLnccszMYczMU8zMcCLMQiLMYSLBXWu6rWci17vmrwET9/Y3WWfZY6j1VYjTVYi3VYjw3YiE3YjC3YKqx3Va3lWvbso/Tsq7Mcs9R57MJu7MFe7MN+HMBBHMJhHMFRYb2rai3X8v2R/Uo6yz5LnccpnMYZnMU5nMcFXMQlXMYV4Xk3ruE6bgjPu6LumfuV/tcsXz9mqfO4iVu4jTu4i3u4jwd4iEd4jCd4imd4bvRht+dEZ9mfq87jBV7iFV7jDd7iHd7jAz7iEz7jC77iG3780Wy359S3zrI/V53HdxA4QSI=
+  </data>
+ </layer>
+</map>
