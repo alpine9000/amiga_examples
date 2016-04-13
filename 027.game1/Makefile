@@ -38,6 +38,8 @@ out/foreground.bin: assets/tilemap.png
 out/background.bin: assets/tilemap.png
 	$(IMAGECON) --use-palette=assets/background.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output out/background
 
+out/tilemap-palette.s: assets/tilemap.png
+	$(IMAGECON) --use-palette=assets/palette.pal --full-color-palette-file --input=assets/tilemap.png --output-palette-asm --output=out/tilemap
 
 out/foreground-map.s: foreground.tmx
 	../tools/mapgen/out/mapgen --depth=3 --input=foreground.tmx
@@ -48,5 +50,5 @@ out/background-map.s: background.tmx
 	mv background-map.s out
 
 out/blit.o: constants.i macros.i
-out/main.o: out/background-map.s out/foreground-map.s $(TILEMAPDATA) $(IMAGEDATA) constants.i macros.i Makefile link.script.x assets/palette.pal
+out/main.o: out/background-map.s out/foreground-map.s $(TILEMAPDATA) $(IMAGEDATA) constants.i macros.i Makefile link.script.x assets/palette.pal out/tilemap-palette.s
 out/init.o: constants.i Makefile

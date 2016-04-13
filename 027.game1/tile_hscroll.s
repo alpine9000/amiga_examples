@@ -237,7 +237,7 @@ copperListBplPtr:
 	endif
 	
 InstallPalette:
-	include	"palette.s"
+	include	"out/tilemap-palette.s"
 	rts
 
 onscreen:
