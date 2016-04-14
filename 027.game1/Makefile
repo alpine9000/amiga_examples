@@ -1,4 +1,4 @@
-EXAMPLE_NAME=game
+EXAMPLE_NAME=game1
 
 # userstack used by bootblock
 USERSTACK_ADDRESS=7fffc
@@ -9,7 +9,7 @@ BASE_ADDRESS=4000
 NUM_COLORS=8
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/scroll.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o
 
 #IMAGES=gigi_full.png
 #IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
