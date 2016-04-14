@@ -14,7 +14,9 @@ SwitchBuffers:
 	move.l	a0,a1
 	lea 	copperListBpl1Ptr,a0
 	jsr	PokeBitplanePointers
-
+	
+	btst	#FOREGROUND_DELAY_BIT,d6
+	beq	.skipBackgroundSwap
 	move.l	bg_xpos,d0
 	lsr.l   #3,d0		; bytes to scroll		
 	move.l	backgroundOffscreen,a0
@@ -23,7 +25,7 @@ SwitchBuffers:
 	move.l	a0,a1
 	lea 	copperListBpl2Ptr,a0
 	jsr	PokeBitplanePointers	
-	
+.skipBackgroundSwap:	
 	;; 	movem.l (sp)+,d0/a0-a1
 	rts
 

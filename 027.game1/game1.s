@@ -10,7 +10,7 @@
 	xdef	backgroundOffscreen
 	xdef	fg_xpos
 	xdef	bg_xpos
-	
+
 byteMap:
 	dc.l	Entry
 	dc.l	endCode-byteMap
@@ -49,54 +49,40 @@ Reset:
 	move.l	#0,bg_xpos
 	move.l	#0,bg_shift		; shift counter (d2)
 	move.l	#0,bg_tileIndex		; tile index	(d3)	
-	move.l	#1,bg_delay
+	move.l	#0,bg_delay
 	
 	jsr 	BlueFill
 	
 MainLoop:
-	add.l	#1,fg_xpos
-
 	move.l	bg_delay,d6
-	btst	#0,d6
-	beq	.s1	
-	add.l	#1,bg_xpos		
-.s1:	
-
 
 	jsr	WaitVerticalBlank
-
 	bsr.s	HoriScrollPlayfield
-	bsr.s	RenderNextForegroundFrame
-	bsr.s 	RenderNextBackgroundFrame	
+
+	bsr	RenderNextForegroundFrame
+	bsr 	RenderNextBackgroundFrame	
 	
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
 
-	jsr 	WaitVerticalBlank 	
-	
-	bsr.s	RenderNextForegroundFrame
-	bsr.s 	RenderNextBackgroundFrame		
-	
-	add.l	#2,fg_tileIndex    	  ; increment foreground tile index
-	
-	btst	#0,d6
-	beq	.skipBackgroundUpdates
-
-	;; Background updates
+	andi.b	#BACKGROUND_UPDATE_COUNT,d6
+	bne	.skipBackgroundUpdates
+	;; ---- Background updates ----------------------------------------
+.backgroundUpdates:
+	add.l	#1,bg_xpos		
 	add.l	#2,bg_tileIndex    	  ; increment tile index			
-	bsr 	UpdateBackgroundShiftCounter
-	
+	bsr 	UpdateBackgroundShiftCounter	
 .skipBackgroundUpdates:
-	
-	bsr	UpdateShiftCounter
 
+	btst	#FOREGROUND_DELAY_BIT,d6
+	beq	.skipForegroundUpdates
+	;; ---- Foreground updates ----------------------------------------	
+.foregroundUpdates:
+	add.l	#1,fg_xpos
+	add.l	#2,fg_tileIndex    	  ; increment foreground tile index	
+	bsr	UpdateShiftCounter
+.skipForegroundUpdates:
 
 	add.l	#1,bg_delay	
-	
-	;; d0 - fg bitplane pointer offset
-	;; d1 - bg bitplane pointer offset
-	
-
-
 	bra	MainLoop
 
 HoriScrollPlayfield:
@@ -131,8 +117,8 @@ HoriScrollPlayfield:
 
 
 RenderNextBackgroundFrame:
-	btst	#0,d6
-	beq	.s1
+	btst	#FOREGROUND_DELAY_BIT,d6
+	;; 	beq	.s1
 	lea	backgroundMap,a2
 	add.l	bg_tileIndex,a2
 	bsr	RenderBackgroundTile	
@@ -161,14 +147,6 @@ RenderForegroundTile:
 	add.w	(a2),a1 	; source tile
 	move.l	fg_shift,d2
 	jsr	BlitTile
-
-	if 0
-	move.l	offscreen,a0
-	add.l	d0,a0
-	add.l	#BITPLANE_WIDTH_BYTES-2,a0 ; dest
-	jsr	BlitTile
-	endif
-	
 	;; 	movem.l	(sp)+,a4
 	rts
 
@@ -185,13 +163,6 @@ RenderBackgroundTile:
 	add.w	(a2),a1 	; source tile
 	move.l	bg_shift,d2
 	jsr	BlitTile
-
-	if 0
-	move.l	backgroundOffscreen,a0
-	add.l	d0,a0
-	add.l	#BITPLANE_WIDTH_BYTES-2,a0 ; dest
-	jsr	BlitTile
-	endif
 	;; 	movem.l	(sp)+,a4
 	rts	
 
@@ -343,3 +314,34 @@ startUserstack:
 userstack:
 
 
+
+	end
+
+0:	UpdateFG
+	UpdateBG	
+	RenderFG
+	RenderBG
+	SwapBufferFG
+	SwapBufferBG	
+	
+1:	RenderFG
+	SwapBufferFG
+
+2:	UpdateFG	
+	RenderFG
+	RenderBG
+	SwapBufferFG
+	SwapBufferBG		
+	
+2:	RenderFG
+	SwapBufferFG
+
+
+000
+001
+010
+011
+100
+101
+110
+111
