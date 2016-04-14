@@ -42,26 +42,16 @@ Entry:
 	
 Reset:
 	move.l	#0,foregroundScrollX		; x pos 	(d1)
-	move.l	#0,fg_shift		; shift counter (d2)
+	move.l	#15,fg_shift		; shift counter (d2)
 	move.l	#0,fg_tileIndex		; tile index	(d3)
 	move.l	#0,backgroundScrollX
 	move.l	#0,bg_shift		; shift counter (d2)
 	move.l	#0,bg_tileIndex		; tile index	(d3)	
 	move.l	#BACKGROUND_UPDATE_COUNT,d6 (Frame count)
 	jsr 	BlueFill
-	move.l	#0,frameCount		
+	move.l	#-1,frameCount		
 	
 MainLoop:
-	move.l	frameCount,d6
-
-
-	bsr	RenderNextForegroundFrame	
-	bsr 	RenderNextBackgroundFrame		
-	
-	jsr	WaitVerticalBlank	
-	bsr.s	HoriScrollPlayfield
-	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
-
 	andi.b	#BACKGROUND_UPDATE_COUNT,d6
 	bne	.skipBackgroundUpdates
 	;; ---- Background updates ----------------------------------------
@@ -84,6 +74,17 @@ MainLoop:
 .skipForegroundUpdates:
 
 	add.l	#1,frameCount	
+
+	
+	move.l	frameCount,d6
+	
+	bsr	RenderNextForegroundFrame	
+	bsr 	RenderNextBackgroundFrame		
+
+	jsr	WaitVerticalBlank		
+	bsr.s	HoriScrollPlayfield
+	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
+	
 
 	bra	MainLoop
 
@@ -146,7 +147,8 @@ RenderForegroundTile:
 	move.l	foregroundOffscreen,a0
 	add.l	d0,a0
 	lea 	tilemap,a1	
-	add.l	#BITPLANE_WIDTH_BYTES-8,a0 ; dest
+	;; 	add.l	#BITPLANE_WIDTH_BYTES-8,a0 ; dest
+	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*SCREEN_HEIGHT/4)+BITPLANE_WIDTH_BYTES-8,a0
 	add.w	(a2),a1 	; source tile
 	move.l	fg_shift,d2
 	cmp.l	#8,d2
@@ -159,8 +161,11 @@ ClearForegroundTile
 	lea 	tilemap,a1		
 	add.w	#11520,a1 	; source tile
 	move.l	fg_shift,d2
+	cmp.l	#8,d2
+	bge	.skip
 	sub.l	#32,a0
-	jsr	BlitTile	
+	jsr	BlitTile
+.skip:
 	rts
 
 

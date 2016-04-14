@@ -14,7 +14,7 @@ SwitchBuffers:
 	move.l	a0,a1
 	lea 	copperListBpl1Ptr,a0
 	jsr	PokeBitplanePointers
-	
+
 	btst	#FOREGROUND_DELAY_BIT,d6 ; only swap the background buffer every second frame
 	beq	.skipBackgroundSwap
 	move.l	backgroundScrollX,d0
@@ -24,7 +24,8 @@ SwitchBuffers:
 	move.l	a0,backgroundOnscreen
 	move.l	a0,a1
 	lea 	copperListBpl2Ptr,a0
-	jsr	PokeBitplanePointers	
+	jsr	PokeBitplanePointers
+
 .skipBackgroundSwap:	
 	;; 	movem.l (sp)+,d0/a0-a1
 	rts
