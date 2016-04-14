@@ -130,14 +130,14 @@ BlueFill:
 	;; d0 - color#
 	;; d1 - height
 	;; d2 - ypos
-	move.l	offscreen,a0
+	move.l	foregroundOffscreen,a0
 	move.l	#0,d0
 	move.l	#256,d1
 	move.l	#0,d2
 	jsr	BlitFillColor
 	jsr     WaitVerticalBlank
 	jsr	SwitchBuffers
-	move.l	offscreen,a0
+	move.l	foregroundOffscreen,a0
 	move.l	#0,d0
 	move.l	#256,d1
 	move.l	#0,d2

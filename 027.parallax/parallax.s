@@ -1,15 +1,14 @@
 	include "includes.i"
 	
 	xdef	copperList
-	xdef	onscreen
-	xdef	offscreen
 	xdef	copperListBpl1Ptr
 	xdef	copperListBpl2Ptr	
-	xdef    backgroundTiles
 	xdef 	backgroundOnscreen
 	xdef	backgroundOffscreen
-	xdef	fg_xpos
-	xdef	bg_xpos
+	xdef	foregroundOnscreen
+	xdef	foregroundOffscreen
+	xdef	foregroundX
+	xdef	backgroundX
 
 byteMap:
 	dc.l	Entry
@@ -33,25 +32,25 @@ Entry:
 	;; d0 - fg bitplane pointer offset
 	;; d1 - bg bitplane pointer offset
 	move.l	#0,d0
-	move.l	#1,d1
+	move.l	#0,d1
 	jsr	SwitchBuffers		
 	
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
  	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_MASTER),DMACON(a6) 		
 
-	jsr	Init		  ; enable the playfield		
+	jsr	Init		  	; enable the playfield		
 
 	
 Reset:
-	move.l	#0,fg_xpos		; x pos 	(d1)
-	move.l	#0,fg_shift		; shift counter (d2)
-	move.l	#0,fg_tileIndex		; tile index	(d3)
-	move.l	#0,bg_xpos
-	move.l	#0,bg_shift		; shift counter (d2)
-	move.l	#0,bg_tileIndex		; tile index	(d3)	
-	move.l	#BACKGROUND_UPDATE_COUNT,d6 (Frame count)
+	move.l	#0,foregroundX		; x pos 	
+	move.l	#0,fg_shift		; shift counter
+	move.l	#0,fg_tileIndex		; tile index
+	move.l	#0,backgroundX
+	move.l	#0,bg_shift		; shift counter
+	move.l	#0,bg_tileIndex		; tile index	
+	move.l	#BACKGROUND_UPDATE_COUNT,d6 (frame count)
 	jsr 	BlueFill
-	move.l	#11,frameCount		
+	move.l	#0,frameCount		
 	
 MainLoop:
 	move.l	frameCount,d6
@@ -64,34 +63,28 @@ MainLoop:
 	
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
 
+	bsr	RenderNextForegroundFrame	
+	
 	andi.b	#BACKGROUND_UPDATE_COUNT,d6
 	bne	.skipBackgroundUpdates
 	;; ---- Background updates ----------------------------------------
 .backgroundUpdates:
-	add.l	#1,bg_xpos		
+	add.l	#1,backgroundX		
 	add.l	#2,bg_tileIndex    	  ; increment tile index			
 	bsr 	UpdateBackgroundShiftCounter	
 .skipBackgroundUpdates:
 
-	btst	#FOREGROUND_DELAY_BIT,d6
-	beq	.skipForegroundUpdates
 	;; ---- Foreground updates ----------------------------------------	
 .foregroundUpdates:
-	add.l	#1,fg_xpos
+	add.l	#1,foregroundX
 	add.l	#2,fg_tileIndex    	  ; increment foreground tile index	
 	bsr	UpdateShiftCounter
-.skipForegroundUpdates:
 
 	add.l	#1,frameCount
 	bra	MainLoop
 
 HoriScrollPlayfield:
-	;; d0 - fg x position in pixels
-	;; d1 - bg x position in pixels	
-	;; 	movem.l	d0-d6,-(sp)
-	
-	move.l	bg_xpos,d0
-	
+	move.l	backgroundX,d0	
 	move.w	d0,d2
 	lsr.w   #3,d0		; bytes to scroll
 	and.w   #$F,d2		; pixels = 0xf - (hpos - (hpos_bytes*8))
@@ -99,7 +92,7 @@ HoriScrollPlayfield:
 	sub.w   d2,d0		; bits to delay	
 	move.w	d0,d5		; d5 == bg bits to delay
 
-	move.l	fg_xpos,d0
+	move.l	foregroundX,d0
 	move.w	d0,d2
 	lsr.w   #3,d0		; bytes to scroll
 	and.w   #$F,d2		; pixels = 0xf - (hpos - (hpos_bytes*8))
@@ -108,23 +101,18 @@ HoriScrollPlayfield:
 
 	lsl.w	#4,d5
 	or.w	d5,d0	
-
 	move.w  d0,BPLCON1(a6)	
-	
-	;; movem.l (sp)+,d0-d6
 	rts
 
 
-
 RenderNextBackgroundFrame:
-	btst	#FOREGROUND_DELAY_BIT,d6
-	;; 	beq	.s1
 	lea	backgroundMap,a2
 	add.l	bg_tileIndex,a2
 	bsr	RenderBackgroundTile	
 .s1:
 	rts
-	
+
+
 RenderNextForegroundFrame:
 	lea	map,a2
 	add.l	fg_tileIndex,a2
@@ -134,27 +122,25 @@ RenderNextForegroundFrame:
 .skip:
 	bsr	RenderForegroundTile
 	rts
-	
+
+
 RenderForegroundTile:
 	;; a2 - map
-	;; 	movem.l	a4,-(sp)
-	move.l	fg_xpos,d0
+	move.l	foregroundX,d0
 	lsr.w   #3,d0		; bytes to scroll
-	move.l	offscreen,a0
+	move.l	foregroundOffscreen,a0
 	add.l	d0,a0
 	lea 	tilemap,a1	
 	add.l	#BITPLANE_WIDTH_BYTES-2,a0 ; dest
 	add.w	(a2),a1 	; source tile
 	move.l	fg_shift,d2
 	jsr	BlitTile
-	;; 	movem.l	(sp)+,a4
 	rts
 
 
 RenderBackgroundTile:	
 	;; a2 - map
-	;; 	movem.l	a1,-(sp)
-	move.l	bg_xpos,d0
+	move.l	backgroundX,d0
 	lsr.w   #3,d0		; bytes to scroll
 	move.l	backgroundOffscreen,a0
 	add.l	d0,a0
@@ -163,8 +149,8 @@ RenderBackgroundTile:
 	add.w	(a2),a1 	; source tile
 	move.l	bg_shift,d2
 	jsr	BlitTile
-	;; 	movem.l	(sp)+,a4
 	rts	
+
 
 UpdateShiftCounter:	
 	cmp.l	#15,fg_shift	
@@ -185,7 +171,8 @@ UpdateBackgroundShiftCounter:
 	add.l	#1,bg_shift
 .s2:
 	rts	
-	
+
+
 Level3InterruptHandler:
 	movem.l	d0-a6,-(sp)
 	lea	CUSTOM,a6
@@ -206,6 +193,7 @@ Level3InterruptHandler:
 .interruptComplete:
 	movem.l	(sp)+,d0-a6
 	rte	
+
 
 copperList:
 copperListBpl1Ptr:
@@ -228,32 +216,15 @@ copperListBpl2Ptr:
 	dc.w	BPL6PTH,0
 	dc.l	$fffffffe	
 
-	if 0
-copperList:
-copperListBplPtr:
-	dc.w	BPL1PTL,0
-	dc.w	BPL1PTH,0
-	dc.w	BPL2PTL,0
-	dc.w	BPL2PTH,0
-	dc.w	BPL3PTL,0
-	dc.w	BPL3PTH,0
-	dc.w	BPL4PTL,0
-	dc.w	BPL4PTH,0
-	dc.w	BPL5PTL,0
-	dc.w	BPL5PTH,0
-	dc.w	BPL6PTL,0
-	dc.w	BPL6PTH,0
-	dc.l	$fffffffe
-	endif
 	
 InstallPalette:
 	include	"out/tilemap-palette.s"
 	rts
 
-onscreen:
-	dc.l	bitplanes1
-offscreen:
-	dc.l	bitplanes2
+foregroundOnscreen:
+	dc.l	foregroundBitplanes1
+foregroundOffscreen:
+	dc.l	foregroundBitplanes2
 
 backgroundOnscreen:
 	dc.l	backgroundBitplanes1
@@ -265,22 +236,7 @@ tilemap:
 
 backgroundTilemap:
 	incbin "out/background.bin"	
-
-	
-bitplanes1:
-	ds.b	IMAGESIZE
-	ds.b	BITPLANE_WIDTH_BYTES*20
-bitplanes2:
-	ds.b	IMAGESIZE
-	ds.b	BITPLANE_WIDTH_BYTES*20
-
-backgroundBitplanes1:
-	ds.b	IMAGESIZE
-	ds.b	BITPLANE_WIDTH_BYTES*20
-backgroundBitplanes2:
-	ds.b	IMAGESIZE
-	ds.b	BITPLANE_WIDTH_BYTES*20	
-	
+		
 map:
 	include "out/foreground-map.s"
 	dc.w	$FFFF
@@ -290,14 +246,14 @@ backgroundMap:
 	
 fg_shift:
 	dc.l	0
-fg_xpos:
+foregroundX:
 	dc.l	0
 fg_tileIndex:
 	dc.l	0
 
 bg_shift:
 	dc.l	0
-bg_xpos:
+backgroundX:
 	dc.l	0
 bg_tileIndex:
 	dc.l	0
@@ -307,41 +263,20 @@ frameCount:
 	
 	section .bss
 
+foregroundBitplanes1:
+	ds.b	IMAGESIZE
+	ds.b	BITPLANE_WIDTH_BYTES*20
+foregroundBitplanes2:
+	ds.b	IMAGESIZE
+	ds.b	BITPLANE_WIDTH_BYTES*20
 
+backgroundBitplanes1:
+	ds.b	IMAGESIZE
+	ds.b	BITPLANE_WIDTH_BYTES*20
+backgroundBitplanes2:
+	ds.b	IMAGESIZE
+	ds.b	BITPLANE_WIDTH_BYTES*20	
 
 startUserstack:
 	ds.b	$1000		; size of stack
 userstack:
-
-
-
-	end
-
-0:	UpdateFG
-	UpdateBG	
-	RenderFG
-	RenderBG
-	SwapBufferFG
-	SwapBufferBG	
-	
-1:	RenderFG
-	SwapBufferFG
-
-2:	UpdateFG	
-	RenderFG
-	RenderBG
-	SwapBufferFG
-	SwapBufferBG		
-	
-2:	RenderFG
-	SwapBufferFG
-
-
-000
-001
-010
-011
-100
-101
-110
-111

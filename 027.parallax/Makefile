@@ -1,4 +1,4 @@
-EXAMPLE_NAME=game1
+EXAMPLE_NAME=parallax
 
 # userstack used by bootblock
 USERSTACK_ADDRESS=7fffc
