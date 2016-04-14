@@ -15,7 +15,7 @@ SwitchBuffers:
 	lea 	copperListBpl1Ptr,a0
 	jsr	PokeBitplanePointers
 	
-	btst	#FOREGROUND_DELAY_BIT,d6
+	btst	#FOREGROUND_DELAY_BIT,d6 ; only swap the background buffer every second frame
 	beq	.skipBackgroundSwap
 	move.l	bg_xpos,d0
 	lsr.l   #3,d0		; bytes to scroll		

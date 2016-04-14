@@ -49,12 +49,12 @@ Reset:
 	move.l	#0,bg_xpos
 	move.l	#0,bg_shift		; shift counter (d2)
 	move.l	#0,bg_tileIndex		; tile index	(d3)	
-	move.l	#0,bg_delay
-	
+	move.l	#BACKGROUND_UPDATE_COUNT,d6 (Frame count)
 	jsr 	BlueFill
+	move.l	#11,frameCount		
 	
 MainLoop:
-	move.l	bg_delay,d6
+	move.l	frameCount,d6
 
 	jsr	WaitVerticalBlank
 	bsr.s	HoriScrollPlayfield
@@ -82,7 +82,7 @@ MainLoop:
 	bsr	UpdateShiftCounter
 .skipForegroundUpdates:
 
-	add.l	#1,bg_delay	
+	add.l	#1,frameCount
 	bra	MainLoop
 
 HoriScrollPlayfield:
@@ -302,7 +302,7 @@ bg_xpos:
 bg_tileIndex:
 	dc.l	0
 
-bg_delay:
+frameCount:
 	dc.l	0
 	
 	section .bss
