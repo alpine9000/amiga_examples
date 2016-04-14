@@ -111,3 +111,20 @@ Notes:
     # make
     # make install
 ```
+
+10. CMake
+    ```
+    # curl -O  https://cmake.org/files/v3.5/cmake-3.5.1-Darwin-x86_64.tar.gz
+    # tar zxfv cmake-3.5.1-Darwin-x86_64.tar.gz
+    # mv CMake.app /Applications
+```
+
+11. TMX C Loader
+    ```
+    # git clone https://github.com/baylej/tmx.git
+    # cd tmx
+    # mkdir build
+    # cd build
+    # /Applications/CMake.app/Contents/bin/cmake ..
+    # make install
+```
