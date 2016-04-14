@@ -1,4 +1,4 @@
-EXAMPLE_NAME=tile_hscroll
+EXAMPLE_NAME=game
 
 # userstack used by bootblock
 USERSTACK_ADDRESS=7fffc
