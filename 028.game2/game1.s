@@ -80,12 +80,9 @@ Update:
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	andi.l	#$f,d0
 
-	cmp.b	#3,joystickpos
-	bne	.slowScroll
+	btst	#0,joystick
+	bne	.c1
 	add.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollX
-	bra	.c1
-.slowScroll:
-	add.l	#FOREGROUND_SCROLL_PIXELS/4,foregroundScrollX
 .c1:
 	
 .skipForegroundUpdates:
