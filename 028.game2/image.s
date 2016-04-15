@@ -17,6 +17,7 @@ SwitchBuffers:
 
 	;; background is not double buffered
 	move.l	backgroundScrollX,d0
+	lsr.l	#BACKGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels	
 	lsr.l   #3,d0		; bytes to scroll		
 	move.l	backgroundOnscreen,a1
 	lea 	copperListBpl2Ptr,a0
