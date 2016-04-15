@@ -32,7 +32,7 @@ include ../shared/base.mk
 out/%.bin: out/%.sized.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --quantize --colors $(NUM_COLORS) --output-bitplanes  --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output out/$*
 
-out/foreground.bin: assets/tilemap.png
+out/foreground.bin: assets/foregroundTilemap.png
 	$(IMAGECON) --use-palette=assets/foreground.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output out/foreground
 
 out/background.bin: assets/tilemap.png

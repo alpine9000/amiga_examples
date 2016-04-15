@@ -93,15 +93,21 @@ Update:
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	andi.l	#$f,d0
 
-
 	cmp.w	#1,moving
 	bne	.c1
 	add.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollX
+
+	move.l	foregroundScrollX,d0
+	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
+	andi.l	#$f,d0
+	cmp.b	#0,d0
+	bne	.c1
+	bsr	ResetAnimPattern		
 .c1:
 
 	
 .skipForegroundUpdates:
-
+	
 	add.l	#1,frameCount
 	move.l	frameCount,d6	
 	rts
@@ -136,7 +142,13 @@ HoriScrollPlayfield:
 	;; movem.l (sp)+,d0-d6
 	rts
 
-
+ResetAnimPattern:
+	lea	animIndex,a0
+	lea	animIndexPattern,a1
+	move.l	#7,d0
+.loop:
+	move.l	(a1)+,(a0)+
+	dbra	d0,.loop
 
 RenderNextBackgroundFrame:
 	lea	backgroundMap,a2
@@ -152,7 +164,7 @@ RenderNextBackgroundFrame:
 	bsr	RenderBackgroundTile	
 	rts
 	
-RenderNextForegroundFrame:
+RenderNextForegroundFrame_Old:
 	lea	map,a2
 	move.l	foregroundScrollX,d0
 	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
@@ -163,12 +175,58 @@ RenderNextForegroundFrame:
 	bne	.skip
 	bra	Reset
 .skip:
+	move.l	#8,d3
+.loop:
 	bsr	RenderForegroundTile
 	bsr	ClearForegroundTile
+	dbra	d3,.loop
 .noRender
 	rts
 
+RenderNextForegroundFrame:
+	lea	map,a2	
+	move.l	foregroundScrollX,d0	
+	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
+	lsr.l	#1,d0
+	and.b   #$f0,d0
+	add.l	d0,a2		
+	move.l	#7,d3
+.loop:
+	move.l	d3,d2
+	bsr	RenderForegroundTile2
+	add.l	#2,a2
+	dbra	d3,.loop
 
+	bsr	ClearForegroundTile	
+
+	rts
+	
+
+RenderForegroundTile2:
+	;; a2 - address of tileIndex
+	move.l	foregroundScrollX,d0
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
+	lsr.w   #3,d0		; bytes to scroll
+	move.l	foregroundOffscreen,a0
+	add.l	d0,a0
+	lea 	tilemap,a1	
+	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*SCREEN_HEIGHT/4)+BITPLANE_WIDTH_BYTES-8,a0
+	add.w	(a2),a1 	; source tile
+
+	lea 	animIndex,a4
+	move.l	d2,d1
+	lsl.l	#2,d1
+	add.l	d1,a4
+	move.l	(a4),d1
+	lsr.l	#2,d1
+	add.l	d1,a1
+	jsr	BlitTile
+	cmp.l	#2,(a4)
+	blt	.s1
+	sub.l	#2,(a4)	
+.s1:
+	rts
+	
 RenderForegroundTile:
 	;; a2 - address of tileIndex
 	move.l	foregroundScrollX,d0
@@ -177,20 +235,15 @@ RenderForegroundTile:
 	move.l	foregroundOffscreen,a0
 	add.l	d0,a0
 	lea 	tilemap,a1	
-	;; 	add.l	#BITPLANE_WIDTH_BYTES-8,a0 ; dest
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*SCREEN_HEIGHT/4)+BITPLANE_WIDTH_BYTES-8,a0
 	add.w	(a2),a1 	; source tile
 	move.l	foregroundScrollX,d2
 	lsr.b	#FOREGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
-
 	lsr.b	#1,d2
-
 	andi.w	#$f,d2		; find the shift component
-	cmp.b	#8,d2		;
-	;; 	bge	.skip
 	jsr	BlitTile
-.skip:
 	rts
+
 	
 ClearForegroundTile
 	lea 	tilemap,a1		
@@ -306,7 +359,21 @@ joystick:
 	dc.b	0
 joystickpos:
 	dc.b	0
+
+animIndex:
+	ds.l	16,0
 	
+animIndexPattern:
+	dc.l	0
+	dc.l	8*4
+	dc.l	6*4
+	dc.l	8*4
+	dc.l	8*4
+	dc.l	4*4
+	dc.l	8*4
+	dc.l	0	
+
+
 	section .bss
 foregroundBitplanes1:
 	ds.b	IMAGESIZE*3
