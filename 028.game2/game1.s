@@ -43,8 +43,7 @@ Entry:
 Reset:
 	move.l	#-FOREGROUND_SCROLL_PIXELS,foregroundScrollX		; x pos 	(d1)
 	move.l	#0,fg_tileIndex		; tile index	(d3)
-	move.l	#-BACKGROUND_SCROLL_PIXELS,backgroundScrollX
-	move.l	#0,bg_tileIndex		; tile index	(d3)	
+	move.l	#0,backgroundScrollX
 	jsr 	BlueFill
 	move.l	#-1,frameCount		
 	
@@ -58,10 +57,6 @@ MainLoop:
 	bsr	RenderNextForegroundFrame	
 	bsr 	RenderNextBackgroundFrame		
 
-	move.l	#5000,d7
-.loop:
-	dbra	d7,.loop
-
 	jsr	WaitVerticalBlank	
 	bsr.s	HoriScrollPlayfield
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
@@ -72,14 +67,8 @@ MainLoop:
 	bra	MainLoop
 
 Update:
-	andi.b	#BACKGROUND_UPDATE_COUNT,d6
-	bne	.skipBackgroundUpdates
-	;; ---- Background updates ----------------------------------------
 .backgroundUpdates:
 	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX		
-	add.l	#2,bg_tileIndex    	  ; increment tile index by a word
-.skipBackgroundUpdates:
-
 	btst	#FOREGROUND_DELAY_BIT,d6
 	beq	.skipForegroundUpdates
 	;; ---- Foreground updates ----------------------------------------	
@@ -133,7 +122,11 @@ HoriScrollPlayfield:
 
 RenderNextBackgroundFrame:
 	lea	backgroundMap,a2
-	add.l	bg_tileIndex,a2
+	move.l	backgroundScrollX,d0
+	lsr.l	#BACKGROUND_SCROLL_TILE_INDEX_CONVERT,d0
+	and.w	#$fffe,d0
+	add.l	d0,a2
+	;; 	add.l	#1954,a2
 	bsr	RenderBackgroundTile	
 	rts
 	
@@ -272,8 +265,6 @@ foregroundScrollX:
 fg_tileIndex:
 	dc.l	0
 backgroundScrollX:
-	dc.l	0
-bg_tileIndex:
 	dc.l	0
 frameCount:
 	dc.l	0
