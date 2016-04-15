@@ -144,11 +144,18 @@ HoriScrollPlayfield:
 
 ResetAnimPattern:
 	lea	animIndex,a0
-	lea	animIndexPattern,a1
+	move.l	animIndexPatternPtr,a1
 	move.l	#7,d0
 .loop:
 	move.l	(a1)+,(a0)+
 	dbra	d0,.loop
+	add.l	#8,animIndexPatternPtr
+	cmp.l	#$ffffffff,(a1)
+	bne	.s1
+	lea	animIndexPattern,a0
+	move.l	a0,animIndexPatternPtr
+.s1:
+	rts
 
 RenderNextBackgroundFrame:
 	lea	backgroundMap,a2
@@ -218,13 +225,16 @@ RenderForegroundTile2:
 	lsl.l	#2,d1
 	add.l	d1,a4
 	move.l	(a4),d1
-	lsr.l	#2,d1
+	lsr.l	#2,d1		; anim scaling (speed)
+	cmp.l	#10,d1
+	bge	.s1
 	add.l	d1,a1
 	jsr	BlitTile
 	cmp.l	#2,(a4)
-	blt	.s1
-	sub.l	#2,(a4)	
+	blt	.s2
 .s1:
+	sub.l	#2,(a4)	
+.s2:
 	rts
 	
 RenderForegroundTile:
@@ -362,16 +372,43 @@ joystickpos:
 
 animIndex:
 	ds.l	16,0
-	
+
+animIndexPatternPtr:
+	dc.l	animIndexPattern
 animIndexPattern:
 	dc.l	0
 	dc.l	8*4
+	dc.l	10*4
+	dc.l	16*4
+	dc.l	12*4
+	dc.l	14*4
+	dc.l	16*4
+	dc.l	0
+	dc.l	0
+	dc.l	16*4
+	dc.l	10*4
 	dc.l	6*4
+	dc.l	2*4
+	dc.l	16*4
+	dc.l	14*4
+	dc.l	0
+	dc.l	0
 	dc.l	8*4
+	dc.l	10*4
+	dc.l	16*4
+	dc.l	12*4
+	dc.l	14*4
+	dc.l	16*4
+	dc.l	0
+	dc.l	0
+	dc.l	16*4
+	dc.l	10*4
 	dc.l	8*4
+	dc.l	12*4
 	dc.l	4*4
-	dc.l	8*4
-	dc.l	0	
+	dc.l	12*4
+	dc.l	0
+	dc.l	$ffffffff
 
 
 	section .bss
