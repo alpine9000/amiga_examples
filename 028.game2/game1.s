@@ -47,11 +47,33 @@ Reset:
 	move.l	#0,backgroundScrollX
 	move.l	#0,bg_shift		; shift counter (d2)
 	move.l	#0,bg_tileIndex		; tile index	(d3)	
-	move.l	#BACKGROUND_UPDATE_COUNT,d6 (Frame count)
 	jsr 	BlueFill
 	move.l	#-1,frameCount		
 	
 MainLoop:
+
+	move.w	#$09e,COLOR00(a6)	
+	move.w	#$09e,COLOR08(a6)
+	
+	bsr 	Update
+	
+	bsr	RenderNextForegroundFrame	
+	bsr 	RenderNextBackgroundFrame		
+
+	move.l	#5000,d7
+.loop:
+	dbra	d7,.loop
+
+	jsr	WaitVerticalBlank	
+	bsr.s	HoriScrollPlayfield
+	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
+
+	move.w	#$000,COLOR00(a6)	
+	move.w	#$000,COLOR08(a6)	
+	
+	bra	MainLoop
+
+Update:
 	andi.b	#BACKGROUND_UPDATE_COUNT,d6
 	bne	.skipBackgroundUpdates
 	;; ---- Background updates ----------------------------------------
@@ -73,21 +95,10 @@ MainLoop:
 	bsr	UpdateShiftCounter
 .skipForegroundUpdates:
 
-	add.l	#1,frameCount	
-
+	add.l	#1,frameCount
+	move.l	frameCount,d6	
+	rts
 	
-	move.l	frameCount,d6
-	
-	bsr	RenderNextForegroundFrame	
-	bsr 	RenderNextBackgroundFrame		
-
-	jsr	WaitVerticalBlank		
-	bsr.s	HoriScrollPlayfield
-	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
-	
-
-	bra	MainLoop
-
 HoriScrollPlayfield:
 	;; d0 - fg x position in pixels
 	;; d1 - bg x position in pixels	
@@ -120,12 +131,9 @@ HoriScrollPlayfield:
 
 
 RenderNextBackgroundFrame:
-	btst	#FOREGROUND_DELAY_BIT,d6
-	beq	.s1
 	lea	backgroundMap,a2
 	add.l	bg_tileIndex,a2
 	bsr	RenderBackgroundTile	
-.s1:
 	rts
 	
 RenderNextForegroundFrame:
@@ -213,6 +221,7 @@ Level3InterruptHandler:
 
 .verticalBlank:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
+	add.l	#1,verticalBlankCount
 .checkCopper:
 	move.w	INTREQR(a6),d0
 	and.w	#INTF_COPER,d0	
@@ -258,7 +267,7 @@ foregroundOffscreen:
 backgroundOnscreen:
 	dc.l	backgroundBitplanes1
 backgroundOffscreen:
-	dc.l	backgroundBitplanes2	
+	dc.l	backgroundBitplanes1
 tilemap:
 	incbin "out/foreground.bin"
 backgroundTilemap:
@@ -282,6 +291,8 @@ bg_tileIndex:
 	dc.l	0
 frameCount:
 	dc.l	0
+verticalBlankCount:
+	dc.l	0
 	
 	section .bss
 foregroundBitplanes1:
@@ -294,10 +305,6 @@ foregroundBitplanes2:
 backgroundBitplanes1:
 	ds.b	IMAGESIZE
 	ds.b	BITPLANE_WIDTH_BYTES*20
-backgroundBitplanes2:
-	ds.b	IMAGESIZE
-	ds.b	BITPLANE_WIDTH_BYTES*20	
-	
 
 startUserstack:
 	ds.b	$1000		; size of stack

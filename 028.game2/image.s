@@ -4,7 +4,6 @@
 	
 SwitchBuffers:
 	;; offscreen - bitplane address
-	;; 	movem.l	d0/a0-a1,-(sp)
 
 	move.l	foregroundScrollX,d0
 	lsr.l   #3,d0		; bytes to scroll
@@ -15,19 +14,13 @@ SwitchBuffers:
 	lea 	copperListBpl1Ptr,a0
 	jsr	PokeBitplanePointers
 
-	btst	#FOREGROUND_DELAY_BIT,d6 ; only swap the background buffer every second frame
-	beq	.skipBackgroundSwap
+	;; background is not double buffered
 	move.l	backgroundScrollX,d0
 	lsr.l   #3,d0		; bytes to scroll		
-	move.l	backgroundOffscreen,a0
-	move.l	backgroundOnscreen,backgroundOffscreen
-	move.l	a0,backgroundOnscreen
-	move.l	a0,a1
+	move.l	backgroundOnscreen,a1
 	lea 	copperListBpl2Ptr,a0
 	jsr	PokeBitplanePointers
 
-.skipBackgroundSwap:	
-	;; 	movem.l (sp)+,d0/a0-a1
 	rts
 
 PokeBitplanePointers:
