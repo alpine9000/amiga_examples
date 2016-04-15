@@ -76,7 +76,7 @@ Update:
 	bne	.skipBackgroundUpdates
 	;; ---- Background updates ----------------------------------------
 .backgroundUpdates:
-	add.l	#FOREGROUND_SCROLL_PIXELS,backgroundScrollX		
+	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX		
 	add.l	#2,bg_tileIndex    	  ; increment tile index by a word
 .skipBackgroundUpdates:
 
