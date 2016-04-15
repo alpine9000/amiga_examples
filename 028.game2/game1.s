@@ -102,7 +102,8 @@ Update:
 	andi.l	#$f,d0
 	cmp.b	#0,d0
 	bne	.c1
-	bsr	ResetAnimPattern		
+	bsr	ResetAnimPattern
+	bsr	ResetDeAnimPattern
 .c1:
 
 	
@@ -157,6 +158,21 @@ ResetAnimPattern:
 .s1:
 	rts
 
+ResetDeAnimPattern:
+	lea	deAnimIndex,a0
+	move.l	deAnimIndexPatternPtr,a1
+	move.l	#7,d0
+.loop:
+	move.l	(a1)+,(a0)+
+	dbra	d0,.loop
+	add.l	#8,deAnimIndexPatternPtr
+	cmp.l	#$ffffffff,(a1)
+	bne	.s1
+	lea	deAnimIndexPattern,a0
+	move.l	a0,deAnimIndexPatternPtr
+.s1:
+	rts	
+
 RenderNextBackgroundFrame:
 	lea	backgroundMap,a2
 	move.l	backgroundScrollX,d0
@@ -171,25 +187,6 @@ RenderNextBackgroundFrame:
 	bsr	RenderBackgroundTile	
 	rts
 	
-RenderNextForegroundFrame_Old:
-	lea	map,a2
-	move.l	foregroundScrollX,d0
-	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
-	lsr.l	#1,d0
-	and.b   #$fe,d0
-	add.l	d0,a2	
-	cmp.w	#$FFFF,20(a2)
-	bne	.skip
-	bra	Reset
-.skip:
-	move.l	#8,d3
-.loop:
-	bsr	RenderForegroundTile
-	bsr	ClearForegroundTile
-	dbra	d3,.loop
-.noRender
-	rts
-
 RenderNextForegroundFrame:
 	lea	map,a2	
 	move.l	foregroundScrollX,d0	
@@ -200,16 +197,14 @@ RenderNextForegroundFrame:
 	move.l	#7,d3
 .loop:
 	move.l	d3,d2
-	bsr	RenderForegroundTile2
+	bsr	RenderForegroundTile
+	bsr	ClearForegroundTile2
 	add.l	#2,a2
 	dbra	d3,.loop
-
-	bsr	ClearForegroundTile	
-
 	rts
 	
 
-RenderForegroundTile2:
+RenderForegroundTile:
 	;; a2 - address of tileIndex
 	move.l	foregroundScrollX,d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
@@ -217,9 +212,8 @@ RenderForegroundTile2:
 	move.l	foregroundOffscreen,a0
 	add.l	d0,a0
 	lea 	tilemap,a1	
+	add.w	(a2),a1 	; source tile	
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*SCREEN_HEIGHT/4)+BITPLANE_WIDTH_BYTES-8,a0
-	add.w	(a2),a1 	; source tile
-
 	lea 	animIndex,a4
 	move.l	d2,d1
 	lsl.l	#2,d1
@@ -237,25 +231,38 @@ RenderForegroundTile2:
 .s2:
 	rts
 	
-RenderForegroundTile:
-	;; a2 - address of tileIndex
-	move.l	foregroundScrollX,d0
-	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
-	lsr.w   #3,d0		; bytes to scroll
-	move.l	foregroundOffscreen,a0
-	add.l	d0,a0
+
+ClearForegroundTile2:	
+	lea 	tilemap,a1		
+	add.w	#11520,a1 	; source tile
 	lea 	tilemap,a1	
-	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*SCREEN_HEIGHT/4)+BITPLANE_WIDTH_BYTES-8,a0
-	add.w	(a2),a1 	; source tile
-	move.l	foregroundScrollX,d2
-	lsr.b	#FOREGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
-	lsr.b	#1,d2
-	andi.w	#$f,d2		; find the shift component
+	add.w	(a2,-32),a1 	; source tile
+	lea	map,a3
+	add.l	#32*8,a3
+	cmp.l	a3,a2
+	blt	.s3
+	sub.l	#32,a0
+
+	lea 	deAnimIndex,a4
+	move.l	d2,d1
+	lsl.l	#2,d1
+	add.l	d1,a4
+	move.l	(a4),d1
+	lsr.l	#2,d1		; anim scaling (speed)
+	cmp.l	#10,d1
+	bge	.s1	
+	add.l	d1,a1
+	add.l	#2,(a4)	
+	bra	.s2
+.s1:
+	add.w	#11520,a1 	; source tile	
+.s2:
 	jsr	BlitTile
+.s3:
 	rts
 
 	
-ClearForegroundTile
+ClearForegroundTile:	
 	lea 	tilemap,a1		
 	add.w	#11520,a1 	; source tile
 	move.l	foregroundScrollX,d2
@@ -372,6 +379,8 @@ joystickpos:
 
 animIndex:
 	ds.l	16,0
+deAnimIndex:
+	ds.l	16,0	
 
 animIndexPatternPtr:
 	dc.l	animIndexPattern
@@ -409,6 +418,19 @@ animIndexPattern:
 	dc.l	12*4
 	dc.l	0
 	dc.l	$ffffffff
+
+deAnimIndexPatternPtr:
+	dc.l	deAnimIndexPattern
+deAnimIndexPattern:
+	dc.l	0
+	dc.l	0*4
+	dc.l	2*4
+	dc.l	4*4
+	dc.l	2*4
+	dc.l	6*4
+	dc.l	2*4
+	dc.l	0
+	dc.l	$ffffffff	
 
 
 	section .bss
