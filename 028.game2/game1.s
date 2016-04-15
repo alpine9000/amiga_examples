@@ -22,7 +22,7 @@ Entry:
 	move	#$7fff,INTENA(a6) 	; disable all interrupts		
 	
 	jsr	InstallPalette
-	move.w	#$09e,COLOR00(a6)	
+	;; 	move.w	#$09e,COLOR00(a6)	
 	move.w	#$09e,COLOR08(a6)
 	
 	lea	Level3InterruptHandler,a3
@@ -48,21 +48,21 @@ Reset:
 	move.l	#-1,frameCount		
 	
 MainLoop:
-
-	move.w	#$09e,COLOR00(a6)	
-	move.w	#$09e,COLOR08(a6)
-	
-	bsr 	Update
-	
-	bsr	RenderNextForegroundFrame	
-	bsr 	RenderNextBackgroundFrame		
-
 	jsr	WaitVerticalBlank	
 	bsr.s	HoriScrollPlayfield
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
 
 	move.w	#$000,COLOR00(a6)	
 	move.w	#$000,COLOR08(a6)	
+	
+
+	bsr 	Update
+
+	bsr	RenderNextForegroundFrame	
+	bsr 	RenderNextBackgroundFrame		
+
+	move.w	#$09e,COLOR00(a6)	
+	move.w	#$09e,COLOR08(a6)	
 	
 	bra	MainLoop
 
@@ -124,21 +124,26 @@ RenderNextBackgroundFrame:
 	lea	backgroundMap,a2
 	move.l	backgroundScrollX,d0
 	lsr.l	#BACKGROUND_SCROLL_TILE_INDEX_CONVERT,d0
-	and.w	#$fffe,d0
+	and.b	#$fe,d0
 	add.l	d0,a2
-	;; 	add.l	#1954,a2
 	bsr	RenderBackgroundTile	
 	rts
 	
 RenderNextForegroundFrame:
 	lea	map,a2
-	add.l	fg_tileIndex,a2
+	move.l	foregroundScrollX,d0
+	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
+	lsr.l	#1,d0
+	and.b   #$fe,d0
+	add.l	d0,a2	
+	;; 	add.l	fg_tileIndex,a2
 	cmp.w	#$FFFF,20(a2)
 	bne	.skip
 	bra	Reset
 .skip:
 	bsr	RenderForegroundTile
 	bsr	ClearForegroundTile
+.noRender
 	rts
 
 
@@ -155,9 +160,12 @@ RenderForegroundTile:
 	add.w	(a2),a1 	; source tile
 	move.l	foregroundScrollX,d2
 	lsr.b	#FOREGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
+
+	lsr.b	#1,d2
+
 	andi.w	#$f,d2		; find the shift component
 	cmp.b	#8,d2		;
-	bge	.skip
+	;; 	bge	.skip
 	jsr	BlitTile
 .skip:
 	rts
@@ -167,6 +175,7 @@ ClearForegroundTile
 	add.w	#11520,a1 	; source tile
 	move.l	foregroundScrollX,d2
 	lsr.b	#FOREGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
+	lsr.b	#1,d2
 	andi.w	#$f,d2		; find the shift component	
 	cmp.b	#8,d2
 	bge	.skip
@@ -273,15 +282,12 @@ verticalBlankCount:
 	
 	section .bss
 foregroundBitplanes1:
-	ds.b	IMAGESIZE
-	ds.b	BITPLANE_WIDTH_BYTES*20
+	ds.b	IMAGESIZE*3
 foregroundBitplanes2:
-	ds.b	IMAGESIZE
-	ds.b	BITPLANE_WIDTH_BYTES*20
+	ds.b	IMAGESIZE*3
 
 backgroundBitplanes1:
-	ds.b	IMAGESIZE
-	ds.b	BITPLANE_WIDTH_BYTES*20
+	ds.b	IMAGESIZE*2
 
 startUserstack:
 	ds.b	$1000		; size of stack
