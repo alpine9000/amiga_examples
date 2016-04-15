@@ -42,17 +42,30 @@ Entry:
 
 	
 Reset:
-	move.l	#-FOREGROUND_SCROLL_PIXELS,foregroundScrollX		; x pos 	(d1)
+	move.l	#0,foregroundScrollX
 	move.l	#0,backgroundScrollX
 	jsr 	BlueFill
 	move.l	#-1,frameCount		
 	
 MainLoop:
 	jsr	WaitVerticalBlank	
-	bsr.s	HoriScrollPlayfield
+	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
 
 	jsr	ReadJoystick
+
+	move.l	foregroundScrollX,d0
+	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels		
+	and.b	#$f,d0
+	cmp.b	#$f,d0
+	bne	.s2
+	move.w	#0,moving
+.s2:
+	
+	cmp.b	#3,joystickpos
+ 	bne	.s1
+	move.w	#1,moving
+.s1:
 	
 	move.w	#$000,COLOR00(a6)	
 	move.w	#$000,COLOR08(a6)	
@@ -80,10 +93,12 @@ Update:
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	andi.l	#$f,d0
 
-	btst	#0,joystick
+
+	cmp.w	#1,moving
 	bne	.c1
 	add.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollX
 .c1:
+
 	
 .skipForegroundUpdates:
 
@@ -129,6 +144,11 @@ RenderNextBackgroundFrame:
 	lsr.l	#BACKGROUND_SCROLL_TILE_INDEX_CONVERT,d0
 	and.b	#$fe,d0
 	add.l	d0,a2
+
+	cmp.w	#$FFFF,20(a2)
+	bne	.skip
+	move.l	#0,backgroundScrollX
+.skip:
 	bsr	RenderBackgroundTile	
 	rts
 	
@@ -271,6 +291,7 @@ map:
 	dc.w	$FFFF
 backgroundMap:
 	include "out/background-map.s"
+	dc.w	$FFFF	
 foregroundScrollX:
 	dc.l	0
 backgroundScrollX:
@@ -279,6 +300,8 @@ frameCount:
 	dc.l	0
 verticalBlankCount:
 	dc.l	0
+moving:
+	dc.w	0
 joystick:
 	dc.b	0
 joystickpos:
