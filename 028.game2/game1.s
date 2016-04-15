@@ -41,8 +41,7 @@ Entry:
 
 	
 Reset:
-	move.l	#0,foregroundScrollX		; x pos 	(d1)
-	move.l	#15,fg_shift		; shift counter (d2)
+	move.l	#-1,foregroundScrollX		; x pos 	(d1)
 	move.l	#0,fg_tileIndex		; tile index	(d3)
 	move.l	#0,backgroundScrollX
 	move.l	#0,bg_shift		; shift counter (d2)
@@ -87,12 +86,15 @@ Update:
 	beq	.skipForegroundUpdates
 	;; ---- Foreground updates ----------------------------------------	
 .foregroundUpdates:
-	add.l	#1,foregroundScrollX
-	cmp.l	#8,fg_shift
+
+	move.l	foregroundScrollX,d0
+	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
+	andi.l	#$f,d0
+	cmp.l	#8,d0
 	bge	.skip
 	add.l	#2,fg_tileIndex    	  ; increment foreground tile index
 .skip:
-	bsr	UpdateShiftCounter
+	add.l	#16,foregroundScrollX
 .skipForegroundUpdates:
 
 	add.l	#1,frameCount
@@ -114,6 +116,7 @@ HoriScrollPlayfield:
 	move.w	d0,d5		; d5 == bg bits to delay
 
 	move.l	foregroundScrollX,d0
+	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
 	move.w	d0,d2
 	lsr.w   #3,d0		; bytes to scroll
 	and.w   #$F,d2		; pixels = 0xf - (hpos - (hpos_bytes*8))
@@ -151,6 +154,7 @@ RenderNextForegroundFrame:
 RenderForegroundTile:
 	;; a2 - address of tileIndex
 	move.l	foregroundScrollX,d0
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
 	lsr.w   #3,d0		; bytes to scroll
 	move.l	foregroundOffscreen,a0
 	add.l	d0,a0
@@ -158,8 +162,10 @@ RenderForegroundTile:
 	;; 	add.l	#BITPLANE_WIDTH_BYTES-8,a0 ; dest
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*SCREEN_HEIGHT/4)+BITPLANE_WIDTH_BYTES-8,a0
 	add.w	(a2),a1 	; source tile
-	move.l	fg_shift,d2
-	cmp.l	#8,d2
+	move.l	foregroundScrollX,d2
+	lsr.b	#FOREGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
+	andi.w	#$f,d2		; find the shift component
+	cmp.b	#8,d2		;
 	bge	.skip
 	jsr	BlitTile
 .skip:
@@ -168,8 +174,10 @@ RenderForegroundTile:
 ClearForegroundTile
 	lea 	tilemap,a1		
 	add.w	#11520,a1 	; source tile
-	move.l	fg_shift,d2
-	cmp.l	#8,d2
+	move.l	foregroundScrollX,d2
+	lsr.b	#FOREGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
+	andi.w	#$f,d2		; find the shift component	
+	cmp.b	#8,d2
 	bge	.skip
 	sub.l	#32,a0
 	jsr	BlitTile
@@ -190,15 +198,6 @@ RenderBackgroundTile:
 	jsr	BlitTile
 	rts	
 
-UpdateShiftCounter:	
-	cmp.l	#15,fg_shift	
-	bne	.s1
-	move.l	#0,fg_shift
-	bra	.s2
-.s1:
-	add.l	#1,fg_shift
-.s2:
-	rts
 
 UpdateBackgroundShiftCounter:	
 	cmp.l	#15,bg_shift	
@@ -277,8 +276,6 @@ map:
 	dc.w	$FFFF
 backgroundMap:
 	include "out/background-map.s"
-fg_shift:
-	dc.l	0
 foregroundScrollX:
 	dc.l	0
 fg_tileIndex:
