@@ -6,7 +6,7 @@ SwitchBuffers:
 	;; offscreen - bitplane address
 
 	move.l	foregroundScrollX,d0
-	lsr.l	#4,d0		; convert to pixels
+	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
 	lsr.l   #3,d0		; bytes to scroll
 	move.l	foregroundOffscreen,a0
 	move.l	foregroundOnscreen,foregroundOffscreen

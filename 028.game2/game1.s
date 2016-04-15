@@ -41,7 +41,7 @@ Entry:
 
 	
 Reset:
-	move.l	#-1,foregroundScrollX		; x pos 	(d1)
+	move.l	#-FOREGROUND_SCROLL_PIXELS,foregroundScrollX		; x pos 	(d1)
 	move.l	#0,fg_tileIndex		; tile index	(d3)
 	move.l	#0,backgroundScrollX
 	move.l	#0,bg_shift		; shift counter (d2)
@@ -94,7 +94,7 @@ Update:
 	bge	.skip
 	add.l	#2,fg_tileIndex    	  ; increment foreground tile index
 .skip:
-	add.l	#16,foregroundScrollX
+	add.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollX
 .skipForegroundUpdates:
 
 	add.l	#1,frameCount
