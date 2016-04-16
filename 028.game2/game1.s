@@ -430,6 +430,30 @@ deAnimIndexPattern:
 	dc.l	6*4
 	dc.l	2*4
 	dc.l	0
+	dc.l	0
+	dc.l	8*4
+	dc.l	4*4
+	dc.l	6*4
+	dc.l	2*4
+	dc.l	4*4
+	dc.l	2*4
+	dc.l	0
+	dc.l	0
+	dc.l	0*4
+	dc.l	4*4
+	dc.l	2*4
+	dc.l	4*4
+	dc.l	2*4
+	dc.l	6*4
+	dc.l	0
+	dc.l	0
+	dc.l	6*4
+	dc.l	0*4
+	dc.l	2*4
+	dc.l	2*4
+	dc.l	8*4
+	dc.l	2*4
+	dc.l	0	
 	dc.l	$ffffffff	
 
 
