@@ -1,6 +1,7 @@
 	include "includes.i"
 
 	xdef SwitchBuffers
+	xdef PokePanelBitplanePointers
 	
 SwitchBuffers:
 	;; offscreen - bitplane address
@@ -42,6 +43,23 @@ PokeBitplanePointers:
 	dbra	d0,.bitplaneloop
 	;; 	movem.l (sp)+,d0-a6
 	rts
+
+	
+PokePanelBitplanePointers:
+	; a0 = BPLP copper list address
+	; a1 = bitplanes pointer
+	moveq	#4-1,d0
+.bitplaneloop:
+	move.l 	a1,d1
+	move.w	d1,2(a0)
+	swap	d1
+	move.w  d1,6(a0)
+	lea	SCREEN_WIDTH_BYTES(a1),a1
+	addq	#8,a0
+	dbra	d0,.bitplaneloop
+	rts
+
+	
 
 	
 

@@ -22,9 +22,9 @@ Entry:
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6) 	; disable all interrupts		
 	
-	jsr	InstallPalette
+	;; jsr	InstallPalette
 	;; 	move.w	#$09e,COLOR00(a6)	
-	move.w	#$09e,COLOR08(a6)
+	;; 	move.w	#$09e,COLOR08(a6)
 	
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR			
@@ -38,6 +38,9 @@ Entry:
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
  	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_MASTER),DMACON(a6) 		
 
+	lea	panelCopperListBpl1Ptr,a0
+	lea	panel,a1
+	jsr	PokePanelBitplanePointers
 	jsr	Init		  ; enable the playfield		
 
 	
@@ -67,8 +70,8 @@ MainLoop:
 	move.w	#1,moving
 .s1:
 	
-	move.w	#$000,COLOR00(a6)	
-	move.w	#$000,COLOR08(a6)	
+	;; 	move.w	#$000,COLOR00(a6)	
+	;; 	move.w	#$000,COLOR08(a6)	
 	
 
 	bsr 	Update
@@ -76,8 +79,8 @@ MainLoop:
 	bsr	RenderNextForegroundFrame	
 	bsr 	RenderNextBackgroundFrame		
 
-	move.w	#$09e,COLOR00(a6)	
-	move.w	#$09e,COLOR08(a6)	
+	;; 	move.w	#$09e,COLOR00(a6)	
+	;; 	move.w	#$09e,COLOR08(a6)	
 	
 	bra	MainLoop
 
@@ -138,7 +141,8 @@ HoriScrollPlayfield:
 	lsl.w	#4,d5
 	or.w	d5,d0	
 
-	move.w  d0,BPLCON1(a6)	
+	move.w	d0,copperListScrollPtr
+	;; move.w  d0,BPLCON1(a6)	
 	
 	;; movem.l (sp)+,d0-d6
 	rts
@@ -213,7 +217,7 @@ RenderForegroundTile:
 	add.l	d0,a0
 	lea 	tilemap,a1	
 	add.w	(a2),a1 	; source tile	
-	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*SCREEN_HEIGHT/4)+BITPLANE_WIDTH_BYTES-8,a0
+	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*4))/4)+BITPLANE_WIDTH_BYTES-8,a0
 	lea 	animIndex,a4
 	move.l	d2,d1
 	lsl.l	#2,d1
@@ -319,6 +323,32 @@ Level3InterruptHandler:
 
 
 copperList:
+
+panelCopperListBpl1Ptr:	
+	dc.w	BPL1PTL,0
+	dc.w	BPL1PTH,0
+	dc.w	BPL2PTL,0
+	dc.w	BPL2PTH,0
+	dc.w	BPL3PTL,0
+	dc.w	BPL3PTH,0
+	dc.w	BPL4PTL,0
+	dc.w	BPL4PTH,0		
+	dc.w    BPLCON1,0
+	dc.w	DDFSTRT,(RASTER_X_START/2-SCREEN_RES)
+	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))
+	dc.w	BPLCON0,(4<<12)|COLOR_ON ; 4 bit planes
+	dc.w	BPL1MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
+	dc.w	BPL2MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
+	include "out/panel-copper-list.s"
+	DC.W    $5bd1,$fffe
+
+
+	dc.w	BPL1MOD,BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2
+	dc.w	BPL2MOD,BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2	
+	
+	dc.w    BPLCON1
+copperListScrollPtr:	
+	dc.w	0
 copperListBpl1Ptr:
 	;; this is where bitplanes are assigned to playfields
 	;; http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0079.html
@@ -329,6 +359,7 @@ copperListBpl1Ptr:
 	dc.w	BPL3PTH,0
 	dc.w	BPL5PTL,0
 	dc.w	BPL5PTH,0
+
 copperListBpl2Ptr:
 	;; 3 bitplanes per playfield, playfield2 gets bitplanes 2,4,6
 	dc.w	BPL2PTL,0
@@ -337,6 +368,13 @@ copperListBpl2Ptr:
 	dc.w	BPL4PTH,0
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
+
+	dc.w	DDFSTRT,(RASTER_X_START/2-SCREEN_RES)-8 ; -8 for extra scrolling word
+	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))	
+	dc.w	BPLCON0,(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF	
+	
+	include "tilemap-copper-list.s"
+
 	dc.l	$fffffffe	
 
 	
@@ -355,7 +393,9 @@ backgroundOffscreen:
 tilemap:
 	incbin "out/foreground.bin"
 backgroundTilemap:
-	incbin "out/background.bin"	
+	incbin "out/background.bin"
+panel:
+	incbin "out/panel.bin"
 map:
 	include "out/foreground-map.s"
 	dc.w	$FFFF

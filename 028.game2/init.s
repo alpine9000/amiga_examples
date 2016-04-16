@@ -15,13 +15,13 @@ Init:
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)
 	move.w	#((RASTER_Y_STOP-256)<<8)|(RASTER_X_STOP-256),DIWSTOP(a6)
 
-	move.w	#(RASTER_X_START/2-SCREEN_RES)-8,DDFSTRT(a6) ; -8 for extra scrolling word
-	move.w	#(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1)),DDFSTOP(a6)
+	;; 	move.w	#(RASTER_X_START/2-SCREEN_RES)-8,DDFSTRT(a6) ; -8 for extra scrolling word
+	;; 	move.w	#(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1)),DDFSTOP(a6)
 
 	;; enabled 2x the bitplanes as 2x playfields	
-	move.w	#(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF,BPLCON0(a6)
-	move.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2,BPL1MOD(a6) ; -2 for extra scrolling word
-	move.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2,BPL2MOD(a6)
+	;; move.w	#(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF,BPLCON0(a6)
+	;; move.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2,BPL1MOD(a6) ; -2 for extra scrolling word
+	;; move.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2,BPL2MOD(a6)
 
 	;; install copper list, then enable dma and selected interrupts
 	lea	copperList,a0
