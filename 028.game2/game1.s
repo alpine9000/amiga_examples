@@ -22,10 +22,6 @@ Entry:
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6) 	; disable all interrupts		
 	
-	;; jsr	InstallPalette
-	;; 	move.w	#$09e,COLOR00(a6)	
-	;; 	move.w	#$09e,COLOR08(a6)
-	
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR			
 
@@ -43,20 +39,29 @@ Entry:
 	jsr	PokePanelBitplanePointers
 	jsr	Init		  ; enable the playfield		
 
+	jsr	InstallGreyPalette
 	
 Reset:
 	move.l	#0,foregroundScrollX
 	move.l	#0,backgroundScrollX
 	jsr 	BlueFill
 	move.l	#-1,frameCount		
-	
+
 MainLoop:
+	add.l	#1,frameCount
+	move.l	frameCount,d6		
+	cmp.l	#32,frameCount
+	bge	GameLoop
+	bra	SetupBoardLoop
+
+GameLoop:
+	;; 	bsr	FadeToPalette
+	bsr	InstallColorPalette
+	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 	jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
-
 	jsr	ReadJoystick
-
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels		
 	and.b	#$f,d0
@@ -69,21 +74,25 @@ MainLoop:
  	bne	.s1
 	move.w	#1,moving
 .s1:
-	
-	;; 	move.w	#$000,COLOR00(a6)	
-	;; 	move.w	#$000,COLOR08(a6)	
-	
-
 	bsr 	Update
-
 	bsr	RenderNextForegroundFrame	
-	bsr 	RenderNextBackgroundFrame		
-
-	;; 	move.w	#$09e,COLOR00(a6)	
-	;; 	move.w	#$09e,COLOR08(a6)	
-	
+	bsr 	RenderNextBackgroundFrame			
 	bra	MainLoop
 
+SetupBoardLoop:
+	move.l	#FOREGROUND_SCROLL_PIXELS*15,foregroundScrollPixels	
+	;; jsr	WaitVerticalBlank	
+	bsr	HoriScrollPlayfield
+	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
+	move.l	foregroundScrollX,d0
+	move.w	#1,moving
+	bsr 	Update
+	bsr	RenderNextForegroundFrame	
+	bsr 	RenderNextBackgroundFrame			
+	bra	MainLoop
+
+
+	
 Update:
 .backgroundUpdates:
 	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX		
@@ -98,7 +107,8 @@ Update:
 
 	cmp.w	#1,moving
 	bne	.c1
-	add.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollX
+	move.l	foregroundScrollPixels,d0
+	add.l	d0,foregroundScrollX
 
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
@@ -112,8 +122,6 @@ Update:
 	
 .skipForegroundUpdates:
 	
-	add.l	#1,frameCount
-	move.l	frameCount,d6	
 	rts
 	
 HoriScrollPlayfield:
@@ -198,17 +206,31 @@ RenderNextForegroundFrame:
 	lsr.l	#1,d0
 	and.b   #$f0,d0
 	add.l	d0,a2		
-	move.l	#7,d3
+	move.l	#7,d3		; 8 tiles per column
 .loop:
 	move.l	d3,d2
-	bsr	RenderForegroundTile
+	bsr	RenderForegroundTile2
 	bsr	ClearForegroundTile2
 	add.l	#2,a2
 	dbra	d3,.loop
 	rts
-	
+
+
 
 RenderForegroundTile:
+	;; a2 - address of tileIndex
+	move.l	foregroundScrollX,d0
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
+	lsr.w   #3,d0		; bytes to scroll
+	move.l	foregroundOffscreen,a0
+	add.l	d0,a0
+	lea 	tilemap,a1	
+	add.w	(a2),a1 	; source tile	
+	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*4))/4)+BITPLANE_WIDTH_BYTES-8,a0
+	jsr	BlitTile
+	rts	
+
+RenderForegroundTile2:
 	;; a2 - address of tileIndex
 	move.l	foregroundScrollX,d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
@@ -372,12 +394,37 @@ copperListBpl2Ptr:
 	dc.w	DDFSTRT,(RASTER_X_START/2-SCREEN_RES)-8 ; -8 for extra scrolling word
 	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))	
 	dc.w	BPLCON0,(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF	
-	
+
+tileMapCopperPalettePtr:	
 	include "tilemap-copper-list.s"
 
 	dc.l	$fffffffe	
 
+
+InstallColorPalette:
+	lea	tileMapCopperPalettePtr,a1
+	lea	tilemapPalette,a0
+	add.l	#2,a1
+	move.l	#15,d0
+.loop:
+	move.w	(a0),(a1)
+	add.l	#2,a0
+	add.l	#4,a1	
+	dbra	d0,.loop
+	rts
 	
+InstallGreyPalette:
+	lea	tileMapCopperPalettePtr,a1
+	lea	greyPalette,a0
+	add.l	#2,a1
+	move.l	#15,d0
+.loop:
+	move.w	(a0),(a1)
+	add.l	#2,a0
+	add.l	#4,a1	
+	dbra	d0,.loop
+	rts
+
 InstallPalette:
 	include	"out/tilemap-palette.s"
 	rts
@@ -402,6 +449,8 @@ map:
 backgroundMap:
 	include "out/background-map.s"
 	dc.w	$FFFF	
+foregroundScrollPixels:
+	dc.l	FOREGROUND_SCROLL_PIXELS
 foregroundScrollX:
 	dc.l	0
 backgroundScrollX:
@@ -496,6 +545,11 @@ deAnimIndexPattern:
 	dc.l	0	
 	dc.l	$ffffffff	
 
+greyPalette:
+	include "tilemap-grey-table.s"
+
+tilemapPalette:
+	include "tilemap-palette-table.s"	
 
 	section .bss
 foregroundBitplanes1:
@@ -510,35 +564,4 @@ startUserstack:
 	ds.b	$1000		; size of stack
 userstack:
 
-
-
 	end
-
-0:	UpdateFG
-	UpdateBG	
-	RenderFG
-	RenderBG
-	SwapBufferFG
-	SwapBufferBG	
-	
-1:	RenderFG
-	SwapBufferFG
-
-2:	UpdateFG	
-	RenderFG
-	RenderBG
-	SwapBufferFG
-	SwapBufferBG		
-	
-2:	RenderFG
-	SwapBufferFG
-
-
-000
-001
-010
-011
-100
-101
-110
-111
