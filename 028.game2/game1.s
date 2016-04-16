@@ -55,8 +55,7 @@ MainLoop:
 	bra	SetupBoardLoop
 
 GameLoop:
-	;; 	bsr	FadeToPalette
-	bsr	InstallColorPalette
+	bsr	InstallNextGreyPalette
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 	jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
@@ -425,6 +424,28 @@ InstallGreyPalette:
 	dbra	d0,.loop
 	rts
 
+
+InstallNextGreyPalette:
+	lea	tileMapCopperPalettePtr,a1	
+	move.l	fadePtr,a0
+	lea	fadeComplete,a2
+	cmp.l	a2,a0
+	bge	.done
+	add.l	#2,a1
+	move.l	#15,d0
+.loop:
+	move.w	(a0),(a1)
+	add.l	#2,a0
+	add.l	#4,a1	
+	dbra	d0,.loop
+	move.l	frameCount,d0
+	lsr.l	#1,d0
+	btst.l	#0,d0
+	beq	.done
+	add.l	#16*2,fadePtr
+.done
+	rts	
+
 InstallPalette:
 	include	"out/tilemap-palette.s"
 	rts
@@ -465,7 +486,9 @@ joystick:
 	dc.b	0
 joystickpos:
 	dc.b	0
-
+fadePtr:
+	dc.l	fade
+	
 animIndex:
 	ds.l	16,0
 deAnimIndex:
@@ -551,6 +574,9 @@ greyPalette:
 tilemapPalette:
 	include "tilemap-palette-table.s"	
 
+fade:
+	include "fade.s"
+	
 	section .bss
 foregroundBitplanes1:
 	ds.b	IMAGESIZE*3
