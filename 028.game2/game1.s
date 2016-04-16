@@ -50,7 +50,7 @@ Reset:
 MainLoop:
 	add.l	#1,frameCount
 	move.l	frameCount,d6		
-	cmp.l	#32,frameCount
+	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount
 	bge	GameLoop
 	bra	SetupBoardLoop
 
@@ -76,6 +76,8 @@ GameLoop:
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
 	bsr 	RenderNextBackgroundFrame			
+
+	move.w	#$f00,COLOR00(a6)
 	bra	MainLoop
 
 SetupBoardLoop:
@@ -205,18 +207,17 @@ RenderNextForegroundFrame:
 	lsr.l	#1,d0
 	and.b   #$f0,d0
 	add.l	d0,a2		
-	move.l	#7,d3		; 8 tiles per column
+	move.l	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d3		; 8 tiles per column
 .loop:
 	move.l	d3,d2
-	bsr	RenderForegroundTile2
-	bsr	ClearForegroundTile2
+	bsr	RenderForegroundTile
+	bsr	ClearForegroundTile
 	add.l	#2,a2
 	dbra	d3,.loop
 	rts
 
 
-
-RenderForegroundTile:
+RenderForegroundTile_NoAnim:
 	;; a2 - address of tileIndex
 	move.l	foregroundScrollX,d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
@@ -229,7 +230,7 @@ RenderForegroundTile:
 	jsr	BlitTile
 	rts	
 
-RenderForegroundTile2:
+RenderForegroundTile:
 	;; a2 - address of tileIndex
 	move.l	foregroundScrollX,d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
@@ -238,7 +239,7 @@ RenderForegroundTile2:
 	add.l	d0,a0
 	lea 	tilemap,a1	
 	add.w	(a2),a1 	; source tile	
-	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*4))/4)+BITPLANE_WIDTH_BYTES-8,a0
+	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0
 	lea 	animIndex,a4
 	move.l	d2,d1
 	lsl.l	#2,d1
@@ -257,17 +258,19 @@ RenderForegroundTile2:
 	rts
 	
 
-ClearForegroundTile2:	
+ClearForegroundTile:	
 	lea 	tilemap,a1		
-	add.w	#11520,a1 	; source tile
-	lea 	tilemap,a1	
-	add.w	(a2,-32),a1 	; source tile
+	move.l	a2,a4
+	sub.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*8,a4
+	sub.l	d0,d0
+	move.w	(a4),d0
+	add.l	d0,a1
+	;; 	add.w	(a2,-FOREGROUND_PLAYAREA_WIDTH_WORDS),a1 	; source tile
 	lea	map,a3
-	add.l	#32*8,a3
-	cmp.l	a3,a2
+	add.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*FOREGROUND_PLAYAREA_HEIGHT_WORDS,a3
+	cmp.l	a3,a2		; don't clear until the full play area has scrolled in
 	blt	.s3
-	sub.l	#32,a0
-
+	sub.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,a0
 	lea 	deAnimIndex,a4
 	move.l	d2,d1
 	lsl.l	#2,d1
@@ -287,21 +290,6 @@ ClearForegroundTile2:
 	rts
 
 	
-ClearForegroundTile:	
-	lea 	tilemap,a1		
-	add.w	#11520,a1 	; source tile
-	move.l	foregroundScrollX,d2
-	lsr.b	#FOREGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
-	lsr.b	#1,d2
-	andi.w	#$f,d2		; find the shift component	
-	cmp.b	#8,d2
-	bge	.skip
-	sub.l	#32,a0
-	jsr	BlitTile
-.skip:
-	rts
-
-
 RenderBackgroundTile:	
 	;; a2 - map
 	move.l	backgroundScrollX,d0
