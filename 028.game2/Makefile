@@ -38,7 +38,7 @@ out/tilemap-palette.s: assets/tilemap.png
 	$(IMAGECON) --use-palette=assets/palette.pal --full-color-palette-file --input=assets/tilemap.png --output-palette-asm --output=out/tilemap --output-copperlist
 
 out/panel.bin: assets/panel.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/panel
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/panel --use-palette=assets/panel.pal
 
 
 out/foreground-map.s: foreground.tmx
