@@ -54,9 +54,9 @@ MainLoop:
 	MOVE.W  #$0024,BPLCON2(a6)
 	add.l	#1,frameCount
 	move.l	frameCount,d6		
-	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount
-	bge	GameLoop
-	bra	SetupBoardLoop
+	;; cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount
+	;; bge	GameLoop
+	;; bra	SetupBoardLoop
 
 GameLoop:
 	bsr	InstallNextGreyPalette
@@ -64,7 +64,7 @@ GameLoop:
 	jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
-	jsr	ReadJoystick
+
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels		
 	and.b	#$f,d0
@@ -73,10 +73,9 @@ GameLoop:
 	move.w	#0,moving
 .s2:
 	
-	cmp.b	#3,joystickpos
- 	bne	.s1
-	move.w	#1,moving
-.s1:
+
+	bsr	ProcessJoystick
+
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
 	bsr 	RenderNextBackgroundFrame			
@@ -84,8 +83,44 @@ GameLoop:
 	move.w	#$f00,COLOR00(a6)
 	bra	MainLoop
 
+ProcessJoystick:
+	;; 812
+	;; 7 3
+	;; 654
+	;; move.w	#1,moving	
+	jsr	ReadJoystick
+	cmp.w	#0,spriteR
+	bne	.skip
+	cmp.w	#0,spriteU
+	bne	.skip
+	cmp.w	#0,spriteD
+	bne	.skip
+	cmp.w	#0,spriteL
+	bne	.skip	
+	
+	cmp.b	#3,joystickpos
+ 	bne	.notRight
+	move.w	#8,spriteR
+.notRight:
+	cmp.b	#1,joystickpos
+ 	bne	.notUp
+	move.w	#8,spriteU
+.notUp:
+	cmp.b	#5,joystickpos
+ 	bne	.notDown
+	move.w	#8,spriteD
+.notDown:
+	cmp.b	#7,joystickpos
+ 	bne	.notLeft
+	move.w	#8,spriteL
+.notLeft:	
+.skip:
+	rts
+
+
+	
 SetupBoardLoop:
-	move.l	#FOREGROUND_SCROLL_PIXELS*15,foregroundScrollPixels	
+	move.l	#FOREGROUND_SCROLL_PIXELS*15,foregroundScrollPixels
 	;; jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
@@ -99,6 +134,37 @@ SetupBoardLoop:
 
 	
 Update:
+	;; right
+	cmp.w	#0,spriteR
+	beq	.notRight
+	add.w	#2,spriteX
+	sub.w	#1,spriteR
+.notRight:
+	;; up
+	cmp.w	#0,spriteU
+	beq	.notUp
+	sub.w	#FOREGROUND_SCROLL_PIXELS*2,spriteY
+	sub.w	#FOREGROUND_SCROLL_PIXELS*2,spriteYEnd	
+	sub.w	#1,spriteU
+.notUp:
+	;; down
+	cmp.w	#0,spriteD
+	beq	.notDown
+	add.w	#FOREGROUND_SCROLL_PIXELS*2,spriteY
+	add.w	#FOREGROUND_SCROLL_PIXELS*2,spriteYEnd	
+	sub.w	#1,spriteD
+.notDown:
+	;; left
+	cmp.w	#0,spriteL
+	beq	.notLeft
+	sub.w	#2,spriteX
+	sub.w	#1,spriteL
+.notLeft:
+
+	cmp.w	#$cf,spriteX
+	blt	.noScroll
+	move.w	#1,moving
+.noScroll:	
 .backgroundUpdates:
 	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX		
 	btst	#FOREGROUND_DELAY_BIT,d6
@@ -110,10 +176,11 @@ Update:
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	andi.l	#$f,d0
 
-	cmp.w	#1,moving
-	bne	.c1
+	cmp.w	#0,moving
+	beq	.c1
 	move.l	foregroundScrollPixels,d0
 	add.l	d0,foregroundScrollX
+	sub.w	#1,spriteX	
 
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
@@ -318,11 +385,25 @@ Level3InterruptHandler:
 .checkVerticalBlank:
 	move.w	INTREQR(a6),d0
 	and.w	#INTF_VERTB,d0	
-	beq.s	.checkCopper
+	beq	.checkCopper
 
 .verticalBlank:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
 	add.l	#1,verticalBlankCount
+
+	
+	move.w	spriteX,d0
+	move.w	d0,d1
+	andi	#1,d1
+	move.b	d1,spriteControl
+	lsr.l	#1,d0
+	move.b	d0,spriteHStart
+	move.w	spriteY,d0
+	lsr.l	#4,d0	
+	move.b	d0,spriteVStart
+	move.w	spriteYEnd,d0
+	lsr.l	#4,d0		
+	move.b	d0,spriteVStop
 	move.l	#sprite,SPR0PTH(a6)
 	move.l	#deadSprite,SPR1PTH(a6)
 	move.l	#deadSprite,SPR2PTH(a6)
@@ -469,13 +550,13 @@ backgroundTilemap:
 
 sprite:
 spriteVStart:
-	dc.b	$94
-spriteHStart:
-	dc.b	$60
-spriteHStop:
-	dc.b	$a4
 	dc.b	0
-	DC.W    $0000,$0000 ;End of sprite data
+spriteHStart:
+	dc.b	0
+spriteVStop:
+	dc.b	0
+spriteControl:	
+	dc.b	0
 	incbin	"out/sprite.bin"
 	dc.l	0
 deadSprite:
@@ -487,9 +568,9 @@ map:
 	dc.w	$FFFF
 backgroundMap:
 	include "out/background-map.s"
-	dc.w	$FFFF	
+	dc.w	$FFFF
 foregroundScrollPixels:
-	dc.l	FOREGROUND_SCROLL_PIXELS
+	dc.l	FOREGROUND_SCROLL_PIXELS	
 foregroundScrollX:
 	dc.l	0
 backgroundScrollX:
@@ -500,13 +581,27 @@ verticalBlankCount:
 	dc.l	0
 moving:
 	dc.w	0
+spriteR:
+	dc.w	0
+spriteL:
+	dc.w	0
+spriteU:
+	dc.w	0
+spriteD:
+	dc.w	0	
+spriteX:
+	dc.w	$c0
+spriteY:
+	dc.w	$e4*FOREGROUND_SCROLL_PIXELS
+spriteYEnd:
+	dc.w	$f4*FOREGROUND_SCROLL_PIXELS
 joystick:
 	dc.b	0
 joystickpos:
 	dc.b	0
 fadePtr:
 	dc.l	fade
-	
+
 animIndex:
 	ds.l	16,0
 deAnimIndex:
