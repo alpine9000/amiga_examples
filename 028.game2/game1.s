@@ -52,13 +52,36 @@ Reset:
 
 MainLoop:
 	MOVE.W  #$0024,BPLCON2(a6)
+
+SetupBoardLoop:
 	add.l	#1,frameCount
 	move.l	frameCount,d6		
-	;; cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount
-	;; bge	GameLoop
-	;; bra	SetupBoardLoop
+	move.l	#FOREGROUND_SCROLL_PIXELS*15,foregroundScrollPixels
+	;; jsr	WaitVerticalBlank	
+	bsr	HoriScrollPlayfield
+	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
+	move.l	foregroundScrollX,d0
+	move.w	#1,moving
+	bsr 	Update
+	bsr	RenderNextForegroundFrame	
+	bsr 	RenderNextBackgroundFrame			
+	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount
+	bge	.gotoGameLoop
+	bra	SetupBoardLoop
 
+.gotoGameLoop:	
+	jsr	WaitVerticalBlank
+	bra	GameLoop
+	
 GameLoop:
+	add.l	#1,frameCount
+	move.l	frameCount,d6			
+
+	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,d6
+	bne	.c1
+	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
+	move.w	#$c0,spriteX
+.c1:
 	bsr	InstallNextGreyPalette
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 	jsr	WaitVerticalBlank	
@@ -73,7 +96,6 @@ GameLoop:
 	move.w	#0,moving
 .s2:
 	
-
 	bsr	ProcessJoystick
 
 	bsr 	Update
@@ -81,7 +103,7 @@ GameLoop:
 	bsr 	RenderNextBackgroundFrame			
 
 	move.w	#$f00,COLOR00(a6)
-	bra	MainLoop
+	bra	GameLoop
 
 ProcessJoystick:
 	;; 812
@@ -101,36 +123,28 @@ ProcessJoystick:
 	cmp.b	#3,joystickpos
  	bne	.notRight
 	move.w	#8,spriteR
+	move.l	#spritePigRight,currentSprite			
 .notRight:
 	cmp.b	#1,joystickpos
  	bne	.notUp
 	move.w	#8,spriteU
+	move.l	#spritePigUp,currentSprite		
 .notUp:
 	cmp.b	#5,joystickpos
  	bne	.notDown
 	move.w	#8,spriteD
+	move.l	#spritePigDown,currentSprite	
 .notDown:
 	cmp.b	#7,joystickpos
  	bne	.notLeft
 	move.w	#8,spriteL
+	move.l	#spritePigLeft,currentSprite
 .notLeft:	
 .skip:
 	rts
 
 
 	
-SetupBoardLoop:
-	move.l	#FOREGROUND_SCROLL_PIXELS*15,foregroundScrollPixels
-	;; jsr	WaitVerticalBlank	
-	bsr	HoriScrollPlayfield
-	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
-	move.l	foregroundScrollX,d0
-	move.w	#1,moving
-	bsr 	Update
-	bsr	RenderNextForegroundFrame	
-	bsr 	RenderNextBackgroundFrame			
-	bra	MainLoop
-
 
 	
 Update:
@@ -143,15 +157,15 @@ Update:
 	;; up
 	cmp.w	#0,spriteU
 	beq	.notUp
-	sub.w	#FOREGROUND_SCROLL_PIXELS*2,spriteY
-	sub.w	#FOREGROUND_SCROLL_PIXELS*2,spriteYEnd	
+	sub.w	#2,spriteY
+	sub.w	#2,spriteYEnd	
 	sub.w	#1,spriteU
 .notUp:
 	;; down
 	cmp.w	#0,spriteD
 	beq	.notDown
-	add.w	#FOREGROUND_SCROLL_PIXELS*2,spriteY
-	add.w	#FOREGROUND_SCROLL_PIXELS*2,spriteYEnd	
+	add.w	#2,spriteY
+	add.w	#2,spriteYEnd	
 	sub.w	#1,spriteD
 .notDown:
 	;; left
@@ -391,20 +405,21 @@ Level3InterruptHandler:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
 	add.l	#1,verticalBlankCount
 
-	
+
+
+	move.l	currentSprite,a0
 	move.w	spriteX,d0
 	move.w	d0,d1
 	andi	#1,d1
-	move.b	d1,spriteControl
+	move.b	d1,3(a0)	;spriteControl
 	lsr.l	#1,d0
-	move.b	d0,spriteHStart
+	move.b	d0,1(a0)	;spriteHStart
 	move.w	spriteY,d0
-	lsr.l	#4,d0	
-	move.b	d0,spriteVStart
+	move.b	d0,(a0)		;spriteVStart
 	move.w	spriteYEnd,d0
-	lsr.l	#4,d0		
-	move.b	d0,spriteVStop
-	move.l	#sprite,SPR0PTH(a6)
+	move.b	d0,2(a0)	;spriteVStop
+	move.l	a0,SPR0PTH(a6)
+
 	move.l	#deadSprite,SPR1PTH(a6)
 	move.l	#deadSprite,SPR2PTH(a6)
 	move.l	#deadSprite,SPR3PTH(a6)
@@ -482,7 +497,7 @@ tileMapCopperPalettePtr:
 	dc.l	$fffffffe	
 
 InstallSpriteColorPalette:
-	include "out/sprite-palette.s"
+	include "out/sprite_pig_up-palette.s"
 	rts
 
 InstallColorPalette:
@@ -548,17 +563,29 @@ tilemap:
 backgroundTilemap:
 	incbin "out/background.bin"
 
-sprite:
-spriteVStart:
-	dc.b	0
-spriteHStart:
-	dc.b	0
-spriteVStop:
-	dc.b	0
-spriteControl:	
-	dc.b	0
-	incbin	"out/sprite.bin"
+spritePigUp:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_pig_up.bin"
 	dc.l	0
+spritePigDown:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_pig_down.bin"
+	dc.l	0
+spritePigLeft:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_pig_left.bin"
+	dc.l	0
+spritePigRight:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_pig_right.bin"
+	dc.l	0	
+
+currentSprite:
+	dc.l	spritePigRight
 deadSprite:
 	dc.l	0
 panel:
@@ -590,11 +617,11 @@ spriteU:
 spriteD:
 	dc.w	0	
 spriteX:
-	dc.w	$c0
+	dc.w	$0
 spriteY:
-	dc.w	$e4*FOREGROUND_SCROLL_PIXELS
+	dc.w	$e4
 spriteYEnd:
-	dc.w	$f4*FOREGROUND_SCROLL_PIXELS
+	dc.w	$f5
 joystick:
 	dc.b	0
 joystickpos:
