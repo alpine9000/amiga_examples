@@ -11,7 +11,7 @@ NUM_COLORS=8
 BOOTBLOCK_ASM=alpine_bootblock.s
 OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/pig.o
 
-IMAGES=foreground.png background.png panel.png sprite_pig_up.png sprite_pig_down.png sprite_pig_left.png sprite_pig_right.png
+IMAGES=foreground.png background.png panel.png  sprite_pig_up.png sprite_pig_left_jump.png sprite_pig_up_jump.png sprite_pig_down_jump.png sprite_pig_right_jump.png sprite_pig_down.png sprite_pig_left.png sprite_pig_right.png
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
 VASM_EXTRA_ARGS=-DNUM_COLORS=$(NUM_COLORS)
@@ -51,6 +51,19 @@ out/sprite_pig_left.bin: assets/sprite_pig_left.png
 
 out/sprite_pig_right.bin: assets/sprite_pig_right.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_right --palette-offset 16 --use-palette=assets/pig.pal
+
+
+out/sprite_pig_right_jump.bin: assets/sprite_pig_right_jump.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_right_jump --palette-offset 16 --use-palette=assets/pig.pal
+
+out/sprite_pig_down_jump.bin: assets/sprite_pig_down_jump.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_down_jump --palette-offset 16 --use-palette=assets/pig.pal
+
+out/sprite_pig_up_jump.bin: assets/sprite_pig_up_jump.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_up_jump --palette-offset 16 --use-palette=assets/pig.pal
+
+out/sprite_pig_left_jump.bin: assets/sprite_pig_left_jump.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_left_jump --palette-offset 16 --use-palette=assets/pig.pal
 
 
 out/foreground-map.s: foreground.tmx

@@ -15,40 +15,55 @@ UpdatePig:
 	cmp.w	#PIG_PAUSE_PIXELS,spriteR
 	ble	.skipRight
 	add.w	#PIG_MOVE_PIXELS,spriteX
+	move.l	#spritePigRightJump,currentSprite	
 .skipRight
 	cmp.w	#0,spriteR
 	beq	.notRight
 	sub.w	#1,spriteR
+	cmp.w   #PIG_PAUSE_PIXELS,spriteR
+	bge	.notRight
+	move.l	#spritePigRight,currentSprite
 .notRight:
 	;; up
 	cmp.w	#PIG_PAUSE_PIXELS,spriteU
 	ble	.skipUp
 	sub.w	#PIG_MOVE_PIXELS,spriteY
 	sub.w	#PIG_MOVE_PIXELS,spriteYEnd	
+	move.l	#spritePigUpJump,currentSprite
 .skipUp:
 	cmp.w	#0,spriteU
 	beq	.notUp
 	sub.w	#1,spriteU
+	cmp.w   #PIG_PAUSE_PIXELS,spriteU
+	bge	.notUp
+	move.l	#spritePigUp,currentSprite	
 .notUp:
 	;; down
 	cmp.w	#PIG_PAUSE_PIXELS,spriteD
 	ble	.skipDown
 	add.w	#PIG_MOVE_PIXELS,spriteY
 	add.w	#PIG_MOVE_PIXELS,spriteYEnd	
+	move.l	#spritePigDownJump,currentSprite
 .skipDown:
 	cmp.w	#0,spriteD
 	beq	.notDown
 	sub.w	#1,spriteD
+	cmp.w   #PIG_PAUSE_PIXELS,spriteD
+	bge	.notDown
+	move.l	#spritePigDown,currentSprite		
 .notDown:
 	;; left
-
 	cmp.w	#PIG_PAUSE_PIXELS,spriteL
 	ble	.skipLeft
 	sub.w	#PIG_MOVE_PIXELS,spriteX
+	move.l	#spritePigLeftJump,currentSprite
 .skipLeft
 	cmp.w	#0,spriteL
 	beq	.notLeft
 	sub.w	#1,spriteL
+	cmp.w   #PIG_PAUSE_PIXELS,spriteL
+	bge	.notLeft
+	move.l	#spritePigLeft,currentSprite		
 .notLeft:
 	cmp.w	#$cf,spriteX
 	blt	.noScroll
@@ -75,7 +90,7 @@ ProcessJoystick:
 	cmp.b	#3,joystickpos
  	bne	.notRight
 	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteR
-	move.l	#spritePigRight,currentSprite			
+	move.l	#spritePigRight,currentSprite
 .notRight:
 	cmp.b	#1,joystickpos
  	bne	.notUp
@@ -126,22 +141,44 @@ spritePigUp:
 	dc.w	0,0
 	incbin	"out/sprite_pig_up.bin"
 	dc.l	0
+spritePigUpJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_pig_up_jump.bin"
+	dc.l	0		
 spritePigDown:
 	dc.w	0,0
 	dc.w	0,0
 	incbin	"out/sprite_pig_down.bin"
 	dc.l	0
+spritePigDownJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_pig_down_jump.bin"
+	dc.l	0		
 spritePigLeft:
 	dc.w	0,0
 	dc.w	0,0
 	incbin	"out/sprite_pig_left.bin"
 	dc.l	0
+spritePigLeftJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_pig_left_jump.bin"
+	dc.l	0		
 spritePigRight:
 	dc.w	0,0
 	dc.w	0,0
 	incbin	"out/sprite_pig_right.bin"
-	dc.l	0	
+	dc.l	0
+spritePigRightJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_pig_right_jump.bin"
+	dc.l	0		
 
+currentSpriteOffset:
+	dc.l	0
 currentSprite:
 	dc.l	spritePigRight
 deadSprite:
