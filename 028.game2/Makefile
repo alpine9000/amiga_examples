@@ -9,7 +9,7 @@ BASE_ADDRESS=4000
 NUM_COLORS=8
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/pig.o
 
 IMAGES=foreground.png background.png panel.png sprite_pig_up.png sprite_pig_down.png sprite_pig_left.png sprite_pig_right.png
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))

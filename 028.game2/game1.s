@@ -12,6 +12,14 @@
 	xdef	joystick
 	xdef	sprite
 	xdef	deadSprite
+	xdef	spriteX
+	xdef	spriteY
+	xdef	spriteYEnd
+	xdef	spriteR
+	xdef	spriteL
+	xdef	spriteU
+	xdef	spriteD
+	xdef	moving
 	
 byteMap:
 	dc.l	Entry
@@ -109,7 +117,6 @@ ProcessJoystick:
 	;; 812
 	;; 7 3
 	;; 654
-	;; move.w	#1,moving	
 	jsr	ReadJoystick
 	cmp.w	#0,spriteR
 	bne	.skip
@@ -122,22 +129,22 @@ ProcessJoystick:
 	
 	cmp.b	#3,joystickpos
  	bne	.notRight
-	move.w	#8,spriteR
+	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteR
 	move.l	#spritePigRight,currentSprite			
 .notRight:
 	cmp.b	#1,joystickpos
  	bne	.notUp
-	move.w	#8,spriteU
+	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteU
 	move.l	#spritePigUp,currentSprite		
 .notUp:
 	cmp.b	#5,joystickpos
  	bne	.notDown
-	move.w	#8,spriteD
+	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteD
 	move.l	#spritePigDown,currentSprite	
 .notDown:
 	cmp.b	#7,joystickpos
  	bne	.notLeft
-	move.w	#8,spriteL
+	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteL
 	move.l	#spritePigLeft,currentSprite
 .notLeft:	
 .skip:
@@ -149,36 +156,8 @@ ProcessJoystick:
 	
 Update:
 	;; right
-	cmp.w	#0,spriteR
-	beq	.notRight
-	add.w	#2,spriteX
-	sub.w	#1,spriteR
-.notRight:
-	;; up
-	cmp.w	#0,spriteU
-	beq	.notUp
-	sub.w	#2,spriteY
-	sub.w	#2,spriteYEnd	
-	sub.w	#1,spriteU
-.notUp:
-	;; down
-	cmp.w	#0,spriteD
-	beq	.notDown
-	add.w	#2,spriteY
-	add.w	#2,spriteYEnd	
-	sub.w	#1,spriteD
-.notDown:
-	;; left
-	cmp.w	#0,spriteL
-	beq	.notLeft
-	sub.w	#2,spriteX
-	sub.w	#1,spriteL
-.notLeft:
-
-	cmp.w	#$cf,spriteX
-	blt	.noScroll
-	move.w	#1,moving
-.noScroll:	
+	jsr	UpdatePig
+	
 .backgroundUpdates:
 	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX		
 	btst	#FOREGROUND_DELAY_BIT,d6
