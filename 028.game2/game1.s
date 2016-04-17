@@ -10,6 +10,8 @@
 	xdef	foregroundScrollX
 	xdef	backgroundScrollX
 	xdef	joystick
+	xdef	sprite
+	xdef	deadSprite
 	
 byteMap:
 	dc.l	Entry
@@ -39,6 +41,7 @@ Entry:
 	jsr	PokePanelBitplanePointers
 	jsr	Init		  ; enable the playfield		
 
+	jsr	InstallSpriteColorPalette
 	jsr	InstallGreyPalette
 	
 Reset:
@@ -48,6 +51,7 @@ Reset:
 	move.l	#-1,frameCount		
 
 MainLoop:
+	MOVE.W  #$0024,BPLCON2(a6)
 	add.l	#1,frameCount
 	move.l	frameCount,d6		
 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount
@@ -319,6 +323,15 @@ Level3InterruptHandler:
 .verticalBlank:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
 	add.l	#1,verticalBlankCount
+	move.l	#sprite,SPR0PTH(a6)
+	move.l	#deadSprite,SPR1PTH(a6)
+	move.l	#deadSprite,SPR2PTH(a6)
+	move.l	#deadSprite,SPR3PTH(a6)
+	move.l	#deadSprite,SPR4PTH(a6)
+	move.l	#deadSprite,SPR5PTH(a6)
+	move.l	#deadSprite,SPR6PTH(a6)
+	move.l	#deadSprite,SPR7PTH(a6)		
+	
 .checkCopper:
 	move.w	INTREQR(a6),d0
 	and.w	#INTF_COPER,d0	
@@ -387,6 +400,9 @@ tileMapCopperPalettePtr:
 
 	dc.l	$fffffffe	
 
+InstallSpriteColorPalette:
+	include "out/sprite-palette.s"
+	rts
 
 InstallColorPalette:
 	lea	tileMapCopperPalettePtr,a1
@@ -450,6 +466,20 @@ tilemap:
 	incbin "out/foreground.bin"
 backgroundTilemap:
 	incbin "out/background.bin"
+
+sprite:
+spriteVStart:
+	dc.b	$94
+spriteHStart:
+	dc.b	$60
+spriteHStop:
+	dc.b	$a4
+	dc.b	0
+	DC.W    $0000,$0000 ;End of sprite data
+	incbin	"out/sprite.bin"
+	dc.l	0
+deadSprite:
+	dc.l	0
 panel:
 	incbin "out/panel.bin"
 map:

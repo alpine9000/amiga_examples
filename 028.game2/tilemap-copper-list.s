@@ -14,12 +14,3 @@
 	dc.w $19a,$d02
 	dc.w $19c,$999
 	dc.w $19e,$00f
-	dc.w $1a0,$ea6
-	dc.w $1a2,$f76
-	dc.w $1a4,$a31
-	dc.w $1a6,$37
-	dc.w $1a8,$19a
-	dc.w $1aa,$1ef
-	dc.w $1ac,$f70
-	dc.w $1ae,$ff0
-	dc.w $1b0,$fff

@@ -23,11 +23,16 @@ Init:
 	;; move.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2,BPL1MOD(a6) ; -2 for extra scrolling word
 	;; move.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2,BPL2MOD(a6)
 
+
+	;; setup sprites
+	
+
+	
 	;; install copper list, then enable dma and selected interrupts
 	lea	copperList,a0
 	move.l	a0,COP1LC(a6)
  	move.w  COPJMP1(a6),d0
-	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
+	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 	;; move.w	#PF2PRI,BPLCON2(a6) 
 	;; move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)
 	movem.l (sp)+,d0-a6
