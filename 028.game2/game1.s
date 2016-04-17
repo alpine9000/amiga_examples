@@ -102,7 +102,7 @@ GameLoop:
 	bsr	RenderNextForegroundFrame	
 	bsr 	RenderNextBackgroundFrame			
 
-	move.w	#$f00,COLOR00(a6)
+	;; move.w	#$f00,COLOR00(a6)
 	bra	GameLoop
 
 ProcessJoystick:

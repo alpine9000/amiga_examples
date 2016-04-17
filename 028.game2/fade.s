@@ -1,5 +1,5 @@
 .step1
-	dc.w	$778
+	dc.w	$788
 	dc.w	$211
 	dc.w	$333
 	dc.w	$655
@@ -16,7 +16,7 @@
 	dc.w	$999
 	dc.w	$000
 .step2
-	dc.w	$778
+	dc.w	$788
 	dc.w	$211
 	dc.w	$323
 	dc.w	$655
@@ -33,7 +33,7 @@
 	dc.w	$999
 	dc.w	$000
 .step3
-	dc.w	$679
+	dc.w	$689
 	dc.w	$211
 	dc.w	$423
 	dc.w	$754
@@ -101,7 +101,7 @@
 	dc.w	$999
 	dc.w	$000
 .step7
-	dc.w	$48a
+	dc.w	$48b
 	dc.w	$311
 	dc.w	$512
 	dc.w	$953
@@ -135,7 +135,7 @@
 	dc.w	$999
 	dc.w	$000
 .step9
-	dc.w	$48b
+	dc.w	$38b
 	dc.w	$301
 	dc.w	$612
 	dc.w	$942
@@ -152,7 +152,7 @@
 	dc.w	$999
 	dc.w	$000
 .step10
-	dc.w	$38c
+	dc.w	$39c
 	dc.w	$301
 	dc.w	$612
 	dc.w	$a42
@@ -169,7 +169,7 @@
 	dc.w	$999
 	dc.w	$000
 .step11
-	dc.w	$38c
+	dc.w	$29c
 	dc.w	$401
 	dc.w	$612
 	dc.w	$a42
@@ -186,7 +186,7 @@
 	dc.w	$999
 	dc.w	$000
 .step12
-	dc.w	$28c
+	dc.w	$29d
 	dc.w	$401
 	dc.w	$702
 	dc.w	$b41
@@ -203,7 +203,7 @@
 	dc.w	$999
 	dc.w	$000
 .step13
-	dc.w	$28d
+	dc.w	$19d
 	dc.w	$401
 	dc.w	$702
 	dc.w	$b41
@@ -220,7 +220,7 @@
 	dc.w	$999
 	dc.w	$000
 .step14
-	dc.w	$18d
+	dc.w	$19e
 	dc.w	$401
 	dc.w	$701
 	dc.w	$c41
@@ -237,7 +237,7 @@
 	dc.w	$999
 	dc.w	$000
 .step15
-	dc.w	$18e
+	dc.w	$09e
 	dc.w	$401
 	dc.w	$801
 	dc.w	$c40
@@ -254,7 +254,7 @@
 	dc.w	$999
 	dc.w	$000
 .step16
-	dc.w	$18e
+	dc.w	$09e
 	dc.w	$500
 	dc.w	$801
 	dc.w	$d30
