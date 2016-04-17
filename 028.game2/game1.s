@@ -408,7 +408,8 @@ Level3InterruptHandler:
 
 
 	move.l	currentSprite,a0
-	move.w	spriteX,d0
+	move.w	spriteLagX,d0
+	move.w	spriteX,spriteLagX
 	move.w	d0,d1
 	andi	#1,d1
 	move.b	d1,3(a0)	;spriteControl
@@ -616,6 +617,8 @@ spriteU:
 	dc.w	0
 spriteD:
 	dc.w	0	
+spriteLagX:
+	dc.w	0
 spriteX:
 	dc.w	$0
 spriteY:
