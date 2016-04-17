@@ -1,6 +1,8 @@
 	;; http://eab.abime.net/showpost.php?p=986196&postcount=2
 
 	xdef ReadJoystick
+	xdef joystick
+	xdef joystickpos	
 	
 ciaa_pra  = $bfe001
 joy1dat   = $dff00c
@@ -25,3 +27,8 @@ ReadJoystick:
         rts
 .conv:
         dc.b      0,5,4,3,1,0,3,2,8,7,0,1,7,6,5,0
+
+joystick:
+	dc.b	0
+joystickpos:
+	dc.b	0	

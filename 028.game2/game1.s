@@ -9,16 +9,8 @@
 	xdef	foregroundOffscreen
 	xdef	foregroundScrollX
 	xdef	backgroundScrollX
-	xdef	joystick
-	xdef	sprite
-	xdef	deadSprite
-	xdef	spriteX
-	xdef	spriteY
-	xdef	spriteYEnd
-	xdef	spriteR
-	xdef	spriteL
-	xdef	spriteU
-	xdef	spriteD
+
+
 	xdef	moving
 	
 byteMap:
@@ -88,7 +80,7 @@ GameLoop:
 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,d6
 	bne	.c1
 	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
-	move.w	#$c0,spriteX
+	jsr	InitialisePig
 .c1:
 	bsr	InstallNextGreyPalette
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
@@ -104,7 +96,7 @@ GameLoop:
 	move.w	#0,moving
 .s2:
 	
-	bsr	ProcessJoystick
+	jsr	ProcessJoystick
 
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
@@ -113,42 +105,6 @@ GameLoop:
 	;; move.w	#$f00,COLOR00(a6)
 	bra	GameLoop
 
-ProcessJoystick:
-	;; 812
-	;; 7 3
-	;; 654
-	jsr	ReadJoystick
-	cmp.w	#0,spriteR
-	bne	.skip
-	cmp.w	#0,spriteU
-	bne	.skip
-	cmp.w	#0,spriteD
-	bne	.skip
-	cmp.w	#0,spriteL
-	bne	.skip	
-	
-	cmp.b	#3,joystickpos
- 	bne	.notRight
-	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteR
-	move.l	#spritePigRight,currentSprite			
-.notRight:
-	cmp.b	#1,joystickpos
- 	bne	.notUp
-	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteU
-	move.l	#spritePigUp,currentSprite		
-.notUp:
-	cmp.b	#5,joystickpos
- 	bne	.notDown
-	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteD
-	move.l	#spritePigDown,currentSprite	
-.notDown:
-	cmp.b	#7,joystickpos
- 	bne	.notLeft
-	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteL
-	move.l	#spritePigLeft,currentSprite
-.notLeft:	
-.skip:
-	rts
 
 
 	
@@ -383,31 +339,7 @@ Level3InterruptHandler:
 .verticalBlank:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
 	add.l	#1,verticalBlankCount
-
-
-
-	move.l	currentSprite,a0
-	move.w	spriteLagX,d0
-	move.w	spriteX,spriteLagX
-	move.w	d0,d1
-	andi	#1,d1
-	move.b	d1,3(a0)	;spriteControl
-	lsr.l	#1,d0
-	move.b	d0,1(a0)	;spriteHStart
-	move.w	spriteY,d0
-	move.b	d0,(a0)		;spriteVStart
-	move.w	spriteYEnd,d0
-	move.b	d0,2(a0)	;spriteVStop
-	move.l	a0,SPR0PTH(a6)
-
-	move.l	#deadSprite,SPR1PTH(a6)
-	move.l	#deadSprite,SPR2PTH(a6)
-	move.l	#deadSprite,SPR3PTH(a6)
-	move.l	#deadSprite,SPR4PTH(a6)
-	move.l	#deadSprite,SPR5PTH(a6)
-	move.l	#deadSprite,SPR6PTH(a6)
-	move.l	#deadSprite,SPR7PTH(a6)		
-	
+	jsr SetupSpriteData
 .checkCopper:
 	move.w	INTREQR(a6),d0
 	and.w	#INTF_COPER,d0	
@@ -543,31 +475,6 @@ tilemap:
 backgroundTilemap:
 	incbin "out/background.bin"
 
-spritePigUp:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig_up.bin"
-	dc.l	0
-spritePigDown:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig_down.bin"
-	dc.l	0
-spritePigLeft:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig_left.bin"
-	dc.l	0
-spritePigRight:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig_right.bin"
-	dc.l	0	
-
-currentSprite:
-	dc.l	spritePigRight
-deadSprite:
-	dc.l	0
 panel:
 	incbin "out/panel.bin"
 map:
@@ -588,26 +495,7 @@ verticalBlankCount:
 	dc.l	0
 moving:
 	dc.w	0
-spriteR:
-	dc.w	0
-spriteL:
-	dc.w	0
-spriteU:
-	dc.w	0
-spriteD:
-	dc.w	0	
-spriteLagX:
-	dc.w	0
-spriteX:
-	dc.w	$0
-spriteY:
-	dc.w	$e4
-spriteYEnd:
-	dc.w	$f5
-joystick:
-	dc.b	0
-joystickpos:
-	dc.b	0
+
 fadePtr:
 	dc.l	fade
 
