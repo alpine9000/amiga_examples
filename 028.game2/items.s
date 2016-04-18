@@ -5,7 +5,9 @@
 	xdef RenderItemSprite
 	
 ScrollItemSprites:	
-	sub.w	#1,itemX
+	;; sub.w	#1,itemX
+	move.l 	foregroundScrollPixels,d0
+	sub.w	d0,itemX
 	rts
 	
 SetupItemSpriteData:
@@ -25,6 +27,7 @@ SetupItemSpriteData:
 	mulu.w	#64+12,d0
 	add.l	d0,a0
 	move.w	itemLagX,d0
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	move.w	itemX,itemLagX
 	add.w	#32,d0
 	move.w	d0,d1
@@ -56,7 +59,7 @@ RenderItemSprite:
 	cmpi.w	#0,(a3)
 	beq	.dontAddSprite
 	move.l	#deadSprite,currentItemSprite
-	move.w	#337,itemX
+	move.w	#337<<FOREGROUND_SCROLL_SHIFT_CONVERT,itemX
 	mulu.w	#16,d2
 	move.w	#255-12,d3
 	sub.w	d2,d3

@@ -13,6 +13,7 @@
 	xdef	itemsMap
 	xdef   	mapSize
 	xdef	moving
+	xdef 	foregroundScrollPixels
 	
 byteMap:
 	dc.l	Entry
@@ -57,8 +58,8 @@ MainLoop:
 SetupBoardLoop:
 	add.l	#1,frameCount
 	move.l	frameCount,d6		
-	;; move.l	#FOREGROUND_SCROLL_PIXELS*15,foregroundScrollPixels
-	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
+	move.l	#(FOREGROUND_SCROLL_PIXELS*16)-1,foregroundScrollPixels
+	;; move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 	;; jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
@@ -67,8 +68,8 @@ SetupBoardLoop:
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
 	;; bsr 	RenderNextBackgroundFrame			
-	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*15,frameCount
-	;; cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount	
+	;; 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*15,frameCount
+	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount	
 	bge	.gotoGameLoop
 	bra	SetupBoardLoop
 
@@ -80,8 +81,8 @@ GameLoop:
 	add.l	#1,frameCount
 	move.l	frameCount,d6			
 
-	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*15+25,d6
-	;; 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,d6
+	;; cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*15+25,d6
+	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,d6
 	bne	.c1
 	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 	jsr	InitialisePig
