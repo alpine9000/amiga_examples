@@ -53,11 +53,12 @@ Reset:
 
 MainLoop:
 	MOVE.W  #$0024,BPLCON2(a6)
-
+	
 SetupBoardLoop:
 	add.l	#1,frameCount
 	move.l	frameCount,d6		
-	move.l	#FOREGROUND_SCROLL_PIXELS*15,foregroundScrollPixels
+	;; move.l	#FOREGROUND_SCROLL_PIXELS*15,foregroundScrollPixels
+	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 	;; jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
@@ -65,8 +66,9 @@ SetupBoardLoop:
 	move.w	#1,moving
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
-	bsr 	RenderNextBackgroundFrame			
-	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount
+	;; bsr 	RenderNextBackgroundFrame			
+	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*15,frameCount
+	;; cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount	
 	bge	.gotoGameLoop
 	bra	SetupBoardLoop
 
@@ -78,7 +80,8 @@ GameLoop:
 	add.l	#1,frameCount
 	move.l	frameCount,d6			
 
-	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,d6
+	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*15+25,d6
+	;; 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,d6
 	bne	.c1
 	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 	jsr	InitialisePig
@@ -246,7 +249,7 @@ RenderForegroundTile_NoAnim:
 	add.l	d0,a0
 	lea 	tilemap,a1	
 	add.w	(a2),a1 	; source tile	
-	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*4))/4)+BITPLANE_WIDTH_BYTES-8,a0
+	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0	
 	jsr	BlitTile
 	rts	
 
@@ -339,7 +342,7 @@ Level3InterruptHandler:
 .verticalBlank:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
 	add.l	#1,verticalBlankCount
-	jsr SetupSpriteData
+	jsr 	SetupSpriteData
 .checkCopper:
 	move.w	INTREQR(a6),d0
 	and.w	#INTF_COPER,d0	
