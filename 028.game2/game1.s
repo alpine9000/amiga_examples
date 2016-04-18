@@ -9,8 +9,9 @@
 	xdef	foregroundOffscreen
 	xdef	foregroundScrollX
 	xdef	backgroundScrollX
-
-
+	xdef	map
+	xdef	itemsMap
+	xdef   	mapSize
 	xdef	moving
 	
 byteMap:
@@ -97,18 +98,15 @@ GameLoop:
 .s2:
 	
 	jsr	ProcessJoystick
-
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
 	bsr 	RenderNextBackgroundFrame			
 
-	;; move.w	#$f00,COLOR00(a6)
+	if 0
+	 move.w	#$f00,COLOR00(a6)
+	endif
+
 	bra	GameLoop
-
-
-
-	
-
 	
 Update:
 	;; right
@@ -129,7 +127,8 @@ Update:
 	beq	.c1
 	move.l	foregroundScrollPixels,d0
 	add.l	d0,foregroundScrollX
-	sub.w	#1,spriteX	
+
+	jsr	ScrollSprites
 
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
@@ -232,6 +231,7 @@ RenderNextForegroundFrame:
 	move.l	d3,d2
 	bsr	RenderForegroundTile
 	bsr	ClearForegroundTile
+	jsr	RenderItemSprite	
 	add.l	#2,a2
 	dbra	d3,.loop
 	rts
@@ -410,6 +410,7 @@ tileMapCopperPalettePtr:
 
 InstallSpriteColorPalette:
 	include "out/sprite_pig_up-palette.s"
+	include "out/sprite_coin1-palette.s"
 	rts
 
 InstallColorPalette:
@@ -480,6 +481,12 @@ panel:
 map:
 	include "out/foreground-map.s"
 	dc.w	$FFFF
+itemsMap:
+	include "out/items-indexes.s"
+	dc.w	$FFFF
+mapSize:
+	dc.l	itemsMap-map
+	
 backgroundMap:
 	include "out/background-map.s"
 	dc.w	$FFFF

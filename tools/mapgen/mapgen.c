@@ -18,10 +18,30 @@ get_tile_address(tmx_map *m, unsigned int gid)
   if (config.verbose) {
     printf("get_tile_address %d\n", gid);
   }
-  
-  tmx_tileset* ts = m->ts_head;
+
+  int ts_count = 0;
+  tmx_tileset** ta;
+
+  {
+    tmx_tileset* t = m->ts_head;
+    while (t != 0) {
+      t = t->next;
+      ts_count++;
+    }
+
+    ta = malloc(sizeof(tmx_tileset)*ts_count);
+    t = m->ts_head;
+    int c = ts_count;
+    while (t != 0) {
+      ta[--c] = t;
+      t = t->next;
+    }
+  }
+
+
   unsigned baseAddress = 0;
-  while (ts != 0) {
+  for (int y = 0; y < ts_count; y++) {
+    tmx_tileset* ts = ta[y];    
     for (unsigned int i = 0; i < ts->tilecount; i++) {
       tmx_tile* t = ts->tiles;
       if (t[i].id+ts->firstgid == gid) {
@@ -33,12 +53,54 @@ get_tile_address(tmx_map *m, unsigned int gid)
       }
     }
     baseAddress += ((ts->image->width/8) * config.bitDepth * ts->image->height);
-    ts = ts->next;
   }
 
   return 0;
 }
 
+
+static unsigned
+get_tile_index(tmx_map *m, unsigned int gid)
+{
+  if (config.verbose) {
+    printf("get_tile_address %d\n", gid);
+  }
+
+  int ts_count = 0;
+  tmx_tileset** ta;
+
+  {
+    tmx_tileset* t = m->ts_head;
+    while (t != 0) {
+      t = t->next;
+      ts_count++;
+    }
+
+    ta = malloc(sizeof(tmx_tileset)*ts_count);
+    t = m->ts_head;
+    int c = ts_count;
+    while (t != 0) {
+      ta[--c] = t;
+      t = t->next;
+    }
+  }
+
+
+  for (int y = 0; y < ts_count; y++) {
+    tmx_tileset* ts = ta[y];    
+    for (unsigned int i = 0; i < ts->tilecount; i++) {
+      tmx_tile* t = ts->tiles;
+      if (t[i].id+ts->firstgid == gid) {
+	if (config.verbose) {
+	  printf("%s - index = %d\n", ts->name, t[i].id);
+	}
+	return t[i].id;
+      }
+    }
+  }
+
+  return 0;
+}
 
 static void 
 output_map_asm(tmx_map *m, tmx_layer *l)
@@ -67,9 +129,36 @@ output_map_asm(tmx_map *m, tmx_layer *l)
 
 
 static void 
+output_map_indexes(tmx_map *m, tmx_layer *l)
+{
+  if (!l) {
+    abort_("output_map_indexes: empty layer");
+  }
+
+  FILE* fp = file_openWrite("%s-indexes.s", l->name);
+
+  if (l->type == L_LAYER && l->content.gids) {
+    for (unsigned int x = 0; x < m->width; x++) {
+      for (unsigned int y = 0; y < m->height; y++) {
+	fprintf(fp, "\tdc.w %d\n", get_tile_index(m, l->content.gids[(y*m->width)+x] & TMX_FLIP_BITS_REMOVAL));
+      }
+    }
+  }
+  fclose(fp);
+
+  if (l) {
+    if (l->next) {
+      output_map_indexes(m, l->next);
+    }
+  }
+}
+
+
+static void 
 process_map(tmx_map *m) 
 {
     output_map_asm(m, m->ly_head);
+    output_map_indexes(m, m->ly_head);
 }
 
 

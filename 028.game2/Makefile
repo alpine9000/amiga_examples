@@ -9,9 +9,21 @@ BASE_ADDRESS=4000
 NUM_COLORS=8
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/pig.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/pig.o out/items.o
 
-IMAGES=foreground.png background.png panel.png  sprite_pig_up.png sprite_pig_left_jump.png sprite_pig_up_jump.png sprite_pig_down_jump.png sprite_pig_right_jump.png sprite_pig_down.png sprite_pig_left.png sprite_pig_right.png
+IMAGES=foreground.png \
+	background.png \
+	panel.png \
+	sprite_pig_up.png \
+	sprite_pig_down.png \
+	sprite_pig_left.png \
+	sprite_pig_right.png \
+	sprite_pig_left_jump.png \
+	sprite_pig_up_jump.png \
+	sprite_pig_down_jump.png \
+	sprite_pig_right_jump.png \
+	sprite_coin1.png
+	
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
 VASM_EXTRA_ARGS=-DNUM_COLORS=$(NUM_COLORS)
@@ -40,39 +52,23 @@ out/tilemap-palette.s: assets/tilemap.png
 out/panel.bin: assets/panel.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/panel --use-palette=assets/panel.pal
 
-out/sprite_pig_up.bin: assets/sprite_pig_up.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_up --palette-offset 16 --use-palette=assets/pig.pal
+out/sprite_pig_%.bin: assets/sprite_pig_%.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_$* --palette-offset 16 --use-palette=assets/pig.pal
 
-out/sprite_pig_down.bin: assets/sprite_pig_down.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_down --palette-offset 16 --use-palette=assets/pig.pal
-
-out/sprite_pig_left.bin: assets/sprite_pig_left.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_left --palette-offset 16 --use-palette=assets/pig.pal
-
-out/sprite_pig_right.bin: assets/sprite_pig_right.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_right --palette-offset 16 --use-palette=assets/pig.pal
-
-
-out/sprite_pig_right_jump.bin: assets/sprite_pig_right_jump.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_right_jump --palette-offset 16 --use-palette=assets/pig.pal
-
-out/sprite_pig_down_jump.bin: assets/sprite_pig_down_jump.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_down_jump --palette-offset 16 --use-palette=assets/pig.pal
-
-out/sprite_pig_up_jump.bin: assets/sprite_pig_up_jump.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_up_jump --palette-offset 16 --use-palette=assets/pig.pal
-
-out/sprite_pig_left_jump.bin: assets/sprite_pig_left_jump.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_left_jump --palette-offset 16 --use-palette=assets/pig.pal
-
+out/sprite_coin%.bin: assets/sprite_coin%.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_coin$* --palette-offset 20  --use-palette=assets/coin.pal
 
 out/foreground-map.s: foreground.tmx
 	../tools/mapgen/out/mapgen --depth=3 --input=foreground.tmx
 	mv foreground-map.s out
+	rm items-map.s
+	mv items-indexes.s out
+	rm foreground-indexes.s
 
 out/background-map.s: background.tmx
 	../tools/mapgen/out/mapgen --depth=3 --input=background.tmx
 	mv background-map.s out
+	rm background-indexes.s
 
 out/blit.o: constants.i macros.i
 out/main.o: out/background-map.s out/foreground-map.s $(IMAGEDATA) constants.i macros.i Makefile link.script.x assets/palette.pal out/tilemap-palette.s 

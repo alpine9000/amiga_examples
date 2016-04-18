@@ -4,10 +4,17 @@
 	xdef ProcessJoystick
 	xdef InitialisePig
 	xdef SetupSpriteData
-	xdef spriteX
+	xdef ScrollSprites
+	xdef deadSprite
+	
 
 InitialisePig:
 	move.w	#$c0,spriteX
+	rts
+
+ScrollSprites:
+	sub.w	#1,spriteX
+	bra	ScrollItemSprites
 	rts
 	
 UpdatePig:	
@@ -126,8 +133,9 @@ SetupSpriteData:
 	move.b	d0,2(a0)	;spriteVStop
 	move.l	a0,SPR0PTH(a6)
 
+	jsr 	SetupItemSpriteData
+	
 	move.l	#deadSprite,SPR1PTH(a6)
-	move.l	#deadSprite,SPR2PTH(a6)
 	move.l	#deadSprite,SPR3PTH(a6)
 	move.l	#deadSprite,SPR4PTH(a6)
 	move.l	#deadSprite,SPR5PTH(a6)
@@ -175,7 +183,7 @@ spritePigRightJump:
 	dc.w	0,0
 	dc.w	0,0
 	incbin	"out/sprite_pig_right_jump.bin"
-	dc.l	0		
+	dc.l	0
 
 currentSpriteOffset:
 	dc.l	0
