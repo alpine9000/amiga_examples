@@ -22,7 +22,12 @@ IMAGES=foreground.png \
 	sprite_pig_up_jump.png \
 	sprite_pig_down_jump.png \
 	sprite_pig_right_jump.png \
-	sprite_coin1.png
+	sprite_coin1.png \
+	sprite_coin2.png \
+	sprite_coin3.png \
+	sprite_coin4.png \
+	sprite_coin6.png \
+	sprite_coin7.png 
 	
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
