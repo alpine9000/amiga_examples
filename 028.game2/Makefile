@@ -11,11 +11,12 @@ BASE_ADDRESS=4000
 NUM_COLORS=8
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/pig.o out/items.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/pig.o out/items.o out/blittext.o
 
 IMAGES=foreground.png \
 	background.png \
 	panel.png \
+	mpanel.png \
 	sprite_pig_up.png \
 	sprite_pig_down.png \
 	sprite_pig_left.png \
@@ -29,7 +30,8 @@ IMAGES=foreground.png \
 	sprite_coin3.png \
 	sprite_coin4.png \
 	sprite_coin6.png \
-	sprite_coin7.png 
+	sprite_coin7.png \
+	font8x8.png
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
@@ -55,11 +57,17 @@ out/background.bin: assets/tilemap.png
 out/panel.bin: assets/panel.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/panel --use-palette=assets/panel.pal
 
+out/mpanel.bin: assets/mpanel.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/mpanel --use-palette=assets/mpanel.pal
+
 out/sprite_pig_%.bin: assets/sprite_pig_%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_$* --palette-offset 16 --use-palette=assets/pig.pal
 
 out/sprite_coin%.bin: assets/sprite_coin%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_coin$* --palette-offset 20  --use-palette=assets/coin.pal
+
+out/font%.bin: assets/font%.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/font$* --colors=16 --use-palette assets/mpanel.pal --full-color-palette-file --output-mask --transparent-color=0,0,0 --output-png
 
 out/fade.s: assets/bottom_section.pal out/fade
 	./out/fade assets/bottom_section.pal bottom > out/fade.s

@@ -7,7 +7,12 @@ BLIT_LF_MINTERM		equ $ca		; cookie cut
 BLIT_WIDTH_WORDS	equ 1		; blit 2 words to allow shifting
 BLIT_WIDTH_BYTES	equ BLIT_WIDTH_WORDS*2
 FONTMAP_WIDTH_BYTES	equ 32
-
+_SCREEN_BIT_DEPTH	equ 4
+_BITPLANE_WIDTH_BYTES	equ 320/8
+MASKED_FONT		equ 1
+FONT_WIDTH		equ 8
+FONT_HEIGHT		equ 8
+	
 	if MASKED_FONT==1
 BLTCON0_VALUE		equ BC0F_SRCA|BC0F_SRCB|BC0F_SRCC|BC0F_DEST|BLIT_LF_MINTERM
 	else
@@ -20,7 +25,7 @@ BlitChar8:
 	;; d1 - ypos	
 	;; d2 - char
 	movem.l	d0-d3/a0-a2,-(sp)
-        mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH,d1		; ypos bytes
+        mulu.w	#_BITPLANE_WIDTH_BYTES*_SCREEN_BIT_DEPTH,d1		; ypos bytes
 	lea	font(pc),a1						; font pointer
 
 	sub.w	#'!',d2		; index = char - '!'
@@ -28,9 +33,9 @@ BlitChar8:
 	lsr.w	#5,d3		; char / 32 = fontmap line
 	andi.w	#$1f,d2		; char index in line (char index - start of line index)	
 	add.l	#1,d3		; while we have a weird font image, '!' starts on second line
-	mulu.w	#FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 	; d3 *= #FONTMAP_WIDTH_BYTES*SCREEN_BIT_DEPTH*FONT_HEIGHT
+	mulu.w	#FONTMAP_WIDTH_BYTES*_SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 	; d3 *= #FONTMAP_WIDTH_BYTES*_SCREEN_BIT_DEPTH*FONT_HEIGHT
 
-	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a1 ; last word - descending mode
+	add.l	#(FONT_HEIGHT*_SCREEN_BIT_DEPTH*FONTMAP_WIDTH_BYTES)-FONTMAP_WIDTH_BYTES+0,a1 ; last word - descending mode
 	
 	add.w	d3,a1		; add y offset in lines to font address
 	add.w	d2,a1		; add offset into font
@@ -38,7 +43,7 @@ BlitChar8:
 
 	add.l 	d0,a0		; dest += XPOS_BYTES
 	add.l	d1,a0		; dest += YPOS_BYTES
-	add.l	#(FONT_HEIGHT*SCREEN_BIT_DEPTH*BITPLANE_WIDTH_BYTES)-BITPLANE_WIDTH_BYTES+0,a0 ; last word - descending mode
+	add.l	#(FONT_HEIGHT*_SCREEN_BIT_DEPTH*_BITPLANE_WIDTH_BYTES)-_BITPLANE_WIDTH_BYTES+0,a0 ; last word - descending mode
 	
 	WaitBlitter
 
@@ -46,8 +51,8 @@ BlitChar8:
 	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTAMOD(a6)	; A modulo (only used for masked version)
 	endif
 	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTBMOD(a6)	; B modulo
-	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
-	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
+	move.w 	#_BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
+	move.w 	#_BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
 	move.w	#$ffff,BLTAFWM(a6) 					; don't mask first word
 	
 
@@ -76,7 +81,7 @@ BlitChar8:
 	move.l 	a0,BLTCPTH(a6) 				; background top left corner
 	move.l 	a0,BLTDPTH(a6) 				; destination top left corner
 
-	move.w 	#(FONT_HEIGHT*SCREEN_BIT_DEPTH)<<6|(BLIT_WIDTH_WORDS),BLTSIZE(a6)	;rectangle size, starts blit
+	move.w 	#(FONT_HEIGHT*_SCREEN_BIT_DEPTH)<<6|(BLIT_WIDTH_WORDS),BLTSIZE(a6)	;rectangle size, starts blit
 
 	movem.l	(sp)+,d0-d3/a0-a2
 	rts

@@ -2,7 +2,9 @@
 	
 	xdef	copperList
 	xdef	copperListBpl1Ptr
-	xdef	copperListBpl2Ptr	
+	xdef	copperListBpl1Ptr2	
+	xdef	copperListBpl2Ptr
+	xdef	copperListBpl2Ptr2	
 	xdef 	backgroundOnscreen
 	xdef	backgroundOffscreen
 	xdef	foregroundOnscreen
@@ -41,6 +43,9 @@ Entry:
 	lea	panelCopperListBpl1Ptr,a0
 	lea	panel,a1
 	jsr	PokePanelBitplanePointers
+	lea	mpanelCopperListBpl1Ptr,a0
+	lea	mpanel,a1
+	jsr	PokePanelBitplanePointers	
 	jsr	Init		  ; enable the playfield		
 
 	jsr	InstallSpriteColorPalette
@@ -50,6 +55,7 @@ Reset:
 	move.l	#0,foregroundScrollX
 	move.l	#0,backgroundScrollX
 	jsr 	BlueFill
+	jsr	Message
 	move.l	#-1,frameCount		
 
 MainLoop:
@@ -71,10 +77,11 @@ SetupBoardLoop:
 .gotoGameLoop:
 	add.l	#1,d6
 	jsr	WaitVerticalBlank
-	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+100,d6
+	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+50,d6
 	bne	.gotoGameLoop
 	move.w	#0,moving
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
+	move.w	#$ffff,mpanelWaitLinePtr	
 	
 FadeInLoop:
 	add.l	#1,frameCount
@@ -168,6 +175,7 @@ HoriScrollPlayfield:
 	lsl.w	#4,d5
 	or.w	d5,d0	
 	move.w	d0,copperListScrollPtr
+	move.w	d0,copperListScrollPtr2	
 	rts
 
 ResetAnimPattern:
@@ -344,6 +352,24 @@ Level3InterruptHandler:
 	rte	
 
 
+Message:
+	;; a0 - bitplane
+	;; a1 - text
+	;; d0 - xpos
+	;; d1 - ypos
+	lea	mpanel,a0
+	lea	message,a1
+	move.w	#128,d0
+	move.w	#11,d1
+	jsr	DrawText8
+	rts
+
+
+message:
+	dc.b	"LETS PLAY!"
+	dc.b	0
+
+	align 4	
 copperList:
 panelCopperListBpl1Ptr:	
 	dc.w	BPL1PTL,0
@@ -398,6 +424,66 @@ copperListBpl2Ptr:
 playAreaCopperPalettePtr:	
 	include "out/foreground-copper-list.s"
 	include "out/background-copper-list.s"
+
+
+mpanelWaitLinePtr:	
+	dc.w    $9ad1
+	dc.w	$fffe	
+mpanelCopperListBpl1Ptr:	
+	dc.w	BPL1PTL,0
+	dc.w	BPL1PTH,0
+	dc.w	BPL2PTL,0
+	dc.w	BPL2PTH,0
+	dc.w	BPL3PTL,0
+	dc.w	BPL3PTH,0
+	dc.w	BPL4PTL,0
+	dc.w	BPL4PTH,0		
+	dc.w    BPLCON1,0
+	dc.w	DDFSTRT,(RASTER_X_START/2-SCREEN_RES)
+	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))
+	dc.w	BPLCON0,(4<<12)|COLOR_ON ; 4 bit planes
+	dc.w	BPL1MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
+	dc.w	BPL2MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
+mpanelCopperPalettePtr:	
+	include "out/mpanel-copper-list.s"
+	
+	dc.w    $BAd1,$fffe
+
+
+	dc.w	BPL1MOD,BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2
+	dc.w	BPL2MOD,BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2	
+	
+	dc.w    BPLCON1
+copperListScrollPtr2:	
+	dc.w	0
+copperListBpl1Ptr2:
+	;; this is where bitplanes are assigned to playfields
+	;; http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0079.html
+	;; 3 bitplanes per playfield, playfield1 gets bitplanes 1,3,5
+	dc.w	BPL1PTL,0
+	dc.w	BPL1PTH,0
+	dc.w	BPL3PTL,0
+	dc.w	BPL3PTH,0
+	dc.w	BPL5PTL,0
+	dc.w	BPL5PTH,0
+
+copperListBpl2Ptr2:
+	;; 3 bitplanes per playfield, playfield2 gets bitplanes 2,4,6
+	dc.w	BPL2PTL,0
+	dc.w	BPL2PTH,0
+	dc.w	BPL4PTL,0
+	dc.w	BPL4PTH,0
+	dc.w	BPL6PTL,0
+	dc.w	BPL6PTH,0
+
+	dc.w	DDFSTRT,(RASTER_X_START/2-SCREEN_RES)-8 ; -8 for extra scrolling word
+	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))	
+	dc.w	BPLCON0,(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF	
+
+playAreaCopperPalettePtr2:	
+	include "out/foreground-copper-list.s"
+	include "out/background-copper-list.s"
+
 	dc.l	$fffffffe	
 
 InstallSpriteColorPalette:
@@ -407,25 +493,33 @@ InstallSpriteColorPalette:
 
 InstallColorPalette:
 	lea	playAreaCopperPalettePtr,a1
+	lea	playAreaCopperPalettePtr2,a2	
 	lea	playAreaPalette,a0
 	add.l	#2,a1
+	add.l	#2,a2	
 	move.l	#15,d0
 .loop:
 	move.w	(a0),(a1)
+	move.w	(a0),(a2)	
 	add.l	#2,a0
-	add.l	#4,a1	
+	add.l	#4,a1
+	add.l	#4,a2	
 	dbra	d0,.loop
 	rts
 	
 InstallGreyPalette:
 	lea	playAreaCopperPalettePtr,a1
+	lea	playAreaCopperPalettePtr2,a2	
 	lea	greyPalette,a0
 	add.l	#2,a1
+	add.l	#2,a2	
 	move.l	#15,d0
 .loop:
 	move.w	(a0),(a1)
+	move.w	(a0),(a2)	
 	add.l	#2,a0
-	add.l	#4,a1	
+	add.l	#4,a1
+	add.l	#4,a2		
 	dbra	d0,.loop
 
 InstallPanelGreyPalette:
@@ -442,17 +536,21 @@ InstallPanelGreyPalette:
 
 
 InstallNextGreyPalette:
-	lea	playAreaCopperPalettePtr,a1	
+	lea	playAreaCopperPalettePtr,a1
+	lea	playAreaCopperPalettePtr2,a3	
 	move.l	fadePtr,a0
 	lea	bottomFadeComplete,a2
 	cmp.l	a2,a0
 	bge	.done
 	add.l	#2,a1
+	add.l	#2,a3	
 	move.l	#15,d0
 .loop:
 	move.w	(a0),(a1)
+	move.w	(a0),(a3)	
 	add.l	#2,a0
-	add.l	#4,a1	
+	add.l	#4,a1
+	add.l	#4,a3		
 	dbra	d0,.loop
 	move.l	frameCount,d0
 	lsr.l	#1,d0
@@ -494,9 +592,10 @@ foregroundTilemap:
 	incbin "out/foreground.bin"
 backgroundTilemap:
 	incbin "out/background.bin"
-
 panel:
 	incbin "out/panel.bin"
+mpanel:
+	incbin "out/mpanel.bin"	
 map:
 	include "out/foreground-map.s"
 	dc.w	$FFFF
