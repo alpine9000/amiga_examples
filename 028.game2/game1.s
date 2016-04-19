@@ -59,40 +59,43 @@ SetupBoardLoop:
 	add.l	#1,frameCount
 	move.l	frameCount,d6		
 	move.l	#(FOREGROUND_SCROLL_PIXELS*16)-1,foregroundScrollPixels
-	;; move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
-	;; jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
-	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
+	jsr 	SwitchBuffers
 	move.l	foregroundScrollX,d0
 	move.w	#1,moving
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
-	;; bsr 	RenderNextBackgroundFrame			
-	;; 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*15,frameCount
 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount	
 	bge	.gotoGameLoop
 	bra	SetupBoardLoop
-
-.gotoGameLoop:	
+.gotoGameLoop:
+	add.l	#1,d6
 	jsr	WaitVerticalBlank
-	bra	GameLoop
+	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+100,d6
+	bne	.gotoGameLoop
+	move.w	#0,moving
+	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 	
-GameLoop:
+FadeInLoop:
 	add.l	#1,frameCount
-	move.l	frameCount,d6			
-
-	;; cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*15+25,d6
+	move.l	frameCount,d6				
+	jsr 	WaitVerticalBlank
+	bsr	InstallNextGreyPalette
 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,d6
 	bne	.c1
 	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 	jsr	InitialisePig
+	bra	GameLoop
 .c1:
-	bsr	InstallNextGreyPalette
+	bra	FadeInLoop
+	
+GameLoop:
+	add.l	#1,frameCount
+	move.l	frameCount,d6			
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 	jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
-	jsr 	SwitchBuffers	    ; takes bitplane pointer offset in d0
-
+	jsr 	SwitchBuffers
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels		
 	and.b	#$f,d0
@@ -100,20 +103,18 @@ GameLoop:
 	bne	.s2
 	move.w	#0,moving
 .s2:
-	
 	jsr	ProcessJoystick
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
 	bsr 	RenderNextBackgroundFrame			
 
 	if 0
-	 move.w	#$f00,COLOR00(a6)
+	move.w	#$f00,COLOR00(a6)
 	endif
 
 	bra	GameLoop
 	
 Update:
-	;; right
 	jsr	UpdatePig
 	
 .backgroundUpdates:
@@ -142,17 +143,12 @@ Update:
 	bsr	ResetAnimPattern
 	bsr	ResetDeAnimPattern
 .c1:
-
-	
 .skipForegroundUpdates:
-	
 	rts
 	
 HoriScrollPlayfield:
 	;; d0 - fg x position in pixels
 	;; d1 - bg x position in pixels	
-	;; 	movem.l	d0-d6,-(sp)
-	
 	move.l	backgroundScrollX,d0
 	lsr.l	#BACKGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels	
 	move.w	d0,d2
@@ -169,14 +165,9 @@ HoriScrollPlayfield:
 	and.w   #$F,d2		; pixels = 0xf - (hpos - (hpos_bytes*8))
 	move.w  #$F,d0
 	sub.w   d2,d0		; bits to delay
-
 	lsl.w	#4,d5
 	or.w	d5,d0	
-
 	move.w	d0,copperListScrollPtr
-	;; move.w  d0,BPLCON1(a6)	
-	
-	;; movem.l (sp)+,d0-d6
 	rts
 
 ResetAnimPattern:
@@ -215,7 +206,6 @@ RenderNextBackgroundFrame:
 	lsr.l	#BACKGROUND_SCROLL_TILE_INDEX_CONVERT,d0
 	and.b	#$fe,d0
 	add.l	d0,a2
-
 	cmp.w	#$FFFF,20(a2)
 	bne	.skip
 	move.l	#0,backgroundScrollX
@@ -248,7 +238,7 @@ RenderForegroundTile_NoAnim:
 	lsr.w   #3,d0		; bytes to scroll
 	move.l	foregroundOffscreen,a0
 	add.l	d0,a0
-	lea 	tilemap,a1	
+	lea 	foregroundTilemap,a1	
 	add.w	(a2),a1 	; source tile	
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0	
 	jsr	BlitTile
@@ -261,7 +251,7 @@ RenderForegroundTile:
 	lsr.w   #3,d0		; bytes to scroll
 	move.l	foregroundOffscreen,a0
 	add.l	d0,a0
-	lea 	tilemap,a1	
+	lea 	foregroundTilemap,a1	
 	add.w	(a2),a1 	; source tile	
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0
 	lea 	animIndex,a4
@@ -283,13 +273,12 @@ RenderForegroundTile:
 	
 
 ClearForegroundTile:	
-	lea 	tilemap,a1		
+	lea 	foregroundTilemap,a1		
 	move.l	a2,a4
 	sub.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*8,a4
 	sub.l	d0,d0
 	move.w	(a4),d0
 	add.l	d0,a1
-	;; 	add.w	(a2,-FOREGROUND_PLAYAREA_WIDTH_WORDS),a1 	; source tile
 	lea	map,a3
 	add.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*FOREGROUND_PLAYAREA_HEIGHT_WORDS,a3
 	cmp.l	a3,a2		; don't clear until the full play area has scrolled in
@@ -328,8 +317,7 @@ RenderBackgroundTile:
 	lsr.b	#BACKGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
 	andi.w	#$f,d2		; find the shift component		
 	jsr	BlitTile
-	rts	
-
+	rts
 
 
 Level3InterruptHandler:
@@ -357,7 +345,6 @@ Level3InterruptHandler:
 
 
 copperList:
-
 panelCopperListBpl1Ptr:	
 	dc.w	BPL1PTL,0
 	dc.w	BPL1PTH,0
@@ -408,7 +395,7 @@ copperListBpl2Ptr:
 	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))	
 	dc.w	BPLCON0,(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF	
 
-tileMapCopperPalettePtr:	
+playAreaCopperPalettePtr:	
 	include "out/foreground-copper-list.s"
 	include "out/background-copper-list.s"
 	dc.l	$fffffffe	
@@ -419,8 +406,8 @@ InstallSpriteColorPalette:
 	rts
 
 InstallColorPalette:
-	lea	tileMapCopperPalettePtr,a1
-	lea	tilemapPalette,a0
+	lea	playAreaCopperPalettePtr,a1
+	lea	playAreaPalette,a0
 	add.l	#2,a1
 	move.l	#15,d0
 .loop:
@@ -431,7 +418,7 @@ InstallColorPalette:
 	rts
 	
 InstallGreyPalette:
-	lea	tileMapCopperPalettePtr,a1
+	lea	playAreaCopperPalettePtr,a1
 	lea	greyPalette,a0
 	add.l	#2,a1
 	move.l	#15,d0
@@ -455,7 +442,7 @@ InstallPanelGreyPalette:
 
 
 InstallNextGreyPalette:
-	lea	tileMapCopperPalettePtr,a1	
+	lea	playAreaCopperPalettePtr,a1	
 	move.l	fadePtr,a0
 	lea	bottomFadeComplete,a2
 	cmp.l	a2,a0
@@ -503,7 +490,7 @@ backgroundOnscreen:
 	dc.l	backgroundBitplanes1
 backgroundOffscreen:
 	dc.l	backgroundBitplanes1
-tilemap:
+foregroundTilemap:
 	incbin "out/foreground.bin"
 backgroundTilemap:
 	incbin "out/background.bin"
@@ -626,10 +613,7 @@ greyPalette:
 panelGreyPalette:
 	include "out/panel-grey-table.s"
 	
-tilemapPalette:
-	if 0
-	include "tilemap-palette-table.s"
-	endif
+playAreaPalette:
 	include	"out/foreground-palette-table.s"
 	include	"out/background-palette-table.s"	
 
