@@ -1,4 +1,6 @@
 EXAMPLE_NAME=game1
+BACKGROUND_COLOR=09e
+BACKGROUND_GREY_COLOR=777
 
 # userstack used by bootblock
 USERSTACK_ADDRESS=7fffc
@@ -28,7 +30,7 @@ IMAGES=foreground.png \
 	sprite_coin4.png \
 	sprite_coin6.png \
 	sprite_coin7.png 
-	
+
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
 VASM_EXTRA_ARGS=-DNUM_COLORS=$(NUM_COLORS)
@@ -38,30 +40,35 @@ LINKER_OPTIONS=-T link.script.x
 
 include ../shared/base.mk
 
-
-#out/%.sized.png: ../assets/%.png
-#	$(RESIZE) --width=352 --height=256 --blur=0.75 --input=$< --output=$@
-
 out/%.bin: out/%.sized.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --quantize --colors $(NUM_COLORS) --output-bitplanes  --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output out/$*
 
 out/foreground.bin: assets/foregroundTilemap.png
-	$(IMAGECON) --use-palette=assets/foreground.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output out/foreground
+	$(IMAGECON) --use-palette=assets/foreground.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/foreground
+	sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_COLOR)/" out/foreground-copper-list.s 
+	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_COLOR)/" out/foreground-palette-table.s
+	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_GREY_COLOR)/" out/foreground-grey-table.s
 
 out/background.bin: assets/tilemap.png
-	$(IMAGECON) --use-palette=assets/background.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output out/background
-
-out/tilemap-palette.s: assets/tilemap.png
-	$(IMAGECON) --use-palette=assets/palette.pal --full-color-palette-file --input=assets/tilemap.png --output-palette-asm --output=out/tilemap --output-copperlist --output-grey-palette
+	$(IMAGECON) --use-palette=assets/background.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/background --palette-offset 8
 
 out/panel.bin: assets/panel.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/panel --use-palette=assets/panel.pal
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/panel --use-palette=assets/panel.pal
 
 out/sprite_pig_%.bin: assets/sprite_pig_%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_$* --palette-offset 16 --use-palette=assets/pig.pal
 
 out/sprite_coin%.bin: assets/sprite_coin%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_coin$* --palette-offset 20  --use-palette=assets/coin.pal
+
+out/fade.s: assets/bottom_section.pal out/fade
+	./out/fade assets/bottom_section.pal bottom > out/fade.s
+
+out/panelFade.s: assets/panel.pal out/fade
+	./out/fade assets/panel.pal panel > out/panelFade.s
+
+out/fade: fade.c
+	gcc fade.c -o out/fade
 
 out/foreground-map.s: foreground.tmx
 	../tools/mapgen/out/mapgen --depth=3 --input=foreground.tmx
@@ -76,5 +83,5 @@ out/background-map.s: background.tmx
 	rm background-indexes.s
 
 out/blit.o: constants.i macros.i
-out/main.o: out/background-map.s out/foreground-map.s $(IMAGEDATA) constants.i macros.i Makefile link.script.x assets/palette.pal out/tilemap-palette.s 
+out/main.o: out/background-map.s out/foreground-map.s $(IMAGEDATA) constants.i macros.i Makefile link.script.x assets/palette.pal out/fade.s out/panelFade.s
 out/init.o: constants.i Makefile

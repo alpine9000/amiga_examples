@@ -116,7 +116,7 @@ palette_output(imagecon_image_t* ic, char* outFilename)
     }
 
     if (fp) {
-      fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+(i*2), RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b));
+      fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+((i+config.paletteOffset)*2), RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b));
     }
   }
 

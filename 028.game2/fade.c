@@ -54,7 +54,7 @@ main(int argc, char** argv)
     }
   }
 
-  printf("fadeComplete:\n");
+  printf("%sFadeComplete:\n", argv[2]);
 
   fclose(fp);
 }

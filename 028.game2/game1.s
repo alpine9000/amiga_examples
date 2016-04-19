@@ -373,8 +373,9 @@ panelCopperListBpl1Ptr:
 	dc.w	BPLCON0,(4<<12)|COLOR_ON ; 4 bit planes
 	dc.w	BPL1MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
 	dc.w	BPL2MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
+panelCopperPalettePtr:	
 	include "out/panel-copper-list.s"
-	dc.W    $5bd1,$fffe
+	dc.w    $5bd1,$fffe
 
 
 	dc.w	BPL1MOD,BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2
@@ -408,8 +409,8 @@ copperListBpl2Ptr:
 	dc.w	BPLCON0,(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF	
 
 tileMapCopperPalettePtr:	
-	include "tilemap-copper-list.s"
-
+	include "out/foreground-copper-list.s"
+	include "out/background-copper-list.s"
 	dc.l	$fffffffe	
 
 InstallSpriteColorPalette:
@@ -439,13 +440,24 @@ InstallGreyPalette:
 	add.l	#2,a0
 	add.l	#4,a1	
 	dbra	d0,.loop
-	rts
+
+InstallPanelGreyPalette:
+	lea	panelCopperPalettePtr,a1
+	lea	panelGreyPalette,a0
+	add.l	#2,a1
+	move.l	#15,d0
+.loop:
+	move.w	(a0),(a1)
+	add.l	#2,a0
+	add.l	#4,a1	
+	dbra	d0,.loop
+	rts	
 
 
 InstallNextGreyPalette:
 	lea	tileMapCopperPalettePtr,a1	
 	move.l	fadePtr,a0
-	lea	fadeComplete,a2
+	lea	bottomFadeComplete,a2
 	cmp.l	a2,a0
 	bge	.done
 	add.l	#2,a1
@@ -461,11 +473,27 @@ InstallNextGreyPalette:
 	beq	.done
 	add.l	#16*2,fadePtr
 .done
-	rts	
-
-InstallPalette:
-	include	"out/tilemap-palette.s"
-	rts
+	
+InstallNextGreyPanelPalette:
+	lea	panelCopperPalettePtr,a1	
+	move.l	panelFadePtr,a0
+	lea	panelFadeComplete,a2
+	cmp.l	a2,a0
+	bge	.done
+	add.l	#2,a1
+	move.l	#15,d0
+.loop:
+	move.w	(a0),(a1)
+	add.l	#2,a0
+	add.l	#4,a1	
+	dbra	d0,.loop
+	move.l	frameCount,d0
+	lsr.l	#1,d0
+	btst.l	#0,d0
+	beq	.done
+	add.l	#16*2,panelFadePtr
+.done
+	rts		
 
 foregroundOnscreen:
 	dc.l	foregroundBitplanes1
@@ -509,7 +537,9 @@ moving:
 
 fadePtr:
 	dc.l	fade
-
+panelFadePtr:
+	dc.l	panelFade
+	
 animIndex:
 	ds.l	16,0
 deAnimIndex:
@@ -590,13 +620,24 @@ deAnimIndexPattern:
 	dc.l	$ffffffff	
 
 greyPalette:
-	include "tilemap-grey-table.s"
+	include	"out/foreground-grey-table.s"
+	include	"out/background-grey-table.s"		
 
+panelGreyPalette:
+	include "out/panel-grey-table.s"
+	
 tilemapPalette:
-	include "tilemap-palette-table.s"	
+	if 0
+	include "tilemap-palette-table.s"
+	endif
+	include	"out/foreground-palette-table.s"
+	include	"out/background-palette-table.s"	
 
 fade:
-	include "fade.s"
+	include "out/fade.s"
+
+panelFade:
+	include "out/panelFade.s"
 	
 	section .bss
 foregroundBitplanes1:
