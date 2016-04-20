@@ -66,7 +66,7 @@ DrawChar8:
 	lsr.w	#5,d5		; char / 32 = fontmap line
 	andi.w	#$1f,d2		; char index in line (char index - start of line index)
 	
-	add.l	#1,d5		; while we have a weird font image, '!' starts on second line
+	add.l	#1,d5		; while we have a weird font image, ' ' starts on second line
 	move.l	a5,a1		; #font
 
 	if 1

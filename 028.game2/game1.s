@@ -77,8 +77,11 @@ SetupBoardLoop:
 .gotoGameLoop:
 	add.l	#1,d6
 	jsr	WaitVerticalBlank
-	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+50,d6
-	bne	.gotoGameLoop
+	jsr	ProcessJoystick
+	;; cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+50,d6
+	;; bne	.gotoGameLoop
+	btst.b	#0,joystick
+	beq	.gotoGameLoop
 	move.w	#0,moving
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 	move.w	#$ffff,mpanelWaitLinePtr	
