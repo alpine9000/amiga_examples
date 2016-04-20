@@ -4,3 +4,46 @@ WaitBlitter:	macro
 	btst	#6,DMACONR(a6)
 	bne.s 	.\@
 	endm
+
+
+ItemSprite:	macro
+\1:
+	dc.w	0,0
+	incbin	"out/\2"
+	dc.w	0,0
+	incbin	"out/\2"
+	dc.w	0,0
+	incbin	"out/\2"
+	dc.w	0,0
+	incbin	"out/\2"
+	dc.w	0,0
+	incbin	"out/\2"
+	dc.w	0,0
+	incbin	"out/\2"
+	dc.w	0,0
+	incbin	"out/\2"
+	dc.w	0,0
+	incbin	"out/\2"	
+	dc.l	0
+	endm
+
+
+ItemControl:	macro
+\1:
+.itemX:
+	dc.w	0
+.itemLagX:
+	dc.w	0
+.itemY:
+	dc.w	0
+.itemLagY:
+	dc.w	0
+.itemYEnd:
+	dc.w	0
+.itemLagYEnd:
+	dc.w	0
+.itemIndex:
+	dc.w	0		
+.pad	; make the control word 16 bytes
+	dc.w	0
+	endm

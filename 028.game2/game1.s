@@ -374,6 +374,7 @@ message:
 
 	align 4	
 copperList:
+
 panelCopperListBpl1Ptr:	
 	dc.w	BPL1PTL,0
 	dc.w	BPL1PTH,0
@@ -410,6 +411,7 @@ copperListBpl1Ptr:
 	dc.w	BPL3PTH,0
 	dc.w	BPL5PTL,0
 	dc.w	BPL5PTH,0
+
 
 copperListBpl2Ptr:
 	;; 3 bitplanes per playfield, playfield2 gets bitplanes 2,4,6
