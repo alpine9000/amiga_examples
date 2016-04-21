@@ -6,7 +6,7 @@
 	
 ScrollItemSprites:
 	move.l	#1,d0
-	lsl.w	#4,d0		; multiply by 16 (item control structure size)
+	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
 	lea	item1,a1
 	add.l	d0,a1
 
@@ -18,14 +18,13 @@ SetupItemSpriteData:
 	;; d0 - item slot
 	;; d1 - sprite slot
 	move.l	#1,d0
-	lsl.w	#4,d0		; multiply by 16 (item control structure size)
+	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
 	lea	item1,a1
 	add.l	d0,a1
 	
 	move.l	currentItemSprite,a0
-	;; 	add.l	#64+4,a0
 	
-	cmp.w	#13<<3,ITEM_INDEX(a1)
+	cmp.w	#(ITEM_NUM_COIN_ANIMS-1)<<3,ITEM_INDEX(a1)
 	ble	.dontResetIndex
 	move.l	#0,ITEM_INDEX(a1)
 .dontResetIndex:
@@ -39,6 +38,9 @@ SetupItemSpriteData:
 	lsr.l	#3,d0
 	mulu.w	#ITEM_SPRITE_BYTES,d0
 	add.l	d0,a0
+
+	add.l	#1*(64+4),a0	
+
 	move.w	ITEM_LAGX(a1),d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	move.w	ITEM_X(a1),ITEM_LAGX(a1)
@@ -48,18 +50,22 @@ SetupItemSpriteData:
 	move.b	d1,3(a0)	;spriteControl
 	lsr.l	#1,d0
 	move.b	d0,1(a0)	;spriteHStart
+
+	if 0
 	move.w	ITEM_LAGY(a1),d0
 	move.w	ITEM_Y(a1),ITEM_LAGY(a1)
 	move.b	d0,(a0)		;spriteVStart
 	move.w	ITEM_LAGYEND(a1),d0
 	move.w	ITEM_YEND(a1),ITEM_LAGYEND(a1)
 	move.b	d0,2(a0)	;spriteVStop
+	endif
 .c1:
 
 
+	sub.l	#1*(64+4),a0
 	move.l	a0,SPR2PTH(a6)
 
-	add.w	#1,ITEM_INDEX(a1)	
+	add.w	#1,ITEM_INDEX(a1)		
 	rts
 	
 RenderItemSprite:
@@ -67,7 +73,7 @@ RenderItemSprite:
 	movem.l	d2-d3,-(sp)
 
 	move.l	#1,d0
-	lsl.w	#4,d0		; multiply by 16 (item control structure size)
+	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
 	lea	item1,a1
 	add.l	d0,a1	
 	
@@ -106,18 +112,12 @@ currentItemSprite:
 	ItemControl item7
 	ItemControl item8	
 
-	ItemSprite spriteCoin1,sprite_coin1.bin
-	ItemSprite spriteCoin1_1,sprite_coin1.bin
-	ItemSprite spriteCoin2,sprite_coin2.bin
-	ItemSprite spriteCoin3,sprite_coin3.bin
-	ItemSprite spriteCoin4,sprite_coin4.bin
-	ItemSprite spriteCoin5,sprite_coin3.bin
-	ItemSprite spriteCoin6,sprite_coin6.bin
-	ItemSprite spriteCoin7,sprite_coin7.bin
-	ItemSprite spriteCoin7_1,sprite_coin7.bin
-	ItemSprite spriteCoin8,sprite_coin6.bin
-	ItemSprite spriteCoin9,sprite_coin3.bin
-	ItemSprite spriteCoin10,sprite_coin4.bin
-	ItemSprite spriteCoin11,sprite_coin3.bin
-	ItemSprite spriteCoin12,sprite_coin2.bin	
+	ItemSprite spriteCoin1,sprite_coin-0.bin
+	ItemSprite spriteCoin2,sprite_coin-0.bin
+	ItemSprite spriteCoin3,sprite_coin-1.bin
+	ItemSprite spriteCoin4,sprite_coin-2.bin
+	ItemSprite spriteCoin5,sprite_coin-3.bin
+	ItemSprite spriteCoin6,sprite_coin-2.bin
+	ItemSprite spriteCoin7,sprite_coin-1.bin	
+
 

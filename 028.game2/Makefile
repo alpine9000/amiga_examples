@@ -25,12 +25,10 @@ IMAGES=foreground.png \
 	sprite_pig_up_jump.png \
 	sprite_pig_down_jump.png \
 	sprite_pig_right_jump.png \
-	sprite_coin1.png \
-	sprite_coin2.png \
-	sprite_coin3.png \
-	sprite_coin4.png \
-	sprite_coin6.png \
-	sprite_coin7.png \
+	sprite_coin-0.png \
+	sprite_coin-1.png \
+	sprite_coin-2.png \
+	sprite_coin-3.png\
 	font8x8.png
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
@@ -42,10 +40,10 @@ LINKER_OPTIONS=-T link.script.x
 
 include ../shared/base.mk
 
-out/%.bin: out/%.sized.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --quantize --colors $(NUM_COLORS) --output-bitplanes  --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output out/$*
+#out/%.bin: out/%.sized.png
+#	$(IMAGECON) --input $< $(IMAGECON_ARGS) --quantize --colors $(NUM_COLORS) --output-bitplanes  --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output out/$*
 
-out/foreground.bin: assets/foregroundTilemap.png
+out/foreground.bin: assets/foreground.png
 	$(IMAGECON) --use-palette=assets/foreground.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/foreground
 	sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_COLOR)/" out/foreground-copper-list.s 
 	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_COLOR)/" out/foreground-palette-table.s
@@ -63,8 +61,11 @@ out/mpanel.bin: assets/mpanel.png
 out/sprite_pig_%.bin: assets/sprite_pig_%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig_$* --palette-offset 16 --use-palette=assets/pig.pal
 
-out/sprite_coin%.bin: assets/sprite_coin%.png
+out/sprite_coin%.bin: out/sprite_coin%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_coin$* --palette-offset 20  --use-palette=assets/coin.pal
+
+out/sprite_coin%.png: assets/assets.png
+	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_coin --width=16 --height=16 --rows=1 --cols=4 --dx=16 --dy=16 --x=128 --y=192
 
 out/font%.bin: assets/font%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/font$* --colors=16 --use-palette assets/mpanel.pal --full-color-palette-file --output-mask --transparent-color=0,0,0 --output-png

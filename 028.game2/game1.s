@@ -493,7 +493,7 @@ playAreaCopperPalettePtr2:
 
 InstallSpriteColorPalette:
 	include "out/sprite_pig_up-palette.s"
-	include "out/sprite_coin1-palette.s"
+	include "out/sprite_coin-1-palette.s"
 	rts
 
 InstallColorPalette:

@@ -39,10 +39,6 @@ cleanup()
     DestroyImage(image.image);
   }
 
-  if (image.croppedImage != (Image *)NULL) {
-    DestroyImage(image.croppedImage);
-  }
-
   if (image.imageInfo != (ImageInfo *) NULL) {
     DestroyImageInfo(image.imageInfo);
   }
@@ -218,7 +214,7 @@ main(int argc, char **argv)
       image.croppedImage = CropImage(image.image, &rect, &exception);
 
       if (config.rows > 1 || config.cols > 1) {
-	sprintf(image.croppedImage->filename, "%d-%s", count,  outputFile);
+	sprintf(image.croppedImage->filename, "%s-%d.png", outputFile, count);
       } else {
 	strcpy(image.croppedImage->filename, outputFile);
       }
@@ -227,6 +223,10 @@ main(int argc, char **argv)
 	CatchException(&image.croppedImage->exception);
 	abort_("Failed to write image %d\n", outputFile);
       }
+
+      if (image.croppedImage != (Image *)NULL) {
+	DestroyImage(image.croppedImage);
+      }      
     }
   }
 
