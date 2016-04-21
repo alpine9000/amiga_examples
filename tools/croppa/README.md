@@ -13,7 +13,6 @@ usage
       --rows <num rows> (default: 1)
       --cols <num columns> (default: 1)
       --verbose
-      --verbose
 ```
 
 Crop will extract one or more images from a master image.
