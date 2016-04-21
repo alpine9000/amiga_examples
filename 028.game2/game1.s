@@ -307,7 +307,8 @@ ClearForegroundTile:
 	add.l	#2,(a4)	
 	bra	.s2
 .s1:
-	add.w	#11520,a1 	; source tile	
+	;; add.w	#11520,a1 	; source tile	
+	add.w	#20880,a1	;
 .s2:
 	jsr	BlitTile
 .s3:
@@ -492,7 +493,7 @@ playAreaCopperPalettePtr2:
 	dc.l	$fffffffe	
 
 InstallSpriteColorPalette:
-	include "out/sprite_pig_up-palette.s"
+	include "out/sprite_pig-0-palette.s"
 	include "out/sprite_coin-1-palette.s"
 	rts
 

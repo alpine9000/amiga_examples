@@ -147,42 +147,42 @@ SetupSpriteData:
 spritePigUp:
 	dc.w	0,0
 	dc.w	0,0
-	incbin	"out/sprite_pig_up.bin"
+	incbin	"out/sprite_pig-1.bin" ; up
 	dc.l	0
 spritePigUpJump:
 	dc.w	0,0
 	dc.w	0,0
-	incbin	"out/sprite_pig_up_jump.bin"
+	incbin	"out/sprite_pig-0.bin" ; up jump
 	dc.l	0		
 spritePigDown:
 	dc.w	0,0
 	dc.w	0,0
-	incbin	"out/sprite_pig_down.bin"
+	incbin	"out/sprite_pig-5.bin" ; down
 	dc.l	0
 spritePigDownJump:
 	dc.w	0,0
 	dc.w	0,0
-	incbin	"out/sprite_pig_down_jump.bin"
+	incbin	"out/sprite_pig-4.bin" ; down jump
 	dc.l	0		
 spritePigLeft:
 	dc.w	0,0
 	dc.w	0,0
-	incbin	"out/sprite_pig_left.bin"
+	incbin	"out/sprite_pig-7.bin" ; left
 	dc.l	0
 spritePigLeftJump:
 	dc.w	0,0
 	dc.w	0,0
-	incbin	"out/sprite_pig_left_jump.bin"
+	incbin	"out/sprite_pig-6.bin" ; left jump
 	dc.l	0		
 spritePigRight:
 	dc.w	0,0
 	dc.w	0,0
-	incbin	"out/sprite_pig_right.bin"
+	incbin	"out/sprite_pig-3.bin" ; right
 	dc.l	0
 spritePigRightJump:
 	dc.w	0,0
 	dc.w	0,0
-	incbin	"out/sprite_pig_right_jump.bin"
+	incbin	"out/sprite_pig-2.bin" ; right jump
 	dc.l	0
 
 currentSpriteOffset:
