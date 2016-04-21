@@ -48,19 +48,19 @@ Specify the y coordinate for the start of the crop in pixels.
 options
 -------
 
-**--dx &lt;dx>**
+**--dx** &lt;dx>
 
 Specify the number of pixels added to x after each crop
 
-**--dy &lt;dy>**
+**--dy** &lt;dy>
 
 Specify the number of pixels added to y after each crop
 
-**--rows &lt;rows>**
+**--rows** &lt;rows>
 
 Specify the number rows of images that will be cropped (total number of images will be rows*cols)
 
-**--colss &lt;cols>**
+**--cols** &lt;cols>
 
 Specify the number columns of images that will be cropped (total number of images will be rows*cols)
 
