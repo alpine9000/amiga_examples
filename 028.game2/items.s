@@ -39,7 +39,7 @@ SetupItemSpriteData:
 	mulu.w	#ITEM_SPRITE_BYTES,d0
 	add.l	d0,a0
 
-	add.l	#1*(64+4),a0	
+	add.l	#1*((ITEM_SPRITE_HEIGHT*4)+4),a0	
 
 	move.w	ITEM_LAGX(a1),d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
@@ -62,7 +62,7 @@ SetupItemSpriteData:
 .c1:
 
 
-	sub.l	#1*(64+4),a0
+	sub.l	#1*((ITEM_SPRITE_HEIGHT*4)+4),a0
 	move.l	a0,SPR2PTH(a6)
 
 	add.w	#1,ITEM_INDEX(a1)		
