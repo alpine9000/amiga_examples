@@ -28,10 +28,14 @@ Entry:
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6) 	; disable all interrupts		
 
+	jsr	StartMusic
 	jsr	ShowSplash
 
-	move	#$7ff,DMACON(a6)	; disable all dma
+
+	if 0
+	move	#$7ff,DMACON(a6)  ; disable all dma
 	move	#$7fff,INTENA(a6) ; disable all interrupts		
+	endif
 	
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR			
@@ -738,9 +742,9 @@ panelFade:
 	
 	section .bss
 foregroundBitplanes1:
-	ds.b	IMAGESIZE*3
+	ds.b	IMAGESIZE
 foregroundBitplanes2:
-	ds.b	IMAGESIZE*3
+	ds.b	IMAGESIZE
 
 backgroundBitplanes1:
 	ds.b	IMAGESIZE*2
