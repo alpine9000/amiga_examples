@@ -27,6 +27,8 @@ Entry:
 
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6) 	; disable all interrupts		
+
+	jsr	ShowSplash	
 	
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR			
@@ -374,8 +376,10 @@ message:
 	dc.b	0
 
 	align 4	
-copperList:
 
+
+	
+copperList:
 panelCopperListBpl1Ptr:	
 	dc.w	BPL1PTL,0
 	dc.w	BPL1PTH,0

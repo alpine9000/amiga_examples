@@ -11,7 +11,7 @@ BASE_ADDRESS=4000
 NUM_COLORS=8
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/pig.o out/items.o out/blittext.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/pig.o out/items.o out/blittext.o out/splash.o
 
 IMAGES=foreground.png \
 	background.png \
@@ -29,7 +29,8 @@ IMAGES=foreground.png \
 	sprite_coin-1.png \
 	sprite_coin-2.png \
 	sprite_coin-3.png\
-	font8x8.png
+	font8x8.png\
+	splash.png
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
@@ -72,6 +73,11 @@ out/sprite_coin%.png: assets/assets.png
 
 out/font%.bin: assets/font%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/font$* --colors=16 --use-palette assets/mpanel.pal --full-color-palette-file --output-mask --transparent-color=0,0,0 --output-png
+
+out/splash.bin: assets/splash.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/splash --colors=32  --full-color-palette-file --output-png --output-copperlist
+
+
 
 out/fade.s: assets/bottom_section.pal out/fade
 	./out/fade assets/bottom_section.pal bottom > out/fade.s
