@@ -133,7 +133,10 @@ SetupSpriteData:
 	move.b	d0,2(a0)	;spriteVStop
 	move.l	a0,SPR0PTH(a6)
 
+	move.l	#ITEM_NUM_SLOTS-1,d0
+.loop:
 	jsr 	SetupItemSpriteData
+	dbra	d0,.loop
 	
 	move.l	#deadSprite,SPR1PTH(a6)
 	move.l	#deadSprite,SPR3PTH(a6)

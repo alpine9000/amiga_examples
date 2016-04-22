@@ -5,13 +5,23 @@
 	xdef RenderItemSprite
 	
 ScrollItemSprites:
-	move.w	#1,d0
-	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
+	move.w	#ITEM_NUM_SLOTS-1,d1
 	lea	item1,a1
-	add.l	d0,a1
-
+.loop:
 	move.l 	foregroundScrollPixels,d0
-	sub.w	d0,ITEM_X(a1)	
+	cmp.w	#0,ITEM_SPRITE(a1)
+	beq	.skip
+	sub.w	d0,ITEM_X(a1)
+	cmp.w	#160<<FOREGROUND_SCROLL_SHIFT_CONVERT,ITEM_X(a1)
+	bgt	.skip
+	move.w	#0,ITEM_SPRITE(a1)
+	move.w	#0,ITEM_X(a1)
+	move.w	#0,ITEM_LAGX(a1)
+	move.w	ITEM_Y(a1),d2
+	bsr	ClearItemSpriteData
+.skip:
+	add.l	#ITEM_STRUCT_SIZE,a1		; multiply by 16 (item control structure size)
+	dbra	d1,.loop
 	rts
 
 ClearItemSpriteData:
@@ -24,7 +34,7 @@ ClearItemSpriteData:
 	move.w	#ITEM_SPRITE_NUM_VERTICAL_SPRITES-1,d3
 .l1:
 	cmp.w	d3,d2
-	beq	.skip
+	bne	.skip
 	move.b	#0,3(a0)
 	move.b	#0,1(a0)
 
@@ -37,7 +47,7 @@ ClearItemSpriteData:
 	
 SetupItemSpriteData:
 	;; d0 - item slot	
-	move.l	#1,d0
+	move.l	d0,-(sp)
 	
 	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
 	lea	item1,a1
@@ -82,35 +92,43 @@ SetupItemSpriteData:
 	move.l	a0,SPR2PTH(a6)
 
 	add.w	#1,ITEM_INDEX(a1)		
+	move.l	(sp)+,d0
 	rts
 	
 RenderItemSprite:
 	;; d2 - y tile index ?
 	movem.l	d2-d3,-(sp)
 
-	move.l	#1,d0
-	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
-	lea	item1,a1
-	add.l	d0,a1	
-
-	move.l	foregroundScrollX,d0
-	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
-	andi.w	#$f,d0
-	cmp.b	#$f,d0
-	bne	.dontAddSprite
+	move.l	foregroundScrollX,d1
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d1 ; convert to pixels
+	andi.w	#$f,d1
+	cmp.b	#$f,d1
+	bne	dontAddSprite
 	move.l	a2,a3
 	add.l	mapSize,a3
 	cmpi.w	#0,(a3)
-	beq	.dontAddSprite
+	beq	dontAddSprite
 
+
+GetSpriteSlot:
+	move.w	(a3),d0 		; sprite slot
+
+	move.w	d0,d1
+	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
+	lea	item1,a1
+	add.l	d0,a1	
+	
 	move.l	#deadSprite,currentItemSprite	
 	move.w	#336<<FOREGROUND_SCROLL_SHIFT_CONVERT,ITEM_X(a1)
 	sub.l	#1,d2
 	move.w	d2,ITEM_Y(a1)
 	move.w	ITEM_X(a1),ITEM_LAGX(a1)
-	bsr	ClearItemSpriteData					
+
+	add.w	#1,d1
+	move.w	d1,ITEM_SPRITE(a1)
+
 	move.l	#spriteCoin1,currentItemSprite
-.dontAddSprite:
+dontAddSprite:
 	movem.l	(sp)+,d2-d3
 	rts
 
@@ -135,3 +153,5 @@ currentItemSprite:
 	ItemSprite spriteCoin7,sprite_coin-1.bin	
 
 
+nextSpriteSlot:
+	dc.w	0
