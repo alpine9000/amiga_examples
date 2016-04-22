@@ -28,7 +28,10 @@ Entry:
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6) 	; disable all interrupts		
 
-	jsr	ShowSplash	
+	jsr	ShowSplash
+
+	move	#$7ff,DMACON(a6)	; disable all dma
+	move	#$7fff,INTENA(a6) ; disable all interrupts		
 	
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR			
@@ -52,6 +55,7 @@ Entry:
 
 	jsr	InstallSpriteColorPalette
 	jsr	InstallGreyPalette
+
 	
 Reset:
 	move.l	#0,foregroundScrollX

@@ -5,31 +5,42 @@
 SPLASH_COLOR_DEPTH		equ 5
 SPLASH_SCREEN_WIDTH_BYTES	equ 40
 
+ShowSplash:
+	lea 	CUSTOM,a6
+		
+	;; set up playfield
+	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)
+	move.w	#((RASTER_Y_STOP-256)<<8)|(RASTER_X_STOP-256),DIWSTOP(a6)
 
-SplashPokeBitplanePointers:
-	; a0 = BPLP copper list address
-	; a1 = bitplanes pointer
-	lea	splashCopperListBplPtr,a0
-	lea	splash,a1
+	move.w	#(RASTER_X_START/2-SCREEN_RES),DDFSTRT(a6)
+	move.w	#(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1)),DDFSTOP(a6)
+	
+	move.w	#(SPLASH_COLOR_DEPTH<<12)|$200,BPLCON0(a6)
+	move.w	#SPLASH_SCREEN_WIDTH_BYTES*SPLASH_COLOR_DEPTH-SPLASH_SCREEN_WIDTH_BYTES,BPL1MOD(a6)
+	move.w	#SPLASH_SCREEN_WIDTH_BYTES*SPLASH_COLOR_DEPTH-SPLASH_SCREEN_WIDTH_BYTES,BPL2MOD(a6)
+
+	;; poke bitplane pointers
+	lea	splash(pc),a1
+	lea     splashCopperListBplPtr(pc),a2
 	moveq	#SPLASH_COLOR_DEPTH-1,d0
 .bitplaneloop:
 	move.l 	a1,d1
-	move.w	d1,2(a0)
+	move.w	d1,2(a2)
 	swap	d1
-	move.w  d1,6(a0)
-	lea	SPLASH_SCREEN_WIDTH_BYTES(a1),a1
-	addq	#8,a0
+	move.w  d1,6(a2)
+	lea	SPLASH_SCREEN_WIDTH_BYTES(a1),a1 ; bit plane data is interleaved
+	addq	#8,a2
 	dbra	d0,.bitplaneloop
-	rts
 
-	
-ShowSplash:
-	bsr	SplashPokeBitplanePointers
-	lea 	CUSTOM,a1
+	;; install copper list, then enable dma
 	lea	splashCopperList(pc),a0
-	move.l	a0,COP1LC(a1)
-	move.w  COPJMP1(a1),d0
-	move.w  #(DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),dmacon(a1)
+	move.l	a0,COP1LC(a6)
+ 	move.w  COPJMP1(a6),d0
+
+	;; set up default palette
+	include "out/splash-palette.s"
+
+	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 .wait:
 	jsr	WaitVerticalBlank
 	jsr	ProcessJoystick
@@ -39,7 +50,7 @@ ShowSplash:
 
 
 splashCopperList:
-splashCopperListBplPtr:	
+splashCopperListBplPtr:
 	dc.w	BPL1PTL,0
 	dc.w	BPL1PTH,0
 	dc.w	BPL2PTL,0
@@ -49,14 +60,10 @@ splashCopperListBplPtr:
 	dc.w	BPL4PTL,0
 	dc.w	BPL4PTH,0
 	dc.w	BPL5PTL,0
-	dc.w	BPL5PTH,0	
-	dc.w    DIWSTRT,$2c81
-	dc.w	DIWSTOP,$2cc1
-	dc.w	BPLCON0,(SPLASH_COLOR_DEPTH<<12)|$200 ; set color depth and enable COLOR
-	dc.w	BPL1MOD,SPLASH_SCREEN_WIDTH_BYTES*SPLASH_COLOR_DEPTH-SPLASH_SCREEN_WIDTH_BYTES
-	dc.w	BPL2MOD,SPLASH_SCREEN_WIDTH_BYTES*SPLASH_COLOR_DEPTH-SPLASH_SCREEN_WIDTH_BYTES
-	include "out/splash-copper-list.s"
-	dc.l	$fffffffe	
+	dc.w	BPL5PTH,0
+	dc.w	BPL6PTL,0
+	dc.w	BPL6PTH,0
+	dc.l	$fffffffe		
 
 splash:	
 	incbin "out/splash.bin"	
