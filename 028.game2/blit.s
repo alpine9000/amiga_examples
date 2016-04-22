@@ -1,7 +1,6 @@
 	include "includes.i"
 
 	xdef BlitFillColor
-	xdef BlitScroll
 	xdef BlitTile
 	xref BlueFill
 	

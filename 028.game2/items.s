@@ -5,22 +5,47 @@
 	xdef RenderItemSprite
 	
 ScrollItemSprites:
-	move.l	#1,d0
+	move.w	#1,d0
 	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
 	lea	item1,a1
 	add.l	d0,a1
 
 	move.l 	foregroundScrollPixels,d0
-	sub.w	d0,ITEM_X(a1)
+	sub.w	d0,ITEM_X(a1)	
+	rts
+
+ClearItemSpriteData:
+	move.w	#ITEM_SPRITE_NUM_VERTICAL_SPRITES-1,d4
+	sub.w	d2,d4 		; this is because of the upside board at the moment
+	move.w	d4,d2
+	move.w  #ITEM_NUM_COIN_ANIMS-1,d4
+	move.l	#spriteCoin1,a0
+.l2:
+	move.w	#ITEM_SPRITE_NUM_VERTICAL_SPRITES-1,d3
+.l1:
+	cmp.w	d3,d2
+	beq	.skip
+	move.b	#0,3(a0)
+	move.b	#0,1(a0)
+
+.skip:
+	add.l	#ITEM_SPRITE_VERTICAL_BYTES,a0
+	dbra.w	d3,.l1
+	add.l	#4,a0
+	dbra.w	d4,.l2
 	rts
 	
 SetupItemSpriteData:
-	;; d0 - item slot
-	;; d1 - sprite slot
+	;; d0 - item slot	
 	move.l	#1,d0
+	
 	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
 	lea	item1,a1
 	add.l	d0,a1
+
+
+	move.w	ITEM_Y(a1),d2
+	;; move.l	#5,d2
 	
 	move.l	currentItemSprite,a0
 	
@@ -39,7 +64,8 @@ SetupItemSpriteData:
 	mulu.w	#ITEM_SPRITE_BYTES,d0
 	add.l	d0,a0
 
-	add.l	#1*((ITEM_SPRITE_HEIGHT*4)+4),a0	
+	mulu.w	#ITEM_SPRITE_VERTICAL_BYTES,d2
+	add.l	d2,a0
 
 	move.w	ITEM_LAGX(a1),d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
@@ -51,18 +77,8 @@ SetupItemSpriteData:
 	lsr.l	#1,d0
 	move.b	d0,1(a0)	;spriteHStart
 
-	if 0
-	move.w	ITEM_LAGY(a1),d0
-	move.w	ITEM_Y(a1),ITEM_LAGY(a1)
-	move.b	d0,(a0)		;spriteVStart
-	move.w	ITEM_LAGYEND(a1),d0
-	move.w	ITEM_YEND(a1),ITEM_LAGYEND(a1)
-	move.b	d0,2(a0)	;spriteVStop
-	endif
 .c1:
-
-
-	sub.l	#1*((ITEM_SPRITE_HEIGHT*4)+4),a0
+	sub.l	d2,a0	;#1*ITEM_SPRITE_VERTICAL_BYTES,a0
 	move.l	a0,SPR2PTH(a6)
 
 	add.w	#1,ITEM_INDEX(a1)		
@@ -76,7 +92,7 @@ RenderItemSprite:
 	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
 	lea	item1,a1
 	add.l	d0,a1	
-	
+
 	move.l	foregroundScrollX,d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	andi.w	#$f,d0
@@ -86,15 +102,13 @@ RenderItemSprite:
 	add.l	mapSize,a3
 	cmpi.w	#0,(a3)
 	beq	.dontAddSprite
-	move.l	#deadSprite,currentItemSprite
+
+	move.l	#deadSprite,currentItemSprite	
 	move.w	#336<<FOREGROUND_SCROLL_SHIFT_CONVERT,ITEM_X(a1)
-	mulu.w	#16,d2
-	move.w	#255-10,d3
-	sub.w	d2,d3
-	move.w	d3,ITEM_Y(a1)
-	add.w	#ITEM_SPRITE_HEIGHT,d3
-	move.w	d3,ITEM_YEND(a1)
-	;; move.w	#0,itemIndex
+	sub.l	#1,d2
+	move.w	d2,ITEM_Y(a1)
+	move.w	ITEM_X(a1),ITEM_LAGX(a1)
+	bsr	ClearItemSpriteData					
 	move.l	#spriteCoin1,currentItemSprite
 .dontAddSprite:
 	movem.l	(sp)+,d2-d3
