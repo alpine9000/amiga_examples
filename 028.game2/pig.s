@@ -3,15 +3,19 @@
 	xdef UpdatePig
 	xdef ProcessJoystick
 	xdef InitialisePig
+	xdef HidePig
 	xdef SetupSpriteData
 	xdef ScrollSprites
 	xdef deadSprite
-	
 
 InitialisePig:
 	move.w	#$c0,spriteX
 	rts
 
+HidePig:
+	move.w	#$f000,spriteX
+	rts			
+	
 ScrollSprites:
 	sub.w	#1,spriteX
 	bra	ScrollItemSprites

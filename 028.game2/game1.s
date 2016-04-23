@@ -30,12 +30,6 @@ Entry:
 
 	jsr	StartMusic
 	jsr	ShowSplash
-
-
-	if 0
-	move	#$7ff,DMACON(a6)  ; disable all dma
-	move	#$7fff,INTENA(a6) ; disable all interrupts		
-	endif
 	
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR			
@@ -57,11 +51,14 @@ Entry:
 	jsr	PokePanelBitplanePointers	
 	jsr	Init		  ; enable the playfield		
 
+	jsr	ResetBigBangPattern	
 	jsr	InstallSpriteColorPalette
 	jsr	InstallGreyPalette
 
 	
-Reset:
+Reset:		
+	move.l	#fade,fadePtr
+	move.l	#panelFade,panelFadePtr
 	move.l	#0,foregroundScrollX
 	move.l	#0,backgroundScrollX
 	jsr 	BlueFill
@@ -122,8 +119,16 @@ GameLoop:
 	cmp.b	#$f,d0
 	bne	.s2
 	move.w	#0,moving
-.s2:
+	cmp.w	#1,missedTile
+	beq	BigBang
+.s2:	
 	jsr	ProcessJoystick
+
+	btst.b	#0,joystick
+	beq	.notMissedTile
+	move.w	#1,missedTile
+.notMissedTile:
+	
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
 	bsr 	RenderNextBackgroundFrame			
@@ -222,6 +227,24 @@ ResetDeAnimPattern:
 	lea	deAnimIndexPattern,a0
 	move.l	a0,deAnimIndexPatternPtr
 .s1:
+	rts
+
+
+ResetBigBangPattern:
+	lea	bigBangIndex,a0
+	move.l	verticalBlankCount,d0
+	andi.l	#$fff0,d0
+	move.l	#MainLoop,a1	
+	add.l	d0,a1
+	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
+.loop1:	
+	move.l	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d0
+.loop:
+	move.l	(a1)+,d2
+	and.l	#3,d2
+	move.l	d2,(a0)+
+	dbra	d0,.loop
+	dbra	d1,.loop1
 	rts	
 
 RenderNextBackgroundFrame:
@@ -299,6 +322,92 @@ RenderForegroundTile:
 	rts
 	
 
+PostMissedTile:
+	move.w	#0,missedTile
+	jsr	ResetBigBangPattern
+	jsr	InstallGreyPalette
+	jsr	ResetItems	
+	jsr	HidePig
+	move.w	#MPANEL_COPPER_WAIT,mpanelWaitLinePtr
+	bra	Reset
+
+
+BigBang:
+	move.w	#(DMAF_SPRITE),DMACON(a6) ; turn sprites off for now	
+	move.w	#0,moving
+	move.l	#0,frameCount	
+.bigBangLoop:
+	add.l	#1,frameCount
+	cmp.l	#10,frameCount
+	beq	PostMissedTile
+	move.l	frameCount,d6	
+	jsr	WaitVerticalBlank	
+	bsr	HoriScrollPlayfield
+	jsr 	SwitchBuffers
+	jsr	ProcessJoystick
+	;; bsr 	Update
+
+	lea	map,a2	
+	move.l	foregroundScrollX,d0	
+	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
+	lsr.l	#1,d0
+	and.b   #$f0,d0
+	add.l	d0,a2
+	add.l	#(FOREGROUND_PLAYAREA_HEIGHT_WORDS-1)*2,a2
+	
+	move.l	foregroundScrollX,d0
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
+	lsr.w   #3,d0		; bytes to scroll
+	move.l	foregroundOffscreen,a0
+	add.l	d0,a0
+	lea 	foregroundTilemap,a1	
+	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0	
+
+
+	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d5
+
+	move.l	#4,d0
+
+	lea 	bigBangIndex,a4
+.loop3:
+	jsr	WaitVerticalBlank
+	dbra	d0,.loop3
+
+	
+.loop1:	
+	move.l  #FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d2
+.loop2:
+	bsr	ClearForegroundTile3
+	sub.l	#2,a2
+	dbra	d2,.loop2
+	sub.l	#2,a0
+	dbra	d5,.loop1
+	bra	.bigBangLoop
+
+
+ClearForegroundTile3:	
+	;;  a4 - pointed to animation offset for tile
+	lea 	foregroundTilemap,a1		
+	sub.l	d0,d0
+	move.w	(a2),d0
+	add.l	d0,a1
+	lea	map,a3
+	add.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*FOREGROUND_PLAYAREA_HEIGHT_WORDS,a3
+	move.l	(a4),d1
+	cmp.l	#10,d1
+	bge	.s1	
+	add.l	d1,a1
+	add.l	#2,(a4)	
+	add.l	#4,a4
+	bra	.s2
+.s1:
+	lea 	foregroundTilemap,a1
+	add.w	#21520,a1 	; source tile		
+.s2:
+	jsr	BlitTile
+	rts
+
+	
 ClearForegroundTile:	
 	lea 	foregroundTilemap,a1		
 	move.l	a2,a4
@@ -311,7 +420,8 @@ ClearForegroundTile:
 	cmp.l	a3,a2		; don't clear until the full play area has scrolled in
 	blt	.s3
 	sub.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,a0
-	lea 	deAnimIndex,a4
+	lea     deAnimIndex,a4
+	
 	move.l	d2,d1
 	lsl.l	#2,d1
 	add.l	d1,a4
@@ -451,7 +561,7 @@ playAreaCopperPalettePtr:
 
 
 mpanelWaitLinePtr:	
-	dc.w    $9ad1
+	dc.w    MPANEL_COPPER_WAIT
 	dc.w	$fffe	
 mpanelCopperListBpl1Ptr:	
 	dc.w	BPL1PTL,0
@@ -649,12 +759,17 @@ fadePtr:
 	dc.l	fade
 panelFadePtr:
 	dc.l	panelFade
+
+missedTile:
+	dc.w	0
+bigBangIndex:
+	ds.l	FOREGROUND_PLAYAREA_HEIGHT_WORDS*FOREGROUND_PLAYAREA_WIDTH_WORDS,0
 	
 animIndex:
 	ds.l	16,0
 deAnimIndex:
 	ds.l	16,0	
-
+	
 animIndexPatternPtr:
 	dc.l	animIndexPattern
 animIndexPattern:

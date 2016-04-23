@@ -3,6 +3,7 @@
 	xdef SetupItemSpriteData
 	xdef ScrollItemSprites
 	xdef RenderItemSprite
+	xdef ResetItems
 	
 ScrollItemSprites:
 	move.w	#ITEM_NUM_SLOTS-1,d1
@@ -24,6 +25,18 @@ ScrollItemSprites:
 	dbra	d1,.loop
 	rts
 
+ResetItems:
+	lea	item1,a1	
+	move.w  #ITEM_NUM_SLOTS-1,d1
+.loop1:
+	move.w	#0,ITEM_SPRITE(a1)
+	move.w	#0,ITEM_X(a1)
+	move.w	#0,ITEM_LAGX(a1)
+	move.w	ITEM_Y(a1),d2	
+	add.l	#ITEM_STRUCT_SIZE,a1		; multiply by 16 (item control structure size)	
+	dbra	d1,.loop1
+	rts
+	
 ClearItemSpriteData:
 	;; 	move.w	#ITEM_SPRITE_NUM_VERTICAL_SPRITES-1,d4
 	;; sub.w	d2,d4 		; this is because of the upside board at the moment
