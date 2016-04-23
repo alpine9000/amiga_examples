@@ -1,6 +1,9 @@
 
 MPANEL_COPPER_WAIT			equ $9ad1
 
+PIG_INITIAL_X				equ $c0
+PIG_INITIAL_Y				equ $e4
+
 PIG_JUMP_PIXELS				equ 8
 PIG_PAUSE_PIXELS			equ 16
 PIG_MOVE_PIXELS				equ 2

@@ -7,9 +7,14 @@
 	xdef SetupSpriteData
 	xdef ScrollSprites
 	xdef deadSprite
-
+	xdef spriteX
+	xdef spriteLagX	
+	xdef spriteY
+	
 InitialisePig:
-	move.w	#$c0,spriteX
+	move.w	#PIG_INITIAL_X,spriteX
+	move.w	#PIG_INITIAL_Y,spriteY
+	move.w	#PIG_INITIAL_Y+16,spriteYEnd
 	rts
 
 HidePig:

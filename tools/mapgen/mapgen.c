@@ -114,7 +114,7 @@ output_map_asm(tmx_map *m, tmx_layer *l)
   if (l->type == L_LAYER && l->content.gids) {
     for (unsigned int x = 0; x < m->width; x++) {
       for (unsigned int y = 0; y < m->height; y++) {
-	fprintf(fp, "\tdc.w %d\n", get_tile_address(m, l->content.gids[(y*m->width)+x] & TMX_FLIP_BITS_REMOVAL));
+	fprintf(fp, "\tdc.w $%x\n", get_tile_address(m, l->content.gids[(y*m->width)+x] & TMX_FLIP_BITS_REMOVAL));
       }
     }
   }

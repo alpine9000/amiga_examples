@@ -8,7 +8,7 @@
  </tileset>
  <layer name="foreground" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjZGBg0GXEjhlH5eguZwekmYBYDAs9Kkd/OS0c8sTIhQNxLxn6RuVwy1ESn6lAnE2GvlE5/PnjPBCfxELD5GB5IBBNbjc0TgZL2hoOcsTEWT00DnbjkZuMRW4wpbuhIketuK5kQM07gy3dDRU5TQbcbbBROfrLAQBQb1rL
+   eJy7y8DAoMuIHd8dlaO7nB2QZgJiMSz0qBz95bRwyBMjFw7EvWToG5XDLUdJfKYCcTYZ+kbl8OeP80B8EgsNk4PlgUA0ud3QOBksaWs4yBETZ/XQONiNR24yFrnBlO6Gihy14rqSATXvDLZ0N1TkWHG0v0B4VI7+cgD6L2Wi
   </data>
  </layer>
  <layer name="items" width="100" height="8">

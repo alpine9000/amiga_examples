@@ -51,14 +51,19 @@ Entry:
 	jsr	PokePanelBitplanePointers	
 	jsr	Init		  ; enable the playfield		
 
-	jsr	ResetBigBangPattern	
 	jsr	InstallSpriteColorPalette
 	jsr	InstallGreyPalette
 
+
+
 	
 Reset:		
+	move.w	#0,moving	
 	move.l	#fade,fadePtr
 	move.l	#panelFade,panelFadePtr
+	bsr	InitAnimPattern
+	;; jsr	CleaDeAnimPattern
+	jsr	ResetBigBangPattern
 	move.l	#0,foregroundScrollX
 	move.l	#0,backgroundScrollX
 	jsr 	BlueFill
@@ -119,22 +124,16 @@ GameLoop:
 	cmp.b	#$f,d0
 	bne	.s2
 	move.w	#0,moving
-	cmp.w	#1,missedTile
-	beq	BigBang
 .s2:	
 	jsr	ProcessJoystick
 
-	btst.b	#0,joystick
-	beq	.notMissedTile
-	move.w	#1,missedTile
-.notMissedTile:
-	
+	jsr	CheckPigMiss	
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
 	bsr 	RenderNextBackgroundFrame			
 
 	if 0
-	move.l	#8000,d0
+	move.l	#1000,d0
 .checkLoop:
 	dbra	d0,.checkLoop
 	move.w	#$f00,COLOR00(a6)		
@@ -144,7 +143,7 @@ GameLoop:
 	
 Update:
 	jsr	UpdatePig
-	
+
 .backgroundUpdates:
 	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX		
 	btst	#FOREGROUND_DELAY_BIT,d6
@@ -199,14 +198,24 @@ HoriScrollPlayfield:
 	move.w	d0,copperListScrollPtr2	
 	rts
 
+
+InitAnimPattern:
+	lea	animIndex,a0
+	move.l	#7,d0
+.loop:
+	move.l	#0,(a0)+
+	dbra	d0,.loop
+	move.l	#animIndexPattern,animIndexPatternPtr
+	rts	
+	
 ResetAnimPattern:
 	lea	animIndex,a0
-	move.l	animIndexPatternPtr,a1
+	move.l	#animIndexPattern,a1
 	move.l	#7,d0
 .loop:
 	move.l	(a1)+,(a0)+
 	dbra	d0,.loop
-	add.l	#8,animIndexPatternPtr
+	add.l	#8*4,animIndexPatternPtr
 	cmp.l	#$ffffffff,(a1)
 	bne	.s1
 	lea	animIndexPattern,a0
@@ -323,8 +332,6 @@ RenderForegroundTile:
 	
 
 PostMissedTile:
-	move.w	#0,missedTile
-	jsr	ResetBigBangPattern
 	jsr	InstallGreyPalette
 	jsr	ResetItems	
 	jsr	HidePig
@@ -332,6 +339,50 @@ PostMissedTile:
 	bra	Reset
 
 
+CheckPigMiss:
+	lea	map,a2	
+
+	move.l	foregroundScrollX,d0		
+	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
+	lsr.l	#1,d0
+
+	and.b   #$f0,d0
+	add.l	d0,a2
+
+Offset:	
+	
+	move.w	spriteLagX,d0
+	sub.w	#PIG_INITIAL_X,d0
+	lsr.w	#4,d0      	; x columns
+
+BlahX:
+	
+	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
+	sub.w	d0,d1
+	mulu.w  #FOREGROUND_PLAYAREA_HEIGHT_WORDS*2,d1
+	sub.l	d1,a2		; pig x if y == bottom ?
+
+
+	move.w	#PIG_INITIAL_Y,d0
+	sub.w	spriteY,d0
+	lsr.w	#4,d0      	; y columns
+	add.w	#1,d0
+	
+BlahY:	
+	sub.l	d1,d1
+	move.w	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d1
+	sub.w	d0,d1
+	lsl.w	#1,d1
+	add.l	d1,a2
+
+	move.w	(a2),d0
+
+	cmp.w	#$78e,d0
+	blt	BigBang
+.skip:
+	rts
+	
+	
 BigBang:
 	move.w	#(DMAF_SPRITE),DMACON(a6) ; turn sprites off for now	
 	move.w	#0,moving
@@ -364,7 +415,7 @@ BigBang:
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0	
 
 
-	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d5
+	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2),d5
 
 	move.l	#4,d0
 
@@ -402,7 +453,8 @@ ClearForegroundTile3:
 	bra	.s2
 .s1:
 	lea 	foregroundTilemap,a1
-	add.w	#21520,a1 	; source tile		
+	;; add.w	#21520,a1 	; source tile
+	add.w	#$7080,a1
 .s2:
 	jsr	BlitTile
 	rts
@@ -434,7 +486,8 @@ ClearForegroundTile:
 	bra	.s2
 .s1:
 	lea 	foregroundTilemap,a1
-	add.w	#21520,a1 	; source tile		
+	;; 	add.w	#21520,a1 	; source tile		
+	add.w	#$7080,a1
 .s2:
 	jsr	BlitTile
 .s3:
@@ -760,8 +813,6 @@ fadePtr:
 panelFadePtr:
 	dc.l	panelFade
 
-missedTile:
-	dc.w	0
 bigBangIndex:
 	ds.l	FOREGROUND_PLAYAREA_HEIGHT_WORDS*FOREGROUND_PLAYAREA_WIDTH_WORDS,0
 	
