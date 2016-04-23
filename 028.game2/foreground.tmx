@@ -8,12 +8,12 @@
  </tileset>
  <layer name="foreground" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjZGBg0GXEjhlH5eguZwekmYBYDAs9Kkd/OS0c8qNyAyM3GNPISJYbjGlkJMsNxjQykuUGYxoZyXKaDLjbYKNy9JcDAIrySzM=
+   eJxjZGBg0GXEjhlH5eguZwekmYBYDAs9Kkd/OS0c8sTIhQNxLxn6RuVwy1ESn6lAnE2GvlE5/PnjPBCfxELD5GB5IBBNbjc0TgZL2hoOcsTEWT00DnbjkZuMRW4wpbuhIketuK5kQM07gy3dDRU5TQbcbbBROfrLAQBQb1rL
   </data>
  </layer>
  <layer name="items" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFgx04M+KXdyQgjw6ciFRPrLpRgADoceE6GoYogBppCt0MfOkfJDeajukPXHCEOSg+kOMLnT8QYCinDydGVEwOGAxxQAkgxd9DOa6pBYZyXI+C4QUASQkGyg==
+   eJxjYBgFgw04MuLnE1JPCDgRqZ5YdcMdgMKX2DBGV+dKhD6QHucREtbUSFOwMEancamFybuQaDep6kcqQI5TQnGCnpdIyVsgQEx+IhUM5XIO5HZkDAKE6g/0sgY5DtzICAty9FATkBJ/gyWuSa2z3amonlS7R8EooBUAAJkfC84=
   </data>
  </layer>
 </map>

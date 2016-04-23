@@ -129,7 +129,10 @@ GameLoop:
 	bsr 	RenderNextBackgroundFrame			
 
 	if 0
-	move.w	#$f00,COLOR00(a6)
+	move.l	#8000,d0
+.checkLoop:
+	dbra	d0,.checkLoop
+	move.w	#$f00,COLOR00(a6)		
 	endif
 
 	bra	GameLoop
@@ -241,14 +244,17 @@ RenderNextForegroundFrame:
 	lsr.l	#1,d0
 	and.b   #$f0,d0
 	add.l	d0,a2		
-	move.l	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d3		; 8 tiles per column
+	;; 	move.l	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d3		; 8 tiles per column
+	move.l	0,d3
 .loop:
 	move.l	d3,d2
 	bsr	RenderForegroundTile
 	bsr	ClearForegroundTile
 	jsr	RenderItemSprite	
 	add.l	#2,a2
-	dbra	d3,.loop
+	add.l	#1,d3
+	cmp.l 	#FOREGROUND_PLAYAREA_HEIGHT_WORDS,d3
+	blt	.loop
 	rts
 
 
@@ -317,8 +323,8 @@ ClearForegroundTile:
 	add.l	#2,(a4)	
 	bra	.s2
 .s1:
-	;; add.w	#11520,a1 	; source tile	
-	add.w	#20880,a1	;
+	lea 	foregroundTilemap,a1
+	add.w	#21520,a1 	; source tile		
 .s2:
 	jsr	BlitTile
 .s3:

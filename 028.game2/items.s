@@ -25,9 +25,9 @@ ScrollItemSprites:
 	rts
 
 ClearItemSpriteData:
-	move.w	#ITEM_SPRITE_NUM_VERTICAL_SPRITES-1,d4
-	sub.w	d2,d4 		; this is because of the upside board at the moment
-	move.w	d4,d2
+	;; 	move.w	#ITEM_SPRITE_NUM_VERTICAL_SPRITES-1,d4
+	;; sub.w	d2,d4 		; this is because of the upside board at the moment
+	;; 	move.w	d4,d2
 	move.w  #ITEM_NUM_COIN_ANIMS-1,d4
 	move.l	#spriteCoin1,a0
 .l2:
@@ -112,7 +112,8 @@ RenderItemSprite:
 
 GetSpriteSlot:
 	move.w	(a3),d0 		; sprite slot
-
+	sub.w	#1,d0
+	
 	move.w	d0,d1
 	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
 	lea	item1,a1
