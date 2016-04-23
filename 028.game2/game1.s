@@ -28,19 +28,25 @@ Entry:
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6) 	; disable all interrupts		
 
-	jsr	StartMusic
-	jsr	ShowSplash
-	
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR			
+	
+	jsr	StartMusic
+
+	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)
+	
+	jsr	ShowSplash
+
+	jsr	InstallGreyPalette	
 
 	;; d0 - fg bitplane pointer offset
-	;; d1 - bg bitplane pointer offset
+	;; d1 - bg bitplane pointer offset		
 	move.l	#0,d0
 	move.l	#1,d1
-	jsr	SwitchBuffers		
+	jsr	SwitchBuffers				
+
 	
-	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
+	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)		
  	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_MASTER),DMACON(a6) 		
 
 	lea	panelCopperListBpl1Ptr,a0
@@ -52,7 +58,7 @@ Entry:
 	jsr	Init		  ; enable the playfield		
 
 	jsr	InstallSpriteColorPalette
-	jsr	InstallGreyPalette
+
 
 
 
@@ -523,6 +529,7 @@ Level3InterruptHandler:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
 	add.l	#1,verticalBlankCount
 	jsr 	SetupSpriteData
+	jsr	P61_Music
 .checkCopper:
 	move.w	INTREQR(a6),d0
 	and.w	#INTF_COPER,d0	
