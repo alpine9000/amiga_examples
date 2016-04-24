@@ -4,6 +4,7 @@
 	xdef ScrollItemSprites
 	xdef RenderItemSprite
 	xdef ResetItems
+	xdef EnableItemSprites
 	
 ScrollItemSprites:
 	move.w	#ITEM_NUM_SLOTS-1,d1
@@ -35,6 +36,7 @@ ResetItems:
 	move.w	ITEM_Y(a1),d2	
 	add.l	#ITEM_STRUCT_SIZE,a1		; multiply by 16 (item control structure size)	
 	dbra	d1,.loop1
+	move.l	#0,itemSpritesEnabled
 	rts
 	
 ClearItemSpriteData:
@@ -93,6 +95,10 @@ SetupItemSpriteData:
 	move.w	ITEM_LAGX(a1),d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	move.w	ITEM_X(a1),ITEM_LAGX(a1)
+
+	cmp.l	#0,itemSpritesEnabled
+	beq	.dontEnable
+
 	add.w	#32,d0
 	move.w	d0,d1
 	andi	#1,d1
@@ -103,7 +109,11 @@ SetupItemSpriteData:
 .c1:
 	sub.l	d2,a0	;#1*ITEM_SPRITE_VERTICAL_BYTES,a0
 	move.l	a0,SPR2PTH(a6)
+	bra	.done
+.dontEnable:
+	move.l	#deadSprite,SPR2PTH(a6)
 
+.done:
 	add.w	#1,ITEM_INDEX(a1)		
 	move.l	(sp)+,d0
 	rts
@@ -115,13 +125,12 @@ RenderItemSprite:
 	move.l	foregroundScrollX,d1
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d1 ; convert to pixels
 	andi.w	#$f,d1
-	cmp.b	#$f,d1
+	cmp.b	#$f,d1		; only add sprite after tile has scrolled in
 	bne	dontAddSprite
 	move.l	a2,a3
 	add.l	mapSize,a3
 	cmpi.w	#0,(a3)
 	beq	dontAddSprite
-
 
 GetSpriteSlot:
 	move.w	(a3),d0 		; sprite slot
@@ -146,6 +155,13 @@ dontAddSprite:
 	movem.l	(sp)+,d2-d3
 	rts
 
+EnableItemSprites:
+	move.l	#1,itemSpritesEnabled
+	rts
+	
+itemSpritesEnabled:
+	dc.l	0
+	;; used for animation
 currentItemSprite:
 	dc.l	deadSprite
 

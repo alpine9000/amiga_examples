@@ -10,23 +10,45 @@
 	xdef spriteX
 	xdef spriteLagX	
 	xdef spriteY
-	
+	xdef UpdatePigFallingAnimation
+
+
 InitialisePig:
+	move.w	#0,spritePigFallingAnimation
 	move.w	#PIG_INITIAL_X,spriteX
 	move.w	#PIG_INITIAL_Y,spriteY
 	move.w	#PIG_INITIAL_Y+16,spriteYEnd
 	rts
 
+
 HidePig:
 	move.w	#$f000,spriteX
 	rts			
-	
+
+
 ScrollSprites:
 	sub.w	#1,spriteX
 	bra	ScrollItemSprites
 	rts
-	
-UpdatePig:	
+
+
+UpdatePigFallingAnimation:
+	move.w	spritePigFallingAnimation,d0
+	lsr.w	#1,d0
+	mulu.w	#PIG_SPRITE_VERTICAL_BYTES,d0
+	move.l	#spriteFalling1,a0
+	add.l	d0,a0
+	move.l	a0,currentSprite
+	add.w	#1,spritePigFallingAnimation
+	cmp.w	#4<<1,spritePigFallingAnimation
+	blt	.dontResetAnimation
+	move.w	#0,spritePigFallingAnimation
+	bsr	HidePig
+.dontResetAnimation:
+	rts
+
+
+UpdatePig:
 	;; right
 	cmp.w	#PIG_PAUSE_PIXELS,spriteR
 	ble	.skipRight
@@ -196,7 +218,33 @@ spritePigRightJump:
 	dc.w	0,0
 	incbin	"out/sprite_pig-2.bin" ; right jump
 	dc.l	0
-
+spriteFalling0:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingPig-0.bin" 
+	dc.l	0
+spriteFalling1:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingPig-1.bin" 
+	dc.l	0
+spriteFalling2:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingPig-2.bin" 
+	dc.l	0
+spriteFalling3:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingPig-3.bin" 
+	dc.l	0
+spriteFalling4:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingPig-4.bin" 
+	dc.l	0
+spritePigFallingAnimation:
+	dc.w	0
 currentSpriteOffset:
 	dc.l	0
 currentSprite:

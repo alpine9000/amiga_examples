@@ -60,21 +60,22 @@ Entry:
 	jsr	InstallSpriteColorPalette
 
 
-
+	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 
 	
 Reset:		
 	move.w	#0,moving	
 	move.l	#fade,fadePtr
 	move.l	#panelFade,panelFadePtr
-	bsr	InitAnimPattern
-	;; jsr	CleaDeAnimPattern
-	jsr	ResetBigBangPattern
 	move.l	#0,foregroundScrollX
 	move.l	#0,backgroundScrollX
+	move.l	#-1,frameCount		
+	bsr	InitAnimPattern
+	jsr	ResetBigBangPattern
 	jsr 	BlueFill
 	jsr	Message
-	move.l	#-1,frameCount		
+	jsr	InstallGreyPalette
+	jsr	HidePig
 
 MainLoop:
 	MOVE.W  #$0024,BPLCON2(a6)
@@ -111,8 +112,8 @@ FadeInLoop:
 	bsr	InstallNextGreyPalette
 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,d6
 	bne	.c1
-	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 	jsr	InitialisePig
+	jsr	EnableItemSprites
 	bra	GameLoop
 .c1:
 	bra	FadeInLoop
@@ -338,70 +339,67 @@ RenderForegroundTile:
 	
 
 PostMissedTile:
-	jsr	InstallGreyPalette
-	jsr	ResetItems	
-	jsr	HidePig
-	move.w	#MPANEL_COPPER_WAIT,mpanelWaitLinePtr
 	bra	Reset
 
 
 CheckPigMiss:
 	lea	map,a2	
 
+	;; calculate the a2 offset of the top right tile based on foreground scroll
 	move.l	foregroundScrollX,d0		
 	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
 	lsr.l	#1,d0
-
 	and.b   #$f0,d0
 	add.l	d0,a2
 
-Offset:	
-	
+
+	;; add the offset based on the sprite's x position
 	move.w	spriteLagX,d0
 	sub.w	#PIG_INITIAL_X,d0
 	lsr.w	#4,d0      	; x columns
-
-BlahX:
-	
 	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
 	sub.w	d0,d1
 	mulu.w  #FOREGROUND_PLAYAREA_HEIGHT_WORDS*2,d1
 	sub.l	d1,a2		; pig x if y == bottom ?
 
 
+	;; add the offset based on the sprite's y postion
 	move.w	#PIG_INITIAL_Y,d0
 	sub.w	spriteY,d0
 	lsr.w	#4,d0      	; y columns
 	add.w	#1,d0
-	
-BlahY:	
 	sub.l	d1,d1
 	move.w	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d1
 	sub.w	d0,d1
 	lsl.w	#1,d1
 	add.l	d1,a2
 
+	;; a2 now points at the tile under the sprite
 	move.w	(a2),d0
 
+	;; 
 	cmp.w	#$78e,d0
 	blt	BigBang
-.skip:
+
 	rts
 	
 	
 BigBang:
-	move.w	#(DMAF_SPRITE),DMACON(a6) ; turn sprites off for now	
+	;; move.w	#(DMAF_SPRITE),DMACON(a6) ; turn sprites off for now	
+
+	jsr	ResetItems	
 	move.w	#0,moving
 	move.l	#0,frameCount	
 .bigBangLoop:
 	add.l	#1,frameCount
-	cmp.l	#10,frameCount
+	cmp.l	#BIGBANG_POST_DELAY,frameCount
 	beq	PostMissedTile
 	move.l	frameCount,d6	
 	jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers
 	jsr	ProcessJoystick
+	jsr	UpdatePigFallingAnimation
 	;; bsr 	Update
 
 	lea	map,a2	
@@ -423,7 +421,7 @@ BigBang:
 
 	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2),d5
 
-	move.l	#4,d0
+	move.l	#BIGBANG_ANIM_DELAY,d0
 
 	lea 	bigBangIndex,a4
 .loop3:
@@ -552,6 +550,7 @@ Message:
 	move.w	#128,d0
 	move.w	#11,d1
 	jsr	DrawText8
+	move.w	#MPANEL_COPPER_WAIT,mpanelWaitLinePtr	
 	rts
 
 
