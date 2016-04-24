@@ -1,6 +1,6 @@
 	include "includes.i"
 	
-	xdef UpdatePig
+	xdef UpdatePlayer
 	xdef ProcessJoystick
 	xdef InitialisePig
 	xdef HidePig
@@ -11,9 +11,17 @@
 	xdef spriteLagX	
 	xdef spriteY
 	xdef UpdatePigFallingAnimation
+	xdef InstallPlayerColorPalette
 
+PLAYER_INSTALL_COLOR_PALETTE	equ 0
+PLAYER_SPRITE_DATA		equ 4
 
 InitialisePig:
+	move.l	playerSpriteConfig,a0
+	move.l	PLAYER_SPRITE_DATA(a0),d0	
+	add.l	#6*PIG_SPRITE_VERTICAL_BYTES,d0 
+	move.l	d0,currentSprite
+	
 	move.w	#0,spritePigFallingAnimation
 	move.w	#PIG_INITIAL_X,spriteX
 	move.w	#PIG_INITIAL_Y,spriteY
@@ -48,60 +56,69 @@ UpdatePigFallingAnimation:
 	rts
 
 
-UpdatePig:
+UpdatePlayer:
 	;; right
+	move.l	playerSpriteConfig,a0
+	move.l	PLAYER_SPRITE_DATA(a0),d0
 	cmp.w	#PIG_PAUSE_PIXELS,spriteR
 	ble	.skipRight
 	add.w	#PIG_MOVE_PIXELS,spriteX
-	move.l	#spritePigRightJump,currentSprite	
+	add.l	#7*PIG_SPRITE_VERTICAL_BYTES,d0 
+	move.l	d0,currentSprite
 .skipRight
 	cmp.w	#0,spriteR
 	beq	.notRight
 	sub.w	#1,spriteR
 	cmp.w   #PIG_PAUSE_PIXELS,spriteR
 	bge	.notRight
-	move.l	#spritePigRight,currentSprite
+	add.l	#6*PIG_SPRITE_VERTICAL_BYTES,d0 
+	move.l	d0,currentSprite
 .notRight:
 	;; up
 	cmp.w	#PIG_PAUSE_PIXELS,spriteU
 	ble	.skipUp
 	sub.w	#PIG_MOVE_PIXELS,spriteY
 	sub.w	#PIG_MOVE_PIXELS,spriteYEnd	
-	move.l	#spritePigUpJump,currentSprite
+	add.l	#1*PIG_SPRITE_VERTICAL_BYTES,d0 
+	move.l	d0,currentSprite	
 .skipUp:
 	cmp.w	#0,spriteU
 	beq	.notUp
 	sub.w	#1,spriteU
 	cmp.w   #PIG_PAUSE_PIXELS,spriteU
 	bge	.notUp
-	move.l	#spritePigUp,currentSprite	
+	move.l	d0,currentSprite	
 .notUp:
 	;; down
 	cmp.w	#PIG_PAUSE_PIXELS,spriteD
 	ble	.skipDown
 	add.w	#PIG_MOVE_PIXELS,spriteY
 	add.w	#PIG_MOVE_PIXELS,spriteYEnd	
-	move.l	#spritePigDownJump,currentSprite
+	add.l	#3*PIG_SPRITE_VERTICAL_BYTES,d0 
+	move.l	d0,currentSprite		
 .skipDown:
 	cmp.w	#0,spriteD
 	beq	.notDown
 	sub.w	#1,spriteD
 	cmp.w   #PIG_PAUSE_PIXELS,spriteD
 	bge	.notDown
-	move.l	#spritePigDown,currentSprite		
+	add.l	#2*PIG_SPRITE_VERTICAL_BYTES,d0 
+	move.l	d0,currentSprite			
 .notDown:
 	;; left
 	cmp.w	#PIG_PAUSE_PIXELS,spriteL
 	ble	.skipLeft
 	sub.w	#PIG_MOVE_PIXELS,spriteX
-	move.l	#spritePigLeftJump,currentSprite
+	add.l	#5*PIG_SPRITE_VERTICAL_BYTES,d0 
+	move.l	d0,currentSprite				
 .skipLeft
 	cmp.w	#0,spriteL
 	beq	.notLeft
 	sub.w	#1,spriteL
 	cmp.w   #PIG_PAUSE_PIXELS,spriteL
 	bge	.notLeft
-	move.l	#spritePigLeft,currentSprite		
+	add.l	#4*PIG_SPRITE_VERTICAL_BYTES,d0 
+	move.l	d0,currentSprite					
 .notLeft:
 	cmp.w	#$cf,spriteX
 	blt	.noScroll
@@ -176,73 +193,34 @@ SetupSpriteData:
 	move.l	#deadSprite,SPR6PTH(a6)
 	move.l	#deadSprite,SPR7PTH(a6)		
 	rts
+
+InstallPlayerColorPalette:
+	move.l	playerSpriteConfig,a0
+	move.l	PLAYER_INSTALL_COLOR_PALETTE(a0),a1
+	jsr	(a1)
+	rts
 	
-	
-spritePigUp:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig-1.bin" ; up
-	dc.l	0
-spritePigUpJump:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig-0.bin" ; up jump
-	dc.l	0		
-spritePigDown:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig-5.bin" ; down
-	dc.l	0
-spritePigDownJump:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig-4.bin" ; down jump
-	dc.l	0		
-spritePigLeft:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig-7.bin" ; left
-	dc.l	0
-spritePigLeftJump:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig-6.bin" ; left jump
-	dc.l	0		
-spritePigRight:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig-3.bin" ; right
-	dc.l	0
-spritePigRightJump:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_pig-2.bin" ; right jump
-	dc.l	0
-spriteFalling0:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_fallingPig-0.bin" 
-	dc.l	0
-spriteFalling1:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_fallingPig-1.bin" 
-	dc.l	0
-spriteFalling2:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_fallingPig-2.bin" 
-	dc.l	0
-spriteFalling3:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_fallingPig-3.bin" 
-	dc.l	0
-spriteFalling4:
-	dc.w	0,0
-	dc.w	0,0
-	incbin	"out/sprite_fallingPig-4.bin" 
-	dc.l	0
+InstallPigColorPalette:	
+	include "out/sprite_pig-0-palette.s"
+	rts
+
+InstallRobotColorPalette:	
+	include "out/sprite_robot-0-palette.s"
+	rts		
+
+pigPlayerSpriteConfig:
+	dc.l	InstallPigColorPalette
+	dc.l	spritePig
+
+robotPlayerSpriteConfig:
+	dc.l	InstallRobotColorPalette
+	dc.l	spriteRobot	
+
+playerSpriteConfig:
+	dc.l	robotPlayerSpriteConfig
+
+	include "sprite_data.i"
+
 spritePigFallingAnimation:
 	dc.w	0
 currentSpriteOffset:

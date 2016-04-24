@@ -16,6 +16,7 @@
 	xdef   	mapSize
 	xdef	moving
 	xdef 	foregroundScrollPixels
+
 	
 byteMap:
 	dc.l	Entry
@@ -149,7 +150,7 @@ GameLoop:
 	bra	GameLoop
 	
 Update:
-	jsr	UpdatePig
+	jsr	UpdatePlayer
 
 .backgroundUpdates:
 	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX		
@@ -680,7 +681,7 @@ playAreaCopperPalettePtr2:
 	dc.l	$fffffffe	
 
 InstallSpriteColorPalette:
-	include "out/sprite_pig-0-palette.s"
+	jsr	InstallPlayerColorPalette
 	include "out/sprite_coin-1-palette.s"
 	rts
 
@@ -773,6 +774,8 @@ InstallNextGreyPanelPalette:
 .done
 	rts		
 
+
+	
 foregroundOnscreen:
 	dc.l	foregroundBitplanes1
 foregroundOffscreen:
