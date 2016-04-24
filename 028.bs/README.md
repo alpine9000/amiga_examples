@@ -1,5 +1,5 @@
-first simple game
-=================
+work in progress
+================
 
 screenshot
 ----------
@@ -9,5 +9,5 @@ screenshot
 
 try it
 ------
-  * [Download disk image](bin/game1.adf?raw=true)
-  * <a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/game1.adf" target="_blank">Run in SAE</a>
+  * [Download disk image](bin/bs.adf?raw=true)
+  * <a href="http://alpine9000.github.io/ScriptedAmigaEmulator/#amiga_examples/bs.adf" target="_blank">Run in SAE</a>
