@@ -85,6 +85,8 @@ UpdatePlayer:
 	;; up
 	cmp.w	#PLAYER_PAUSE_PIXELS,spriteU
 	ble	.skipUp
+	cmp.w   #PLAYER_TOP_Y,spriteY
+	ble     .skipUp
 	sub.w	#PLAYER_MOVE_PIXELS,spriteY
 	sub.w	#PLAYER_MOVE_PIXELS,spriteYEnd	
 	add.l	#1*PLAYER_SPRITE_VERTICAL_BYTES,d0 
@@ -100,17 +102,15 @@ UpdatePlayer:
 	;; down
 	cmp.w	#PLAYER_PAUSE_PIXELS,spriteD
 	ble	.skipDown
-	if 0
-	cmp.w	#PLAYER_BOTTOM_Y,spriteY
-	bge	.skipDown
-	endif
+	cmp.w   #PLAYER_BOTTOM_Y,spriteY
+	bge     .skipDown
 	add.w	#PLAYER_MOVE_PIXELS,spriteY
 	add.w	#PLAYER_MOVE_PIXELS,spriteYEnd	
 	add.l	#3*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite		
 .skipDown:
 	cmp.w	#0,spriteD
-	beq	.notDown
+	beq	.notDown	
 	sub.w	#1,spriteD
 	cmp.w   #PLAYER_PAUSE_PIXELS,spriteD
 	bge	.notDown
@@ -180,15 +180,28 @@ SetupSpriteData:
 	move.w	spriteX,spriteLagX
 	move.w	d0,d1
 	andi	#1,d1
-	move.b	d1,3(a0)	;spriteControl
+
 	lsr.l	#1,d0
 	move.b	d0,1(a0)	;spriteHStart
 	move.w	spriteY,d0
 	move.b	d0,(a0)		;spriteVStart
+	andi.w	#$100,d0
+	cmp.w	#0,d0
+	beq	.s1
+	ori.w	#$4,d1
+.s1:
 	move.w	spriteYEnd,d0
 	move.b	d0,2(a0)	;spriteVStop
 	move.l	a0,SPR0PTH(a6)
 
+	andi.w	#$100,d0
+	cmp.w	#0,d0
+	beq	.s2
+	ori.w	#$2,d1
+.s2:	
+	
+	move.b	d1,3(a0)	;spriteControl	
+	
 	move.l	#ITEM_NUM_SLOTS-1,d0
 .loop:
 	jsr 	SetupItemSpriteData
@@ -217,7 +230,6 @@ InstallRobotColorPalette:
 	rts		
 
 CheckPlayerMiss:
-
 	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteR
 	beq	.check
 	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteU
@@ -246,32 +258,43 @@ CheckPlayerMiss:
 	lsr.w	#4,d0      	; x columns
 	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
 	sub.w	d0,d1
+	move.w	d0,checkXPos
 	mulu.w  #FOREGROUND_PLAYAREA_HEIGHT_WORDS*2,d1
 	sub.l	d1,a2		; player x if y == bottom ?
 
 
 	;; add the offset based on the sprite's y postion
-	move.w	#PLAYER_INITIAL_Y,d0
+CheckY:	
+	move.w	#PLAYER_BOTTOM_Y,d0
 	sub.w	spriteY,d0
 	lsr.w	#4,d0      	; y columns
-	add.w	#1,d0
+	;; add.w	#1,d0
 	sub.l	d1,d1
 	move.w	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d1
 	sub.w	d0,d1
+	move.w	d0,checkYPos
 	lsl.w	#1,d1
 	add.l	d1,a2
 
 	;; a2 now points at the tile under the sprite
 	move.w	(a2),d0
+	move.w	d0,checkTile
 
 	;; 
 	cmp.w	#$78e,d0
 	bge	.noBigBang
+.doBigBang:
 	jmp	BigBang
 
-.noBigBang
+.noBigBang:
 	rts
-	
+
+checkXPos:
+	dc.w	0
+checkYPos:
+	dc.w	0
+checkTile:
+	dc.w	0
 	
 SelectNextPlayerSprite:
 	cmp.l	#pigPlayerSpriteConfig,playerSpriteConfig
