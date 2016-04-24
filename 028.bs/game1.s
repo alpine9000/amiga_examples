@@ -139,13 +139,15 @@ GameLoop:
 	jsr	CheckPlayerMiss	
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
-	bsr 	RenderNextBackgroundFrame			
+	bsr 	RenderNextBackgroundFrame
+
 
 	if 0
-	move.l	#1000,d0
+	move.l	#002,d0
 .checkLoop:
 	dbra	d0,.checkLoop
-	move.w	#$f00,COLOR00(a6)		
+	move.w	#$f00,COLOR00(a6)
+	move.w	#$f00,COLOR01(a6)			
 	endif
 
 	bra	GameLoop
@@ -576,14 +578,18 @@ copperListBpl2Ptr:
 	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))	
 	dc.w	BPLCON0,(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF	
 
+	if 0
+	dc.l	$fffffffe
+	endif
+
 playAreaCopperPalettePtr:	
 	include "out/foreground-copper-list.s"
 	include "out/background-copper-list.s"
 
-
 mpanelWaitLinePtr:	
 	dc.w    MPANEL_COPPER_WAIT
-	dc.w	$fffe	
+	dc.w	$fffe
+
 mpanelCopperListBpl1Ptr:	
 	dc.w	BPL1PTL,0
 	dc.w	BPL1PTH,0
