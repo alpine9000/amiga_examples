@@ -1,5 +1,6 @@
 	include "includes.i"
-	
+
+	xdef CheckPlayerMiss
 	xdef UpdatePlayer
 	xdef ProcessJoystick
 	xdef InitialisePlayer
@@ -63,9 +64,10 @@ UpdatePlayerFallingAnimation:
 
 
 UpdatePlayer:
-	;; right
 	move.l	playerSpriteConfig,a0
 	move.l	PLAYER_SPRITE_DATA(a0),d0
+
+	;; right
 	cmp.w	#PLAYER_PAUSE_PIXELS,spriteR
 	ble	.skipRight
 	add.w	#PLAYER_MOVE_PIXELS,spriteX
@@ -98,6 +100,10 @@ UpdatePlayer:
 	;; down
 	cmp.w	#PLAYER_PAUSE_PIXELS,spriteD
 	ble	.skipDown
+	if 0
+	cmp.w	#PLAYER_BOTTOM_Y,spriteY
+	bge	.skipDown
+	endif
 	add.w	#PLAYER_MOVE_PIXELS,spriteY
 	add.w	#PLAYER_MOVE_PIXELS,spriteYEnd	
 	add.l	#3*PLAYER_SPRITE_VERTICAL_BYTES,d0 
@@ -210,6 +216,63 @@ InstallRobotColorPalette:
 	include "out/sprite_robot-0-palette.s"
 	rts		
 
+CheckPlayerMiss:
+
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteR
+	beq	.check
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteU
+	beq	.check	
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteD
+	beq	.check	
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteL
+	beq	.check	
+	rts
+
+.check:
+
+	lea	map,a2	
+
+	;; calculate the a2 offset of the top right tile based on foreground scroll
+	move.l	foregroundScrollX,d0		
+	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
+	lsr.l	#1,d0
+	and.b   #$f0,d0
+	add.l	d0,a2
+
+
+	;; add the offset based on the sprite's x position
+	move.w	spriteLagX,d0
+	sub.w	#PLAYER_INITIAL_X,d0
+	lsr.w	#4,d0      	; x columns
+	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
+	sub.w	d0,d1
+	mulu.w  #FOREGROUND_PLAYAREA_HEIGHT_WORDS*2,d1
+	sub.l	d1,a2		; player x if y == bottom ?
+
+
+	;; add the offset based on the sprite's y postion
+	move.w	#PLAYER_INITIAL_Y,d0
+	sub.w	spriteY,d0
+	lsr.w	#4,d0      	; y columns
+	add.w	#1,d0
+	sub.l	d1,d1
+	move.w	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d1
+	sub.w	d0,d1
+	lsl.w	#1,d1
+	add.l	d1,a2
+
+	;; a2 now points at the tile under the sprite
+	move.w	(a2),d0
+
+	;; 
+	cmp.w	#$78e,d0
+	bge	.noBigBang
+	jmp	BigBang
+
+.noBigBang
+	rts
+	
+	
 SelectNextPlayerSprite:
 	cmp.l	#pigPlayerSpriteConfig,playerSpriteConfig
 	bne	.s1
