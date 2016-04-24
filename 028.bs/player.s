@@ -2,34 +2,34 @@
 	
 	xdef UpdatePlayer
 	xdef ProcessJoystick
-	xdef InitialisePig
-	xdef HidePig
+	xdef InitialisePlayer
+	xdef HidePlayer
 	xdef SetupSpriteData
 	xdef ScrollSprites
 	xdef deadSprite
 	xdef spriteX
 	xdef spriteLagX	
 	xdef spriteY
-	xdef UpdatePigFallingAnimation
+	xdef UpdatePlayerFallingAnimation
 	xdef InstallPlayerColorPalette
 
 PLAYER_INSTALL_COLOR_PALETTE	equ 0
 PLAYER_SPRITE_DATA		equ 4
 
-InitialisePig:
+InitialisePlayer:
 	move.l	playerSpriteConfig,a0
 	move.l	PLAYER_SPRITE_DATA(a0),d0	
-	add.l	#6*PIG_SPRITE_VERTICAL_BYTES,d0 
+	add.l	#6*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite
 	
-	move.w	#0,spritePigFallingAnimation
-	move.w	#PIG_INITIAL_X,spriteX
-	move.w	#PIG_INITIAL_Y,spriteY
-	move.w	#PIG_INITIAL_Y+16,spriteYEnd
+	move.w	#0,spritePlayerFallingAnimation
+	move.w	#PLAYER_INITIAL_X,spriteX
+	move.w	#PLAYER_INITIAL_Y,spriteY
+	move.w	#PLAYER_INITIAL_Y+16,spriteYEnd
 	rts
 
 
-HidePig:
+HidePlayer:
 	move.w	#$f000,spriteX
 	rts			
 
@@ -40,18 +40,18 @@ ScrollSprites:
 	rts
 
 
-UpdatePigFallingAnimation:
-	move.w	spritePigFallingAnimation,d0
+UpdatePlayerFallingAnimation:
+	move.w	spritePlayerFallingAnimation,d0
 	lsr.w	#1,d0
-	mulu.w	#PIG_SPRITE_VERTICAL_BYTES,d0
+	mulu.w	#PLAYER_SPRITE_VERTICAL_BYTES,d0
 	move.l	#spriteFalling1,a0
 	add.l	d0,a0
 	move.l	a0,currentSprite
-	add.w	#1,spritePigFallingAnimation
-	cmp.w	#4<<1,spritePigFallingAnimation
+	add.w	#1,spritePlayerFallingAnimation
+	cmp.w	#4<<1,spritePlayerFallingAnimation
 	blt	.dontResetAnimation
-	move.w	#0,spritePigFallingAnimation
-	bsr	HidePig
+	move.w	#0,spritePlayerFallingAnimation
+	bsr	HidePlayer
 .dontResetAnimation:
 	rts
 
@@ -60,64 +60,64 @@ UpdatePlayer:
 	;; right
 	move.l	playerSpriteConfig,a0
 	move.l	PLAYER_SPRITE_DATA(a0),d0
-	cmp.w	#PIG_PAUSE_PIXELS,spriteR
+	cmp.w	#PLAYER_PAUSE_PIXELS,spriteR
 	ble	.skipRight
-	add.w	#PIG_MOVE_PIXELS,spriteX
-	add.l	#7*PIG_SPRITE_VERTICAL_BYTES,d0 
+	add.w	#PLAYER_MOVE_PIXELS,spriteX
+	add.l	#7*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite
 .skipRight
 	cmp.w	#0,spriteR
 	beq	.notRight
 	sub.w	#1,spriteR
-	cmp.w   #PIG_PAUSE_PIXELS,spriteR
+	cmp.w   #PLAYER_PAUSE_PIXELS,spriteR
 	bge	.notRight
-	add.l	#6*PIG_SPRITE_VERTICAL_BYTES,d0 
+	add.l	#6*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite
 .notRight:
 	;; up
-	cmp.w	#PIG_PAUSE_PIXELS,spriteU
+	cmp.w	#PLAYER_PAUSE_PIXELS,spriteU
 	ble	.skipUp
-	sub.w	#PIG_MOVE_PIXELS,spriteY
-	sub.w	#PIG_MOVE_PIXELS,spriteYEnd	
-	add.l	#1*PIG_SPRITE_VERTICAL_BYTES,d0 
+	sub.w	#PLAYER_MOVE_PIXELS,spriteY
+	sub.w	#PLAYER_MOVE_PIXELS,spriteYEnd	
+	add.l	#1*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite	
 .skipUp:
 	cmp.w	#0,spriteU
 	beq	.notUp
 	sub.w	#1,spriteU
-	cmp.w   #PIG_PAUSE_PIXELS,spriteU
+	cmp.w   #PLAYER_PAUSE_PIXELS,spriteU
 	bge	.notUp
 	move.l	d0,currentSprite	
 .notUp:
 	;; down
-	cmp.w	#PIG_PAUSE_PIXELS,spriteD
+	cmp.w	#PLAYER_PAUSE_PIXELS,spriteD
 	ble	.skipDown
-	add.w	#PIG_MOVE_PIXELS,spriteY
-	add.w	#PIG_MOVE_PIXELS,spriteYEnd	
-	add.l	#3*PIG_SPRITE_VERTICAL_BYTES,d0 
+	add.w	#PLAYER_MOVE_PIXELS,spriteY
+	add.w	#PLAYER_MOVE_PIXELS,spriteYEnd	
+	add.l	#3*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite		
 .skipDown:
 	cmp.w	#0,spriteD
 	beq	.notDown
 	sub.w	#1,spriteD
-	cmp.w   #PIG_PAUSE_PIXELS,spriteD
+	cmp.w   #PLAYER_PAUSE_PIXELS,spriteD
 	bge	.notDown
-	add.l	#2*PIG_SPRITE_VERTICAL_BYTES,d0 
+	add.l	#2*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite			
 .notDown:
 	;; left
-	cmp.w	#PIG_PAUSE_PIXELS,spriteL
+	cmp.w	#PLAYER_PAUSE_PIXELS,spriteL
 	ble	.skipLeft
-	sub.w	#PIG_MOVE_PIXELS,spriteX
-	add.l	#5*PIG_SPRITE_VERTICAL_BYTES,d0 
+	sub.w	#PLAYER_MOVE_PIXELS,spriteX
+	add.l	#5*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite				
 .skipLeft
 	cmp.w	#0,spriteL
 	beq	.notLeft
 	sub.w	#1,spriteL
-	cmp.w   #PIG_PAUSE_PIXELS,spriteL
+	cmp.w   #PLAYER_PAUSE_PIXELS,spriteL
 	bge	.notLeft
-	add.l	#4*PIG_SPRITE_VERTICAL_BYTES,d0 
+	add.l	#4*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite					
 .notLeft:
 	cmp.w	#$cf,spriteX
@@ -144,23 +144,19 @@ ProcessJoystick:
 	
 	cmp.b	#3,joystickpos
  	bne	.notRight
-	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteR
-	move.l	#spritePigRight,currentSprite
+	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteR
 .notRight:
 	cmp.b	#1,joystickpos
  	bne	.notUp
-	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteU
-	move.l	#spritePigUp,currentSprite		
+	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteU
 .notUp:
 	cmp.b	#5,joystickpos
  	bne	.notDown
-	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteD
-	move.l	#spritePigDown,currentSprite	
+	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteD
 .notDown:
 	cmp.b	#7,joystickpos
  	bne	.notLeft
-	move.w	#PIG_JUMP_PIXELS+PIG_PAUSE_PIXELS,spriteL
-	move.l	#spritePigLeft,currentSprite
+	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteL
 .notLeft:	
 .skip:
 	rts
@@ -200,7 +196,7 @@ InstallPlayerColorPalette:
 	jsr	(a1)
 	rts
 	
-InstallPigColorPalette:	
+InstallPlayerColorPalette:	
 	include "out/sprite_pig-0-palette.s"
 	rts
 
@@ -209,7 +205,7 @@ InstallRobotColorPalette:
 	rts		
 
 pigPlayerSpriteConfig:
-	dc.l	InstallPigColorPalette
+	dc.l	InstallPlayerColorPalette
 	dc.l	spritePig
 
 robotPlayerSpriteConfig:
@@ -221,12 +217,12 @@ playerSpriteConfig:
 
 	include "sprite_data.i"
 
-spritePigFallingAnimation:
+spritePlayerFallingAnimation:
 	dc.w	0
 currentSpriteOffset:
 	dc.l	0
 currentSprite:
-	dc.l	spritePigRight
+	dc.l	spritePig
 deadSprite:
 	dc.l	0
 spriteR:

@@ -11,7 +11,7 @@ BASE_ADDRESS=4000
 NUM_COLORS=8
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/pig.o out/items.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o
 
 IMAGES=foreground.png \
 	background.png \

@@ -76,7 +76,7 @@ Reset:
 	jsr 	BlueFill
 	jsr	Message
 	jsr	InstallGreyPalette
-	jsr	HidePig
+	jsr	HidePlayer
 
 MainLoop:
 	MOVE.W  #$0024,BPLCON2(a6)
@@ -113,7 +113,7 @@ FadeInLoop:
 	bsr	InstallNextGreyPalette
 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,d6
 	bne	.c1
-	jsr	InitialisePig
+	jsr	InitialisePlayer
 	jsr	EnableItemSprites
 	bra	GameLoop
 .c1:
@@ -135,7 +135,7 @@ GameLoop:
 .s2:	
 	jsr	ProcessJoystick
 
-	jsr	CheckPigMiss	
+	jsr	CheckPlayerMiss	
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
 	bsr 	RenderNextBackgroundFrame			
@@ -343,7 +343,7 @@ PostMissedTile:
 	bra	Reset
 
 
-CheckPigMiss:
+CheckPlayerMiss:
 	lea	map,a2	
 
 	;; calculate the a2 offset of the top right tile based on foreground scroll
@@ -356,16 +356,16 @@ CheckPigMiss:
 
 	;; add the offset based on the sprite's x position
 	move.w	spriteLagX,d0
-	sub.w	#PIG_INITIAL_X,d0
+	sub.w	#PLAYER_INITIAL_X,d0
 	lsr.w	#4,d0      	; x columns
 	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
 	sub.w	d0,d1
 	mulu.w  #FOREGROUND_PLAYAREA_HEIGHT_WORDS*2,d1
-	sub.l	d1,a2		; pig x if y == bottom ?
+	sub.l	d1,a2		; player x if y == bottom ?
 
 
 	;; add the offset based on the sprite's y postion
-	move.w	#PIG_INITIAL_Y,d0
+	move.w	#PLAYER_INITIAL_Y,d0
 	sub.w	spriteY,d0
 	lsr.w	#4,d0      	; y columns
 	add.w	#1,d0
@@ -400,7 +400,7 @@ BigBang:
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers
 	jsr	ProcessJoystick
-	jsr	UpdatePigFallingAnimation
+	jsr	UpdatePlayerFallingAnimation
 	;; bsr 	Update
 
 	lea	map,a2	
