@@ -108,3 +108,30 @@ spriteFalling4:
 	dc.w	0,0
 	incbin	"out/sprite_fallingPig-4.bin" 
 	dc.l	0
+
+
+spriteFallingRobot0:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingRobot-0.bin" 
+	dc.l	0
+spriteFallingRobot1:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingRobot-1.bin" 
+	dc.l	0
+spriteFallingRobot2:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingRobot-2.bin" 
+	dc.l	0
+spriteFallingRobot3:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingRobot-3.bin" 
+	dc.l	0
+spriteFallingRobot4:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingRobot-4.bin" 
+	dc.l	0

@@ -16,6 +16,7 @@
 	
 PLAYER_INSTALL_COLOR_PALETTE	equ 0
 PLAYER_SPRITE_DATA		equ 4
+PLAYER_SPRITE_FALLING_DATA	equ 8	
 
 InitialisePlayer:
 	move.l	playerSpriteConfig,a0
@@ -45,7 +46,11 @@ UpdatePlayerFallingAnimation:
 	move.w	spritePlayerFallingAnimation,d0
 	lsr.w	#1,d0
 	mulu.w	#PLAYER_SPRITE_VERTICAL_BYTES,d0
-	move.l	#spriteFalling1,a0
+	;; move.l	#spriteFalling1,a0
+
+	move.l	playerSpriteConfig,a0
+	move.l	PLAYER_SPRITE_FALLING_DATA(a0),a0	
+	
 	add.l	d0,a0
 	move.l	a0,currentSprite
 	add.w	#1,spritePlayerFallingAnimation
@@ -219,10 +224,12 @@ SelectNextPlayerSprite:
 pigPlayerSpriteConfig:
 	dc.l	InstallPigColorPalette
 	dc.l	spritePig
+	dc.l	spriteFalling1
 
 robotPlayerSpriteConfig:
 	dc.l	InstallRobotColorPalette
-	dc.l	spriteRobot	
+	dc.l	spriteRobot
+	dc.l	spriteFallingRobot1
 
 playerSpriteConfig:
 	dc.l	pigPlayerSpriteConfig

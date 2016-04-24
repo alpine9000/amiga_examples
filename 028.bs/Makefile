@@ -42,6 +42,11 @@ IMAGES=foreground.png \
 	sprite_fallingPig-2.png \
 	sprite_fallingPig-3.png \
 	sprite_fallingPig-4.png \
+	sprite_fallingRobot-0.png \
+	sprite_fallingRobot-1.png \
+	sprite_fallingRobot-2.png \
+	sprite_fallingRobot-3.png \
+	sprite_fallingRobot-4.png \
 	font8x8.png\
 	splash.png
 
@@ -82,6 +87,9 @@ out/sprite_robot-%.bin: out/sprite_robot-%.png
 out/sprite_fallingPig-%.bin: out/sprite_fallingPig-%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_fallingPig-$* --palette-offset 16 --use-palette=assets/pig.pal
 
+out/sprite_fallingRobot-%.bin: out/sprite_fallingRobot-%.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_fallingRobot-$* --palette-offset 16 --use-palette=assets/robot.pal
+
 
 out/sprite_coin%.bin: out/sprite_coin%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_coin$* --palette-offset 20  --use-palette=assets/coin.pal
@@ -94,6 +102,9 @@ out/sprite_robot%.png: assets/assets.png
 
 out/sprite_fallingPig%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_fallingPig --width=16 --height=16 --rows=1 --cols=5 --dx=16 --dy=16 --x=192 --y=128
+
+out/sprite_fallingRobot%.png: assets/assets.png
+	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_fallingRobot --width=16 --height=16 --rows=1 --cols=5 --dx=16 --dy=16 --x=192 --y=192
 
 out/sprite_coin%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_coin --width=16 --height=15 --rows=1 --cols=4 --dx=16 --dy=16 --x=192 --y=144
