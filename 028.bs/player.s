@@ -7,19 +7,18 @@
 	xdef HidePlayer
 	xdef SetupSpriteData
 	xdef ScrollSprites
-	xdef deadSprite
-	xdef spriteX
-	xdef spriteLagX	
-	xdef spriteY
+	xdef deadSprite 	; used in items
 	xdef UpdatePlayerFallingAnimation
 	xdef InstallPlayerColorPalette
 	xdef SelectNextPlayerSprite
+	xdef CalculateScore
 	
 PLAYER_INSTALL_COLOR_PALETTE	equ 0
 PLAYER_SPRITE_DATA		equ 4
 PLAYER_SPRITE_FALLING_DATA	equ 8	
 
 InitialisePlayer:
+	move.w	#0,playerMaxX
 	move.l	playerSpriteConfig,a0
 	move.l	PLAYER_SPRITE_DATA(a0),d0	
 	add.l	#6*PLAYER_SPRITE_VERTICAL_BYTES,d0 
@@ -66,13 +65,14 @@ UpdatePlayerFallingAnimation:
 UpdatePlayer:
 	move.l	playerSpriteConfig,a0
 	move.l	PLAYER_SPRITE_DATA(a0),d0
-
 	;; right
 	cmp.w	#PLAYER_PAUSE_PIXELS,spriteR
 	ble	.skipRight
 	add.w	#PLAYER_MOVE_PIXELS,spriteX
+	add.w	#1,playerX
 	add.l	#7*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite
+
 .skipRight
 	cmp.w	#0,spriteR
 	beq	.notRight
@@ -121,6 +121,7 @@ UpdatePlayer:
 	cmp.w	#PLAYER_PAUSE_PIXELS,spriteL
 	ble	.skipLeft
 	sub.w	#PLAYER_MOVE_PIXELS,spriteX
+	sub.w	#1,playerX	
 	add.l	#5*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite				
 .skipLeft
@@ -139,6 +140,17 @@ UpdatePlayer:
 	rts
 
 
+CalculateScore:
+	move.w	playerX,d0
+	move.w	playerMaxX,d1
+	lsr.w	#3,d0
+	cmp.w	d1,d0
+	ble	.skip
+	move.w	d0,playerMaxX	
+	jsr	IncrementScore
+.skip:
+	rts
+	
 
 ProcessJoystick:
 	;; 812
@@ -241,7 +253,6 @@ CheckPlayerMiss:
 	rts
 
 .check:
-
 	lea	map,a2	
 
 	;; calculate the a2 offset of the top right tile based on foreground scroll
@@ -254,17 +265,22 @@ CheckPlayerMiss:
 
 	;; add the offset based on the sprite's x position
 	move.w	spriteLagX,d0
-	sub.w	#PLAYER_INITIAL_X,d0
+
+	cmpi.w  #PLAYER_LEFT_X,d0
+	blt	.doBigBang
+	
+	sub.w	#PLAYER_LEFT_X,d0
 	lsr.w	#4,d0      	; x columns
+
+
+
 	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
 	sub.w	d0,d1
-	move.w	d0,checkXPos
 	mulu.w  #FOREGROUND_PLAYAREA_HEIGHT_WORDS*2,d1
 	sub.l	d1,a2		; player x if y == bottom ?
 
 
 	;; add the offset based on the sprite's y postion
-CheckY:	
 	move.w	#PLAYER_BOTTOM_Y,d0
 	sub.w	spriteY,d0
 	lsr.w	#4,d0      	; y columns
@@ -272,13 +288,11 @@ CheckY:
 	sub.l	d1,d1
 	move.w	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d1
 	sub.w	d0,d1
-	move.w	d0,checkYPos
 	lsl.w	#1,d1
 	add.l	d1,a2
 
 	;; a2 now points at the tile under the sprite
 	move.w	(a2),d0
-	move.w	d0,checkTile
 
 	;; 
 	cmp.w	#$78e,d0
@@ -289,13 +303,6 @@ CheckY:
 .noBigBang:
 	rts
 
-checkXPos:
-	dc.w	0
-checkYPos:
-	dc.w	0
-checkTile:
-	dc.w	0
-	
 SelectNextPlayerSprite:
 	cmp.l	#pigPlayerSpriteConfig,playerSpriteConfig
 	bne	.s1
@@ -346,3 +353,8 @@ spriteY:
 	dc.w	$e4
 spriteYEnd:
 	dc.w	$f5
+playerMaxX:
+	dc.w	0
+playerX:
+	dc.w	0		
+	

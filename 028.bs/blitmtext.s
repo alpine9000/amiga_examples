@@ -1,5 +1,5 @@
 	include "includes.i"
-	xdef DrawText8
+	xdef DrawMaskedText8
 
 BLIT_LF_MINTERM		equ $ca		; cookie cut
 BLIT_WIDTH_WORDS	equ 2		; blit 2 words to allow shifting
@@ -9,9 +9,9 @@ FONT_WIDTH		equ 8
 FONTMAP_WIDTH_BYTES	equ 32
 _SCREEN_BIT_DEPTH	equ 4
 _BITPLANE_WIDTH_BYTES	equ 320/8
-MASKED_FONT		equ 0
+MASKED_FONT		equ 1
 	
-DrawText8:
+DrawMaskedText8:
 	;; a0 - bitplane
 	;; a1 - text
 	;; d0 - xpos

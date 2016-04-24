@@ -1,6 +1,8 @@
 	include "includes.i"
 
 	xdef    BigBang
+	xdef	IncrementScore
+
 	xdef	copperList
 	xdef	copperListBpl1Ptr
 	xdef	copperListBpl1Ptr2	
@@ -65,7 +67,7 @@ Entry:
 	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 
 	
-Reset:		
+Reset:	
 	move.w	#0,moving	
 	move.l	#fade,fadePtr
 	move.l	#panelFade,panelFadePtr
@@ -78,7 +80,8 @@ Reset:
 	jsr	Message
 	jsr	InstallGreyPalette
 	jsr	HidePlayer
-
+	bsr	RenderScore
+	
 MainLoop:
 	;; 	MOVE.W  #$0024,BPLCON2(a6)
 	
@@ -135,7 +138,7 @@ GameLoop:
 	move.w	#0,moving
 .s2:	
 	jsr	ProcessJoystick
-
+	
 	jsr	CheckPlayerMiss	
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
@@ -161,7 +164,7 @@ Update:
 	beq	.skipForegroundUpdates
 	;; ---- Foreground updates ----------------------------------------	
 .foregroundUpdates:
-
+	jsr	CalculateScore
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	andi.l	#$f,d0
@@ -503,7 +506,6 @@ Level3InterruptHandler:
 	movem.l	(sp)+,d0-a6
 	rte	
 
-
 Message:
 	;; a0 - bitplane
 	;; a1 - text
@@ -513,18 +515,50 @@ Message:
 	lea	message,a1
 	move.w	#128,d0
 	move.w	#11,d1
-	jsr	DrawText8
+	jsr	DrawMaskedText8
 	move.w	#MPANEL_COPPER_WAIT,mpanelWaitLinePtr	
 	rts
 
+RenderScore:
+	lea	panel,a0
+	lea	scoreText,a1
+	move.w	#31,d0
+	move.w	#20,d1
+	jsr	DrawText8
+	rts
 
+	
+IncrementScore:
+	movem.l	d0-a6,-(sp)
+	lea	scoreText,a0
+	add.l	#3,a0
+.loop:
+	sub.l	d0,d0
+	move.b	(a0),d0
+	addq.b	#1,d0
+	cmp.b	#'9',d0
+	ble	.done
+	move.b	#'0',d0
+	move.b	d0,(a0)	
+	sub.l	#1,a0
+	bra	.loop
+.done
+	move.b	d0,(a0)
+	jsr	RenderScore
+	movem.l	(sp)+,d0-a6
+	rts
+	
 message:
 	dc.b	"LETS PLAY!"
 	dc.b	0
 
 	align 4	
 
+scoreText:
+	dc.b	"0000"
+	dc.b	0
 
+	align	4
 	
 copperList:
 panelCopperListBpl1Ptr:	

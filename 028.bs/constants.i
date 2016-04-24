@@ -2,6 +2,7 @@
 MPANEL_COPPER_WAIT			equ $9ad1 ; controls the vertical position of the message panel
 
 PLAYER_INITIAL_X			equ $c0
+PLAYER_LEFT_X				equ $c0
 PLAYER_INITIAL_Y			equ $e4-32
 PLAYER_BOTTOM_Y				equ $e4+16
 PLAYER_TOP_Y				equ (PLAYER_BOTTOM_Y-(7*16))
