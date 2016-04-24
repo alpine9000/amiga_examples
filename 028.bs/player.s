@@ -12,7 +12,8 @@
 	xdef spriteY
 	xdef UpdatePlayerFallingAnimation
 	xdef InstallPlayerColorPalette
-
+	xdef SelectNextPlayerSprite
+	
 PLAYER_INSTALL_COLOR_PALETTE	equ 0
 PLAYER_SPRITE_DATA		equ 4
 
@@ -196,7 +197,7 @@ InstallPlayerColorPalette:
 	jsr	(a1)
 	rts
 	
-InstallPlayerColorPalette:	
+InstallPigColorPalette:	
 	include "out/sprite_pig-0-palette.s"
 	rts
 
@@ -204,8 +205,19 @@ InstallRobotColorPalette:
 	include "out/sprite_robot-0-palette.s"
 	rts		
 
+SelectNextPlayerSprite:
+	cmp.l	#pigPlayerSpriteConfig,playerSpriteConfig
+	bne	.s1
+	move.l	#robotPlayerSpriteConfig,playerSpriteConfig
+	bra	.done
+.s1:
+	move.l	#pigPlayerSpriteConfig,playerSpriteConfig
+.done:
+	bsr	InstallPlayerColorPalette	
+	rts
+	
 pigPlayerSpriteConfig:
-	dc.l	InstallPlayerColorPalette
+	dc.l	InstallPigColorPalette
 	dc.l	spritePig
 
 robotPlayerSpriteConfig:
@@ -213,8 +225,8 @@ robotPlayerSpriteConfig:
 	dc.l	spriteRobot	
 
 playerSpriteConfig:
-	dc.l	robotPlayerSpriteConfig
-
+	dc.l	pigPlayerSpriteConfig
+	
 	include "sprite_data.i"
 
 spritePlayerFallingAnimation:

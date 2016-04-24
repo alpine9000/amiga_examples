@@ -340,6 +340,7 @@ RenderForegroundTile:
 	
 
 PostMissedTile:
+	jsr 	SelectNextPlayerSprite
 	bra	Reset
 
 
