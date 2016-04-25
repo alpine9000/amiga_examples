@@ -35,7 +35,6 @@ ShowSplash:
 	;; install copper list, then enable dma
 	lea	splashCopperList(pc),a0
 	move.l	a0,COP1LC(a6)
- 	move.w  COPJMP1(a6),d0
 
 	;; set up default palette
 	include "out/splash-palette.s"
