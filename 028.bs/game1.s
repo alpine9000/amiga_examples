@@ -94,6 +94,7 @@ Reset:
 MainLoop:
 	MOVE.W  #$0024,BPLCON2(a6)
 	move.l	#0,frameCount
+
 SetupBoardLoop:
 	add.l	#1,frameCount
 	move.l	frameCount,d6		
@@ -219,14 +220,15 @@ ShowMessagePanel:
 	jsr	WaitVerticalBlank
 	lea	mpanelCopperList,a0
 	move.l	a0,COP1LC(a6)
- 	move.w  COPJMP1(a6),d0
+ 	;; move.w  COPJMP1(a6),d0
 	rts
 
 
 HideMessagePanel:
+	jsr	WaitVerticalBlank
 	lea	copperList,a0
 	move.l	a0,COP1LC(a6)
- 	move.w  COPJMP1(a6),d0
+ 	;; move.w  COPJMP1(a6),d0
 	rts	
 	
 HoriScrollPlayfield:
