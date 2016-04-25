@@ -216,6 +216,7 @@ Update:
 
 
 ShowMessagePanel:
+	jsr	WaitVerticalBlank
 	lea	mpanelCopperList,a0
 	move.l	a0,COP1LC(a6)
  	move.w  COPJMP1(a6),d0
