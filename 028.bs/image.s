@@ -14,11 +14,17 @@ SwitchBuffers:
 	move.l	a0,foregroundOnscreen
 	move.l	a0,a1
 	lea 	copperListBpl1Ptr,a0
-	bsr.s	PokeBitplanePointers	
+	bsr.s	PokeBitplanePointers
+
+	lea 	copperListBpl1Ptr_MP,a0
+	bsr.s	PokeBitplanePointers		
 
 	add.l	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(96-1),d0	
-	lea 	copperListBpl1Ptr2,a0
-	bsr.s	PokeBitplanePointers
+	;; lea 	copperListBpl1Ptr2,a0
+	;; bsr.s	PokeBitplanePointers
+
+	lea 	copperListBpl1Ptr2_MP,a0
+	bsr.s	PokeBitplanePointers	
 				
 	
 	;; background is not double buffered
@@ -29,9 +35,15 @@ SwitchBuffers:
 	lea 	copperListBpl2Ptr,a0
 	bsr.s	PokeBitplanePointers
 
+	lea 	copperListBpl2Ptr_MP,a0
+	bsr.s	PokeBitplanePointers	
+
 	add.l	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(96-48+16),d0
-	lea 	copperListBpl2Ptr2,a0
-	bsr.s	PokeBitplanePointers
+	;; lea 	copperListBpl2Ptr2,a0
+	;; 	bsr.s	PokeBitplanePointers
+
+	lea 	copperListBpl2Ptr2_MP,a0
+	bsr.s	PokeBitplanePointers	
 	
 	rts
 

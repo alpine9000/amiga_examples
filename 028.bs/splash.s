@@ -41,6 +41,7 @@ ShowSplash:
 	include "out/splash-palette.s"
 
 	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
+	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
 .wait:
 	jsr	WaitVerticalBlank
 	jsr	ProcessJoystick

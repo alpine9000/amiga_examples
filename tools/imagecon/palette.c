@@ -59,6 +59,7 @@ palette_output(imagecon_image_t* ic, char* outFilename)
   FILE* paletteGreyFP = 0;
   FILE* paletteTableFP = 0;
   FILE* paletteGreyTableFP = 0;
+  FILE* paletteGreyCopperFP = 0;
 
   if (config.outputCopperList) {
     fp = file_openWrite("%s-copper-list.s", outFilename);
@@ -72,6 +73,7 @@ palette_output(imagecon_image_t* ic, char* outFilename)
   if (config.outputPaletteGrey) {
     paletteGreyFP = file_openWrite("%s-grey.s", outFilename);
     paletteGreyTableFP = file_openWrite("%s-grey-table.s", outFilename);
+    paletteGreyCopperFP = file_openWrite("%s-grey-copper.s", outFilename);
     fprintf(paletteGreyFP, "\tmovem.l d0-a6,-(sp)\n\tlea CUSTOM,a6\n");
   }
 
@@ -117,6 +119,11 @@ palette_output(imagecon_image_t* ic, char* outFilename)
 
     if (fp) {
       fprintf(fp, "\tdc.w $%x,$%x\n", 0x180+((i+config.paletteOffset)*2), RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b));
+    }
+
+    if (paletteGreyCopperFP) {
+      unsigned grey = ((RGB24TORGB12(ic->palette[i].r) + RGB24TORGB12(ic->palette[i].g) + RGB24TORGB12(ic->palette[i].b))/3);
+      fprintf(paletteGreyCopperFP, "\tdc.w $%x,$%03x\n", 0x180+((i+config.paletteOffset)*2), grey << 8 | grey << 4 | grey);
     }
   }
 

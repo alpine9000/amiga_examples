@@ -29,9 +29,7 @@ Init:
 
 	
 	;; install copper list, then enable dma and selected interrupts
-	lea	copperList,a0
-	move.l	a0,COP1LC(a6)
- 	move.w  COPJMP1(a6),d0
+
 	;; 	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)	
 	;; move.w	#PF2PRI,BPLCON2(a6) 

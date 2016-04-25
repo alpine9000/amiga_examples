@@ -11,7 +11,7 @@ BASE_ADDRESS=4000
 NUM_COLORS=8
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o
 
 IMAGES=foreground.png \
 	background.png \
@@ -67,6 +67,9 @@ out/foreground.bin: assets/assets.png
 	sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_COLOR)/" out/foreground-copper-list.s 
 	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_COLOR)/" out/foreground-palette-table.s
 	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_GREY_COLOR)/" out/foreground-grey-table.s
+	sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_GREY_COLOR)/" out/foreground-grey-copper.s
+	sed -i '' "2s/.*/        dc.w COLOR01,\$$888/" out/foreground-grey-copper.s
+	sed -i '' "3s/.*/        dc.w COLOR02,\$$bbb/" out/foreground-grey-copper.s
 
 out/background.bin: assets/assets.png
 	$(IMAGECON) --use-palette=assets/background.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/background --palette-offset 8
@@ -115,16 +118,17 @@ out/font%.bin: assets/font%.png
 out/splash.bin: assets/splash.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/splash --colors=32  --full-color-palette-file --output-png --output-copperlist
 
+out/playarea_fade.s: assets/bottom_section_playarea.pal ../tools/fade/out/fade
+	../tools/fade/out/fade --from-grey --to=assets/bottom_section_playarea.pal --output=playarea > out/playarea_fade.s
 
+out/flags_fade.s: assets/bottom_section_flags.pal ../tools/fade/out/fade
+	../tools/fade/out/fade --from-grey --to=assets/bottom_section_flags.pal --output=flags > out/flags_fade.s
 
-out/fade.s: assets/bottom_section.pal out/fade
-	./out/fade assets/bottom_section.pal bottom > out/fade.s
+out/panelFade.s: assets/panel.pal ../tools/fade/out/fade
+	../tools/fade/out/fade --from-grey --to=assets/panel.pal --output=panel > out/panelFade.s
 
-out/panelFade.s: assets/panel.pal out/fade
-	./out/fade assets/panel.pal panel > out/panelFade.s
-
-out/fade: fade.c
-	gcc fade.c -o out/fade
+out/tileFade.s: assets/tileFadeFrom.pal assets/tileFadeTo.pal ../tools/fade/out/fade
+	../tools/fade/out/fade --colors=2 --from=assets/tileFadeFrom.pal --to=assets/tileFadeTo.pal --output=tileFade > out/tileFade.s
 
 out/foreground-map.s: foreground.tmx
 	../tools/mapgen/out/mapgen --depth=3 --input=foreground.tmx
@@ -139,5 +143,5 @@ out/background-map.s: background.tmx
 	rm background-indexes.s
 
 out/blit.o: constants.i macros.i
-out/main.o: out/background-map.s out/foreground-map.s $(IMAGEDATA) constants.i macros.i Makefile link.script.x assets/palette.pal out/fade.s out/panelFade.s
+out/main.o: out/background-map.s out/foreground-map.s $(IMAGEDATA) constants.i macros.i Makefile link.script.x assets/palette.pal out/playarea_fade.s out/flags_fade.s out/panelFade.s out/tileFade.s
 out/init.o: constants.i Makefile

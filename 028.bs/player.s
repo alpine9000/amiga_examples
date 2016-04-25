@@ -143,7 +143,7 @@ UpdatePlayer:
 CalculateScore:
 	move.w	playerX,d0
 	move.w	playerMaxX,d1
-	lsr.w	#3,d0
+	lsr.w	#PLAYER_JUMP_SHIFT_CONVERT,d0
 	cmp.w	d1,d0
 	ble	.skip
 	move.w	d0,playerMaxX	
