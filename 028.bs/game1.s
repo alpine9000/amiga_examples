@@ -3,6 +3,8 @@
 	xdef    BigBang
 	xdef	IncrementScore
 
+	xdef	pathwayRenderPending
+	
 	xdef	copperList
 	xdef	mpanelCopperList
 	xdef	copperListBpl1Ptr
@@ -17,6 +19,7 @@
 	xdef	foregroundOffscreen
 	xdef	foregroundScrollX
 	xdef	map
+	xdef	pathwayMap	
 	xdef	itemsMap
 	xdef   	mapSize
 	xdef	moving
@@ -76,6 +79,7 @@ Entry:
 
 	
 Reset:	
+	move.w	#0,pathwayRenderPending
 	move.w	#0,moving	
 	move.l	#playareaFade,playareaFadePtr
 	move.l	#panelFade,panelFadePtr
@@ -104,7 +108,7 @@ SetupBoardLoop:
 	move.l	foregroundScrollX,d0
 	move.w	#1,moving
 	bsr 	Update
-	bsr	RenderNextForegroundFrame	
+	bsr	RenderNextForegroundFrame
 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount	
 	bge	.gotoGameLoop
 	bra	SetupBoardLoop
@@ -166,11 +170,8 @@ GameLoop:
 	move.w	#0,moving
 .s2:	
 	jsr	ProcessJoystick
-
-	jsr	InstallNextTileColor
-	jsr	CheckPlayerMiss	
 	bsr 	Update
-	bsr	RenderNextForegroundFrame	
+	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame
 
 	if TIMING_TEST=1
@@ -183,7 +184,7 @@ GameLoop:
 
 	bra	GameLoop
 	
-Update:
+Update:	
 	jsr	UpdatePlayer
 
 .backgroundUpdates:
@@ -211,8 +212,15 @@ Update:
 	bne	.c1
 	bsr	ResetAnimPattern
 	bsr	ResetDeAnimPattern
+	rts
 .c1:
 .skipForegroundUpdates:
+	cmp.w	#0,pathwayRenderPending
+	beq	.dontRenderPathway
+	jsr	RenderPathway
+.dontRenderPathway:
+	jsr	InstallNextTileColor
+	jsr	CheckPlayerMiss		
 	rts
 
 
@@ -337,6 +345,99 @@ RenderNextForegroundFrame:
 	blt	.loop
 	rts
 
+RenderPathway:
+	;; only render when scroll complete
+	move.l	foregroundScrollX,d0
+	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels		
+	and.b	#$f,d0
+	cmp.b	#$f,d0
+	bne	.skip
+	
+	sub.w	#1,pathwayRenderPending
+	move.w	#6,d6
+.loopY:
+	move.l	#5,d5	
+.loopX:	
+	bsr	GetPathTile
+	move.l	d0,a2
+	move.w	(a2),d0
+	cmp.w	#0,d0
+	beq	.dontBlit
+	
+	lea 	foregroundTilemap,a1	
+	add.w	d0,a1 	; source tile	
+	
+	move.l	foregroundScrollX,d0
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
+	lsr.w   #3,d0		; bytes to scroll
+	move.l	foregroundOffscreen,a0
+	add.l	d0,a0
+
+	move.l	#-BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*8,d0
+	move.w	d5,d4
+	mulu.w	#2,d4
+	add.l	d4,d0
+	add.l	#10,d0
+	add.l	d0,a0
+	move.l	#10,d2
+	sub.l	d6,d2
+	jsr	BlitTile
+.dontBlit:
+	dbra	d5,.loopX
+	dbra	d6,.loopY
+.skip:
+
+	rts
+
+
+GetPathTile:
+	;; d5 - x board index
+	;; d6 - y board index
+	;;
+	;; d0 - pathwayOffset
+	
+	lea	pathwayMap,a2
+	
+	;; calculate the a2 offset of the top right tile based on foreground scroll
+	move.l	foregroundScrollX,d0		
+	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
+	lsr.l	#1,d0
+	and.b   #$f0,d0
+	add.l	d0,a2
+
+	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
+	sub.w	d5,d1		; x column
+	mulu.w  #FOREGROUND_PLAYAREA_HEIGHT_WORDS*2,d1
+	sub.l	d1,a2		; player x if y == bottom ?
+
+	sub.l	d1,d1
+	move.w	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d1
+	sub.w	d6,d1 		; y row
+	lsl.w	#1,d1
+	add.l	d1,a2
+
+	;; a2 now points at the tile at the coordinate
+	move.l	a2,d0
+	rts
+		
+	
+RenderNextForegroundPathwayFrame:
+	lea	pathwayMap,a2	
+	move.l	foregroundScrollX,d0	
+	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
+	lsr.l	#1,d0
+	and.b   #$f0,d0
+	add.l	d0,a2		
+	move.l	0,d3
+.loop:
+	move.l	d3,d2
+	bsr	RenderForegroundTile
+	add.l	#2,a2
+	add.l	#1,d3
+	cmp.l 	#FOREGROUND_PLAYAREA_HEIGHT_WORDS,d3
+	blt	.loop
+	rts	
+
 
 RenderForegroundTile_NoAnim:
 	;; a2 - address of tileIndex
@@ -359,6 +460,9 @@ RenderForegroundTile:
 	move.l	foregroundOffscreen,a0
 	add.l	d0,a0
 	lea 	foregroundTilemap,a1	
+	move.w	(a2),d0
+	cmp.l	#0,d0
+	beq	.s2
 	add.w	(a2),a1 	; source tile	
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0
 	lea 	animIndex,a4
@@ -512,7 +616,7 @@ Level3InterruptHandler:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
 	add.l	#1,verticalBlankCount
 	jsr 	SetupSpriteData
-	jsr	P61_Music
+	;; jsr	P61_Music
 .checkCopper:
 	move.w	INTREQR(a6),d0
 	and.w	#INTF_COPER,d0	
@@ -895,7 +999,6 @@ InstallFlagsGreyPalette:
 
 
 InstallNextTileColor:
-	movem.l	d0-a6,-(sp)
 	lea	playAreaCopperPalettePtr2,a1
 	add.l	#6,a1 		; point to COLOR01
 	move.l	tileFadePtr,a0
@@ -913,7 +1016,6 @@ InstallNextTileColor:
 .reset:
 	move.l	#tileFade,tileFadePtr
 .done:
-	movem.l	(sp)+,d0-a6
 	rts
 	
 InstallNextGreyPalette:
@@ -990,9 +1092,13 @@ panel:
 	incbin "out/panel.bin"
 mpanel:
 	incbin "out/mpanel.bin"	
+
+pathwayMap:
+	include "out/pathway-map.s"
+	dc.w	$FFFF	
 map:
 	include "out/foreground-map.s"
-	dc.w	$FFFF
+	dc.w	$FFFF	
 itemsMap:
 	include "out/items-indexes.s"
 	dc.w	$FFFF
@@ -1010,7 +1116,9 @@ verticalBlankCount:
 	dc.l	0
 moving:
 	dc.w	0
-
+pathwayRenderPending:
+	dc.w	0
+	
 tileFadePtr:
 	dc.l	tileFade
 playareaFadePtr:
@@ -1018,8 +1126,7 @@ playareaFadePtr:
 panelFadePtr:
 	dc.l	panelFade
 flagsFadePtr:
-	dc.l	flagsFade
-
+	dc.l	flagsFade	
 bigBangIndex:
 	ds.l	FOREGROUND_PLAYAREA_HEIGHT_WORDS*FOREGROUND_PLAYAREA_WIDTH_WORDS,0
 	

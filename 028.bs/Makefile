@@ -136,6 +136,9 @@ out/foreground-map.s: foreground.tmx
 	rm items-map.s
 	mv items-indexes.s out
 	rm foreground-indexes.s
+	mv pathway-map.s out
+	mv pathway-indexes.s out
+
 
 out/background-map.s: background.tmx
 	../tools/mapgen/out/mapgen --depth=3 --input=background.tmx
