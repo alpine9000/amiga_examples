@@ -12,6 +12,7 @@ typedef struct {
   int numColors;
   int fromGrey;
   int fromBlack;
+  int steps;
   char* toFile;
   char* fromFile;
   char* output;

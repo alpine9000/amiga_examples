@@ -79,7 +79,8 @@ Reset:
 	move.w	#0,moving	
 	move.l	#playareaFade,playareaFadePtr
 	move.l	#panelFade,panelFadePtr
-	move.l	#flagsFade,flagsFadePtr	
+	move.l	#flagsFade,flagsFadePtr
+	move.l	#tileFade,tileFadePtr
 	move.l	#0,foregroundScrollX
 	move.l	#-1,frameCount		
 	bsr	InitAnimPattern
@@ -164,7 +165,8 @@ GameLoop:
 	move.w	#0,moving
 .s2:	
 	jsr	ProcessJoystick
-	
+
+	jsr	InstallNextTileColor
 	jsr	CheckPlayerMiss	
 	bsr 	Update
 	bsr	RenderNextForegroundFrame	
@@ -612,8 +614,6 @@ copperListBpl1Ptr:
 	dc.w	BPL3PTH,0
 	dc.w	BPL5PTL,0
 	dc.w	BPL5PTH,0
-
-
 copperListBpl2Ptr:
 	;; 3 bitplanes per playfield, playfield2 gets bitplanes 2,4,6
 	dc.w	BPL2PTL,0
@@ -636,7 +636,8 @@ copperListBpl2Ptr:
 playAreaCopperPalettePtr1:	
 	include "out/foreground-copper-list.s"
 	include "out/background-copper-list.s"	
-	
+
+	;; top flag row has it's own palette
 	dc.w    $84d1
 	dc.w	$fffe		
 flagsCopperPalettePtr1:	
@@ -644,12 +645,15 @@ flagsCopperPalettePtr1:
 	include "out/background-copper-list.s"
 	dc.w    $94d1
 	dc.w	$fffe
+	;; 
 
+	
 playAreaCopperPalettePtr2:	
 	include "out/foreground-copper-list.s"
 	include "out/background-copper-list.s"		
 	
 
+	;; bottom flag row has it's own palette
 	dc.w    $f4d1
 	dc.w	$fffe		
 flagsCopperPalettePtr2:	
@@ -887,6 +891,28 @@ InstallFlagsGreyPalette:
 	rts	
 
 
+InstallNextTileColor:
+	movem.l	d0-a6,-(sp)
+	lea	playAreaCopperPalettePtr2,a1
+	add.l	#6,a1 		; point to COLOR01
+	move.l	tileFadePtr,a0
+	lea	tileFadeFadeComplete,a5
+	cmp.l	a5,a0
+	bge	.reset
+	move.l	#1,d0 		; 2 colors to update
+.loop:
+	move.w	(a0),(a1)
+	add.l	#2,a0
+	add.l	#4,a1
+	dbra	d0,.loop
+	add.l	#2*2,tileFadePtr
+	bra	.done
+.reset:
+	move.l	#tileFade,tileFadePtr
+.done:
+	movem.l	(sp)+,d0-a6
+	rts
+	
 InstallNextGreyPalette:
 	lea	playAreaCopperPalettePtr1,a1
 	lea	playAreaCopperPalettePtr2,a2
@@ -982,6 +1008,8 @@ verticalBlankCount:
 moving:
 	dc.w	0
 
+tileFadePtr:
+	dc.l	tileFade
 playareaFadePtr:
 	dc.l	playareaFade
 panelFadePtr:
@@ -1092,6 +1120,10 @@ flagsFade:
 
 panelFade:
 	include "out/panelFade.s"
+
+tileFade:
+	include "out/tileFade.s"
+
 
 
 	section .bss

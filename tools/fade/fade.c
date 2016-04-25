@@ -14,7 +14,8 @@ typedef struct {
 
 
 config_t config = {
-  .numColors = 16
+  .numColors = 16,
+  .steps = 16
 };
 
 #define MAX_COLORS 32
@@ -64,13 +65,14 @@ main(int argc, char** argv)
       {"to",   required_argument, 0, 't'},
       {"from",   required_argument, 0, 'f'},
       {"output",   required_argument, 0, 'o'},
+      {"steps",   required_argument, 0, 's'},
       {"colors",  required_argument, 0, 'c'},
       {0, 0, 0, 0}
     };
     
     int option_index = 0;
     
-    c = getopt_long (argc, argv, "t:c:o:", long_options, &option_index);
+    c = getopt_long (argc, argv, "s:t:c:o:", long_options, &option_index);
     
     if (c == -1)
       break;
@@ -92,6 +94,11 @@ main(int argc, char** argv)
 	abort_("invalid number of colors");
       }
       break;	      
+    case 's':
+      if (sscanf(optarg, "%d", &config.steps) != 1) {
+	abort_("invalid number of steps");
+      }
+      break;
     case '?':
       usage();
       break;	
@@ -152,21 +159,21 @@ main(int argc, char** argv)
     }
   }
 
-  for (int s = 0; s < 16; s++) {
+  for (int s = 0; s < config.steps+1; s++) {
     printf(".step%d\n", s);
     for (int i = 0; i < config.numColors; i++) {
-      int dr = ((((float)original[i].r)-(float)from[i].r)/16.0)*s;
-      int dg = ((((float)original[i].g)-(float)from[i].g)/16.0)*s;
-      int db = ((((float)original[i].b)-(float)from[i].b)/16.0)*s;
+      int dr = ((((float)original[i].r)-(float)from[i].r)/(float)config.steps)*s;
+      int dg = ((((float)original[i].g)-(float)from[i].g)/(float)config.steps)*s;
+      int db = ((((float)original[i].b)-(float)from[i].b)/(float)config.steps)*s;
 
-      #if 0
-      printf("r:%d %d %d -> %d\n"
-	     "g:%d %d %d -> %d\n"
-	     "b:%d %d %d -> %d\n",
-	     original[i].r,from[i].r, dr, from[i].r+dr, 
-	     original[i].g,from[i].g, dg, from[i].g+dg,
-	     original[i].b,from[i].b, db, from[i].b+db);
-      #endif
+      if (config.verbose) {
+	printf("r:%d %d %d -> %d\n"
+	       "g:%d %d %d -> %d\n"
+	       "b:%d %d %d -> %d\n",
+	       original[i].r,from[i].r, dr, from[i].r+dr, 
+	       original[i].g,from[i].g, dg, from[i].g+dg,
+	       original[i].b,from[i].b, db, from[i].b+db);
+      }
 
       printf("\tdc.w\t$%03x\n", 
 	     ((from[i].r+dr)>>4)<<8|
