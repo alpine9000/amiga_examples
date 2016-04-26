@@ -21,14 +21,14 @@ fade will generate 68000 assembler data for fading between two amiga color palet
 
 mandatory arguments
 -------------------
-**--output** &lt;output.png>
+**--output** &lt;output>
 
 Specify the name used for creating symbols used in the data. In addition exactly on "to" and one "from" option must be specified.
 
 options
 -------
 
-**--to** &lt;file.pal>
+**--to** &lt;to.pal>
 
 The palette file used for the destination palette (will fade to this palette)
 
