@@ -114,14 +114,19 @@ out/bootblock.o: $(BOOTBLOCK_ASM) $(PROGRAM_BIN)
 
 out/main.o: $(MODULE) $(EXTRA)
 	vasmm68k_mot $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ -I/usr/local/amiga/os-include
+	@vasmm68k_mot -depend=make $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ -I/usr/local/amiga/os-include > $*.d
 
 out/%.o: %.s
 	vasmm68k_mot $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ -I/usr/local/amiga/os-include
+	@vasmm68k_mot -depend=make $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ -I/usr/local/amiga/os-include > out/$*.d
 
 out/%.o: %.c
 	vc -O3 -c $< -o $@
 	-@vc -O3 -S $< -o out/$*.s > /dev/null 2> /dev/null
 	-@vc -O0 -S $< -o out/$*-noopt.s > /dev/null 2> /dev/null
+
+ALL_OBJS=out/main.o $(OBJS)
+ALL_DEPENDS=$(ALL_OBJS:.o=.d)
 
 out/main.bin: out/main.o $(OBJS)
 	vlink $(LINKER_OPTIONS)  -brawbin1 $< $(OBJS) -o $@
@@ -133,3 +138,5 @@ out/shrunk.bin: $(SHRINKLER_EXE) out/main.bin
 
 clean:
 	rm -rf out bin *~
+
+-include $(ALL_DEPENDS)

@@ -1,7 +1,6 @@
 	include "includes.i"
 
 	xdef    BigBang
-	xdef	IncrementScore
 
 	xdef	pathwayRenderPending
 	
@@ -41,13 +40,10 @@ Entry:
 
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR			
-	
+
 	jsr	StartMusic
-
 	jsr	ShowSplash
-
-	;; jsr	InstallGreyPalette	
-
+		
 	;; d0 - fg bitplane pointer offset
 	;; d1 - bg bitplane pointer offset		
 	move.l	#0,d0
@@ -93,12 +89,11 @@ Reset:
 	jsr	Message
 	jsr	InstallGreyPalette
 	jsr	HidePlayer
-	bsr	RenderScore
 	
 MainLoop:
 	MOVE.W  #$0024,BPLCON2(a6)
 	move.l	#0,frameCount
-
+	
 SetupBoardLoop:
 	add.l	#1,frameCount
 	move.l	frameCount,d6		
@@ -118,14 +113,10 @@ SetupBoardLoop:
 	cmp.l	#50,d6
 	ble	.gotoGameLoop
 	jsr	ProcessJoystick
-	;; cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+50,d6
-	;; bne	.gotoGameLoop
 	btst.b	#0,joystick
 	beq	.gotoGameLoop
 	move.w	#0,moving
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
-	;; move.w	#$ffff,mpanelWaitLinePtr
-	;; bsr	ClearMPanel
 	bsr	HideMessagePanel
 	
 FadeInLoop:
@@ -141,11 +132,26 @@ FadeInLoop:
 	bne	.c1
 	jsr	InitialisePlayer
 	jsr	EnableItemSprites
+
+	lea	frameCounterText,a0
+	bsr	ResetCounter
+	lea	verticalBlankCounterText,a0
+	bsr	ResetCounter	
+	
 	bra	GameLoop
 .c1:
 	bra	FadeInLoop
 	
 GameLoop:
+	lea	frameCounterText,a0
+	bsr	IncrementCounter
+	lea	frameCounterText,a1	
+	move.w	#31,d0
+	jsr	RenderCounter
+	lea	verticalBlankCounterText,a1	
+	move.w	#101,d0
+	jsr	RenderCounter	
+	
 	add.l	#1,frameCount
 	move.l	frameCount,d6			
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
@@ -193,7 +199,6 @@ Update:
 	beq	.skipForegroundUpdates
 	;; ---- Foreground updates ----------------------------------------	
 .foregroundUpdates:
-	jsr	CalculateScore
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	andi.l	#$f,d0
@@ -228,7 +233,6 @@ ShowMessagePanel:
 	jsr	WaitVerticalBlank
 	lea	mpanelCopperList,a0
 	move.l	a0,COP1LC(a6)
- 	;; move.w  COPJMP1(a6),d0
 	rts
 
 
@@ -236,7 +240,6 @@ HideMessagePanel:
 	jsr	WaitVerticalBlank
 	lea	copperList,a0
 	move.l	a0,COP1LC(a6)
- 	;; move.w  COPJMP1(a6),d0
 	rts	
 	
 HoriScrollPlayfield:
@@ -261,7 +264,6 @@ HoriScrollPlayfield:
 	lsl.w	#4,d5
 	or.w	d5,d0	
 	move.w	d0,copperListScrollPtr
-	;; move.w	d0,copperListScrollPtr2
 	move.w	d0,copperListScrollPtr_MP
 	move.w	d0,copperListScrollPtr2_MP
 	rts
@@ -332,7 +334,6 @@ RenderNextForegroundFrame:
 	lsr.l	#1,d0
 	and.b   #$f0,d0
 	add.l	d0,a2		
-	;; 	move.l	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d3		; 8 tiles per column
 	move.l	0,d3
 .loop:
 	move.l	d3,d2
@@ -490,8 +491,6 @@ PostMissedTile:
 
 	
 BigBang:
-	;; move.w	#(DMAF_SPRITE),DMACON(a6) ; turn sprites off for now	
-
 	jsr	ResetItems	
 	move.w	#0,moving
 	move.l	#0,frameCount	
@@ -505,7 +504,6 @@ BigBang:
 	jsr 	SwitchBuffers
 	jsr	ProcessJoystick
 	jsr	UpdatePlayerFallingAnimation
-	;; bsr 	Update
 
 	lea	map,a2	
 	move.l	foregroundScrollX,d0	
@@ -615,8 +613,10 @@ Level3InterruptHandler:
 .verticalBlank:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
 	add.l	#1,verticalBlankCount
+	lea	verticalBlankCounterText,a0
+	bsr	IncrementCounter
 	jsr 	SetupSpriteData
-	;; jsr	P61_Music
+	jsr	P61_Music
 .checkCopper:
 	move.w	INTREQR(a6),d0
 	and.w	#INTF_COPER,d0	
@@ -638,23 +638,21 @@ Message:
 	move.w	#128,d0
 	move.w	#11,d1
 	jsr	DrawMaskedText8
-	;; move.w	#MPANEL_COPPER_WAIT,mpanelWaitLinePtr
-	;; jsr	EnableMPanel
 	bsr	ShowMessagePanel
 	rts
 
-RenderScore:
+	
+RenderCounter:
 	lea	panel,a0
-	lea	scoreText,a1
-	move.w	#31,d0
 	move.w	#20,d1
 	jsr	DrawText8
 	rts
 
+
+ResetCounter:
+	move.l	#"0000",(a0)
 	
-IncrementScore:
-	movem.l	d0-a6,-(sp)
-	lea	scoreText,a0
+IncrementCounter:
 	add.l	#3,a0
 .loop:
 	sub.l	d0,d0
@@ -668,8 +666,6 @@ IncrementScore:
 	bra	.loop
 .done
 	move.b	d0,(a0)
-	jsr	RenderScore
-	movem.l	(sp)+,d0-a6
 	rts
 	
 message:
@@ -678,11 +674,18 @@ message:
 
 	align 4	
 
-scoreText:
+frameCounterText:
 	dc.b	"0000"
 	dc.b	0
 
 	align	4
+
+verticalBlankCounterText:
+	dc.b	"0000"
+	dc.b	0
+
+	align	4
+	
 	
 copperList:
 panelCopperListBpl1Ptr:	
@@ -1208,12 +1211,6 @@ deAnimIndexPattern:
 	dc.l	2*4
 	dc.l	0	
 	dc.l	$ffffffff	
-
-	if 0
-greyPalette:
-	include	"out/foreground-grey-table.s"
-	include	"out/background-grey-table.s"
-	endif
 
 panelGreyPalette:
 	include "out/panel-grey-table.s"

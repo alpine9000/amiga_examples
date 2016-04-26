@@ -9,7 +9,6 @@ FONT_WIDTH		equ 8
 FONTMAP_WIDTH_BYTES	equ 32
 _SCREEN_BIT_DEPTH	equ 4
 _BITPLANE_WIDTH_BYTES	equ 320/8
-MASKED_FONT		equ 1
 	
 DrawMaskedText8:
 	;; a0 - bitplane
@@ -20,12 +19,8 @@ DrawMaskedText8:
 	WaitBlitter
 
 	;; blitter config that is shared for every character
-	if MASKED_FONT==1
 	move.w  #BC0F_SRCA|BC0F_SRCB|BC0F_SRCC|BC0F_DEST|BLIT_LF_MINTERM,d6 ; BLTCON0 value (masked version)
 	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTAMOD(a6)	; A modulo (only used for masked version)
-	else
-	move.w	#BC0F_SRCB|BC0F_SRCC|BC0F_DEST|BLIT_LF_MINTERM,d6 	; BLTCON0 value
-	endif
 	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTBMOD(a6)	; B modulo
 	move.w 	#_BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
 	move.w 	#_BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
@@ -60,43 +55,18 @@ DrawChar8:
 	;; a5  - #font
 	;; d7  - #fontMask
 
-	sub.w	#' ',d2		; index = char - '!'
-	move.w	d2,d5
-	
+	sub.w	#' ',d2		; index = char - ' '
+	move.w	d2,d5	
 	lsr.w	#5,d5		; char / 32 = fontmap line
-	andi.w	#$1f,d2		; char index in line (char index - start of line index)
-	
+	andi.w	#$1f,d2		; char index in line (char index - start of line index)	
 	add.l	#1,d5		; while we have a weird font image, ' ' starts on second line
 	move.l	a5,a1		; #font
-
-	if 1
 	mulu.w	d3,d5 		; d5 *= #FONTMAP_WIDTH_BYTES*_SCREEN_BIT_DEPTH*FONT_HEIGHT
-	else
-	move.w	d5,d3
-	lsl.w	#7,d3		; d5 *= FONTMAP_WIDTH_BYTES*_SCREEN_BIT_DEPTH
-	move.w	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	add.l	d3,d5
-	endif
-
-	if	MASKED_FONT==1
 	move.l	d7,a2		; #fontMask
 	add.w	d5,a2		; add y offset in lines to fontMask address
-	endif
-
 	add.w	d5,a1		; add y offset in lines to font address
-
 	add.w	d2,a1		; add offset into font
-	if MASKED_FONT==1
 	add.l	d2,a2		; add offset into mask
-	endif
 
 .blitChar8:
 	;; kills a4,d2,d4,d5
@@ -125,31 +95,21 @@ DrawChar8:
 .evenChar:
 	move.w	#$FF00,BLTAFWM(a6)			; select the first character in the word
 .continue:
-
 	;; this shift will give us the bits to shift (bits 0-3) in bits (12-15) of d5
 	swap	d5					; d5 << 12
-	lsr.l	#4,d5					; 
-	
+	lsr.l	#4,d5					; 	
 	move.w	d5,BLTCON1(A6)				; set the shift bits 12-15, bits 00-11 cleared
-
-	if MASKED_FONT==1
 	move.l 	a2,BLTAPTH(a6)				; mask bitplane
-	endif
-
 	move.l 	a1,BLTBPTH(a6)				; source bitplane		
 	or.w	d6,d5					; d5 = BLTCON0 value
 	move.w	d5,BLTCON0(a6)				; set minterm, dma channel and shift
-
 	add.l 	d4,a4					; dest += XPOS_BYTES
 	add.l	d1,a4					; dest += YPOS_BYTES
-
 	move.l 	a4,BLTCPTH(a6) 				; background top left corner
 	move.l 	a4,BLTDPTH(a6) 				; destination top left corner
 
 	move.w 	#(FONT_HEIGHT*_SCREEN_BIT_DEPTH)<<6|(BLIT_WIDTH_WORDS),BLTSIZE(a6)	;rectangle size, starts blit
 	rts
 
-font:
-	incbin	"out/font8x8.bin"
 fontMask:
-	incbin	"out/font8x8-mask.bin"
+	incbin	"out/font8x8-mask.bin"	

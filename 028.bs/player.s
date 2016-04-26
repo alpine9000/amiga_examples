@@ -11,7 +11,6 @@
 	xdef UpdatePlayerFallingAnimation
 	xdef InstallPlayerColorPalette
 	xdef SelectNextPlayerSprite
-	xdef CalculateScore
 
 	xdef spriteLagX
 	xdef spriteY
@@ -21,7 +20,6 @@ PLAYER_SPRITE_DATA		equ 4
 PLAYER_SPRITE_FALLING_DATA	equ 8	
 
 InitialisePlayer:
-	move.w	#0,playerMaxX
 	move.l	playerSpriteConfig,a0
 	move.l	PLAYER_SPRITE_DATA(a0),d0	
 	add.l	#6*PLAYER_SPRITE_VERTICAL_BYTES,d0 
@@ -72,7 +70,6 @@ UpdatePlayer:
 	cmp.w	#PLAYER_PAUSE_PIXELS,spriteR
 	ble	.skipRight
 	add.w	#PLAYER_MOVE_PIXELS,spriteX
-	add.w	#1,playerX
 	add.l	#7*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite
 
@@ -124,7 +121,6 @@ UpdatePlayer:
 	cmp.w	#PLAYER_PAUSE_PIXELS,spriteL
 	ble	.skipLeft
 	sub.w	#PLAYER_MOVE_PIXELS,spriteX
-	sub.w	#1,playerX	
 	add.l	#5*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite				
 .skipLeft
@@ -142,18 +138,6 @@ UpdatePlayer:
 .noScroll:
 	rts
 
-
-CalculateScore:
-	move.w	playerX,d0
-	move.w	playerMaxX,d1
-	lsr.w	#PLAYER_JUMP_SHIFT_CONVERT,d0
-	cmp.w	d1,d0
-	ble	.skip
-	move.w	d0,playerMaxX	
-	jsr	IncrementScore
-.skip:
-	rts
-	
 
 ProcessJoystick:
 	;; 812
@@ -364,8 +348,4 @@ spriteY:
 	dc.w	$e4
 spriteYEnd:
 	dc.w	$f5
-playerMaxX:
-	dc.w	0
-playerX:
-	dc.w	0		
 	

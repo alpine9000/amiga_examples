@@ -8,8 +8,6 @@ USERSTACK_ADDRESS=7fffc
 BASE_ADDRESS=4000
 # note: this must be high enough not to conflict with MFMbufE
 
-NUM_COLORS=8
-
 BOOTBLOCK_ASM=alpine_bootblock.s
 OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o
 
@@ -52,7 +50,7 @@ IMAGES=foreground.png \
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
-VASM_EXTRA_ARGS=-DNUM_COLORS=$(NUM_COLORS)
+VASM_EXTRA_ARGS=
 
 #SYMBOL_INFO=-M
 LINKER_OPTIONS=-T link.script.x
@@ -60,10 +58,10 @@ LINKER_OPTIONS=-T link.script.x
 include ../shared/base.mk
 
 #out/%.bin: out/%.sized.png
-#	$(IMAGECON) --input $< $(IMAGECON_ARGS) --quantize --colors $(NUM_COLORS) --output-bitplanes  --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output out/$*
+#	$(IMAGECON) --input $< $(IMAGECON_ARGS) --quantize --colors 8 --output-bitplanes  --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output out/$*
 
 out/foreground.bin: assets/assets.png
-	$(IMAGECON) --use-palette=assets/foreground.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/foreground
+	$(IMAGECON) --use-palette=assets/foreground.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/foreground
 	sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_COLOR)/" out/foreground-copper-list.s 
 	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_COLOR)/" out/foreground-palette-table.s
 	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_GREY_COLOR)/" out/foreground-grey-table.s
@@ -72,7 +70,7 @@ out/foreground.bin: assets/assets.png
 	sed -i '' "3s/.*/        dc.w COLOR02,\$$bbb/" out/foreground-grey-copper.s
 
 out/background.bin: assets/assets.png
-	$(IMAGECON) --use-palette=assets/background.pal --input $< $(IMAGECON_ARGS) --colors $(NUM_COLORS) --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/background --palette-offset 8
+	$(IMAGECON) --use-palette=assets/background.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/background --palette-offset 8
 
 out/panel.bin: assets/panel.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/panel --use-palette=assets/panel.pal
@@ -132,19 +130,18 @@ out/tileFade.s: assets/tileFadeFrom.pal assets/tileFadeTo.pal ../tools/fade/out/
 
 out/foreground-map.s: foreground.tmx
 	../tools/mapgen/out/mapgen --depth=3 --input=foreground.tmx
-	mv foreground-map.s out
-	rm items-map.s
-	mv items-indexes.s out
-	rm foreground-indexes.s
-	mv pathway-map.s out
-	mv pathway-indexes.s out
+	@mv foreground-map.s out
+	@rm items-map.s
+	@mv items-indexes.s out
+	@rm foreground-indexes.s
+	@mv pathway-map.s out
+	@mv pathway-indexes.s out
 
 
 out/background-map.s: background.tmx
 	../tools/mapgen/out/mapgen --depth=3 --input=background.tmx
-	mv background-map.s out
-	rm background-indexes.s
+	@mv background-map.s out
+	@rm background-indexes.s
 
-out/blit.o: constants.i macros.i
-out/main.o: out/background-map.s out/foreground-map.s $(IMAGEDATA) constants.i macros.i Makefile link.script.x assets/palette.pal out/playarea_fade.s out/flags_fade.s out/panelFade.s out/tileFade.s
-out/init.o: constants.i Makefile
+out/main.o: $(IMAGEDATA) out/background-map.s out/foreground-map.s Makefile link.script.x out/playarea_fade.s out/flags_fade.s out/panelFade.s out/tileFade.s
+
