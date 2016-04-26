@@ -27,17 +27,17 @@ splitchans=1	;#channels to be split off to be decrunched at "playtime frame"
 		;Experiment to find minimum rastertime, but it should be 1 or 2
 		;for 3-4 channels songs and 0 or 1 with less channels.
 
-visuctrs=1	;enables visualizers in this example: P61_visuctr0..3.w 
+visuctrs=0	;enables visualizers in this example: P61_visuctr0..3.w 
 		;containing #frames (#lev6ints if cia=1) elapsed since last
 		;instrument triggered. (0=triggered this frame.)
 		;Easy alternative to E8x or 1Fx sync commands.
 
-asmonereport	=0	;ONLY for printing a settings report on assembly. Use
-			;if you get problems (only works in AsmOne/AsmPro, tho)
+asmonereport=0	;ONLY for printing a settings report on assembly. Use
+		;if you get problems (only works in AsmOne/AsmPro, tho)
 
 p61system=0	;1=system-friendly. Use for DOS/Workbench programs.
 
-p61exec	=1	;0 if execbase is destroyed, such as in a trackmo.
+p61exec	=0	;0 if execbase is destroyed, such as in a trackmo.
 
 p61fade	=0	;enable channel volume fading from your demo
 
