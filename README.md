@@ -71,6 +71,8 @@ The following cross development tools have been developed to support the example
 * [imagecon](tools/imagecon) # create amiga compatible raw image data from true color images
 * [resize](tools/resize)     # resize images ready for imagecon
 * [croppa](tools/croppa)     # crop images ready for imagecon
+* [mapgen](tools/mapgen)     # generate amiga data from [tiled](http://www.mapeditor.org/) maps
+* [fade](tools/fade)         # generate data for fading between palettes
 * [makeadf](tools/makeadf)   # make ADF disk image
 
 external tools
