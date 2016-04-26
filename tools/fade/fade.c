@@ -43,7 +43,10 @@ usage()
 	  "%s:  --output <output>\n"\
 	  "options:\n"\
 	  "  --to <file.pal>\n"\
+	  "  --from <file.pal>\n"\
 	  "  --from-grey\n"\
+	  "  --from-black\n"\
+	  "  --steps <num steps> (default: 16)\n"\
 	  "  --colors <num colors> (default: 16)\n"\
 	  "  --verbose\n\n"\
 	  "Exactly one 'to' and 'from' option must be specified\n", config.argv[0]);
