@@ -26,7 +26,6 @@
 	xdef 	foregroundScrollPixels
 
 TIMING_TEST		equ 0
-TIMING_TEST_MAIN_LOOP	equ 1
 	
 byteMap:
 	dc.l	Entry
@@ -113,7 +112,7 @@ SetupBoardLoop:
 	jsr	WaitVerticalBlank
 	cmp.l	#50,d6
 	ble	.gotoGameLoop
-	jsr	ProcessJoystick
+	jsr	ReadJoystick
 	btst.b	#0,joystick
 	beq	.gotoGameLoop
 	move.w	#0,moving
@@ -158,13 +157,11 @@ GameLoop:
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 	jsr	WaitVerticalBlank
 
-	if	TIMING_TEST=1
-	if	TIMING_TEST_MAIN_LOOP=1
+	if      TIMING_TEST=1
 	move.l	#4000,d0
 .looooo:
 	dbra	d0,.looooo	
 	move.w	#$0f0,COLOR00(a6)
-	endif
 	endif
 	
 	bsr	HoriScrollPlayfield
@@ -176,15 +173,13 @@ GameLoop:
 	bne	.s2
 	move.w	#0,moving
 .s2:	
-	jsr	ProcessJoystick
+
+	jsr	ProcessJoystick	
 	bsr 	Update
 	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame
 
 	if TIMING_TEST=1
-	move.l	#0,d0
-.checkLoop:
-	dbra	d0,.checkLoop
 	move.w	#$f00,COLOR00(a6)
 	move.w	#$f00,COLOR02(a6)			
 	endif
@@ -362,7 +357,7 @@ RenderPathway:
 	sub.w	#1,pathwayRenderPending
 	move.w	pathwayXIndex,d5 ; x index
 .loopX:	
-	move.w	#7,d6 		; y index
+	move.w	#6,d6 		; y index
 	move.w	#0,d7		; number of rows without a pathway
 .loopY:
 	bsr	GetPathTile
@@ -394,7 +389,7 @@ RenderPathway:
 	cmp.w	pathwayXIndex,d5
 	beq	.next
 	add.w	#1,d7
-	cmp.w	#8,d7
+	cmp.w	#7,d7
 	beq	.skip
 .next:
 	dbra	d6,.loopY
@@ -517,7 +512,6 @@ BigBang:
 	jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers
-	jsr	ProcessJoystick
 	jsr	UpdatePlayerFallingAnimation
 
 	lea	map,a2	
