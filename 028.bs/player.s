@@ -293,7 +293,7 @@ CheckPlayerMiss:
 
 .noBigBang:
 	move.w	(a3),d0	
-	cmp.w	#$78e*2,d0
+	cmp.w	#$1e00,d0
 	blt	.dontRenderPathway		
 	move.w	#2,pathwayRenderPending
 .dontRenderPathway:	

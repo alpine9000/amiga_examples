@@ -362,7 +362,7 @@ RenderPathway:
 	sub.w	#1,pathwayRenderPending
 	move.w	pathwayXIndex,d5 ; x index
 .loopX:	
-	move.w	#6,d6 		; y index
+	move.w	#7,d6 		; y index
 	move.w	#0,d7		; number of rows without a pathway
 .loopY:
 	bsr	GetPathTile
@@ -391,10 +391,10 @@ RenderPathway:
 	jsr	BlitTile
 	bra	.next
 .dontBlit:
-	add.w	#1,d7
 	cmp.w	pathwayXIndex,d5
 	beq	.next
-	cmp.w	#7,d7
+	add.w	#1,d7
+	cmp.w	#8,d7
 	beq	.skip
 .next:
 	dbra	d6,.loopY
