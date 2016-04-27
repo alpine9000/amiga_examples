@@ -259,7 +259,8 @@ CheckPlayerMiss:
 	blt	.doBigBang
 	sub.w	#PLAYER_LEFT_X,d0
 	lsr.w	#4,d0      	; x columns
-
+	move.w	d0,pathwayXIndex
+	
 	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
 	sub.w	d0,d1
 	mulu.w  #FOREGROUND_PLAYAREA_HEIGHT_WORDS*2,d1

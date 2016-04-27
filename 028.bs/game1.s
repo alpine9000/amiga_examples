@@ -3,6 +3,7 @@
 	xdef    BigBang
 
 	xdef	pathwayRenderPending
+	xdef	pathwayXIndex
 	
 	xdef	copperList
 	xdef	mpanelCopperList
@@ -355,10 +356,11 @@ RenderPathway:
 	bne	.skip
 	
 	sub.w	#1,pathwayRenderPending
-	move.w	#6,d6
-.loopY:
-	move.l	#5,d5	
+	move.w	pathwayXIndex,d5 ; x index
 .loopX:	
+	move.w	#6,d6 		; y index
+	move.w	#0,d7		; number of rows without a pathway
+.loopY:
 	bsr	GetPathTile
 	move.l	d0,a2
 	move.w	(a2),d0
@@ -383,9 +385,18 @@ RenderPathway:
 	move.l	#10,d2
 	sub.l	d6,d2
 	jsr	BlitTile
+	bra	.next
 .dontBlit:
-	dbra	d5,.loopX
+	add.w	#1,d7
+	cmp.w	pathwayXIndex,d5
+	beq	.next
+	cmp.w	#7,d7
+	beq	.skip
+.next:
 	dbra	d6,.loopY
+	add.w	#1,d5
+	bra	.loopX
+	
 .skip:
 
 	rts
@@ -1120,6 +1131,8 @@ verticalBlankCount:
 moving:
 	dc.w	0
 pathwayRenderPending:
+	dc.w	0
+pathwayXIndex
 	dc.w	0
 	
 tileFadePtr:
