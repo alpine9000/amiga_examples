@@ -223,6 +223,7 @@ Update:
 .skipForegroundUpdates:
 	cmp.w	#0,pathwayRenderPending
 	beq	.dontRenderPathway
+	jsr	InstallTilePalette	
 	jsr	RenderPathway
 .dontRenderPathway:
 	jsr	InstallNextTileColor
@@ -349,11 +350,14 @@ RenderNextForegroundFrame:
 
 RenderPathway:
 	;; only render when scroll complete
+
+	if 0
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels		
 	and.b	#$f,d0
 	cmp.b	#$f,d0
 	bne	.skip
+	endif
 	
 	sub.w	#1,pathwayRenderPending
 	move.w	pathwayXIndex,d5 ; x index
@@ -1012,6 +1016,20 @@ InstallFlagsGreyPalette:
 	rts	
 
 
+
+InstallTilePalette:
+	move.l	#tileFade,tileFadePtr
+	lea	playAreaCopperPalettePtr2,a1	
+	add.l	#6,a1 		; point to COLOR01
+	lea	tileFade,a0
+	move.l	#1,d0
+.loop:
+	move.w	(a0),(a1)
+	add.l	#2,a0
+	add.l	#4,a1
+	dbra	d0,.loop
+	rts
+	
 InstallNextTileColor:
 	lea	playAreaCopperPalettePtr2,a1
 	add.l	#6,a1 		; point to COLOR01
@@ -1028,7 +1046,7 @@ InstallNextTileColor:
 	add.l	#2*2,tileFadePtr
 	bra	.done
 .reset:
-	move.l	#tileFade,tileFadePtr
+	;; move.l	#tileFade,tileFadePtr
 .done:
 	rts
 	

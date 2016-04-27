@@ -126,7 +126,7 @@ out/panelFade.s: assets/panel.pal ../tools/fade/out/fade
 	../tools/fade/out/fade --from-grey --to=assets/panel.pal --output=panel > out/panelFade.s
 
 out/tileFade.s: assets/tileFadeFrom.pal assets/tileFadeTo.pal ../tools/fade/out/fade
-	../tools/fade/out/fade --steps=48 --colors=2 --from=assets/tileFadeFrom.pal --to=assets/tileFadeTo.pal --output=tileFade > out/tileFade.s
+	../tools/fade/out/fade --steps=64 --colors=2 --from=assets/tileFadeFrom.pal --to=assets/tileFadeTo.pal --output=tileFade > out/tileFade.s
 
 out/foreground-map.s: foreground.tmx
 	../tools/mapgen/out/mapgen --depth=3 --input=foreground.tmx
