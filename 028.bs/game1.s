@@ -27,7 +27,7 @@
 	xdef	moving
 	xdef 	foregroundScrollPixels
 
-TIMING_TEST		equ 0
+TIMING_TEST	equ 0
 	
 byteMap:
 	dc.l	Entry
@@ -242,7 +242,7 @@ Update:
 .c1:
 .skipForegroundUpdates:
 
-	;; jsr	InstallNextTileColor
+	jsr	InstallNextPathwayColor
 	jsr	CheckPlayerMiss
 
 	rts
@@ -429,7 +429,6 @@ ClearPathway:
 	move.w	pathwayXIndex,d5 ; x index	
 .loopX:	
 	move.w	#6,d6 		; y index
-	move.w	#0,d7		; number of rows without a pathway
 .loopY:
 	lea	map,a2	 	; todo: this will be too slow, it will render too many tiles
 	bsr	GetMapTile
@@ -460,16 +459,9 @@ ClearPathway:
 .dontBlit:
 	cmp.w	pathwayXIndex,d5	
 	beq	.next
-	add.w	#1,d7
-	cmp.w	#7,d7
-	beq	.skip
 .next:
 	dbra	d6,.loopY
-	sub.w	#1,d5
-	bra	.loopX
-	
-.skip:
-
+	dbra	d5,.loopX	
 	rts	
 
 
@@ -1128,7 +1120,7 @@ InstallTilePalette:
 	dbra	d0,.loop
 	rts
 	
-InstallNextTileColor:
+InstallNextPathwayColor:
 	lea	playAreaCopperPalettePtr2,a1
 	add.l	#6,a1 		; point to COLOR01
 	move.l	tileFadePtr,a0
