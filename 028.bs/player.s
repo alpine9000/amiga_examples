@@ -272,6 +272,7 @@ CheckPlayerMiss:
 	move.w	#PLAYER_BOTTOM_Y,d0
 	sub.w	spriteY,d0
 	lsr.w	#4,d0      	; y columns
+	move.w	d0,pathwayYIndex
 	sub.l	d1,d1
 	move.w	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d1
 	sub.w	d0,d1

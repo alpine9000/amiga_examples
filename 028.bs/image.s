@@ -9,6 +9,7 @@ SwitchBuffers:
 	move.l	foregroundScrollX,d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
 	lsr.w   #3,d0		; bytes to scroll
+
 	move.l	foregroundOffscreen,a0
 	move.l	foregroundOnscreen,foregroundOffscreen
 	move.l	a0,foregroundOnscreen

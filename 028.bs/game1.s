@@ -4,6 +4,7 @@
 
 	xdef	pathwayRenderPending
 	xdef	pathwayXIndex
+	xdef	pathwayYIndex	
 	
 	xdef	copperList
 	xdef	mpanelCopperList
@@ -179,6 +180,20 @@ GameLoop:
 	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame
 
+
+	cmp.w	#0,pathwayRenderPending
+	beq	.dontRenderPathway
+	jsr	InstallTilePalette	
+
+	jsr	RenderPathway	
+.dontRenderPathway:
+	move.w	pathwayYIndex,d6	
+	cmp.w	#0,d6
+	beq	.dontRenderMapTile
+	move.w	pathwayXIndex,d5	
+	bsr	RenderMapTile		
+.dontRenderMapTile:		
+	
 	if TIMING_TEST=1
 	move.w	#$f00,COLOR00(a6)
 	move.w	#$f00,COLOR02(a6)			
@@ -216,13 +231,10 @@ Update:
 	rts
 .c1:
 .skipForegroundUpdates:
-	cmp.w	#0,pathwayRenderPending
-	beq	.dontRenderPathway
-	jsr	InstallTilePalette	
-	jsr	RenderPathway
-.dontRenderPathway:
-	jsr	InstallNextTileColor
-	jsr	CheckPlayerMiss		
+
+	;; jsr	InstallNextTileColor
+	jsr	CheckPlayerMiss
+
 	rts
 
 
@@ -360,7 +372,8 @@ RenderPathway:
 	move.w	#6,d6 		; y index
 	move.w	#0,d7		; number of rows without a pathway
 .loopY:
-	bsr	GetPathTile
+	lea	pathwayMap,a2	
+	bsr	GetMapTile
 	move.l	d0,a2
 	move.w	(a2),d0
 	cmp.w	#0,d0
@@ -401,13 +414,45 @@ RenderPathway:
 	rts
 
 
-GetPathTile:
+RenderMapTile:
+	;; d5 - x map index
+	;; d6 - y map index
+	
+	lea	map,a2	
+	bsr	GetMapTile
+	move.l	d0,a2
+	move.w	(a2),d0
+	cmp.w	#0,d0
+	beq	.dontBlit
+	
+	lea 	foregroundTilemap,a1	
+	add.w	d0,a1 	; source tile
+	
+	move.l	foregroundScrollX,d0
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
+	lsr.w   #3,d0		; bytes to scroll
+	move.l	foregroundOffscreen,a0
+	add.l	d0,a0
+
+	move.l	#-BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*8,d0
+	move.w	d5,d4
+	mulu.w	#2,d4
+	add.l	d4,d0
+	add.l	#10,d0
+	add.l	d0,a0
+	move.l	#10,d2
+	sub.l	d6,d2
+	jsr	BlitTile
+.dontBlit:
+	rts
+	
+GetMapTile:
 	;; d5 - x board index
 	;; d6 - y board index
+	;; a2 - map
 	;;
 	;; d0 - pathwayOffset
 	
-	lea	pathwayMap,a2
 	
 	;; calculate the a2 offset of the top right tile based on foreground scroll
 	move.l	foregroundScrollX,d0		
@@ -1111,7 +1156,7 @@ InstallFlagGreyPalette:
 foregroundOnscreen:
 	dc.l	foregroundBitplanes1
 foregroundOffscreen:
-	dc.l	foregroundBitplanes2
+	dc.l	foregroundBitplanes2	
 foregroundTilemap:
 	incbin "out/foreground.bin"
 panel:
@@ -1146,6 +1191,8 @@ pathwayRenderPending:
 	dc.w	0
 pathwayXIndex
 	dc.w	0
+pathwayYIndex
+	dc.w	0	
 	
 tileFadePtr:
 	dc.l	tileFade
