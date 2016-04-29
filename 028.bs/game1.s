@@ -242,7 +242,7 @@ Update:
 .c1:
 .skipForegroundUpdates:
 
-	jsr	InstallNextPathwayColor
+	;; jsr	InstallNextPathwayColor
 	jsr	CheckPlayerMiss
 
 	rts

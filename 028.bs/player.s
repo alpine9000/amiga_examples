@@ -279,12 +279,16 @@ CheckPlayerMiss:
 	add.l	d1,a2
 	add.l	d1,a3	
 
-	;; a2 now points at the tile under the sprite
+	;; a2 now points at the pathway tile under the sprite
 	move.w	(a2),d0
+
+	bsr	CheckDirection
+	
 	cmp.w	#$78e,d0
 	bge	.noBigBang
 
-	move.w	(a3),d0	
+	;; a3 now points at the tile under the sprite
+	move.w	(a3),d0
 	cmp.w	#$78e,d0
 	bge	.noBigBang
 
@@ -308,6 +312,84 @@ CheckPlayerMiss:
 .dontClearPathway:	
 	rts
 
+
+CheckDirection:
+	cmp.w	#$7080,d0 	; dark horizontal
+	beq	.horizontal
+	cmp.w	#$708c,d0	; light horizontal
+	beq	.horizontal
+
+	cmp.w	#$6900,d0	; dark left-top
+	beq	.topLeft
+	cmp.w	#$690c,d0	; light left-top
+	beq	.topLeft
+
+	cmp.w	#$5a00,d0	; dark left-bottom
+	beq	.leftBottom
+	cmp.w	#$5a0c,d0	; light left-bottom
+	beq	.leftBottom			
+
+	cmp.w	#$4b00,d0	; dark right-bottom
+	beq	.rightBottom
+	cmp.w	#$4b0c,d0	; light right-bottom
+	beq	.rightBottom
+
+	cmp.w	#$5280,d0	; dark top-right
+	beq	.topRight
+	cmp.w	#$528c,d0	; light top-right
+	beq	.topRight
+
+	cmp.w	#$6180,d0	; dark vertical
+	beq	.vertical
+	cmp.w	#$618c,d0	; light vertical
+	beq	.vertical	
+
+	cmp.w	#0,d0
+	beq	.ok
+	jmp	BigBang		
+	
+.horizontal:
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteR
+	beq	.ok
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteL
+	beq	.ok	
+	jmp	BigBang
+.vertical:
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteU
+	beq	.ok
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteD
+	beq	.ok
+	jmp	BigBang		
+
+.topLeft:
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteR
+	beq	.ok
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteD
+	beq	.ok	
+	jmp	BigBang
+.topRight:
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteD
+	beq	.ok
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteL
+	beq	.ok		
+	jmp	BigBang			
+.rightBottom:
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteU
+	beq	.ok
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteL
+	beq	.ok		
+	jmp	BigBang		
+.leftBottom:
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteR
+	beq	.ok
+	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteU
+	beq	.ok		
+	jmp	BigBang		
+	
+.ok:
+	rts
+
+	
 SelectNextPlayerSprite:
 	cmp.l	#pigPlayerSpriteConfig,playerSpriteConfig
 	bne	.s1
