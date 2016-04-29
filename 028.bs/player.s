@@ -272,7 +272,6 @@ CheckPlayerMiss:
 	move.w	#PLAYER_BOTTOM_Y,d0
 	sub.w	spriteY,d0
 	lsr.w	#4,d0      	; y columns
-	move.w	d0,pathwayYIndex
 	sub.l	d1,d1
 	move.w	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d1
 	sub.w	d0,d1
@@ -297,7 +296,16 @@ CheckPlayerMiss:
 	cmp.w	#$1e00,d0
 	blt	.dontRenderPathway		
 	move.w	#2,pathwayRenderPending
-.dontRenderPathway:	
+.dontRenderPathway:
+
+	cmp.w	#$f02,d0
+	beq	.clearPathway
+	cmp.w	#$1682,d0
+	beq	.clearPathway	
+	bra	.dontClearPathway
+.clearPathway:
+	move.w	#2,pathwayClearPending
+.dontClearPathway:	
 	rts
 
 SelectNextPlayerSprite:

@@ -4,7 +4,8 @@
 
 	xdef	pathwayRenderPending
 	xdef	pathwayXIndex
-	xdef	pathwayYIndex	
+
+	xdef	pathwayClearPending
 	
 	xdef	copperList
 	xdef	mpanelCopperList
@@ -184,15 +185,24 @@ GameLoop:
 	cmp.w	#0,pathwayRenderPending
 	beq	.dontRenderPathway
 	jsr	InstallTilePalette	
-
-	jsr	RenderPathway	
+	jsr	RenderPathway
 .dontRenderPathway:
+
+	cmp.w	#0,pathwayClearPending
+	beq	.dontClearPathway
+	bsr	ClearPathway
+.dontClearPathway:
+	
+
+
+	if 0
 	move.w	pathwayYIndex,d6	
 	cmp.w	#0,d6
 	beq	.dontRenderMapTile
 	move.w	pathwayXIndex,d5	
 	bsr	RenderMapTile		
-.dontRenderMapTile:		
+.dontRenderMapTile:
+	endif
 	
 	if TIMING_TEST=1
 	move.w	#$f00,COLOR00(a6)
@@ -414,6 +424,55 @@ RenderPathway:
 	rts
 
 
+ClearPathway:	
+	sub.w	#1,pathwayClearPending
+	move.w	pathwayXIndex,d5 ; x index	
+.loopX:	
+	move.w	#6,d6 		; y index
+	move.w	#0,d7		; number of rows without a pathway
+.loopY:
+	lea	map,a2	 	; todo: this will be too slow, it will render too many tiles
+	bsr	GetMapTile
+	move.l	d0,a2
+	move.w	(a2),d0
+	cmp.w	#0,d0
+	beq	.dontBlit
+	
+	lea 	foregroundTilemap,a1	
+	add.w	d0,a1 	; source tile	
+	
+	move.l	foregroundScrollX,d0
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
+	lsr.w   #3,d0		; bytes to scroll
+	move.l	foregroundOffscreen,a0
+	add.l	d0,a0
+
+	move.l	#-BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*8,d0
+	move.w	d5,d4
+	mulu.w	#2,d4
+	add.l	d4,d0
+	add.l	#10,d0
+	add.l	d0,a0
+	move.l	#10,d2
+	sub.l	d6,d2
+	jsr	BlitTile
+	bra	.next
+.dontBlit:
+	cmp.w	pathwayXIndex,d5	
+	beq	.next
+	add.w	#1,d7
+	cmp.w	#7,d7
+	beq	.skip
+.next:
+	dbra	d6,.loopY
+	sub.w	#1,d5
+	bra	.loopX
+	
+.skip:
+
+	rts	
+
+
 RenderMapTile:
 	;; d5 - x map index
 	;; d6 - y map index
@@ -622,6 +681,7 @@ ClearForegroundTile3:
 
 	
 ClearForegroundTile:	
+	;; a0 - pointer to tile just rendered (on the screen right) in destination bitplane
 	lea 	foregroundTilemap,a1		
 	move.l	a2,a4
 	sub.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*8,a4
@@ -653,7 +713,6 @@ ClearForegroundTile:
 	jsr	BlitTile
 .s3:
 	rts
-
 	
 
 Level3InterruptHandler:
@@ -1191,8 +1250,9 @@ pathwayRenderPending:
 	dc.w	0
 pathwayXIndex
 	dc.w	0
-pathwayYIndex
-	dc.w	0	
+
+pathwayClearPending:
+	dc.w	0
 	
 tileFadePtr:
 	dc.l	tileFade
