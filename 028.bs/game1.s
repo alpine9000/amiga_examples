@@ -242,7 +242,11 @@ Update:
 .c1:
 .skipForegroundUpdates:
 
-	;; jsr	InstallNextPathwayColor
+	cmp.w	#PATHWAY_FADE_TIMER_COUNT,pathwayFadeCount
+	blt	.dontInstallNextPathwayColor
+	jsr	InstallNextPathwayColor
+.dontInstallNextPathwayColor:
+	add.w	#1,pathwayFadeCount
 	jsr	CheckPlayerMiss
 
 	rts
@@ -368,14 +372,7 @@ RenderNextForegroundFrame:
 RenderPathway:
 	;; only render when scroll complete
 
-	if 0
-	move.l	foregroundScrollX,d0
-	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels		
-	and.b	#$f,d0
-	cmp.b	#$f,d0
-	bne	.skip
-	endif
-	
+	move.w	#0,pathwayFadeCount
 	sub.w	#1,pathwayRenderPending
 	move.w	pathwayXIndex,d5 ; x index
 .loopX:	
@@ -1214,7 +1211,6 @@ panel:
 	incbin "out/panel.bin"
 mpanel:
 	incbin "out/mpanel.bin"	
-
 pathwayMap:
 	include "out/pathway-map.s"
 	dc.w	$FFFF	
@@ -1242,8 +1238,9 @@ pathwayRenderPending:
 	dc.w	0
 pathwayXIndex
 	dc.w	0
-
 pathwayClearPending:
+	dc.w	0
+pathwayFadeCount:
 	dc.w	0
 	
 tileFadePtr:
