@@ -20,14 +20,16 @@
 	xdef	foregroundOnscreen
 	xdef	foregroundOffscreen
 	xdef	foregroundScrollX
-	xdef	map
-	xdef	pathwayMap	
-	xdef	itemsMap
+
+	xdef	foregroundMapPtr
+	xdef	pathwayMapPtr
+	xdef	startForegroundMapPtr
+	xdef 	startPathwayMapPtr
+	
 	xdef   	mapSize
 	xdef	moving
 	xdef 	foregroundScrollPixels
 
-TIMING_TEST	equ 0
 	
 byteMap:
 	dc.l	Entry
@@ -77,6 +79,8 @@ Entry:
 
 	
 Reset:	
+	move.l	startForegroundMapPtr,foregroundMapPtr
+	move.l	startPathwayMapPtr,pathwayMapPtr	
 	move.w	#0,pathwayRenderPending
 	move.w	#0,moving	
 	move.l	#playareaFade,playareaFadePtr
@@ -351,7 +355,7 @@ ResetBigBangPattern:
 
 	
 RenderNextForegroundFrame:
-	lea	map,a2	
+	move.l	foregroundMapPtr,a2
 	move.l	foregroundScrollX,d0	
 	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
 	lsr.l	#1,d0
@@ -379,7 +383,7 @@ RenderPathway:
 	move.w	#6,d6 		; y index
 	move.w	#0,d7		; number of rows without a pathway
 .loopY:
-	lea	pathwayMap,a2	
+	move.l	pathwayMapPtr,a2
 	bsr	GetMapTile
 	move.l	d0,a2
 	move.w	(a2),d0
@@ -427,7 +431,7 @@ ClearPathway:
 .loopX:	
 	move.w	#6,d6 		; y index
 .loopY:
-	lea	map,a2	 	; todo: this will be too slow, it will render too many tiles
+	move.l	foregroundMapPtr,a2 ;; todo: this will be too slow, it will render too many tiles
 	bsr	GetMapTile
 	move.l	d0,a2
 	move.w	(a2),d0
@@ -465,8 +469,8 @@ ClearPathway:
 RenderMapTile:
 	;; d5 - x map index
 	;; d6 - y map index
-	
-	lea	map,a2	
+
+	move.l	foregroundMapPtr,a2
 	bsr	GetMapTile
 	move.l	d0,a2
 	move.w	(a2),d0
@@ -526,7 +530,7 @@ GetMapTile:
 		
 	
 RenderNextForegroundPathwayFrame:
-	lea	pathwayMap,a2	
+	move.l	pathwayMapPtr,a2
 	move.l	foregroundScrollX,d0	
 	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
 	lsr.l	#1,d0
@@ -607,7 +611,7 @@ BigBang:
 	jsr 	SwitchBuffers
 	jsr	UpdatePlayerFallingAnimation
 
-	lea	map,a2	
+	move.l	foregroundMapPtr,a2
 	move.l	foregroundScrollX,d0	
 	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
 	lsr.l	#1,d0
@@ -651,7 +655,7 @@ ClearForegroundTile3:
 	sub.l	d0,d0
 	move.w	(a2),d0
 	add.l	d0,a1
-	lea	map,a3
+	move.l	foregroundMapPtr,a3
 	add.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*FOREGROUND_PLAYAREA_HEIGHT_WORDS,a3
 	move.l	(a4),d1
 	cmp.l	#10,d1
@@ -677,7 +681,7 @@ ClearForegroundTile:
 	sub.l	d0,d0
 	move.w	(a4),d0
 	add.l	d0,a1
-	lea	map,a3
+	move.l	foregroundMapPtr,a3
 	add.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*FOREGROUND_PLAYAREA_HEIGHT_WORDS,a3
 	cmp.l	a3,a2		; don't clear until the full play area has scrolled in
 	blt	.s3
@@ -1214,14 +1218,23 @@ mpanel:
 pathwayMap:
 	include "out/pathway-map.s"
 	dc.w	$FFFF	
-map:
+foregroundMap:
 	include "out/foreground-map.s"
 	dc.w	$FFFF	
 itemsMap:
 	include "out/items-indexes.s"
 	dc.w	$FFFF
 mapSize:
-	dc.l	itemsMap-map
+	dc.l	itemsMap-foregroundMap
+foregroundMapPtr:
+	dc.l	0
+pathwayMapPtr:
+	dc.l	0
+startForegroundMapPtr:
+	dc.l	foregroundMap
+startPathwayMapPtr:
+	dc.l	pathwayMap	
+	
 	
 
 foregroundScrollPixels:

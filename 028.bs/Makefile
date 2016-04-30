@@ -50,15 +50,12 @@ IMAGES=foreground.png \
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
-VASM_EXTRA_ARGS=
+VASM_EXTRA_ARGS=-DTIMING_TEST=0
 
 #SYMBOL_INFO=-M
 LINKER_OPTIONS=-T link.script.x
 
 include ../shared/base.mk
-
-#out/%.bin: out/%.sized.png
-#	$(IMAGECON) --input $< $(IMAGECON_ARGS) --quantize --colors 8 --output-bitplanes  --output-palette-asm --output-grey-palette --output-palette $(DITHER) --output out/$*
 
 out/foreground.bin: assets/assets.png
 	$(IMAGECON) --use-palette=assets/foreground.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/foreground
@@ -84,13 +81,11 @@ out/sprite_pig-%.bin: out/sprite_pig-%.png
 out/sprite_robot-%.bin: out/sprite_robot-%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_robot-$* --palette-offset 16 --use-palette=assets/robot.pal
 
-
 out/sprite_fallingPig-%.bin: out/sprite_fallingPig-%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_fallingPig-$* --palette-offset 16 --use-palette=assets/pig.pal
 
 out/sprite_fallingRobot-%.bin: out/sprite_fallingRobot-%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_fallingRobot-$* --palette-offset 16 --use-palette=assets/robot.pal
-
 
 out/sprite_coin%.bin: out/sprite_coin%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_coin$* --palette-offset 20  --use-palette=assets/coin.pal
@@ -145,3 +140,8 @@ out/background-map.s: background.tmx
 
 out/main.o: $(IMAGEDATA) out/background-map.s out/foreground-map.s Makefile link.script.x out/playarea_fade.s out/flags_fade.s out/panelFade.s out/tileFade.s
 
+setuptiming:
+	$(eval	VASM_EXTRA_ARGS="-DTIMING_TEST=1")
+	echo $(VASM_EXTRA_ARGS)
+
+timing: setuptiming all

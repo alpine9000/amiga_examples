@@ -241,8 +241,8 @@ CheckPlayerMiss:
 	rts
 
 .check:
-	lea	pathwayMap,a2
-	lea	map,a3
+	move.l	pathwayMapPtr,a2	
+	move.l	foregroundMapPtr,a3
 
 	;; calculate the a2 offset of the top right tile based on foreground scroll
 	move.l	foregroundScrollX,d0		
@@ -281,14 +281,15 @@ CheckPlayerMiss:
 
 	;; a2 now points at the pathway tile under the sprite
 	move.w	(a2),d0
-
+	
 	bsr	CheckDirection
 	
 	cmp.w	#$78e,d0
 	bge	.noBigBang
 
 	;; a3 now points at the tile under the sprite
-	move.w	(a3),d0
+	move.w	(a3),d0	
+	
 	cmp.w	#$78e,d0
 	bge	.noBigBang
 
@@ -309,6 +310,19 @@ CheckPlayerMiss:
 	bra	.dontClearPathway
 .clearPathway:
 	move.w	#2,pathwayClearPending
+
+
+	move.l	#PLAYER_BOTTOM_Y,d0	
+	sub.w	spriteY,d0
+	lsr.w	#4,d0      	; y columns
+	move.w	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d1
+	sub.l	d0,d1
+	mulu.w	#2,d1
+	sub.l	d1,a3
+	sub.l	d1,a2	
+	move.l	a3,startForegroundMapPtr
+	move.l	a2,startPathwayMapPtr	
+	
 .dontClearPathway:	
 	rts
 
