@@ -36,11 +36,14 @@ ShowSplash:
 	lea	splashCopperList(pc),a0
 	move.l	a0,COP1LC(a6)
 
+	jsr	WaitVerticalBlank	
 	;; set up default palette
 	include "out/splash-palette.s"
 
-	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
+	jsr	WaitVerticalBlank			
+	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)		
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
+	
 .wait:
 	jsr	WaitVerticalBlank
 	jsr	ReadJoystick

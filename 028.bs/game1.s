@@ -83,8 +83,11 @@ Entry:
 Reset:	
 	lea	livesCounterText,a0
 	bsr	DecrementCounter
-	move.w	#201,d0
-	lea	livesCounterText,a1	
+	move.w	#218,d0
+	lea	livesCounterShortText,a1	
+	jsr	RenderCounter	
+	lea	player1Text,a1
+	move.w	#192,d0
 	jsr	RenderCounter
 	
 	move.l	startForegroundMapPtr,foregroundMapPtr
@@ -797,8 +800,10 @@ RenderCounter:
 
 ResetCounter:
 	move.l	#"0000",(a0)
+	rts
 	
 IncrementCounter:
+	move.l	a0,a1
 	add.l	#3,a0
 .loop:
 	sub.l	d0,d0
@@ -809,59 +814,73 @@ IncrementCounter:
 	move.b	#'0',d0
 	move.b	d0,(a0)	
 	sub.l	#1,a0
+	cmp.l	a1,a0
+	blt	.startOfText
 	bra	.loop
-.done
+.done:
 	move.b	d0,(a0)
+.startOfText:
 	rts
 
 
 DecrementCounter:
+	move.l	a0,a1	
 	add.l	#3,a0
 .loop:
 	sub.l	d0,d0
 	move.b	(a0),d0
 	cmp.b	#'0',d0
-	beq	.something	
+	beq	.dontWrap
 	subq.b	#1,d0
 	bra	.done
-.something:
+.dontWrap:
 	move.b	#'9',d0
 	move.b	d0,(a0)	
 	sub.l	#1,a0
+	cmp.l	a1,a0
+	blt	.startOfText	
 	bra	.loop
-.done
+.done:
 	move.b	d0,(a0)
+.startOfText:
 	rts	
 
 
+player1Text:
+	dc.b	"P1"
+	dc.b	0
+	align	4
+
+player2Text:
+	dc.b	"P2"
+	dc.b	0
+	align	4	
 	
 message:
 	dc.b	"LETS PLAY!"
 	dc.b	0
-
-	align 4
+	align 	4
 	
 gameOverMessage:
 	dc.b	"GAME OVER"
 	dc.b	0
-
-	align 4	
+	align 	4	
 
 livesCounterText:
-	dc.b	"0004"
+	dc.b	"00"
+livesCounterShortText:
+	dc.b	"04"
 	dc.b	0
 	align	4
 	
 frameCounterText:
 	dc.b	"0000"
 	dc.b	0
-
 	align	4
 
 verticalBlankCounterText:
 	dc.b	"0000"
 	dc.b	0
-
 	align	4
 	
 	
