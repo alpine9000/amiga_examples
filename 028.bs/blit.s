@@ -3,6 +3,8 @@
 	xdef BlitFillColor
 	xdef BlitTile
 	xref BlueFill
+	xref SimpleBlit
+
 	
 ;;       A(mask) B(bob)  C(bg)   D(dest)
 ;;       -       -       -       - 
@@ -147,3 +149,16 @@ BlueFill:
 	movem.l	(sp)+,d0-a6
 	rts	
 
+
+SimpleBlit:
+	WaitBlitter	
+	move.w #(BC0F_SRCA|BC0F_DEST|$f0),BLTCON0(A6)
+	move.w #0,BLTCON1(a6) 
+	move.l #$ffffffff,BLTAFWM(a6) 	;no masking of first/last word
+	move.w #0,BLTAMOD(a6)	      	;A modulo
+	move.w #0,BLTDMOD(a6)		;D modulo
+	move.l a0,BLTAPTH(a6)		;source graphic top left corner
+	move.l a2,BLTDPTH(a6)		;destination top left corner
+	move.w d0,BLTSIZE(a6)
+	rts
+	

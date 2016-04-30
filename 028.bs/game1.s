@@ -6,7 +6,7 @@
 	xdef	pathwayXIndex
 
 	xdef	pathwayClearPending
-	
+
 	xdef	copperList
 	xdef	mpanelCopperList
 	xdef	copperListBpl1Ptr
@@ -79,6 +79,12 @@ Entry:
 
 	
 Reset:	
+	lea	livesCounterText,a0
+	bsr	DecrementCounter
+	move.w	#201,d0
+	lea	livesCounterText,a1	
+	jsr	RenderCounter
+	
 	move.l	startForegroundMapPtr,foregroundMapPtr
 	move.l	startPathwayMapPtr,pathwayMapPtr	
 	move.w	#0,pathwayRenderPending
@@ -92,9 +98,15 @@ Reset:
 	bsr	InitAnimPattern
 	jsr	ResetBigBangPattern
 	jsr 	BlueFill
-	jsr	Message
 	jsr	InstallGreyPalette
 	jsr	HidePlayer
+	cmp.l	#'0000',livesCounterText
+	bne	.notGameOver
+	bra	GameOver
+.notGameOver:
+	lea	message,a1
+	jsr	Message
+	
 	
 MainLoop:
 	MOVE.W  #$0024,BPLCON2(a6)
@@ -256,6 +268,26 @@ Update:
 	rts
 
 
+GameOver:
+	lea	gameOverMessage,a1
+	jsr	Message
+
+	move.l	#100,d0	
+.pause:
+	jsr	WaitVerticalBlank	
+	dbra	d0,.pause
+	
+.waitForJoystick:
+	jsr	ReadJoystick
+	btst.b	#0,joystick
+	bne	.gotJoystick
+	bra	.waitForJoystick
+.gotJoystick:
+	move.l	#foregroundMap,startForegroundMapPtr
+	move.l	#pathwayMap,startPathwayMapPtr
+	move.l	#'0004',livesCounterText	
+	bra	Reset
+	
 ShowMessagePanel:
 	jsr	WaitVerticalBlank
 	lea	mpanelCopperList,a0
@@ -739,8 +771,13 @@ Message:
 	;; a1 - text
 	;; d0 - xpos
 	;; d1 - ypos
+
+	move.w	#(32*4)<<6|(320/16),d0
+	lea	mpanelOrig,a0
+	lea	mpanel,a2
+	jsr	SimpleBlit
+	
 	lea	mpanel,a0
-	lea	message,a1
 	move.w	#128,d0
 	move.w	#11,d1
 	jsr	DrawMaskedText8
@@ -773,13 +810,45 @@ IncrementCounter:
 .done
 	move.b	d0,(a0)
 	rts
+
+
+DecrementCounter:
+	add.l	#3,a0
+.loop:
+	sub.l	d0,d0
+	move.b	(a0),d0
+	cmp.b	#'0',d0
+	beq	.something	
+	subq.b	#1,d0
+	bra	.done
+.something:
+	move.b	#'9',d0
+	move.b	d0,(a0)	
+	sub.l	#1,a0
+	bra	.loop
+.done
+	move.b	d0,(a0)
+	rts	
+
+
 	
 message:
 	dc.b	"LETS PLAY!"
 	dc.b	0
 
+	align 4
+	
+gameOverMessage:
+	dc.b	"GAME OVER"
+	dc.b	0
+
 	align 4	
 
+livesCounterText:
+	dc.b	"0004"
+	dc.b	0
+	align	4
+	
 frameCounterText:
 	dc.b	"0000"
 	dc.b	0
@@ -1214,7 +1283,9 @@ foregroundTilemap:
 panel:
 	incbin "out/panel.bin"
 mpanel:
-	incbin "out/mpanel.bin"	
+	incbin "out/mpanel.bin"
+mpanelOrig:
+	incbin "out/mpanel.bin"
 pathwayMap:
 	include "out/pathway-map.s"
 	dc.w	$FFFF	
