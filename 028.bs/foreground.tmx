@@ -8,15 +8,15 @@
  </tileset>
  <layer name="foreground" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjZ2BgsGTEjtlH5eguZwekmYBYDAs9Kkd/OS0c8qNyAyNHSXxWkqlvVA5//tiNJ86WUxDXo3L0zR+jcrTJH4MtjYxkOWkG3G0wWsgNxjbmYJIDAGX6U4Q=
+   eJxjZ2BgsGTEjtlH5eguZwekmYBYDAtNidxWPHKVNLBvuMhp4ZAflRsYOUriczSd0yZ/7MYTZ8spiOtROfrmj1E52uSPwZZGRrKcNAPuNhgt5AZjG3MwyQEArppUrg==
   </data>
  </layer>
  <layer name="pathway" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUkAvOA/HHgXbECAbo4c/KyMDADcQngWxjIK3LCKFHAW0BLJwlgfgxlA8DsDhBByB1o3mH/gAUF6w48sRonNAf3AVieTxlFCw/wcqzUTAKhgsAAErmDLs=
+   eJxjYBgFIwUYMzIw6DKi0qOAMnAeiD9S2UxuRoTZoHj6TmXzhxNAD39WRkj4nWSgXjpnZcROjwIEgIWzJBA/hvJhABYn6ACkjpy8AzMLnR4FxAFQeOFKw+TEyWj+oAzcBWJ5PGEGy0+w8owQgKmHmYmeH0fBKBgsAADYaBI9
   </data>
  </layer>
- <layer name="items" width="100" height="8">
+ <layer name="items" width="100" height="8" visible="0">
   <data encoding="base64" compression="zlib">
    eJxjYBgFgw04MuLnE1JPCDgRqZ5YdcMdgMKX2DBGV+dKhD6QHucREtbUSFOwMMYVJy6MqGph6lxItJtU9SMduDISjhv0vERK3oLZQW0wlMs5kNuRMQiQU3/A1LiRERbk6KEmICX+Bktck1pnu1NRPal2j4JRQCsAAIdJC5A=
   </data>

@@ -43,7 +43,7 @@ ShowSplash:
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
 .wait:
 	jsr	WaitVerticalBlank
-	jsr	ProcessJoystick
+	jsr	ReadJoystick
 	btst.b	#0,joystick
 	beq	.wait
 	rts

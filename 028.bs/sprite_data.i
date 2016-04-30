@@ -82,6 +82,48 @@ spriteRobotRightJump:
 	dc.w	0,0
 	incbin	"out/sprite_robot-2.bin" ; 7, right jump
 	dc.l	0
+
+spriteTank:
+spriteTankUp:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_tank-1.bin" ; 0, up
+	dc.l	0
+spriteTankUpJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_tank-0.bin" ; 1, up jump
+	dc.l	0		
+spriteTankDown:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_tank-5.bin" ; 2, down
+	dc.l	0
+spriteTankDownJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_tank-4.bin" ; 3, down jump
+	dc.l	0		
+spriteTankLeft:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_tank-7.bin" ; 4, left
+	dc.l	0
+spriteTankLeftJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_tank-6.bin" ; 5, left jump
+	dc.l	0		
+spriteTankRight:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_tank-3.bin" ; 6, right
+	dc.l	0
+spriteTankRightJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_tank-2.bin" ; 7, right jump
+	dc.l	0
 	
 spriteFalling0:
 	dc.w	0,0
@@ -134,4 +176,31 @@ spriteFallingRobot4:
 	dc.w	0,0
 	dc.w	0,0
 	incbin	"out/sprite_fallingRobot-4.bin" 
+	dc.l	0
+
+
+spriteFallingTank0:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingTank-0.bin" 
+	dc.l	0
+spriteFallingTank1:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingTank-1.bin" 
+	dc.l	0
+spriteFallingTank2:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingTank-2.bin" 
+	dc.l	0
+spriteFallingTank3:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingTank-3.bin" 
+	dc.l	0
+spriteFallingTank4:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingTank-4.bin" 
 	dc.l	0

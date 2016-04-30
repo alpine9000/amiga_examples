@@ -14,6 +14,7 @@ SwitchBuffers:
 	move.l	foregroundOnscreen,foregroundOffscreen
 	move.l	a0,foregroundOnscreen
 	move.l	a0,a1
+
 	lea 	copperListBpl1Ptr,a0
 	bsr.s	PokeBitplanePointers
 
@@ -21,18 +22,19 @@ SwitchBuffers:
 	bsr.s	PokeBitplanePointers		
 
 	add.l	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(96-1),d0	
-	;; lea 	copperListBpl1Ptr2,a0
-	;; bsr.s	PokeBitplanePointers
-
 	lea 	copperListBpl1Ptr2_MP,a0
 	bsr.s	PokeBitplanePointers	
 				
 	
-	;; background is not double buffered
 	move.l	backgroundScrollX,d0
 	lsr.w	#BACKGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels	
 	lsr.w   #3,d0		; bytes to scroll		
-	move.l	backgroundOnscreen,a1
+
+	move.l	backgroundOffscreen,a0
+	move.l	backgroundOnscreen,backgroundOffscreen
+	move.l	a0,backgroundOnscreen
+	move.l	a0,a1
+
 	lea 	copperListBpl2Ptr,a0
 	bsr.s	PokeBitplanePointers
 
@@ -40,9 +42,6 @@ SwitchBuffers:
 	bsr.s	PokeBitplanePointers	
 
 	add.l	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(96-48+16),d0
-	;; lea 	copperListBpl2Ptr2,a0
-	;; 	bsr.s	PokeBitplanePointers
-
 	lea 	copperListBpl2Ptr2_MP,a0
 	bsr.s	PokeBitplanePointers	
 	

@@ -4,6 +4,7 @@
 	xdef	RenderNextBackgroundFrame
 	xdef	backgroundScrollX
 	xdef	backgroundOnscreen
+	xdef	backgroundOffscreen	
 
 	
 InitialiseBackground:
@@ -36,6 +37,14 @@ RenderBackgroundTile:
 	lsr.b	#BACKGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
 	andi.w	#$f,d2		; find the shift component		
 	jsr	BlitTile
+	cmp.l   #backgroundBitplanes1,backgroundOffscreen
+	bne	.offsetSub
+	add.l	#IMAGESIZE*2,a0
+	bra	.doBlit
+.offsetSub:
+	sub.l	#IMAGESIZE*2,a0
+.doBlit:
+	jsr	BlitTile	
 	rts
 
 RenderNextBackgroundFrame:
@@ -62,11 +71,13 @@ backgroundMap:
 backgroundOnscreen:
 	dc.l	backgroundBitplanes1
 backgroundOffscreen:
-	dc.l	backgroundBitplanes1	
+	dc.l	backgroundBitplanes2
 	
 	section .bss
 backgroundBitplanes1:
 	ds.b	IMAGESIZE*2
+backgroundBitplanes2:
+	ds.b	IMAGESIZE*2	
 
 
 	

@@ -226,7 +226,11 @@ InstallPigColorPalette:
 
 InstallRobotColorPalette:	
 	include "out/sprite_robot-0-palette.s"
-	rts		
+	rts
+
+InstallTankColorPalette:	
+	include "out/sprite_tank-0-palette.s"
+	rts			
 
 CheckPlayerMiss:
 
@@ -289,6 +293,9 @@ CheckPlayerMiss:
 
 	;; a3 now points at the tile under the sprite
 	move.w	(a3),d0	
+
+	cmp.w	#$7098,d0	; empty tile
+	beq	.doBigBang	
 	
 	cmp.w	#$78e,d0
 	bge	.noBigBang
@@ -405,9 +412,10 @@ CheckDirection:
 
 	
 SelectNextPlayerSprite:
-	cmp.l	#pigPlayerSpriteConfig,playerSpriteConfig
-	bne	.s1
-	move.l	#robotPlayerSpriteConfig,playerSpriteConfig
+	cmp.l	#tankPlayerSpriteConfig,playerSpriteConfig
+	beq	.s1
+	;; move.l	#robotPlayerSpriteConfig,playerSpriteConfig
+	add.l	#3*4,playerSpriteConfig
 	bra	.done
 .s1:
 	move.l	#pigPlayerSpriteConfig,playerSpriteConfig
@@ -424,6 +432,11 @@ robotPlayerSpriteConfig:
 	dc.l	InstallRobotColorPalette
 	dc.l	spriteRobot
 	dc.l	spriteFallingRobot1
+
+tankPlayerSpriteConfig:
+	dc.l	InstallTankColorPalette
+	dc.l	spriteTank
+	dc.l	spriteFallingTank1	
 
 playerSpriteConfig:
 	dc.l	pigPlayerSpriteConfig

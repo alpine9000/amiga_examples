@@ -47,7 +47,8 @@ Entry:
 
 	jsr	StartMusic
 	jsr	ShowSplash
-		
+	jsr 	BlueFill	
+	
 	;; d0 - fg bitplane pointer offset
 	;; d1 - bg bitplane pointer offset		
 	move.l	#0,d0
@@ -55,7 +56,7 @@ Entry:
 	jsr	SwitchBuffers				
 
  	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_MASTER),DMACON(a6) 		
-
+	
 	lea	panelCopperListBpl1Ptr,a0
 	lea	panel,a1
 	jsr	PokePanelBitplanePointers
@@ -68,10 +69,11 @@ Entry:
 	lea	mpanelCopperListBpl1Ptr,a0
 	lea	mpanel,a1
 	jsr	PokePanelBitplanePointers
-
+	
 	bsr	ShowMessagePanel
-	jsr	Init		  ; enable the playfield		
 
+
+	jsr	Init		  ; enable the playfield
 	jsr	InstallSpriteColorPalette
 
 
@@ -88,6 +90,7 @@ Reset:
 	move.l	startForegroundMapPtr,foregroundMapPtr
 	move.l	startPathwayMapPtr,pathwayMapPtr	
 	move.w	#0,pathwayRenderPending
+	move.w	#0,pathwayClearPending
 	move.w	#0,moving	
 	move.l	#playareaFade,playareaFadePtr
 	move.l	#panelFade,panelFadePtr
@@ -198,17 +201,17 @@ GameLoop:
 	jsr 	RenderNextBackgroundFrame
 
 
+	cmp.w	#0,pathwayClearPending
+	beq	.dontClearPathway
+	bsr	ClearPathway
+.dontClearPathway:
+	
 	cmp.w	#0,pathwayRenderPending
 	beq	.dontRenderPathway
 	jsr	InstallTilePalette	
 	jsr	RenderPathway
 .dontRenderPathway:
 
-	cmp.w	#0,pathwayClearPending
-	beq	.dontClearPathway
-	bsr	ClearPathway
-.dontClearPathway:
-	
 
 
 	if 0
@@ -406,8 +409,6 @@ RenderNextForegroundFrame:
 	rts
 
 RenderPathway:
-	;; only render when scroll complete
-
 	move.w	#0,pathwayFadeCount
 	sub.w	#1,pathwayRenderPending
 	move.w	pathwayXIndex,d5 ; x index
@@ -442,7 +443,7 @@ RenderPathway:
 	jsr	BlitTile
 	bra	.next
 .dontBlit:
-	cmp.w	pathwayXIndex,d5
+	cmp.w	pathwayXIndex,d5 ; skip the start column
 	beq	.next
 	add.w	#1,d7
 	cmp.w	#7,d7
@@ -450,6 +451,8 @@ RenderPathway:
 .next:
 	dbra	d6,.loopY
 	add.w	#1,d5
+	cmp.w	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d5 ; don't render pathways off the play area
+	beq	.skip
 	bra	.loopX
 	
 .skip:
