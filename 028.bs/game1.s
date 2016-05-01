@@ -4,8 +4,9 @@
 
 	xdef	pathwayRenderPending
 	xdef	pathwayXIndex
-
+	xdef	pathwayFadeCount	
 	xdef	pathwayClearPending
+	xdef	InstallTilePalette	
 
 	xdef	copperList
 	xdef	mpanelCopperList
@@ -94,7 +95,8 @@ Reset:
 	move.l	startPathwayMapPtr,pathwayMapPtr	
 	move.w	#0,pathwayRenderPending
 	move.w	#0,pathwayClearPending
-	move.w	#0,moving	
+	move.w	#0,moving
+	move.w	#-2*FOREGROUND_MOVING_COUNTER,movingCounter
 	move.l	#playareaFade,playareaFadePtr
 	move.l	#panelFade,panelFadePtr
 	move.l	#flagsFade,flagsFadePtr
@@ -198,7 +200,25 @@ GameLoop:
 	move.w	#0,moving
 .s2:	
 
-	jsr	ProcessJoystick	
+	jsr	ProcessJoystick
+	if 0
+	btst.b	#0,joystick
+	bne	.setMoving
+	endif
+	cmp.w	#PLAYER_INITIAL_X+16*3,spriteX
+	bge	.setMoving
+	addq.w	#1,movingCounter
+	cmp.w	#FOREGROUND_MOVING_COUNTER,movingCounter
+	bge	.setMoving
+	bra	.notMoving
+.setMoving:
+	move.w	#0,movingCounter
+	move.w	#1,moving
+.notMoving:
+
+
+	
+	
 	bsr 	Update
 	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame
@@ -211,7 +231,6 @@ GameLoop:
 	
 	cmp.w	#0,pathwayRenderPending
 	beq	.dontRenderPathway
-	jsr	InstallTilePalette	
 	jsr	RenderPathway
 .dontRenderPathway:
 
@@ -412,9 +431,8 @@ RenderNextForegroundFrame:
 	rts
 
 RenderPathway:
-	move.w	#0,pathwayFadeCount
-	sub.w	#1,pathwayRenderPending
 	move.w	pathwayXIndex,d5 ; x index
+	;;sub.w	#1,pathwayRenderPending
 .loopX:	
 	move.w	#6,d6 		; y index
 	move.w	#0,d7		; number of rows without a pathway
@@ -454,12 +472,13 @@ RenderPathway:
 .next:
 	dbra	d6,.loopY
 	add.w	#1,d5
-	cmp.w	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d5 ; don't render pathways off the play area
-	beq	.skip
+	cmp.w	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-0,d5 ; don't render pathways off the play area
+	beq	.pathwayNotComplete
 	bra	.loopX
-	
 .skip:
-
+	sub.w	#1,pathwayRenderPending	
+	rts
+.pathwayNotComplete:
 	rts
 
 
@@ -1338,6 +1357,8 @@ frameCount:
 	dc.l	0
 verticalBlankCount:
 	dc.l	0
+movingCounter:
+	dc.w	0
 moving:
 	dc.w	0
 pathwayRenderPending:

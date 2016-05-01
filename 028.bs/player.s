@@ -14,6 +14,7 @@
 
 	xdef spriteLagX
 	xdef spriteY
+	xdef spriteX
 	
 PLAYER_INSTALL_COLOR_PALETTE	equ 0
 PLAYER_SPRITE_DATA		equ 4
@@ -33,7 +34,7 @@ InitialisePlayer:
 
 
 HidePlayer:
-	move.w	#$f000,spriteX
+	move.w	#$7000,spriteX
 	rts			
 
 
@@ -134,7 +135,7 @@ UpdatePlayer:
 .notLeft:
 	cmp.w	#$cf,spriteX
 	blt	.noScroll
-	move.w	#1,moving
+	;; move.w	#1,moving
 .noScroll:
 	rts
 
@@ -234,6 +235,10 @@ InstallTankColorPalette:
 
 CheckPlayerMiss:
 
+	;; check if player has fallen off the left side of the play area
+	cmpi.w	#PLAYER_INITIAL_X-15,spriteX
+	blt	.doBigBang
+	
 	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteR
 	beq	.check
 	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteU
@@ -241,7 +246,7 @@ CheckPlayerMiss:
 	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteD
 	beq	.check	
 	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteL
-	beq	.check	
+	beq	.check
 	rts
 
 .check:
@@ -308,6 +313,8 @@ CheckPlayerMiss:
 	cmp.w	#$1e00,d0
 	blt	.dontRenderPathway		
 	move.w	#2,pathwayRenderPending
+	move.w	#0,pathwayFadeCount
+	jsr	InstallTilePalette		
 .dontRenderPathway:
 
 	cmp.w	#$f02,d0
