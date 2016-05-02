@@ -22,7 +22,7 @@ split4=0	;Great time gain, but INCOMPATIBLE with F03, F02, and F01
 		;See ;@@ note for P61_SetPosition.
 
 
-splitchans=1	;#channels to be split off to be decrunched at "playtime frame"
+splitchans=0	;#channels to be split off to be decrunched at "playtime frame"
 		;0=use normal "decrunch all channels in the same frame"
 		;Experiment to find minimum rastertime, but it should be 1 or 2
 		;for 3-4 channels songs and 0 or 1 with less channels.
@@ -41,7 +41,7 @@ p61exec	=0	;0 if execbase is destroyed, such as in a trackmo.
 
 p61fade	=0	;enable channel volume fading from your demo
 
-channels=4	;<4 for game sound effects in the higher channels. Incompatible
+channels=3	;<4 for game sound effects in the higher channels. Incompatible
 		; with splitchans/split4.
 
 playflag=0	;1=enable music on/off capability (at run-time). .If 0, you can

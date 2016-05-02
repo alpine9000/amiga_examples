@@ -9,7 +9,7 @@ BASE_ADDRESS=4000
 # note: this must be high enough not to conflict with MFMbufE
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o out/sound.o
 
 IMAGES=foreground.png \
 	background.png \
@@ -164,7 +164,13 @@ out/background-map.s: background.tmx
 	@mv background-map.s out
 	@rm background-indexes.s
 
-out/main.o: $(IMAGEDATA) out/background-map.s out/foreground-map.s Makefile link.script.x out/playarea_fade.s out/flags_fade.s out/panelFade.s out/tileFade.s
+out/falling.raw: assets/falling.wav
+	sox assets/falling.wav -b 8 -c 1 -r 8000 out/falling.raw
+
+out/jump.raw: assets/jump.wav
+	sox assets/jump.wav -c 1 -r 13000 -b 8 out/jump.raw
+
+out/main.o: $(IMAGEDATA) out/background-map.s out/foreground-map.s Makefile link.script.x out/playarea_fade.s out/flags_fade.s out/panelFade.s out/tileFade.s out/jump.raw out/falling.raw
 
 setuptiming:
 	$(eval	VASM_EXTRA_ARGS="-DTIMING_TEST=1")

@@ -1,5 +1,5 @@
 	include "includes.i"
-
+	
 	xdef    BigBang
 
 	xdef	pathwayRenderPending
@@ -44,12 +44,21 @@ Entry:
 	move	#$7fff,INTENA(a6) 	; disable all interrupts		
 
 	lea	Level3InterruptHandler,a3
- 	move.l	a3,LVL3_INT_VECTOR			
+ 	move.l	a3,LVL3_INT_VECTOR
 
+
+	if 0
+	lea	Level4InterruptHandler,a3
+ 	move.l	a3,LVL4_INT_VECTOR
+	endif
+
+
+	;; 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
+	
 	jsr	StartMusic
 	jsr	ShowSplash
 	jsr 	BlueFill	
-	
+
 	;; d0 - fg bitplane pointer offset
 	;; d1 - bg bitplane pointer offset		
 	move.l	#0,d0
@@ -77,8 +86,7 @@ Entry:
 	jsr	Init		  ; enable the playfield
 	jsr	InstallSpriteColorPalette
 
-
-	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
+	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR|DMAF_COPPER|DMAF_RASTER|DMAF_MASTER),DMACON(a6)
 
 	
 Reset:	
@@ -181,8 +189,12 @@ GameLoop:
 	add.l	#1,frameCount
 	move.l	frameCount,d6			
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
+
 	jsr	WaitVerticalBlank
 
+	MOVE.W  #2,AUD3LEN(a6) ;Set length in words
+	move.l	#emptySound,AUD3LCH(a6)
+	
 	if      TIMING_TEST=1
 	move.l	#4000,d0
 .looooo:
@@ -655,7 +667,16 @@ PostMissedTile:
 
 	
 BigBang:
-	jsr	ResetItems	
+	jsr	PlayFalling
+	move.l	#10,d0
+.loop:
+	jsr	WaitVerticalBlank		
+	dbra	d0,.loop
+	
+	MOVE.W  #2,AUD3LEN(a6) ;Set length in words
+	move.l	#emptySound,AUD3LCH(a6)			
+
+	jsr	ResetItems
 	move.w	#0,moving
 	move.l	#0,frameCount	
 .bigBangLoop:
@@ -789,7 +810,44 @@ Level3InterruptHandler:
 	
 .interruptComplete:
 	movem.l	(sp)+,d0-a6
-	rte	
+	rte
+
+
+	if 0
+Level4InterruptHandler:
+	movem.l	d0-a6,-(sp)
+	lea	CUSTOM,a6
+.checkVerticalBlank:
+	move.w	INTREQR(a6),d0
+	and.w	#INTF_AUD0,d0		
+	beq	.interruptComplete
+
+	move.l	#1000,d0
+.loop:
+	dbra	d0,.loop
+	
+	move.w	#INTF_AUD0,INTREQ(a6)	; clear interrupt bit	
+	MOVE.W  #2,AUD0LEN(a6) ;Set length in words
+	move.l	#jump,AUD0LCH(a6)	
+	move.w	#INTF_AUD0,INTENA(a6)	
+
+	if 0
+	move.w	#DMAF_AUD0,DMACON(a6)
+
+	lea	verticalBlankCounterText,a0
+	bsr	IncrementCounter	
+
+	if 0
+	MOVE.W  #1,AUD0PER(a6)
+        MOVE.W  #0,AUD0VOL(a6) ;Use maximum volume	
+	MOVE.W  #2,AUD0LEN(a6) ;Set length in words		
+	endif
+	endif
+.interruptComplete:
+
+	movem.l	(sp)+,d0-a6
+	rte
+	endif
 
 Message:
 	;; a0 - bitplane
@@ -1479,6 +1537,9 @@ panelFade:
 tileFade:
 	include "out/tileFade.s"
 
+	align	2
+emptySound:
+	dc.l	0
 
 
 	section .bss
