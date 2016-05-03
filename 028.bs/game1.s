@@ -1,7 +1,9 @@
 	include "includes.i"
 	
 	xdef    BigBang
-
+	xdef 	IncrementCounter
+	xdef	RenderCounter
+	
 	xdef	pathwayRenderPending
 	xdef	pathwayXIndex
 	xdef	pathwayFadeCount	
@@ -77,6 +79,7 @@ Entry:
 
 	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR|DMAF_COPPER|DMAF_RASTER|DMAF_MASTER),DMACON(a6)
 
+	jsr	InitialiseItems	
 	
 Reset:	
 	lea	livesCounterText,a0
@@ -166,6 +169,8 @@ FadeInLoop:
 	bra	FadeInLoop
 	
 GameLoop:
+
+	if 0
 	lea	frameCounterText,a0
 	bsr	IncrementCounter
 	lea	frameCounterText,a1	
@@ -173,7 +178,8 @@ GameLoop:
 	jsr	RenderCounter
 	lea	verticalBlankCounterText,a1	
 	move.w	#101,d0
-	jsr	RenderCounter	
+	jsr	RenderCounter
+	endif
 	
 	add.l	#1,frameCount
 	move.l	frameCount,d6			
@@ -181,8 +187,10 @@ GameLoop:
 
 	jsr	WaitVerticalBlank
 
+	if SFX=1
 	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played	
 	move.l	#emptySound,AUD3LCH(a6)
+	endif
 	
 	if      TIMING_TEST=1
 	move.l	#4000,d0
@@ -217,7 +225,7 @@ GameLoop:
 	
 	
 	bsr 	Update
-	jsr	CheckPlayerMiss	
+	jsr	CheckPlayerMiss
 	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame
 
@@ -298,6 +306,7 @@ GameOver:
 	move.l	#foregroundMap,startForegroundMapPtr
 	move.l	#pathwayMap,startPathwayMapPtr
 	move.l	#'0004',livesCounterText	
+	jsr	InitialiseItems
 	bra	Reset
 	
 ShowMessagePanel:
@@ -642,7 +651,7 @@ PostMissedTile:
 
 	
 BigBang:
-	jsr	PlayFallingSound
+	PlaySound Falling
 	jsr	WaitVerticalBlank		
 
 	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played

@@ -157,22 +157,22 @@ ProcessJoystick:
 	cmp.b	#3,joystickpos
  	bne	.notRight
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteR
-	jsr	PlayJumpSound
+	PlaySound Jump
 .notRight:
 	cmp.b	#1,joystickpos
  	bne	.notUp
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteU
-	jsr	PlayJumpSound	
+	PlaySound Jump
 .notUp:
 	cmp.b	#5,joystickpos
  	bne	.notDown
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteD
-	jsr	PlayJumpSound	
+	PlaySound Jump
 .notDown:
 	cmp.b	#7,joystickpos
  	bne	.notLeft
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteL
-	jsr	PlayJumpSound	
+	PlaySound Jump
 .notLeft:	
 .skip:
 	rts
@@ -341,7 +341,9 @@ CheckPlayerMiss:
 	move.l	a3,startForegroundMapPtr
 	move.l	a2,startPathwayMapPtr	
 	
-.dontClearPathway:	
+.dontClearPathway:
+
+	jsr	DetectItemCollisions		
 	rts
 
 

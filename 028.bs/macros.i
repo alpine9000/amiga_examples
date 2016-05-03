@@ -1,3 +1,9 @@
+PlaySound:	macro
+	if	SFX=1
+	jsr	Play\1Sound	
+	endif
+	endm
+
 WaitBlitter:	macro
 	tst	DMACONR(a6)		;for compatibility
 .\@:

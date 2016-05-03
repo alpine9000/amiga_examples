@@ -5,6 +5,16 @@
 	xdef RenderItemSprite
 	xdef ResetItems
 	xdef EnableItemSprites
+	xdef DetectItemCollisions
+	xdef InitialiseItems
+	
+DeleteItemSprite:
+	move.w	#0,ITEM_SPRITE(a1)
+	move.w	#0,ITEM_X(a1)
+	move.w	#0,ITEM_LAGX(a1)
+	move.w	ITEM_Y(a1),d2
+	bsr	ClearItemSpriteData
+	rts
 	
 ScrollItemSprites:
 	move.w	#ITEM_NUM_SLOTS-1,d1
@@ -26,6 +36,48 @@ ScrollItemSprites:
 	dbra	d1,.loop
 	rts
 
+DetectItemCollisions:
+	move.w	#ITEM_NUM_SLOTS-1,d1
+	lea	item1,a1
+.loop:
+	cmp.w	#0,ITEM_SPRITE(a1)	
+	beq	.skip
+	move.w	spriteX,d2
+	move.w	ITEM_X(a1),d3
+	move.w	ITEM_Y(a1),d4
+	mulu.w	#ITEM_SPRITE_SPACING,d4
+	add.w	#ITEM_SPRITE_VSTART,d4
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d3 ; convert to pixels
+	add.w	#ITEM_SPRITE_HORIZONTAL_START_PIXELS,d3
+	cmp.w	d2,d3
+	bne	.skip
+	move.w	spriteY,d2
+	add.w	#ITEM_SPRITE_Y_COLLISION_OFFSET,d2	
+	cmp.w	d2,d4
+	bne	.skip	
+	bsr	DeleteItemSprite
+	lea	coinCounterText,a0
+	jsr	IncrementCounter
+	bsr	RenderCoinScore
+
+	PlaySound Chaching
+
+.skip:
+	add.l	#ITEM_STRUCT_SIZE,a1
+	dbra	d1,.loop	
+	rts
+
+
+RenderCoinScore:
+	lea	coinCounterText,a1	
+	move.w	#31,d0
+	jsr	RenderCounter	
+	rts
+
+InitialiseItems:
+	move.l	#"0000",coinCounterText
+	bsr	RenderCoinScore
+	
 ResetItems:
 	lea	item1,a1	
 	move.w  #ITEM_NUM_SLOTS-1,d1
@@ -34,6 +86,7 @@ ResetItems:
 	move.w	#0,ITEM_X(a1)
 	move.w	#0,ITEM_LAGX(a1)
 	move.w	ITEM_Y(a1),d2	
+	;; bsr     ClearItemSpriteData
 	add.l	#ITEM_STRUCT_SIZE,a1		; multiply by 16 (item control structure size)	
 	dbra	d1,.loop1
 	move.l	#0,itemSpritesEnabled
@@ -99,7 +152,7 @@ SetupItemSpriteData:
 	cmp.l	#0,itemSpritesEnabled
 	beq	.dontEnable
 
-	add.w	#32,d0
+	add.w	#ITEM_SPRITE_HORIZONTAL_START_PIXELS,d0
 	move.w	d0,d1
 	andi	#1,d1
 	move.b	d1,3(a0)	;spriteControl
@@ -185,3 +238,9 @@ currentItemSprite:
 
 nextSpriteSlot:
 	dc.w	0
+
+
+coinCounterText:
+	dc.b	"0000"
+	dc.b	0
+	align	4

@@ -41,8 +41,12 @@ p61exec	=0	;0 if execbase is destroyed, such as in a trackmo.
 
 p61fade	=0	;enable channel volume fading from your demo
 
+	if SFX=1
 channels=3	;<4 for game sound effects in the higher channels. Incompatible
 		; with splitchans/split4.
+	else
+channels=4
+	endif
 
 playflag=0	;1=enable music on/off capability (at run-time). .If 0, you can
 		;still do this by just, you know, not calling P61_Music...
