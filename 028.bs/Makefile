@@ -168,7 +168,7 @@ out/falling.raw: assets/falling.wav
 	sox assets/falling.wav -b 8 -c 1 -r 8000 out/falling.raw
 
 out/jump.raw: assets/jump.wav
-	sox assets/jump.wav -c 1 -r 13000 -b 8 out/jump.raw
+	sox -v 0.98 assets/jump.wav -c 1 -r 13000 -b 8 out/jump.raw
 
 out/main.o: $(IMAGEDATA) out/background-map.s out/foreground-map.s Makefile link.script.x out/playarea_fade.s out/flags_fade.s out/panelFade.s out/tileFade.s out/jump.raw out/falling.raw
 

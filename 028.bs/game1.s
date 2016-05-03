@@ -46,15 +46,6 @@ Entry:
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR
 
-
-	if 0
-	lea	Level4InterruptHandler,a3
- 	move.l	a3,LVL4_INT_VECTOR
-	endif
-
-
-	;; 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
-	
 	jsr	StartMusic
 	jsr	ShowSplash
 	jsr 	BlueFill	
@@ -75,13 +66,11 @@ Entry:
 	lea	panel,a1
 	jsr	PokePanelBitplanePointers	
 
-
 	lea	mpanelCopperListBpl1Ptr,a0
 	lea	mpanel,a1
 	jsr	PokePanelBitplanePointers
 	
 	bsr	ShowMessagePanel
-
 
 	jsr	Init		  ; enable the playfield
 	jsr	InstallSpriteColorPalette
@@ -192,7 +181,7 @@ GameLoop:
 
 	jsr	WaitVerticalBlank
 
-	MOVE.W  #2,AUD3LEN(a6) ;Set length in words
+	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played	
 	move.l	#emptySound,AUD3LCH(a6)
 	
 	if      TIMING_TEST=1
@@ -213,10 +202,6 @@ GameLoop:
 .s2:	
 
 	jsr	ProcessJoystick
-	if 0
-	btst.b	#0,joystick
-	bne	.setMoving
-	endif
 	cmp.w	#PLAYER_INITIAL_X+16*3,spriteX
 	bge	.setMoving
 	addq.w	#1,movingCounter
@@ -232,6 +217,7 @@ GameLoop:
 	
 	
 	bsr 	Update
+	jsr	CheckPlayerMiss	
 	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame
 
@@ -246,17 +232,6 @@ GameLoop:
 	jsr	RenderPathway
 .dontRenderPathway:
 
-
-
-	if 0
-	move.w	pathwayYIndex,d6	
-	cmp.w	#0,d6
-	beq	.dontRenderMapTile
-	move.w	pathwayXIndex,d5	
-	bsr	RenderMapTile		
-.dontRenderMapTile:
-	endif
-	
 	if TIMING_TEST=1
 	move.w	#$f00,COLOR00(a6)
 	move.w	#$f00,COLOR02(a6)			
@@ -300,7 +275,7 @@ Update:
 	jsr	InstallNextPathwayColor
 .dontInstallNextPathwayColor:
 	add.w	#1,pathwayFadeCount
-	jsr	CheckPlayerMiss
+	;; 	jsr	CheckPlayerMiss
 
 	rts
 
@@ -667,13 +642,10 @@ PostMissedTile:
 
 	
 BigBang:
-	jsr	PlayFalling
-	move.l	#10,d0
-.loop:
+	jsr	PlayFallingSound
 	jsr	WaitVerticalBlank		
-	dbra	d0,.loop
-	
-	MOVE.W  #2,AUD3LEN(a6) ;Set length in words
+
+	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played
 	move.l	#emptySound,AUD3LCH(a6)			
 
 	jsr	ResetItems
@@ -812,42 +784,6 @@ Level3InterruptHandler:
 	movem.l	(sp)+,d0-a6
 	rte
 
-
-	if 0
-Level4InterruptHandler:
-	movem.l	d0-a6,-(sp)
-	lea	CUSTOM,a6
-.checkVerticalBlank:
-	move.w	INTREQR(a6),d0
-	and.w	#INTF_AUD0,d0		
-	beq	.interruptComplete
-
-	move.l	#1000,d0
-.loop:
-	dbra	d0,.loop
-	
-	move.w	#INTF_AUD0,INTREQ(a6)	; clear interrupt bit	
-	MOVE.W  #2,AUD0LEN(a6) ;Set length in words
-	move.l	#jump,AUD0LCH(a6)	
-	move.w	#INTF_AUD0,INTENA(a6)	
-
-	if 0
-	move.w	#DMAF_AUD0,DMACON(a6)
-
-	lea	verticalBlankCounterText,a0
-	bsr	IncrementCounter	
-
-	if 0
-	MOVE.W  #1,AUD0PER(a6)
-        MOVE.W  #0,AUD0VOL(a6) ;Use maximum volume	
-	MOVE.W  #2,AUD0LEN(a6) ;Set length in words		
-	endif
-	endif
-.interruptComplete:
-
-	movem.l	(sp)+,d0-a6
-	rte
-	endif
 
 Message:
 	;; a0 - bitplane

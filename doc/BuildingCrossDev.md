@@ -128,3 +128,12 @@ Notes:
     # /Applications/CMake.app/Contents/bin/cmake ..
     # make install
 ```
+
+11. SOX
+    ```
+    # git clone git://sox.git.sourceforge.net/gitroot/sox/sox
+    # cd sox
+    # autoreconf -i
+    # ./configure --prefix=/usr/local
+    # make install
+```

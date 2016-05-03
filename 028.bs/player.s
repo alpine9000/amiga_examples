@@ -157,22 +157,22 @@ ProcessJoystick:
 	cmp.b	#3,joystickpos
  	bne	.notRight
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteR
-	jsr	PlaySound
+	jsr	PlayJumpSound
 .notRight:
 	cmp.b	#1,joystickpos
  	bne	.notUp
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteU
-	jsr	PlaySound	
+	jsr	PlayJumpSound	
 .notUp:
 	cmp.b	#5,joystickpos
  	bne	.notDown
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteD
-	jsr	PlaySound	
+	jsr	PlayJumpSound	
 .notDown:
 	cmp.b	#7,joystickpos
  	bne	.notLeft
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteL
-	jsr	PlaySound	
+	jsr	PlayJumpSound	
 .notLeft:	
 .skip:
 	rts
