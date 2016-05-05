@@ -1,7 +1,10 @@
 	include "includes.i"
 
 	xdef SwitchBuffers
+	xdef SwitchBackgroundBuffers
 	xdef PokePanelBitplanePointers
+
+	
 	
 SwitchBuffers:
 	;; offscreen - bitplane address
@@ -23,8 +26,9 @@ SwitchBuffers:
 
 	add.l	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(96-1),d0	
 	lea 	copperListBpl1Ptr2_MP,a0
-	bsr.s	PokeBitplanePointers	
+	bsr.s	PokeBitplanePointers
 				
+SwitchBackgroundBuffers:
 	
 	move.l	backgroundScrollX,d0
 	lsr.w	#BACKGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels	
@@ -41,7 +45,7 @@ SwitchBuffers:
 	lea 	copperListBpl2Ptr_MP,a0
 	bsr.s	PokeBitplanePointers	
 
-	add.l	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(96-48+16),d0
+	add.l	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(96-1),d0
 	lea 	copperListBpl2Ptr2_MP,a0
 	bsr.s	PokeBitplanePointers	
 	

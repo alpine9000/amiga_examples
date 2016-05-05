@@ -48,7 +48,9 @@ ItemSprite:	macro
 	endm
 
 
+
 ItemControl:	macro
+	align 4
 \1:
 .itemX:
 	dc.w	0
@@ -56,14 +58,12 @@ ItemControl:	macro
 	dc.w	0
 .itemY:
 	dc.w	0
-.itemLagY:
-	dc.w	0
-.itemYEnd:
-	dc.w	0
-.itemLagYEnd:
+.itemSprite:
 	dc.w	0
 .itemIndex:
-	dc.w	0		
-.pad	; make the control word 16 bytes
 	dc.w	0
+.pad:	; make the control word 16 bytes
+	dc.w	0
+.spriteAddress:
+	dc.l	\2
 	endm

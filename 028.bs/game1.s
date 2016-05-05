@@ -129,7 +129,17 @@ SetupBoardLoop:
 	move.l	foregroundScrollX,d0
 	move.w	#1,moving
 	bsr 	Update
-	bsr	RenderNextForegroundFrame
+
+	jsr	RenderNextForegroundFrame	
+	
+	move.w	#15,d5
+	sub.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX			
+.renderNextBackgroundFrameLoop:	
+	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX		
+	jsr	RenderNextBackgroundFrame
+	jsr 	SwitchBackgroundBuffers
+	dbra	d5,.renderNextBackgroundFrameLoop
+	
 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount	
 	bge	.gotoGameLoop
 	bra	SetupBoardLoop
@@ -1149,6 +1159,7 @@ playAreaCopperPalettePtr4_MP:
 InstallSpriteColorPalette:
 	jsr	InstallPlayerColorPalette
 	include "out/sprite_coin-1-palette.s"
+	include "out/sprite_arrow-1-palette.s"	
 	rts
 
 InstallColorPalette:

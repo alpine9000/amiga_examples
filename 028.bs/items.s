@@ -93,6 +93,7 @@ ResetItems:
 	rts
 	
 ClearItemSpriteData:
+	rts
 	;; 	move.w	#ITEM_SPRITE_NUM_VERTICAL_SPRITES-1,d4
 	;; sub.w	d2,d4 		; this is because of the upside board at the moment
 	;; 	move.w	d4,d2
@@ -125,7 +126,7 @@ SetupItemSpriteData:
 	move.w	ITEM_Y(a1),d2
 	;; move.l	#5,d2
 	
-	move.l	currentItemSprite,a0
+	move.l	ITEM_SPRITE_ADDRESS(a1),a0
 	
 	cmp.w	#(ITEM_NUM_COIN_ANIMS-1)<<3,ITEM_INDEX(a1)
 	ble	.dontResetIndex
@@ -194,7 +195,7 @@ GetSpriteSlot:
 	lea	item1,a1
 	add.l	d0,a1	
 	
-	move.l	#deadSprite,currentItemSprite	
+	;; move.l	#deadSprite,ITEM_SPRITE_ADDRESS(a1)
 	move.w	#336<<FOREGROUND_SCROLL_SHIFT_CONVERT,ITEM_X(a1)
 	sub.l	#1,d2
 	move.w	d2,ITEM_Y(a1)
@@ -203,7 +204,7 @@ GetSpriteSlot:
 	add.w	#1,d1
 	move.w	d1,ITEM_SPRITE(a1)
 
-	move.l	#spriteCoin1,currentItemSprite
+	;; move.l	#spriteCoin1,ITEM_SPRITE_ADDRESS(a1)
 dontAddSprite:
 	movem.l	(sp)+,d2-d3
 	rts
@@ -214,18 +215,26 @@ EnableItemSprites:
 	
 itemSpritesEnabled:
 	dc.l	0
-	;; used for animation
-currentItemSprite:
-	dc.l	deadSprite
 
-	ItemControl item1
-	ItemControl item2
-	ItemControl item3
-	ItemControl item4
-	ItemControl item5
-	ItemControl item6
-	ItemControl item7
-	ItemControl item8	
+	;; coin1
+	ItemControl item1,spriteCoin1
+	ItemControl item2,spriteCoin1
+	ItemControl item3,spriteCoin1
+	ItemControl item4,spriteCoin1
+	ItemControl item5,spriteCoin1
+	ItemControl item6,spriteCoin1
+	ItemControl item7,spriteCoin1
+	ItemControl item8,spriteCoin1
+
+	;; arrow1
+	ItemControl item9,spriteArrow1
+	ItemControl item10,spriteArrow1
+	ItemControl item11,spriteArrow1
+	ItemControl item12,spriteArrow1
+	ItemControl item13,spriteArrow1
+	ItemControl item14,spriteArrow1
+	ItemControl item15,spriteArrow1
+	ItemControl item16,spriteArrow1	
 
 	ItemSprite spriteCoin1,sprite_coin-0.bin
 	ItemSprite spriteCoin2,sprite_coin-0.bin
@@ -233,8 +242,15 @@ currentItemSprite:
 	ItemSprite spriteCoin4,sprite_coin-2.bin
 	ItemSprite spriteCoin5,sprite_coin-3.bin
 	ItemSprite spriteCoin6,sprite_coin-2.bin
-	ItemSprite spriteCoin7,sprite_coin-1.bin	
+	ItemSprite spriteCoin7,sprite_coin-1.bin
 
+	ItemSprite spriteArrow1,sprite_arrow-0.bin
+	ItemSprite spriteArrow2,sprite_arrow-0.bin
+	ItemSprite spriteArrow3,sprite_arrow-1.bin
+	ItemSprite spriteArrow4,sprite_arrow-2.bin
+	ItemSprite spriteArrow5,sprite_arrow-3.bin
+	ItemSprite spriteArrow6,sprite_arrow-2.bin
+	ItemSprite spriteArrow7,sprite_arrow-1.bin
 
 nextSpriteSlot:
 	dc.w	0
