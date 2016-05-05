@@ -213,7 +213,7 @@ SetupSpriteData:
 	
 	move.l	#deadSprite,SPR1PTH(a6)
 	move.l	#deadSprite,SPR3PTH(a6)
-	move.l	#deadSprite,SPR4PTH(a6)
+	;; move.l	#deadSprite,SPR4PTH(a6)
 	move.l	#deadSprite,SPR5PTH(a6)
 	move.l	#deadSprite,SPR6PTH(a6)
 	move.l	#deadSprite,SPR7PTH(a6)		

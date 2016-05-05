@@ -117,6 +117,7 @@ ClearItemSpriteData:
 SetupItemSpriteData:
 	;; d0 - item slot	
 	move.l	d0,-(sp)
+	move.l	d0,d4 					; save item slot
 	
 	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
 	lea	item1,a1
@@ -162,10 +163,20 @@ SetupItemSpriteData:
 
 .c1:
 	sub.l	d2,a0	;#1*ITEM_SPRITE_VERTICAL_BYTES,a0
+	cmp.b	#8,d4
+	bge	.arrowSprite
 	move.l	a0,SPR2PTH(a6)
 	bra	.done
+.arrowSprite:
+	move.l	a0,SPR4PTH(a6)
+	bra	.done	
 .dontEnable:
+	cmp.b	#8,d4
+	bge	.dontEnableArrowSprite	
 	move.l	#deadSprite,SPR2PTH(a6)
+	bra	.done
+.dontEnableArrowSprite:
+	move.l	#deadSprite,SPR4PTH(a6)	
 
 .done:
 	add.w	#1,ITEM_INDEX(a1)		
