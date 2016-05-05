@@ -7,13 +7,13 @@
 	xdef EnableItemSprites
 	xdef DetectItemCollisions
 	xdef InitialiseItems
+	xdef SwitchItemSpriteBuffers
 	
 DeleteItemSprite:
 	move.w	#0,ITEM_SPRITE(a1)
 	move.w	#0,ITEM_X(a1)
 	move.w	#0,ITEM_LAGX(a1)
 	move.w	ITEM_Y(a1),d2
-	bsr	ClearItemSpriteData
 	rts
 	
 ScrollItemSprites:
@@ -30,7 +30,6 @@ ScrollItemSprites:
 	move.w	#0,ITEM_X(a1)
 	move.w	#0,ITEM_LAGX(a1)
 	move.w	ITEM_Y(a1),d2
-	bsr	ClearItemSpriteData
 .skip:
 	add.l	#ITEM_STRUCT_SIZE,a1		; multiply by 16 (item control structure size)
 	dbra	d1,.loop
@@ -86,34 +85,25 @@ ResetItems:
 	move.w	#0,ITEM_X(a1)
 	move.w	#0,ITEM_LAGX(a1)
 	move.w	ITEM_Y(a1),d2	
-	;; bsr     ClearItemSpriteData
 	add.l	#ITEM_STRUCT_SIZE,a1		; multiply by 16 (item control structure size)	
 	dbra	d1,.loop1
 	move.l	#0,itemSpritesEnabled
 	rts
-	
-ClearItemSpriteData:
-	rts
-	;; 	move.w	#ITEM_SPRITE_NUM_VERTICAL_SPRITES-1,d4
-	;; sub.w	d2,d4 		; this is because of the upside board at the moment
-	;; 	move.w	d4,d2
-	move.w  #ITEM_NUM_COIN_ANIMS-1,d4
-	move.l	#spriteCoin1,a0
-.l2:
-	move.w	#ITEM_SPRITE_NUM_VERTICAL_SPRITES-1,d3
-.l1:
-	cmp.w	d3,d2
-	bne	.skip
-	move.b	#0,3(a0)
-	move.b	#0,1(a0)
 
-.skip:
-	add.l	#ITEM_SPRITE_VERTICAL_BYTES,a0
-	dbra.w	d3,.l1
-	add.l	#4,a0
-	dbra.w	d4,.l2
-	rts
+
+SwitchItemSpriteBuffers:
+
+	move.w	spriteX,spriteLagX	
 	
+	move.w	#ITEM_NUM_SLOTS-1,d1
+	move.w	d1,d0
+	lea	item1,a1
+.loop:
+	move.w	ITEM_X(a1),ITEM_LAGX(a1)
+	adda.l	#ITEM_STRUCT_SIZE,a1		
+	dbra	d1,.loop
+	rts
+
 SetupItemSpriteData:
 	;; d0 - item slot	
 	move.l	d0,-(sp)
@@ -149,7 +139,7 @@ SetupItemSpriteData:
 
 	move.w	ITEM_LAGX(a1),d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
-	move.w	ITEM_X(a1),ITEM_LAGX(a1)
+	;; 	 move.w	ITEM_X(a1),ITEM_LAGX(a1)
 
 	cmp.l	#0,itemSpritesEnabled
 	beq	.dontEnable

@@ -8,7 +8,7 @@
 	
 SwitchBuffers:
 	;; offscreen - bitplane address
-
+	
 	move.l	foregroundScrollX,d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
 	lsr.w   #3,d0		; bytes to scroll
@@ -47,7 +47,9 @@ SwitchBackgroundBuffers:
 
 	add.l	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(96-1),d0
 	lea 	copperListBpl2Ptr2_MP,a0
-	bsr.s	PokeBitplanePointers	
+	bsr.s	PokeBitplanePointers
+
+	jsr	SwitchItemSpriteBuffers	
 	
 	rts
 

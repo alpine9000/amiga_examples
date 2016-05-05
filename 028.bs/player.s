@@ -181,7 +181,7 @@ ProcessJoystick:
 SetupSpriteData:
 	move.l	currentSprite,a0
 	move.w	spriteLagX,d0
-	move.w	spriteX,spriteLagX
+	;; move.w	spriteX,spriteLagX
 	move.w	d0,d1
 	andi	#1,d1
 
@@ -267,7 +267,8 @@ CheckPlayerMiss:
 
 
 	;; add the offset based on the sprite's x position
-	move.w	spriteLagX,d0
+	move.w	spriteX,d0
+	;; move.w	spriteLagX,d0
 	cmpi.w  #PLAYER_LEFT_X,d0
 	blt	.doBigBang
 	sub.w	#PLAYER_LEFT_X,d0
