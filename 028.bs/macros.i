@@ -62,8 +62,8 @@ ItemControl:	macro
 	dc.w	0
 .itemIndex:
 	dc.w	0
-.pad:	; make the control word 16 bytes
-	dc.w	0
+.itemEnabled:
+	dc.w	\3
 .spriteAddress:
 	dc.l	\2
 	endm

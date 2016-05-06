@@ -104,7 +104,24 @@ SwitchItemSpriteBuffers:
 	dbra	d1,.loop
 	rts
 
-SetupItemSpriteData:
+
+SetupItemSpriteData:	
+	cmp.l	#0,itemSpritesEnabled
+	bne	.enableSprites
+	move.l	#deadSprite,SPR2PTH(a6)
+	move.l	#deadSprite,SPR3PTH(a6)
+	move.l	#deadSprite,SPR4PTH(a6)	
+	rts
+	
+.enableSprites:	
+	move.l	#ITEM_NUM_SLOTS,d0	
+.loop:
+	bsr 	_SetupItemSpriteData
+	dbra	d0,.loop
+	rts
+	
+
+_SetupItemSpriteData:
 	;; d0 - item slot	
 	move.l	d0,-(sp)
 	move.l	d0,d4 					; save item slot
@@ -113,15 +130,15 @@ SetupItemSpriteData:
 	lea	item1,a1
 	add.l	d0,a1
 
+	cmpi.w	#0,ITEM_SPRITE_ENABLED(a1)
+	beq	.spriteIsNotEnabled
 
-	move.w	ITEM_Y(a1),d2
-	;; move.l	#5,d2
-	
+	move.w	ITEM_Y(a1),d2	
 	move.l	ITEM_SPRITE_ADDRESS(a1),a0
-	
+
 	cmp.w	#(ITEM_NUM_COIN_ANIMS-1)<<3,ITEM_INDEX(a1)
 	ble	.dontResetIndex
-	move.l	#0,ITEM_INDEX(a1)
+	move.w	#0,ITEM_INDEX(a1)
 .dontResetIndex:
 	cmp.l	#deadSprite,a0
 	bne	.setupSprite
@@ -137,12 +154,11 @@ SetupItemSpriteData:
 	mulu.w	#ITEM_SPRITE_VERTICAL_BYTES,d2
 	add.l	d2,a0
 
-	move.w	ITEM_LAGX(a1),d0
+	move.w	ITEM_X(a1),d0
+	;; move.w	ITEM_LAGX(a1),d0	
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	;; 	 move.w	ITEM_X(a1),ITEM_LAGX(a1)
 
-	cmp.l	#0,itemSpritesEnabled
-	beq	.dontEnable
 
 	add.w	#ITEM_SPRITE_HORIZONTAL_START_PIXELS,d0
 	move.w	d0,d1
@@ -153,23 +169,23 @@ SetupItemSpriteData:
 
 .c1:
 	sub.l	d2,a0	;#1*ITEM_SPRITE_VERTICAL_BYTES,a0
-	cmp.b	#8,d4
+	cmp.b	#ITEM_SPRITE_ARROW_INDEX,d4
 	bge	.arrowSprite
+	cmp.b	#ITEM_SPRITE_COINB_INDEX,d4
+	bge	.coinBSprite
+.coinASprite:
 	move.l	a0,SPR2PTH(a6)
 	bra	.done
+.coinBSprite:
+	move.l	a0,SPR3PTH(a6)
+	bra	.done	
 .arrowSprite:
 	move.l	a0,SPR4PTH(a6)
 	bra	.done	
-.dontEnable:
-	cmp.b	#8,d4
-	bge	.dontEnableArrowSprite	
-	move.l	#deadSprite,SPR2PTH(a6)
-	bra	.done
-.dontEnableArrowSprite:
-	move.l	#deadSprite,SPR4PTH(a6)	
 
 .done:
 	add.w	#1,ITEM_INDEX(a1)		
+.spriteIsNotEnabled:
 	move.l	(sp)+,d0
 	rts
 	
@@ -196,7 +212,6 @@ GetSpriteSlot:
 	lea	item1,a1
 	add.l	d0,a1	
 	
-	;; move.l	#deadSprite,ITEM_SPRITE_ADDRESS(a1)
 	move.w	#336<<FOREGROUND_SCROLL_SHIFT_CONVERT,ITEM_X(a1)
 	sub.l	#1,d2
 	move.w	d2,ITEM_Y(a1)
@@ -205,7 +220,6 @@ GetSpriteSlot:
 	add.w	#1,d1
 	move.w	d1,ITEM_SPRITE(a1)
 
-	;; move.l	#spriteCoin1,ITEM_SPRITE_ADDRESS(a1)
 dontAddSprite:
 	movem.l	(sp)+,d2-d3
 	rts
@@ -217,34 +231,54 @@ EnableItemSprites:
 itemSpritesEnabled:
 	dc.l	0
 
-	;; coin1
-	ItemControl item1,spriteCoin1
-	ItemControl item2,spriteCoin1
-	ItemControl item3,spriteCoin1
-	ItemControl item4,spriteCoin1
-	ItemControl item5,spriteCoin1
-	ItemControl item6,spriteCoin1
-	ItemControl item7,spriteCoin1
-	ItemControl item8,spriteCoin1
+	;; coinA
+	ItemControl item1,spriteCoinA1,1
+	ItemControl item2,spriteCoinA1,1
+	ItemControl item3,spriteCoinA1,1
+	ItemControl item4,spriteCoinA1,1
+	ItemControl item5,spriteCoinA1,1
+	ItemControl item6,spriteCoinA1,1
+	ItemControl item7,spriteCoinA1,0
+	ItemControl item8,spriteCoinA1,0
+
+	;; coinB
+	ItemControl item9,spriteCoinB1,1
+	ItemControl item10,spriteCoinB1,1
+	ItemControl item11,spriteCoinB1,1
+	ItemControl item12,spriteCoinB1,1
+	ItemControl item13,spriteCoinB1,1
+	ItemControl item14,spriteCoinB1,1
+	ItemControl item15,spriteCoinB1,0
+	ItemControl item16,spriteCoinB1,0
 
 	;; arrow1
-	ItemControl item9,spriteArrow1
-	ItemControl item10,spriteArrow1
-	ItemControl item11,spriteArrow1
-	ItemControl item12,spriteArrow1
-	ItemControl item13,spriteArrow1
-	ItemControl item14,spriteArrow1
-	ItemControl item15,spriteArrow1
-	ItemControl item16,spriteArrow1	
+	ItemControl item17,spriteArrow1,1
+	ItemControl item18,spriteArrow1,1
+	ItemControl item19,spriteArrow1,1
+	ItemControl item20,spriteArrow1,1
+	ItemControl item21,spriteArrow1,1
+	ItemControl item22,spriteArrow1,1
+	ItemControl item23,spriteArrow1,0
+	ItemControl item24,spriteArrow1,0
 
-	ItemSprite spriteCoin1,sprite_coin-0.bin
-	ItemSprite spriteCoin2,sprite_coin-0.bin
-	ItemSprite spriteCoin3,sprite_coin-1.bin
-	ItemSprite spriteCoin4,sprite_coin-2.bin
-	ItemSprite spriteCoin5,sprite_coin-3.bin
-	ItemSprite spriteCoin6,sprite_coin-2.bin
-	ItemSprite spriteCoin7,sprite_coin-1.bin
+	ItemSprite spriteCoinA1,sprite_coin-0.bin
+	ItemSprite spriteCoinA2,sprite_coin-0.bin
+	ItemSprite spriteCoinA3,sprite_coin-1.bin
+	ItemSprite spriteCoinA4,sprite_coin-2.bin
+	ItemSprite spriteCoinA5,sprite_coin-3.bin
+	ItemSprite spriteCoinA6,sprite_coin-2.bin
+	ItemSprite spriteCoinA7,sprite_coin-1.bin
+	ItemSprite spriteCoinA8,sprite_coin-1.bin	
 
+	ItemSprite spriteCoinB1,sprite_coin-0.bin
+	ItemSprite spriteCoinB2,sprite_coin-0.bin
+	ItemSprite spriteCoinB3,sprite_coin-1.bin
+	ItemSprite spriteCoinB4,sprite_coin-2.bin
+	ItemSprite spriteCoinB5,sprite_coin-3.bin
+	ItemSprite spriteCoinB6,sprite_coin-2.bin
+	ItemSprite spriteCoinB7,sprite_coin-1.bin
+	ItemSprite spriteCoinB8,sprite_coin-1.bin		
+	
 	ItemSprite spriteArrow1,sprite_arrow-0.bin
 	ItemSprite spriteArrow2,sprite_arrow-0.bin
 	ItemSprite spriteArrow3,sprite_arrow-1.bin
@@ -252,6 +286,7 @@ itemSpritesEnabled:
 	ItemSprite spriteArrow5,sprite_arrow-3.bin
 	ItemSprite spriteArrow6,sprite_arrow-2.bin
 	ItemSprite spriteArrow7,sprite_arrow-1.bin
+	ItemSprite spriteArrow8,sprite_arrow-1.bin	
 
 nextSpriteSlot:
 	dc.w	0

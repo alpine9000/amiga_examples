@@ -206,17 +206,12 @@ SetupSpriteData:
 	
 	move.b	d1,3(a0)	;spriteControl	
 	
-	move.l	#ITEM_NUM_SLOTS-1,d0
-.loop:
 	jsr 	SetupItemSpriteData
-	dbra	d0,.loop
 	
-	move.l	#deadSprite,SPR1PTH(a6)
-	move.l	#deadSprite,SPR3PTH(a6)
-	;; move.l	#deadSprite,SPR4PTH(a6)
-	move.l	#deadSprite,SPR5PTH(a6)
-	move.l	#deadSprite,SPR6PTH(a6)
-	move.l	#deadSprite,SPR7PTH(a6)		
+	move.l	#deadSprite,SPR1PTH(a6) ; unused - could only use if sprite resused player sprite palette
+	move.l	#deadSprite,SPR5PTH(a6) ; unused - we only allow one arrow per line per screen
+	move.l	#deadSprite,SPR6PTH(a6) ; unused - incompatible with oversize playfield data fetch
+	move.l	#deadSprite,SPR7PTH(a6)	; unused - incompatible with oversize playfield data fetch
 	rts
 
 InstallPlayerColorPalette:
@@ -295,7 +290,8 @@ CheckPlayerMiss:
 
 	;; a2 now points at the pathway tile under the sprite
 	move.w	(a2),d0
-	
+	move.w	spriteCurrentPathwayTile,spriteLastPathwayTile
+	move.w	d0,spriteCurrentPathwayTile
 	bsr	CheckDirection
 	
 	cmp.w	#$78e,d0
@@ -481,4 +477,7 @@ spriteY:
 	dc.w	$e4
 spriteYEnd:
 	dc.w	$f5
-	
+spriteCurrentPathwayTile:
+	dc.w	0
+spriteLastPathwayTile:
+	dc.w	0
