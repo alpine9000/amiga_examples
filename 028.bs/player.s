@@ -1,5 +1,6 @@
 	include "includes.i"
 
+	xdef GetNextAutoMove
 	xdef CheckPlayerMiss
 	xdef UpdatePlayer
 	xdef ProcessJoystick
@@ -11,6 +12,7 @@
 	xdef UpdatePlayerFallingAnimation
 	xdef InstallPlayerColorPalette
 	xdef SelectNextPlayerSprite
+	xdef SpriteEnableAuto
 
 	xdef spriteLagX
 	xdef spriteY
@@ -25,7 +27,8 @@ InitialisePlayer:
 	move.l	PLAYER_SPRITE_DATA(a0),d0	
 	add.l	#6*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite
-	
+
+	;; move.w	#0,spriteAutoMoveEnabled
 	move.w	#0,spritePlayerFallingAnimation
 	move.w	#PLAYER_INITIAL_X,spriteX
 	move.w	#PLAYER_INITIAL_Y,spriteY
@@ -153,31 +156,45 @@ ProcessJoystick:
 	bne	.skip
 	cmp.w	#0,spriteL
 	bne	.skip	
-	
+
+	cmp.w	#0,spriteAutoMoveEnabled
+	beq	.autoMoveDisabled
+	bsr	GetNextAutoMove
+	cmp.w	#1,d0
+	beq	.skip
+
+.autoMoveDisabled:
 	cmp.b	#3,joystickpos
  	bne	.notRight
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteR
+	move.w	#SPRITE_MOVE_RIGHT,spriteLastMove
 	PlaySound Jump
 .notRight:
 	cmp.b	#1,joystickpos
  	bne	.notUp
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteU
+	move.w	#SPRITE_MOVE_UP,spriteLastMove	
 	PlaySound Jump
 .notUp:
 	cmp.b	#5,joystickpos
  	bne	.notDown
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteD
+	move.w	#SPRITE_MOVE_DOWN,spriteLastMove	
 	PlaySound Jump
 .notDown:
 	cmp.b	#7,joystickpos
  	bne	.notLeft
 	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteL
+	move.w	#SPRITE_MOVE_LEFT,spriteLastMove	
 	PlaySound Jump
 .notLeft:	
 .skip:
 	rts
 
-
+SpriteEnableAuto:
+	move.w	#1,spriteAutoMoveEnabled
+	rts
+	
 SetupSpriteData:
 	move.l	currentSprite,a0
 	move.w	spriteLagX,d0
@@ -290,7 +307,6 @@ CheckPlayerMiss:
 
 	;; a2 now points at the pathway tile under the sprite
 	move.w	(a2),d0
-	move.w	spriteCurrentPathwayTile,spriteLastPathwayTile
 	move.w	d0,spriteCurrentPathwayTile
 	bsr	CheckDirection
 	
@@ -344,6 +360,75 @@ CheckPlayerMiss:
 	rts
 
 
+GetNextAutoMove:
+	move.w	spriteCurrentPathwayTile,d0
+	lsr.w	#4,d0
+
+	cmp.w	#$708,d0
+	beq	.horizontal
+	cmp.w	#$690,d0
+	beq	.topLeft
+	cmp.w	#$5a0,d0
+	beq	.leftBottom
+	cmp.w	#$4b0,d0
+	beq	.rightBottom
+	cmp.w	#$528,d0
+	beq	.topRight
+	cmp.w	#$618,d0
+	beq	.vertical
+	bra	.skip
+.horizontal:
+	cmp.w	#SPRITE_MOVE_RIGHT,spriteLastMove
+	beq	.goRight
+	bra	.goLeft
+.topLeft:
+	cmp.w	#SPRITE_MOVE_RIGHT,spriteLastMove
+	beq	.goUp
+	bra	.goLeft
+.leftBottom:
+	cmp.w	#SPRITE_MOVE_RIGHT,spriteLastMove
+	beq	.goDown
+	bra	.goLeft	
+.topRight:
+	cmp.w	#SPRITE_MOVE_DOWN,spriteLastMove
+	beq	.goRight
+	bra	.goUp
+.rightBottom:
+	cmp.w	#SPRITE_MOVE_UP,spriteLastMove
+	beq	.goRight
+	bra	.goDown
+.vertical:
+	cmp.w	#SPRITE_MOVE_UP,spriteLastMove
+	beq	.goUp
+	bra	.goDown
+.default:	
+	bra	.skip
+
+.goRight:
+	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteR
+	move.w	#SPRITE_MOVE_RIGHT,spriteLastMove
+	bra	.done
+.goUp:
+	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteU
+	move.w	#SPRITE_MOVE_UP,spriteLastMove	
+	bra	.done
+.goDown:
+	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteD
+	move.w	#SPRITE_MOVE_DOWN,spriteLastMove	
+	bra	.done	
+.goLeft:
+	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteL
+	move.w	#SPRITE_MOVE_LEFT,spriteLastMove
+	bra	.done
+.done:
+	PlaySound Jump
+	move.w	#1,d0
+	rts
+.skip:
+	move.w	#0,spriteAutoMoveEnabled
+	move.w	#0,d0
+	rts
+	
 CheckDirection:
 	cmp.w	#$7080,d0 	; dark horizontal
 	beq	.horizontal
@@ -390,8 +475,7 @@ CheckDirection:
 	beq	.ok
 	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteD
 	beq	.ok
-	jmp	BigBang		
-
+	jmp	BigBang
 .topLeft:
 	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteR
 	beq	.ok
@@ -415,8 +499,7 @@ CheckDirection:
 	beq	.ok
 	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteU
 	beq	.ok		
-	jmp	BigBang		
-	
+	jmp	BigBang	
 .ok:
 	rts
 
@@ -424,7 +507,6 @@ CheckDirection:
 SelectNextPlayerSprite:
 	cmp.l	#tankPlayerSpriteConfig,playerSpriteConfig
 	beq	.s1
-	;; move.l	#robotPlayerSpriteConfig,playerSpriteConfig
 	add.l	#3*4,playerSpriteConfig
 	bra	.done
 .s1:
@@ -479,5 +561,7 @@ spriteYEnd:
 	dc.w	$f5
 spriteCurrentPathwayTile:
 	dc.w	0
-spriteLastPathwayTile:
+spriteLastMove:
+	dc.w	0
+spriteAutoMoveEnabled:
 	dc.w	0

@@ -54,13 +54,22 @@ DetectItemCollisions:
 	add.w	#ITEM_SPRITE_Y_COLLISION_OFFSET,d2	
 	cmp.w	d2,d4
 	bne	.skip	
+	cmpi.w	#ITEM_SPRITE_ARROW_INDEX,ITEM_SPRITE(a1)		
+	bge	.arrowCollision
+
+.coinCollision:	
 	bsr	DeleteItemSprite
 	lea	coinCounterText,a0
 	jsr	IncrementCounter
 	bsr	RenderCoinScore
-
 	PlaySound Chaching
-
+	rts
+	
+.arrowCollision:
+	bsr	DeleteItemSprite	
+	jsr	SpriteEnableAuto
+	rts
+	
 .skip:
 	add.l	#ITEM_STRUCT_SIZE,a1
 	dbra	d1,.loop	
