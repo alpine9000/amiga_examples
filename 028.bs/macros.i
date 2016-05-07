@@ -73,7 +73,7 @@ PlayerMoveRight: macro
 	move.w	playerJumpPixels,d1
 	add.w	playerPausePixels,d1
 	move.w	d1,spriteR
-	move.w	#SPRITE_MOVE_RIGHT,spriteLastMove
+	move.w	#PLAYER_MOVE_RIGHT,spriteLastMove
 	PlaySound Jump
 	endm
 
@@ -81,7 +81,7 @@ PlayerMoveUp:	macro
 	move.w	playerJumpPixels,d1
 	add.w	playerPausePixels,d1
 	move.w	d1,spriteU	
-	move.w	#SPRITE_MOVE_UP,spriteLastMove	
+	move.w	#PLAYER_MOVE_UP,spriteLastMove	
 	PlaySound Jump
 	endm
 
@@ -89,7 +89,7 @@ PlayerMoveDown:	macro
 	move.w	playerJumpPixels,d1
 	add.w	playerPausePixels,d1
 	move.w	d1,spriteD
-	move.w	#SPRITE_MOVE_DOWN,spriteLastMove	
+	move.w	#PLAYER_MOVE_DOWN,spriteLastMove	
 	PlaySound Jump
 	endm
 
@@ -97,6 +97,6 @@ PlayerMoveLeft:	macro
 	move.w	playerJumpPixels,d1
 	add.w	playerPausePixels,d1
 	move.w	d1,spriteL
-	move.w	#SPRITE_MOVE_LEFT,spriteLastMove	
+	move.w	#PLAYER_MOVE_LEFT,spriteLastMove	
 	PlaySound Jump
 	endm

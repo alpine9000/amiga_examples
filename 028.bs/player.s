@@ -165,8 +165,8 @@ ProcessJoystick:
 	cmp.w	#0,spriteAutoMoveEnabled
 	beq	.autoMoveDisabled
 
-	move.w	#4,playerPausePixels
-	move.w	#4,playerMissPixels
+	move.w	#PLAYER_FAST_PAUSE_PIXELS,playerPausePixels
+	move.w	#PLAYER_FAST_CHECK_MISS_PIXELS,playerMissPixels
 	
 	
 	bsr	GetNextAutoMove
@@ -194,6 +194,7 @@ ProcessJoystick:
 	rts
 
 SpriteEnableAuto:
+	PlaySound Whoosh
 	move.w	#1,spriteAutoMoveEnabled
 	rts
 
@@ -392,27 +393,27 @@ GetNextAutoMove:
 	beq	.vertical
 	bra	.skip
 .horizontal:
-	cmp.w	#SPRITE_MOVE_RIGHT,spriteLastMove
+	cmp.w	#PLAYER_MOVE_RIGHT,spriteLastMove
 	beq	.goRight
 	bra	.goLeft
 .topLeft:
-	cmp.w	#SPRITE_MOVE_RIGHT,spriteLastMove
+	cmp.w	#PLAYER_MOVE_RIGHT,spriteLastMove
 	beq	.goUp
 	bra	.goLeft
 .leftBottom:
-	cmp.w	#SPRITE_MOVE_RIGHT,spriteLastMove
+	cmp.w	#PLAYER_MOVE_RIGHT,spriteLastMove
 	beq	.goDown
 	bra	.goLeft	
 .topRight:
-	cmp.w	#SPRITE_MOVE_DOWN,spriteLastMove
+	cmp.w	#PLAYER_MOVE_DOWN,spriteLastMove
 	beq	.goRight
 	bra	.goUp
 .rightBottom:
-	cmp.w	#SPRITE_MOVE_UP,spriteLastMove
+	cmp.w	#PLAYER_MOVE_UP,spriteLastMove
 	beq	.goRight
 	bra	.goDown
 .vertical:
-	cmp.w	#SPRITE_MOVE_UP,spriteLastMove
+	cmp.w	#PLAYER_MOVE_UP,spriteLastMove
 	beq	.goUp
 	bra	.goDown
 .default:	

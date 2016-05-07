@@ -181,10 +181,13 @@ out/falling.raw: assets/falling.wav
 out/jump.raw: assets/jump.wav
 	sox -v 0.98 assets/jump.wav -c 1 -r 13000 -b 8 out/jump.raw
 
+out/whoosh.raw: assets/whoosh.wav
+	sox -v 2.0 assets/whoosh.wav -c 1 -r 13000 -b 8 out/whoosh.raw
+
 out/chaching.raw: assets/chaching.wav
 	sox -v 0.98 assets/chaching.wav -c 1 -r 13000 -b 8 out/chaching.raw
 
-out/main.o: $(IMAGEDATA) out/background-map.s out/foreground-map.s Makefile link.script.x out/playarea_fade.s out/flags_fade.s out/panelFade.s out/tileFade.s out/jump.raw out/falling.raw out/chaching.raw
+out/main.o: $(IMAGEDATA) out/background-map.s out/foreground-map.s Makefile link.script.x out/playarea_fade.s out/flags_fade.s out/panelFade.s out/tileFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw
 
 setuptiming:
 	$(eval	VASM_EXTRA_ARGS=-DTIMING_TEST=1 -DSFX=1)
