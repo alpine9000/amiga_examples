@@ -4,6 +4,26 @@ PlaySound:	macro
 	endif
 	endm
 
+KillSound:	macro
+	if	SFX=1
+	move.w	#(DMAF_AUD3),DMACON(a6)
+        move.w  #1,AUD3PER(a6)	
+	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played
+	move.l	#emptySound,AUD3LCH(a6)	
+
+
+	lea $dff004,a0
+	move.l	(a0),d0
+	add.l	#1<<8,d0
+.loop:
+	move.l	(a0),d1
+	cmp.l	d0,d1
+	ble	.loop
+
+	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
+	endif
+	endm
+
 WaitBlitter:	macro
 	tst	DMACONR(a6)		;for compatibility
 .\@:

@@ -1,4 +1,14 @@
 	include "includes.i"
+
+	xdef	PlayNextSound
+	
+PlayNextSound:
+	if SFX=1	
+	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played	
+	move.l	#emptySound,AUD3LCH(a6)
+	endif
+	rts	
+
 	if SFX=1
 	xdef	PlayJumpSound
 	xdef	PlayFallingSound
@@ -15,6 +25,7 @@ PlayJumpSound:
 	rts
 
 PlayWhooshSound:
+	KillSound
 	lea     whoosh,a1
         move.l  a1,AUD3LCH(a6)
         move.w  #256,AUD3PER(a6)
@@ -25,6 +36,7 @@ PlayWhooshSound:
 
 
 PlayFallingSound:
+	KillSound
 	lea     falling(pc),a1
         move.l  a1,AUD3LCH(a6)
         move.w  #256,AUD3PER(a6)
@@ -34,6 +46,7 @@ PlayFallingSound:
 	rts
 
 PlayChachingSound:
+	KillSound	
 	lea     chaching,a1
         move.l  a1,AUD3LCH(a6)
         move.w  #256,AUD3PER(a6)
@@ -57,4 +70,8 @@ endChaching:
 whoosh:
 	incbin	"out/whoosh.raw"
 endWhoosh:
+
+	align	2
+emptySound:
+	dc.l	0
 	endif

@@ -196,11 +196,6 @@ GameLoop:
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 
 	jsr	WaitVerticalBlank
-
-	if SFX=1
-	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played	
-	move.l	#emptySound,AUD3LCH(a6)
-	endif
 	
 	if      TIMING_TEST=1
 	move.l	#4000,d0
@@ -255,6 +250,7 @@ GameLoop:
 	move.w	#$f00,COLOR02(a6)			
 	endif
 
+	jsr	PlayNextSound	
 	bra	GameLoop
 	
 Update:	
@@ -663,14 +659,13 @@ PostMissedTile:
 BigBang:
 	PlaySound Falling
 	jsr	WaitVerticalBlank		
-
-	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played
-	move.l	#emptySound,AUD3LCH(a6)			
-
+	jsr	PlayNextSound		
+	
 	jsr	ResetItems
 	move.w	#0,moving
 	move.l	#0,frameCount	
 .bigBangLoop:
+
 	add.l	#1,frameCount
 	cmp.l	#BIGBANG_POST_DELAY,frameCount
 	beq	PostMissedTile
@@ -1492,10 +1487,6 @@ panelFade:
 
 tileFade:
 	include "out/tileFade.s"
-
-	align	2
-emptySound:
-	dc.l	0
 
 
 	section .bss
