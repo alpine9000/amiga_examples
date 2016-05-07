@@ -14,11 +14,11 @@ KillSound:	macro
 
 	lea 	$dff006,a0
 	move.w	(a0),d0
-	and.w	#$ff00,d0
+	lsr.w	#8,d0
 	add.w	#4,d0
 .loop:
 	move.l	(a0),d1
-	and.w	#$ff00,d1
+	lsr.w	#8,d1
 	cmp.w	d0,d1
 	ble	.loop
 
