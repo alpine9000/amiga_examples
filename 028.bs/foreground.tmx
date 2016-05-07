@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="left-down" width="100" height="8" tilewidth="16" tileheight="16" nextobjectid="1">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="8" tilewidth="16" tileheight="16" nextobjectid="1">
  <tileset firstgid="1" name="foreground" tilewidth="16" tileheight="16" tilecount="320" columns="20">
   <image source="assets/assets.png" width="320" height="256"/>
  </tileset>
@@ -8,17 +8,17 @@
  </tileset>
  <layer name="foreground" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjZ2BgsGTEjtlH5eguZwekmYBYDAtNidxWPHKVNLBvuMhp4ZAflRsYOUriczSd0yZ/7MYTZ8spiOtROfrmj1E52uSPwZZGRrKcNAPuNhgt5AZjG3MwyQEArppUrg==
+   eJxjZ2BgsGTEjtlH5eguZwekmYBYDAtNidxWPHKVNLBvOMiBwkwLhzzTIJTbTaa+ejrro8QPlMTnaDqnvhyhOFtOID4HSx4gV45c/9HKnYMxjQx1OUrKjcFWR9A7nQ82OWkG3G0wWsgNxjbmYJIDAJ+ZWmA=
   </data>
  </layer>
  <layer name="pathway" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFIwUYMzIw6DKi0qOAMnAeiD9S2UxuRoTZoHj6TmXzhxNAD39WRkj4nWSgXjpnZcROjwIEgIWzJBA/hvJhABYn6ACkjpy8AzMLnR4FxAFQeOFKw+TEyWj+oAzcBWJ5PGEGy0+w8owQgKmHmYmeH0fBKBgsAADYaBI9
+   eJztlD0OwjAMheOhU0+QqSdg4v4HYOoJmDgBEyu10FPdh5M0bRFI5JOiSGli+/mnITT+hbOEcJLl3tjHOK37wTZ7mW1rnR4Vb9fEcglzD3wS6+doDYDz38krf9b33j7vxN9tDPDDsXMtvVh6OmP7FujycnTNfGM/OR/eO/WLGo7OHWiL07qFZW+hJoze2zI7sMU7iPJ+18Zid2Bnjb9Z/TYPXky5eOHDi5NzlkPrPEhaS4le0m+21KQ0Hxb0qPWnuodEnaCVbeiZ3XmucObN3Na8Kbk5Tmkp4Wn07K79Z3McNb31DWrzZvMRf1hXo8wTZUo3PA==
   </data>
  </layer>
  <layer name="items" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJztlVsKgCAQRXVpvaEnFLb/pZSQMEnqjBhZeaCfuqNyrhBjiZjIOX0mQ87MnLaHyrUeZ/oS0q/NccHPWZ/14RqLY43uxX343G8d5RjjGnZXGvK94b0pj53/E2J3UB2uB4sP2Icg9KioEFnb/leEuJNPIc8OH4nL56p9h53UHi5cM+PNfin9xdI19T/RBMxPkThIJDZy/A4W
+   eJztlV0OgjAQhNmjIaJVAZuo97+KNrGxQPeXSnjgeyEps7Pb2QSqamdLHEBfUwtrPOh6RN3VMBPnuRYl+oV8qYwbGGst/qnHhfG4LbxTUyATq4ek7sFoYsa5rJ8w10bdEfHtkHNMP4Xa13QeDdhcViT3sWbhPu/bb9Yu0XpiH57YI0Yr0KY9Jfqe0bxW/mZpCPfr4fcMcHk6wU40nJgai2eJ/kPmnJuVIudn9dT+J7QZngn9v/exlPvG59spxxv5VRN9
   </data>
  </layer>
 </map>
