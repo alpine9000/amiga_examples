@@ -81,7 +81,7 @@ Entry:
 
 	jsr	InitialiseItems	
 	
-Reset:	
+Reset:
 	lea	livesCounterText,a0
 	bsr	DecrementCounter
 	move.w	#218,d0
@@ -169,27 +169,29 @@ FadeInLoop:
 	jsr	InitialisePlayer
 	jsr	EnableItemSprites
 
-	lea	frameCounterText,a0
-	bsr	ResetCounter
-	lea	verticalBlankCounterText,a0
-	bsr	ResetCounter	
-	
+	move.l	#0,verticalBlankCount
+	move.l	#1,frameCount
 	bra	GameLoop
 .c1:
 	bra	FadeInLoop
 	
 GameLoop:
 
-	if 0
-	lea	frameCounterText,a0
-	bsr	IncrementCounter
-	lea	frameCounterText,a1	
-	move.w	#31,d0
-	jsr	RenderCounter
-	lea	verticalBlankCounterText,a1	
-	move.w	#101,d0
-	jsr	RenderCounter
-	endif
+	move.l	verticalBlankCount,d0
+	move.l	frameCount,d1	
+	cmp.l	d1,d0
+	beq	.noSkippedFrames
+	addq	#1,d0
+	cmp.l	d1,d0
+	beq	.noSkippedFrames
+	move.l	frameCount,verticalBlankCount
+	lea	skippedFramesCounterText,a0
+	jsr	IncrementCounter
+	lea	skippedFramesCounterText,a1	
+	move.w	#110,d0
+	jsr	RenderCounter		
+.noSkippedFrames:
+
 	
 	add.l	#1,frameCount
 	move.l	frameCount,d6			
@@ -783,8 +785,6 @@ Level3InterruptHandler:
 .verticalBlank:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
 	add.l	#1,verticalBlankCount
-	lea	verticalBlankCounterText,a0
-	bsr	IncrementCounter
 	jsr 	SetupSpriteData
 	jsr	P61_Music
 .checkCopper:
@@ -893,23 +893,17 @@ gameOverMessage:
 	dc.b	0
 	align 	4	
 
+skippedFramesCounterText:
+	dc.b	"0000"
+	dc.b	0
+	align 	4
+	
 livesCounterText:
 	dc.b	"00"
 livesCounterShortText:
 	dc.b	"04"
 	dc.b	0
 	align	4
-	
-frameCounterText:
-	dc.b	"0000"
-	dc.b	0
-	align	4
-
-verticalBlankCounterText:
-	dc.b	"0000"
-	dc.b	0
-	align	4
-	
 	
 copperList:
 panelCopperListBpl1Ptr:	

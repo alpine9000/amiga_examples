@@ -12,12 +12,14 @@ KillSound:	macro
 	move.l	#emptySound,AUD3LCH(a6)	
 
 
-	lea $dff004,a0
-	move.l	(a0),d0
-	add.l	#1<<8,d0
+	lea 	$dff006,a0
+	move.w	(a0),d0
+	and.w	#$ff00,d0
+	add.w	#4,d0
 .loop:
 	move.l	(a0),d1
-	cmp.l	d0,d1
+	and.w	#$ff00,d1
+	cmp.w	d0,d1
 	ble	.loop
 
 	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)

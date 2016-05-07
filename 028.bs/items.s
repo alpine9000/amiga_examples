@@ -23,7 +23,7 @@ ScrollItemSprites:
 	move.l 	foregroundScrollPixels,d0
 	cmp.w	#0,ITEM_SPRITE(a1)
 	beq	.skip
-	sub.w	d0,ITEM_X(a1)
+	sub.w	d0,ITEM_X(a1)	
 	cmp.w	#160<<FOREGROUND_SCROLL_SHIFT_CONVERT,ITEM_X(a1)
 	bgt	.skip
 	move.w	#0,ITEM_SPRITE(a1)
@@ -163,8 +163,8 @@ _SetupItemSpriteData:
 	mulu.w	#ITEM_SPRITE_VERTICAL_BYTES,d2
 	add.l	d2,a0
 
-	move.w	ITEM_X(a1),d0
-	;; move.w	ITEM_LAGX(a1),d0	
+	;; move.w	ITEM_X(a1),d0
+	move.w	ITEM_LAGX(a1),d0	
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	;; 	 move.w	ITEM_X(a1),ITEM_LAGX(a1)
 
@@ -193,7 +193,7 @@ _SetupItemSpriteData:
 	bra	.done	
 
 .done:
-	add.w	#1,ITEM_INDEX(a1)		
+	;; add.w	#1,ITEM_INDEX(a1)		
 .spriteIsNotEnabled:
 	move.l	(sp)+,d0
 	rts
