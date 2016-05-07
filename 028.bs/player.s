@@ -28,7 +28,7 @@ InitialisePlayer:
 	add.l	#6*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite
 
-	;; move.w	#0,spriteAutoMoveEnabled
+	bsr	SpriteDisableAuto
 	move.w	#0,spritePlayerFallingAnimation
 	move.w	#PLAYER_INITIAL_X,spriteX
 	move.w	#PLAYER_INITIAL_Y,spriteY
@@ -70,10 +70,12 @@ UpdatePlayerFallingAnimation:
 UpdatePlayer:
 	move.l	playerSpriteConfig,a0
 	move.l	PLAYER_SPRITE_DATA(a0),d0
+	move.w	playerPausePixels,d2
 	;; right
-	cmp.w	#PLAYER_PAUSE_PIXELS,spriteR
-	ble	.skipRight
-	add.w	#PLAYER_MOVE_PIXELS,spriteX
+	cmp.w	spriteR,d2
+	bge	.skipRight
+	move.w	playerMovePixels,d1
+	add.w	d1,spriteX
 	add.l	#7*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite
 
@@ -81,58 +83,61 @@ UpdatePlayer:
 	cmp.w	#0,spriteR
 	beq	.notRight
 	sub.w	#1,spriteR
-	cmp.w   #PLAYER_PAUSE_PIXELS,spriteR
-	bge	.notRight
+	cmp.w   spriteR,d2
+	ble	.notRight
 	add.l	#6*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite
 .notRight:
 	;; up
-	cmp.w	#PLAYER_PAUSE_PIXELS,spriteU
-	ble	.skipUp
+	cmp.w	spriteU,d2
+	bge	.skipUp
 	cmp.w   #PLAYER_TOP_Y,spriteY
 	ble     .skipUp
-	sub.w	#PLAYER_MOVE_PIXELS,spriteY
-	sub.w	#PLAYER_MOVE_PIXELS,spriteYEnd	
+	move.w	playerMovePixels,d1	
+	sub.w	d1,spriteY
+	sub.w	d1,spriteYEnd	
 	add.l	#1*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite	
 .skipUp:
 	cmp.w	#0,spriteU
 	beq	.notUp
 	sub.w	#1,spriteU
-	cmp.w   #PLAYER_PAUSE_PIXELS,spriteU
-	bge	.notUp
+	cmp.w   spriteU,d2
+	ble	.notUp
 	move.l	d0,currentSprite	
 .notUp:
 	;; down
-	cmp.w	#PLAYER_PAUSE_PIXELS,spriteD
-	ble	.skipDown
+	cmp.w	spriteD,d2
+	bge	.skipDown
 	cmp.w   #PLAYER_BOTTOM_Y,spriteY
 	bge     .skipDown
-	add.w	#PLAYER_MOVE_PIXELS,spriteY
-	add.w	#PLAYER_MOVE_PIXELS,spriteYEnd	
+	move.w	playerMovePixels,d1
+	add.w	d1,spriteY
+	add.w	d1,spriteYEnd	
 	add.l	#3*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite		
 .skipDown:
 	cmp.w	#0,spriteD
 	beq	.notDown	
 	sub.w	#1,spriteD
-	cmp.w   #PLAYER_PAUSE_PIXELS,spriteD
-	bge	.notDown
+	cmp.w   spriteD,d2
+	ble	.notDown
 	add.l	#2*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite			
 .notDown:
 	;; left
-	cmp.w	#PLAYER_PAUSE_PIXELS,spriteL
-	ble	.skipLeft
-	sub.w	#PLAYER_MOVE_PIXELS,spriteX
+	cmp.w	spriteL,d2
+	bge	.skipLeft
+	move.w	playerMovePixels,d1
+	sub.w	d1,spriteX
 	add.l	#5*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite				
 .skipLeft
 	cmp.w	#0,spriteL
 	beq	.notLeft
 	sub.w	#1,spriteL
-	cmp.w   #PLAYER_PAUSE_PIXELS,spriteL
-	bge	.notLeft
+	cmp.w   spriteL,d2
+	ble	.notLeft
 	add.l	#4*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite					
 .notLeft:
@@ -159,6 +164,11 @@ ProcessJoystick:
 
 	cmp.w	#0,spriteAutoMoveEnabled
 	beq	.autoMoveDisabled
+
+	move.w	#4,playerPausePixels
+	move.w	#4,playerMissPixels
+	
+	
 	bsr	GetNextAutoMove
 	cmp.w	#1,d0
 	beq	.skip
@@ -166,33 +176,33 @@ ProcessJoystick:
 .autoMoveDisabled:
 	cmp.b	#3,joystickpos
  	bne	.notRight
-	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteR
-	move.w	#SPRITE_MOVE_RIGHT,spriteLastMove
-	PlaySound Jump
+	PlayerMoveRight
 .notRight:
 	cmp.b	#1,joystickpos
  	bne	.notUp
-	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteU
-	move.w	#SPRITE_MOVE_UP,spriteLastMove	
-	PlaySound Jump
+	PlayerMoveUp
 .notUp:
 	cmp.b	#5,joystickpos
  	bne	.notDown
-	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteD
-	move.w	#SPRITE_MOVE_DOWN,spriteLastMove	
-	PlaySound Jump
+	PlayerMoveDown
 .notDown:
 	cmp.b	#7,joystickpos
  	bne	.notLeft
-	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteL
-	move.w	#SPRITE_MOVE_LEFT,spriteLastMove	
-	PlaySound Jump
+	PlayerMoveLeft
 .notLeft:	
 .skip:
 	rts
 
 SpriteEnableAuto:
 	move.w	#1,spriteAutoMoveEnabled
+	rts
+
+SpriteDisableAuto:
+	move.w	#0,spriteAutoMoveEnabled
+	move.w	#PLAYER_JUMP_PIXELS,playerJumpPixels
+	move.w	#PLAYER_MOVE_PIXELS,playerMovePixels
+	move.w	#PLAYER_PAUSE_PIXELS,playerPausePixels
+	move.w	#PLAYER_CHECK_MISS_PIXELS,playerMissPixels		
 	rts
 	
 SetupSpriteData:
@@ -254,14 +264,18 @@ CheckPlayerMiss:
 	;; check if player has fallen off the left side of the play area
 	cmpi.w	#PLAYER_INITIAL_X-15,spriteX
 	blt	.doBigBang
-	
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteR
+
+	move.w	playerMissPixels,d1
+	cmp.w	spriteR,d1
 	beq	.check
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteU
-	beq	.check	
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteD
-	beq	.check	
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteL
+	move.w	playerMissPixels,d1
+	cmp.w	spriteU,d1	
+	beq	.check
+	move.w	playerMissPixels,d1
+	cmp.w	spriteD,d1	
+	beq	.check
+	move.w	playerMissPixels,d1
+	cmp.w	spriteL,d1	
 	beq	.check
 	rts
 
@@ -405,31 +419,27 @@ GetNextAutoMove:
 	bra	.skip
 
 .goRight:
-	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteR
-	move.w	#SPRITE_MOVE_RIGHT,spriteLastMove
+	PlayerMoveRight
 	bra	.done
 .goUp:
-	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteU
-	move.w	#SPRITE_MOVE_UP,spriteLastMove	
+	PlayerMoveUp
 	bra	.done
 .goDown:
-	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteD
-	move.w	#SPRITE_MOVE_DOWN,spriteLastMove	
+	PlayerMoveDown
 	bra	.done	
 .goLeft:
-	move.w	#PLAYER_JUMP_PIXELS+PLAYER_PAUSE_PIXELS,spriteL
-	move.w	#SPRITE_MOVE_LEFT,spriteLastMove
+	PlayerMoveLeft
 	bra	.done
 .done:
-	PlaySound Jump
 	move.w	#1,d0
 	rts
 .skip:
-	move.w	#0,spriteAutoMoveEnabled
+	bsr	SpriteDisableAuto	
 	move.w	#0,d0
 	rts
 	
 CheckDirection:
+	move.w	playerMissPixels,d1
 	cmp.w	#$7080,d0 	; dark horizontal
 	beq	.horizontal
 	cmp.w	#$708c,d0	; light horizontal
@@ -465,39 +475,39 @@ CheckDirection:
 	jmp	BigBang		
 	
 .horizontal:
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteR
+	cmp.w	spriteR,d1
 	beq	.ok
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteL
+	cmp.w	spriteL,d1
 	beq	.ok	
 	jmp	BigBang
 .vertical:
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteU
+	cmp.w	spriteU,d1
 	beq	.ok
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteD
+	cmp.w	spriteD,d1
 	beq	.ok
 	jmp	BigBang
 .topLeft:
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteR
+	cmp.w	spriteR,d1
 	beq	.ok
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteD
+	cmp.w	spriteD,d1
 	beq	.ok	
 	jmp	BigBang
 .topRight:
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteD
+	cmp.w	spriteD,d1
 	beq	.ok
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteL
+	cmp.w	spriteL,d1
 	beq	.ok		
 	jmp	BigBang			
 .rightBottom:
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteU
+	cmp.w	spriteU,d1
 	beq	.ok
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteL
+	cmp.w	spriteL,d1
 	beq	.ok		
 	jmp	BigBang		
 .leftBottom:
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteR
+	cmp.w	spriteR,d1
 	beq	.ok
-	cmp.w	#PLAYER_CHECK_MISS_PIXELS,spriteU
+	cmp.w	spriteU,d1
 	beq	.ok		
 	jmp	BigBang	
 .ok:
@@ -565,3 +575,11 @@ spriteLastMove:
 	dc.w	0
 spriteAutoMoveEnabled:
 	dc.w	0
+playerMovePixels:
+	dc.w	PLAYER_MOVE_PIXELS
+playerJumpPixels:
+	dc.w	PLAYER_JUMP_PIXELS
+playerPausePixels
+	dc.w	PLAYER_PAUSE_PIXELS
+playerMissPixels
+	dc.w	PLAYER_CHECK_MISS_PIXELS	
