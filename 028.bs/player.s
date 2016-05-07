@@ -1,5 +1,6 @@
 	include "includes.i"
 
+	xdef ResetPlayer
 	xdef GetNextAutoMove
 	xdef CheckPlayerMiss
 	xdef UpdatePlayer
@@ -35,6 +36,11 @@ InitialisePlayer:
 	move.w	#PLAYER_INITIAL_Y+16,spriteYEnd
 	rts
 
+ResetPlayer:
+	move.w	#0,spriteX
+	move.w	#0,spriteY
+	move.w	#0,spriteYEnd
+	rts
 
 HidePlayer:
 	move.w	#$7000,spriteX
@@ -42,8 +48,11 @@ HidePlayer:
 
 
 ScrollSprites:
+	cmp.l	#0,foregroundScrollPixels
+	beq	.skip
 	sub.w	#1,spriteX
 	bra	ScrollItemSprites
+.skip:
 	rts
 
 
@@ -330,9 +339,12 @@ CheckPlayerMiss:
 
 	;; a3 now points at the tile under the sprite
 	move.w	(a3),d0	
+	
+	cmp.w	#FOREGROUND_TILE_EMPTY,d0	; empty tile
+	bge	.doBigBang	
 
-	cmp.w	#$7098,d0	; empty tile
-	beq	.doBigBang	
+	cmp.w	#FOREGROUND_TILE_ENDLEVEL,d0
+	beq	.levelComplete
 	
 	cmp.w	#$78e,d0
 	bge	.noBigBang
@@ -340,6 +352,9 @@ CheckPlayerMiss:
 .doBigBang:
 	jmp	BigBang
 
+.levelComplete:
+	jmp	LevelComplete
+	
 .noBigBang:
 	move.w	(a3),d0	
 	cmp.w	#$1e00,d0

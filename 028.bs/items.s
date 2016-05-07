@@ -208,7 +208,7 @@ RenderItemSprite:
 	cmp.b	#$f,d1		; only add sprite after tile has scrolled in
 	bne	dontAddSprite
 	move.l	a2,a3
-	add.l	mapSize,a3
+	add.l	itemsMapOffset,a3
 	cmpi.w	#0,(a3)
 	beq	dontAddSprite
 

@@ -8,7 +8,7 @@
  </tileset>
  <layer name="foreground" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjZ2BgsGTEjtlH5eguZwekmYBYDAtNidxWPHKVNLBvOMiBwkwLhzzTIJTbTaa+ejrro8QPlMTnaDqnvhyhOFtOID4HSx4gV45c/9HKnYMxjQx1OUrKjcFWR9A7nQ82OWkG3G0wWsgNxjbmYJIDAJ+ZWmA=
+   eJxjZ2BgsGLEjtlH5eguZwekmYBYDAtNidxWPHKVNLBvqMtZQuNFC4c8iB5scrvJ1FdPZ33k+AEWH5TE9Wg6p03+wJfulpOZDuidB8iVI9d/1HYnNfLHqBz1yo2hWH/QIp0PFjlYfEgz4G6D0UJuMLYxB5McAAccW5U=
   </data>
  </layer>
  <layer name="pathway" width="100" height="8">
@@ -18,7 +18,7 @@
  </layer>
  <layer name="items" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJztlV0OgjAQhNmjIaJVAZuo97+KNrGxQPeXSnjgeyEps7Pb2QSqamdLHEBfUwtrPOh6RN3VMBPnuRYl+oV8qYwbGGst/qnHhfG4LbxTUyATq4ek7sFoYsa5rJ8w10bdEfHtkHNMP4Xa13QeDdhcViT3sWbhPu/bb9Yu0XpiH57YI0Yr0KY9Jfqe0bxW/mZpCPfr4fcMcHk6wU40nJgai2eJ/kPmnJuVIudn9dT+J7QZngn9v/exlPvG59spxxv5VRN9
+   eJztlcsOgjAQRZlPU0TxgRK0+v9/ok1sLLXzLCEsOBuS9s7tzJ0FVbWyJLagr9kIawbQvRF0J0NPnOdcTPGez5fKuIax1uIfe9wZj3PhTPUEmVg9JHXc/CHjXNYP+NcG3Q7xvSDnmD7lSOjSfjTk+irxk9Ras3Cf++abdRtpe2IfjtgjRiPQukgj0XeC2Uoorafw83Xw+3q4PFtiJ+m+JOyZGovnU1GDvX/NnHO9UuT8rJ7a/4Q2wwOht+xjTm5Mf6+F978i5w1JIRUK
   </data>
  </layer>
 </map>

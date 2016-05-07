@@ -1,5 +1,6 @@
 	include "includes.i"
-	
+
+	xdef    LevelComplete
 	xdef    BigBang
 	xdef 	IncrementCounter
 	xdef	RenderCounter
@@ -29,7 +30,7 @@
 	xdef	startForegroundMapPtr
 	xdef 	startPathwayMapPtr
 	
-	xdef   	mapSize
+	xdef   	itemsMapOffset
 	xdef	moving
 	xdef 	foregroundScrollPixels
 
@@ -113,6 +114,7 @@ Reset:
 	bra	GameOver
 .notGameOver:
 	lea	message,a1
+	move.w	#128,d0
 	jsr	Message
 	
 	
@@ -171,6 +173,8 @@ FadeInLoop:
 
 	move.l	#0,verticalBlankCount
 	move.l	#1,frameCount
+	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
+
 	bra	GameLoop
 .c1:
 	bra	FadeInLoop
@@ -195,7 +199,6 @@ GameLoop:
 	
 	add.l	#1,frameCount
 	move.l	frameCount,d6			
-	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 
 	jsr	WaitVerticalBlank
 	
@@ -298,6 +301,7 @@ Update:
 
 GameOver:
 	lea	gameOverMessage,a1
+	move.w	#128,d0
 	jsr	Message
 
 	move.l	#100,d0	
@@ -311,8 +315,33 @@ GameOver:
 	bne	.gotJoystick
 	bra	.waitForJoystick
 .gotJoystick:
-	move.l	#foregroundMap,startForegroundMapPtr
-	move.l	#pathwayMap,startPathwayMapPtr
+	move.l	#level1ForegroundMap,startForegroundMapPtr
+	move.l	#level1PathwayMap,startPathwayMapPtr
+	move.l	#'0004',livesCounterText	
+	jsr	InitialiseItems
+	bra	Reset
+
+
+LevelComplete:
+	jsr	ResetItems
+	jsr	ResetPlayer	
+	lea	levelCompleteMessage,a1
+	move.w	#100,d0
+	jsr	Message
+
+	move.l	#100,d0	
+.pause:
+	jsr	WaitVerticalBlank	
+	dbra	d0,.pause
+	
+.waitForJoystick:
+	jsr	ReadJoystick
+	btst.b	#0,joystick
+	bne	.gotJoystick
+	bra	.waitForJoystick
+.gotJoystick:
+	move.l	#level1ForegroundMap,startForegroundMapPtr
+	move.l	#level1PathwayMap,startPathwayMapPtr
 	move.l	#'0004',livesCounterText	
 	jsr	InitialiseItems
 	bra	Reset
@@ -630,10 +659,13 @@ RenderForegroundTile:
 	add.l	d0,a0
 	lea 	foregroundTilemap,a1	
 	move.w	(a2),d0
-	cmp.l	#0,d0
-	beq	.s2
+	;; 	cmp.l	#0,d0
+	;; 	beq	.s2
 	add.w	(a2),a1 	; source tile	
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0
+	cmp.w	#$ffff,d0
+	beq	stopScrolling
+
 	lea 	animIndex,a4
 	move.l	d2,d1
 	lsl.l	#2,d1
@@ -650,6 +682,9 @@ RenderForegroundTile:
 	sub.l	#2,(a4)	
 .s2:
 	rts
+stopScrolling:
+	move.l	#0,foregroundScrollPixels
+	rts
 	
 
 PostMissedTile:
@@ -662,7 +697,6 @@ BigBang:
 	PlaySound Falling
 	jsr	WaitVerticalBlank		
 	jsr	PlayNextSound		
-	
 	jsr	ResetItems
 	move.w	#0,moving
 	move.l	#0,frameCount	
@@ -761,6 +795,8 @@ ClearForegroundTile:
 	lsr.l	#2,d1		; anim scaling (speed)
 	cmp.l	#10,d1
 	bge	.s1	
+	cmp.l	#0,foregroundScrollPixels
+	beq	.s1	
 	add.l	d1,a1
 	add.l	#2,(a4)	
 	bra	.s2
@@ -805,13 +841,14 @@ Message:
 	;; d0 - xpos
 	;; d1 - ypos
 
+	move.w	d0,d1
 	move.w	#(32*4)<<6|(320/16),d0
 	lea	mpanelOrig,a0
 	lea	mpanel,a2
 	jsr	SimpleBlit
 	
 	lea	mpanel,a0
-	move.w	#128,d0
+	move.w	d1,d0
 	move.w	#11,d1
 	jsr	DrawMaskedText8
 	bsr	ShowMessagePanel
@@ -891,7 +928,12 @@ message:
 gameOverMessage:
 	dc.b	"GAME OVER"
 	dc.b	0
-	align 	4	
+	align 	4
+
+levelCompleteMessage:
+	dc.b	"LEVEL COMPLETE!"
+	dc.b	0
+	align 	4		
 
 skippedFramesCounterText:
 	dc.b	"0000"
@@ -1330,25 +1372,25 @@ mpanel:
 	incbin "out/mpanel.bin"
 mpanelOrig:
 	incbin "out/mpanel.bin"
-pathwayMap:
-	include "out/pathway-map.s"
-	dc.w	$FFFF	
-foregroundMap:
+level1ForegroundMap:
 	include "out/foreground-map.s"
+	dc.w	$FFFF	
+level1PathwayMap:
+	include "out/pathway-map.s"
 	dc.w	$FFFF	
 itemsMap:
 	include "out/items-indexes.s"
 	dc.w	$FFFF
-mapSize:
-	dc.l	itemsMap-foregroundMap
+itemsMapOffset:
+	dc.l	itemsMap-level1ForegroundMap
 foregroundMapPtr:
 	dc.l	0
 pathwayMapPtr:
 	dc.l	0
 startForegroundMapPtr:
-	dc.l	foregroundMap
+	dc.l	level1ForegroundMap
 startPathwayMapPtr:
-	dc.l	pathwayMap	
+	dc.l	level1PathwayMap	
 	
 	
 
