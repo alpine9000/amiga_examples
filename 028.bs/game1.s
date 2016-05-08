@@ -1389,10 +1389,17 @@ mpanelOrig:
 	incbin "out/mpanel.bin"
 level1ForegroundMap:
 	include "out/foreground-map.s"
-	dc.w	$FFFF	
+	dc.w	$FFFF
+	dc.w	$FFFF
+	dc.w	$FFFF
+	dc.w	$FFFF
+	dc.w	$FFFF
+	dc.w	$FFFF
+	dc.w	$FFFF
+	dc.w	$FFFF		
 level1PathwayMap:
 	include "out/pathway-map.s"
-	dc.w	$FFFF	
+	dc.w	$FFFF
 itemsMap:
 	include "out/items-indexes.s"
 	dc.w	$FFFF
