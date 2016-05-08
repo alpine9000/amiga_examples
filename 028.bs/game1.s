@@ -694,6 +694,24 @@ PostMissedTile:
 
 	
 BigBang:
+
+finishScrollLoop:
+	move.l	foregroundScrollX,d0
+	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels		
+	and.b	#$f,d0
+	cmp.b	#$f,d0
+	beq	.scrollFinished	
+	add.l	#1,frameCount
+	move.l	frameCount,d6	
+	jsr	Update
+	bsr	RenderNextForegroundFrame
+	jsr 	RenderNextBackgroundFrame	
+	jsr	WaitVerticalBlank	
+	bsr	HoriScrollPlayfield
+	jsr 	SwitchBuffers
+	bra	finishScrollLoop
+
+.scrollFinished
 	PlaySound Falling
 	jsr	WaitVerticalBlank		
 	jsr	PlayNextSound		
@@ -728,7 +746,7 @@ BigBang:
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0	
 
 
-	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2),d5
+	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d5
 
 	move.l	#BIGBANG_ANIM_DELAY,d0
 
