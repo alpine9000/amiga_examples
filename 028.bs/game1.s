@@ -98,10 +98,10 @@ Reset:
 	move.w	#0,pathwayClearPending
 	move.w	#0,moving
 	move.w	#-2*FOREGROUND_MOVING_COUNTER,movingCounter
-	move.l	#playareaFade,playareaFadePtr
+	move.l	playareaFade,playareaFadePtr
 	move.l	#panelFade,panelFadePtr
-	move.l	#flagsFade,flagsFadePtr
-	move.l	#tileFade,tileFadePtr
+	move.l	flagsFade,flagsFadePtr
+	move.l	tileFade,tileFadePtr
 	move.l	#0,foregroundScrollX
 	move.l	#-1,frameCount		
 	bsr	InitAnimPattern
@@ -1019,13 +1019,15 @@ copperListBpl2Ptr:
 
 
 playAreaCopperPalettePtr1:	
+	;; the foreground color values are just place holders and will be poked with the correcr value
 	include "out/foreground-copper-list.s"
 	include "out/background-copper-list.s"	
 
 	;; top flag row has it's own palette
 	dc.w    $84d1
 	dc.w	$fffe		
-flagsCopperPalettePtr1:	
+flagsCopperPalettePtr1:
+	;; the foreground color values are just place holders and will be poked with the correcr value	
 	include "out/foreground-copper-list.s"
 	include "out/background-copper-list.s"
 	dc.w    $94d1
@@ -1033,7 +1035,8 @@ flagsCopperPalettePtr1:
 	;; 
 
 	
-playAreaCopperPalettePtr2:	
+playAreaCopperPalettePtr2:
+	;; the foreground color values are just place holders and will be poked with the correcr value	
 	include "out/foreground-copper-list.s"
 	include "out/background-copper-list.s"		
 	
@@ -1041,7 +1044,8 @@ playAreaCopperPalettePtr2:
 	;; bottom flag row has it's own palette
 	dc.w    $f4d1
 	dc.w	$fffe		
-flagsCopperPalettePtr2:	
+flagsCopperPalettePtr2:
+	;; the foreground color values are just place holders and will be poked with the correcr value	
 	include "out/foreground-copper-list.s"
 	include "out/background-copper-list.s"
 	dc.w    $ffdf
@@ -1049,7 +1053,8 @@ flagsCopperPalettePtr2:
 	dc.w    $04d1
 	dc.w	$fffe	
 
-playAreaCopperPalettePtr3:	
+playAreaCopperPalettePtr3:
+	;; the foreground color values are just place holders and will be poked with the correcr value	
 	include "out/foreground-copper-list.s"
 	include "out/background-copper-list.s"
 	
@@ -1212,7 +1217,7 @@ InstallColorPalette:
 	lea	playAreaCopperPalettePtr1,a1
 	lea	playAreaCopperPalettePtr2,a2
 	lea	playAreaCopperPalettePtr3,a3
-	lea	playAreaPalette,a0
+	move.l	playAreaPalette,a0
 	add.l	#2,a1
 	add.l	#2,a2
 	add.l	#2,a3
@@ -1232,7 +1237,7 @@ InstallGreyPalette:
 	lea	playAreaCopperPalettePtr1,a1
 	lea	playAreaCopperPalettePtr2,a2
 	lea	playAreaCopperPalettePtr3,a3
-	lea	playareaFade,a0
+	move.l	playareaFade,a0
 	add.l	#2,a1
 	add.l	#2,a2
 	add.l	#2,a3
@@ -1262,7 +1267,7 @@ InstallPanelGreyPalette:
 InstallFlagsGreyPalette:
 	lea	flagsCopperPalettePtr1,a1
 	lea	flagsCopperPalettePtr2,a2
-	lea	flagsFade,a0
+	move.l	flagsFade,a0
 	add.l	#2,a1
 	add.l	#2,a2
 	move.l	#15,d0
@@ -1279,10 +1284,10 @@ InstallFlagsGreyPalette:
 
 
 InstallTilePalette:
-	move.l	#tileFade,tileFadePtr
+	move.l	tileFade,tileFadePtr
 	lea	playAreaCopperPalettePtr2,a1	
 	add.l	#6,a1 		; point to COLOR01
-	lea	tileFade,a0
+	move.l	tileFade,a0
 	move.l	#1,d0
 .loop:
 	move.w	(a0),(a1)
@@ -1438,13 +1443,13 @@ pathwayFadeCount:
 	dc.w	0
 	
 tileFadePtr:
-	dc.l	tileFade
+	dc.l	0
 playareaFadePtr:
-	dc.l	playareaFade
+	dc.l	0
 panelFadePtr:
 	dc.l	panelFade
 flagsFadePtr:
-	dc.l	flagsFade	
+	dc.l	0
 bigBangIndex:
 	ds.l	FOREGROUND_PLAYAREA_HEIGHT_WORDS*FOREGROUND_PLAYAREA_WIDTH_WORDS,0
 	
@@ -1530,22 +1535,30 @@ deAnimIndexPattern:
 panelGreyPalette:
 	include "out/panel-grey-table.s"
 	
-playAreaPalette:
+paletteA_playAreaPalette:
 	include	"out/foreground-palette-table.s"
 	include	"out/background-palette-table.s"	
 
-playareaFade:
+paletteA_playareaFade:
 	include "out/playarea_fade.s"
 
-flagsFade:
+paletteA_flagsFade:
 	include "out/flags_fade.s"	
 
-panelFade:
-	include "out/panelFade.s"
+paletteA_tileFade:
+	include "out/tileFade.s"	
 
+playAreaPalette:
+	dc.l	paletteA_playAreaPalette
+playareaFade:
+	dc.l	paletteA_playareaFade
+flagsFade:
+	dc.l	paletteA_flagsFade
 tileFade:
-	include "out/tileFade.s"
+	dc.l	paletteA_tileFade
 
+panelFade:
+	include "out/panelFade.s"	
 
 	section .bss
 foregroundBitplanes1:
