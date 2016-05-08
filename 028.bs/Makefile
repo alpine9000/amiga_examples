@@ -203,9 +203,13 @@ out/whoosh.raw: assets/whoosh.wav
 out/chaching.raw: assets/chaching.wav
 	sox -v 0.98 assets/chaching.wav -c 1 -r 13000 -b 8 out/chaching.raw
 
+out/yay.raw: assets/yay.wav
+	sox -v 2.0 assets/yay.wav -c 1 -r 4000 -b 8 out/yay.raw
+
 out/main.o: $(IMAGEDATA) out/background-map.s out/foreground-map.s Makefile link.script.x\
 	out/paletteA_playarea_fade.s out/paletteA_flags_fade.s out/paletteA_foreground-palette-table.s out/paletteA_tileFade.s\
-	out/panelFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw
+	out/paletteB_playarea_fade.s out/paletteB_flags_fade.s out/paletteB_foreground-palette-table.s out/paletteB_tileFade.s\
+	out/panelFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw out/yay.raw
 
 setuptiming:
 	$(eval	VASM_EXTRA_ARGS=-DTIMING_TEST=1 -DSFX=1)

@@ -13,14 +13,17 @@ KillSound:	macro
 
 
 	lea 	$dff006,a0
+
+	move.w	#4,d2
+.nTimes:
 	move.w	(a0),d0
 	lsr.w	#8,d0
-	add.w	#4,d0
 .loop:
 	move.l	(a0),d1
 	lsr.w	#8,d1
 	cmp.w	d0,d1
-	ble	.loop
+	beq	.loop
+	dbra	d2,.nTimes
 
 	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
 	endif

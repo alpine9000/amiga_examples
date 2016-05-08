@@ -192,7 +192,7 @@ _SetupItemSpriteData:
 	bra	.done	
 
 .done:
-	add.w	#1,ITEM_INDEX(a1)		
+	;; add.w	#1,ITEM_INDEX(a1)		
 .spriteIsNotEnabled:
 	move.l	(sp)+,d0
 	rts

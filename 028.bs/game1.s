@@ -81,7 +81,6 @@ Entry:
 	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR|DMAF_COPPER|DMAF_RASTER|DMAF_MASTER),DMACON(a6)
 
 	jsr	InitialiseItems	
-	
 Reset:
 	lea	livesCounterText,a0
 	bsr	DecrementCounter
@@ -302,7 +301,8 @@ GameOver:
 	lea	gameOverMessage,a1
 	move.w	#128,d0
 	jsr	Message
-
+	jsr	InstallPaletteA
+	
 	move.l	#100,d0	
 .pause:
 	jsr	WaitVerticalBlank	
@@ -322,15 +322,30 @@ GameOver:
 
 
 LevelComplete:
+	PlaySound Yay
 	jsr	ResetItems
-	jsr	ResetPlayer	
+	jsr	ResetPlayer
+
+	jsr 	SelectNextPlayerSprite
+	move.l	nextPaletteInstaller,a0
+	cmp.l	#0,(a0)
+	bne	.dontResetPaletteInstaller
+	move.l	#paletteInstallers,nextPaletteInstaller
+	move.l	nextPaletteInstaller,a0	
+.dontResetPaletteInstaller:
+	move.l	(a0),a1
+	jsr	(a1)
+	add.l	#4,a0
+	move.l	a0,nextPaletteInstaller
+	
 	lea	levelCompleteMessage,a1
 	move.w	#100,d0
-	jsr	Message
-
+	jsr	Message	
+	
 	move.l	#100,d0	
 .pause:
-	jsr	WaitVerticalBlank	
+	jsr	WaitVerticalBlank
+	jsr	PlayNextSound
 	dbra	d0,.pause
 	
 .waitForJoystick:
@@ -686,7 +701,6 @@ stopScrolling:
 	
 
 PostMissedTile:
-	jsr 	SelectNextPlayerSprite
 	bra	Reset
 
 	
@@ -703,7 +717,8 @@ BigBang:
 	jsr	Update
 	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame	
-	jsr	WaitVerticalBlank	
+	jsr	WaitVerticalBlank
+	jsr	PlayNextSound		
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers
 	bra	.finishScrollLoop
@@ -1384,6 +1399,19 @@ InstallFlagGreyPalette:
 	rts		
 
 
+InstallPaletteA:
+	move.l	#paletteA_playAreaPalette,playAreaPalette
+	move.l	#paletteA_playareaFade,playareaFade
+	move.l	#paletteA_flagsFade,flagsFade
+	move.l	#paletteA_tileFade,tileFade
+	rts
+
+InstallPaletteB:
+	move.l	#paletteB_playAreaPalette,playAreaPalette
+	move.l	#paletteB_playareaFade,playareaFade
+	move.l	#paletteB_flagsFade,flagsFade
+	move.l	#paletteB_tileFade,tileFade
+	rts	
 	
 foregroundOnscreen:
 	dc.l	foregroundBitplanes1
@@ -1551,7 +1579,20 @@ paletteA_flagsFade:
 	include "out/paletteA_flags_fade.s"	
 
 paletteA_tileFade:
-	include "out/paletteA_tileFade.s"	
+	include "out/paletteA_tileFade.s"
+
+paletteB_playAreaPalette:
+	include	"out/paletteB_foreground-palette-table.s"
+	include	"out/background-palette-table.s"	
+
+paletteB_playareaFade:
+	include "out/paletteB_playarea_fade.s"
+
+paletteB_flagsFade:
+	include "out/paletteB_flags_fade.s"	
+
+paletteB_tileFade:
+	include "out/paletteB_tileFade.s"
 
 playAreaPalette:
 	dc.l	paletteA_playAreaPalette
@@ -1562,6 +1603,14 @@ flagsFade:
 tileFade:
 	dc.l	paletteA_tileFade
 
+paletteInstallers:
+	dc.l	InstallPaletteA	
+	dc.l	InstallPaletteB
+	dc.l	0
+
+nextPaletteInstaller:
+	dc.l	paletteInstallers+4
+	
 panelFade:
 	include "out/panelFade.s"	
 
