@@ -76,25 +76,28 @@ LINKER_OPTIONS=-T link.script.x
 include ../shared/base.mk
 
 out/foreground.bin: assets/assets.png
-	$(IMAGECON) --use-palette=assets/foreground_flags.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/foreground
+	$(IMAGECON) --use-palette=assets/paletteA_foreground_flags.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/foreground
 	sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_COLOR)/" out/foreground-copper-list.s 
-	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_COLOR)/" out/foreground-palette-table.s
-	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_GREY_COLOR)/" out/foreground-grey-table.s
 	sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_GREY_COLOR)/" out/foreground-grey-copper.s
 	sed -i '' "2s/.*/        dc.w COLOR01,\$$888/" out/foreground-grey-copper.s
 	sed -i '' "3s/.*/        dc.w COLOR02,\$$bbb/" out/foreground-grey-copper.s
 
-out/bottom_section_flags.pal: assets/foreground_flags.pal assets/background.pal
-	cat assets/foreground_flags.pal  assets/background.pal | sed "1s/.*/$(BACKGROUND_COLOR_LONG)/" > out/bottom_section_flags.pal
+out/%_foreground-palette-table.s: assets/%_foreground_flags.pal
+	$(IMAGECON) --use-palette=assets/$*_foreground_flags.pal --input assets/assets.png $(IMAGECON_ARGS) --colors 8  --full-color-palette-file --output-palette-asm --output-grey-palette --output-copperlist --output out/$*_foreground
+	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_COLOR)/" out/$*_foreground-palette-table.s
 
-out/bottom_section_playarea.pal: assets/foreground_playarea.pal assets/background.pal
-	cat assets/foreground_playarea.pal  assets/background.pal | sed "1s/.*/$(BACKGROUND_COLOR_LONG)/" > out/bottom_section_playarea.pal
 
-out/tileFadeFrom.pal: assets/foreground_playarea.pal
-	cat assets/foreground_playarea.pal | tail -1 | awk '1;1;' > out/tileFadeFrom.pal
+out/%_bottom_section_flags.pal: assets/%_foreground_flags.pal assets/background.pal
+	cat assets/$*_foreground_flags.pal  assets/background.pal | sed "1s/.*/$(BACKGROUND_COLOR_LONG)/" > out/$*_bottom_section_flags.pal
 
-out/tileFadeTo.pal: assets/foreground_playarea.pal
-	cat assets/foreground_playarea.pal  | tail -3 | head -2 > out/tileFadeTo.pal
+out/%_bottom_section_playarea.pal: assets/%_foreground_playarea.pal assets/background.pal
+	cat assets/$*_foreground_playarea.pal  assets/background.pal | sed "1s/.*/$(BACKGROUND_COLOR_LONG)/" > out/$*_bottom_section_playarea.pal
+
+out/%_tileFadeFrom.pal: assets/%_foreground_playarea.pal
+	cat assets/$*_foreground_playarea.pal | tail -1 | awk '1;1;' > out/$*_tileFadeFrom.pal
+
+out/%_tileFadeTo.pal: assets/%_foreground_playarea.pal
+	cat assets/$*_foreground_playarea.pal  | tail -3 | head -2 > out/$*_tileFadeTo.pal
 
 out/background.bin: assets/assets.png
 	$(IMAGECON) --use-palette=assets/background.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/background --palette-offset 8
@@ -161,17 +164,17 @@ out/font%.bin: assets/font%.png
 out/splash.bin: assets/splash.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/splash --colors=32  --full-color-palette-file --output-png --output-copperlist
 
-out/playarea_fade.s: out/bottom_section_playarea.pal ../tools/fade/out/fade
-	../tools/fade/out/fade --from-grey --to=out/bottom_section_playarea.pal --output=playarea > out/playarea_fade.s
+out/%_playarea_fade.s: out/%_bottom_section_playarea.pal ../tools/fade/out/fade
+	../tools/fade/out/fade --from-grey --to=out/$*_bottom_section_playarea.pal --output=$*_playarea > out/$*_playarea_fade.s
 
-out/flags_fade.s: out/bottom_section_flags.pal ../tools/fade/out/fade
-	../tools/fade/out/fade --from-grey --to=out/bottom_section_flags.pal --output=flags > out/flags_fade.s
+out/%_flags_fade.s: out/%_bottom_section_flags.pal ../tools/fade/out/fade
+	../tools/fade/out/fade --from-grey --to=out/$*_bottom_section_flags.pal --output=$*_flags > out/$*_flags_fade.s
 
 out/panelFade.s: assets/panel.pal ../tools/fade/out/fade
 	../tools/fade/out/fade --from-grey --to=assets/panel.pal --output=panel > out/panelFade.s
 
-out/tileFade.s: out/tileFadeFrom.pal out/tileFadeTo.pal ../tools/fade/out/fade
-	../tools/fade/out/fade --steps=64 --colors=2 --from=out/tileFadeFrom.pal --to=out/tileFadeTo.pal --output=tileFade > out/tileFade.s
+out/%_tileFade.s: out/%_tileFadeFrom.pal out/%_tileFadeTo.pal ../tools/fade/out/fade
+	../tools/fade/out/fade --steps=64 --colors=2 --from=out/$*_tileFadeFrom.pal --to=out/$*_tileFadeTo.pal --output=$*_tileFade > out/$*_tileFade.s
 
 out/foreground-map.s: foreground.tmx
 	../tools/mapgen/out/mapgen --depth=3 --input=foreground.tmx
@@ -200,7 +203,9 @@ out/whoosh.raw: assets/whoosh.wav
 out/chaching.raw: assets/chaching.wav
 	sox -v 0.98 assets/chaching.wav -c 1 -r 13000 -b 8 out/chaching.raw
 
-out/main.o: $(IMAGEDATA) out/background-map.s out/foreground-map.s Makefile link.script.x out/playarea_fade.s out/flags_fade.s out/panelFade.s out/tileFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw
+out/main.o: $(IMAGEDATA) out/background-map.s out/foreground-map.s Makefile link.script.x\
+	out/paletteA_playarea_fade.s out/paletteA_flags_fade.s out/paletteA_foreground-palette-table.s out/paletteA_tileFade.s\
+	out/panelFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw
 
 setuptiming:
 	$(eval	VASM_EXTRA_ARGS=-DTIMING_TEST=1 -DSFX=1)

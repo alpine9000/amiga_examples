@@ -1300,7 +1300,9 @@ InstallNextPathwayColor:
 	lea	playAreaCopperPalettePtr2,a1
 	add.l	#6,a1 		; point to COLOR01
 	move.l	tileFadePtr,a0
-	lea	tileFadeFadeComplete,a5
+	move.l	tileFade,a5
+	add.l	#(paletteA_tileFadeFadeComplete-paletteA_tileFade),a5
+	;; 	lea	tileFadeFadeComplete,a5
 	cmp.l	a5,a0
 	bge	.reset
 	move.l	#1,d0 		; 2 colors to update
@@ -1321,7 +1323,8 @@ InstallNextGreyPalette:
 	lea	playAreaCopperPalettePtr2,a2
 	lea	playAreaCopperPalettePtr3,a3
 	move.l	playareaFadePtr,a0
-	lea	playareaFadeComplete,a5
+	move.l	playareaFade,a5
+	add.l	#(paletteA_playareaFadeComplete-paletteA_playareaFade),a5
 	cmp.l	a5,a0
 	bge	.done
 	add.l	#2,a1
@@ -1361,7 +1364,9 @@ InstallFlagGreyPalette:
 	lea	flagsCopperPalettePtr1,a1
 	lea	flagsCopperPalettePtr2,a2
 	move.l	flagsFadePtr,a0
-	lea	flagsFadeComplete,a5
+	move.l	flagsFade,a5
+	add.l	#(paletteA_flagsFadeComplete-paletteA_flagsFade),a5
+	;; 	lea	flagsFadeComplete,a5
 	cmp.l	a5,a0
 	bge	.done
 	add.l	#2,a1
@@ -1536,17 +1541,17 @@ panelGreyPalette:
 	include "out/panel-grey-table.s"
 	
 paletteA_playAreaPalette:
-	include	"out/foreground-palette-table.s"
+	include	"out/paletteA_foreground-palette-table.s"
 	include	"out/background-palette-table.s"	
 
 paletteA_playareaFade:
-	include "out/playarea_fade.s"
+	include "out/paletteA_playarea_fade.s"
 
 paletteA_flagsFade:
-	include "out/flags_fade.s"	
+	include "out/paletteA_flags_fade.s"	
 
 paletteA_tileFade:
-	include "out/tileFade.s"	
+	include "out/paletteA_tileFade.s"	
 
 playAreaPalette:
 	dc.l	paletteA_playAreaPalette
