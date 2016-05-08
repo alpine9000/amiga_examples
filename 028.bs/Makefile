@@ -1,6 +1,7 @@
 EXAMPLE_NAME=game1
 BACKGROUND_COLOR=09e
 BACKGROUND_GREY_COLOR=777
+BACKGROUND_COLOR_LONG=000 153 238 255
 
 # userstack used by bootblock
 USERSTACK_ADDRESS=7fffc
@@ -75,13 +76,25 @@ LINKER_OPTIONS=-T link.script.x
 include ../shared/base.mk
 
 out/foreground.bin: assets/assets.png
-	$(IMAGECON) --use-palette=assets/foreground.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/foreground
+	$(IMAGECON) --use-palette=assets/foreground_flags.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/foreground
 	sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_COLOR)/" out/foreground-copper-list.s 
 	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_COLOR)/" out/foreground-palette-table.s
 	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_GREY_COLOR)/" out/foreground-grey-table.s
 	sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_GREY_COLOR)/" out/foreground-grey-copper.s
 	sed -i '' "2s/.*/        dc.w COLOR01,\$$888/" out/foreground-grey-copper.s
 	sed -i '' "3s/.*/        dc.w COLOR02,\$$bbb/" out/foreground-grey-copper.s
+
+out/bottom_section_flags.pal: assets/foreground_flags.pal assets/background.pal
+	cat assets/foreground_flags.pal  assets/background.pal | sed "1s/.*/$(BACKGROUND_COLOR_LONG)/" > out/bottom_section_flags.pal
+
+out/bottom_section_playarea.pal: assets/foreground_playarea.pal assets/background.pal
+	cat assets/foreground_playarea.pal  assets/background.pal | sed "1s/.*/$(BACKGROUND_COLOR_LONG)/" > out/bottom_section_playarea.pal
+
+out/tileFadeFrom.pal: assets/foreground_playarea.pal
+	cat assets/foreground_playarea.pal | tail -1 | awk '1;1;' > out/tileFadeFrom.pal
+
+out/tileFadeTo.pal: assets/foreground_playarea.pal
+	cat assets/foreground_playarea.pal  | tail -3 | head -2 > out/tileFadeTo.pal
 
 out/background.bin: assets/assets.png
 	$(IMAGECON) --use-palette=assets/background.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/background --palette-offset 8
@@ -148,17 +161,17 @@ out/font%.bin: assets/font%.png
 out/splash.bin: assets/splash.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/splash --colors=32  --full-color-palette-file --output-png --output-copperlist
 
-out/playarea_fade.s: assets/bottom_section_playarea.pal ../tools/fade/out/fade
-	../tools/fade/out/fade --from-grey --to=assets/bottom_section_playarea.pal --output=playarea > out/playarea_fade.s
+out/playarea_fade.s: out/bottom_section_playarea.pal ../tools/fade/out/fade
+	../tools/fade/out/fade --from-grey --to=out/bottom_section_playarea.pal --output=playarea > out/playarea_fade.s
 
-out/flags_fade.s: assets/bottom_section_flags.pal ../tools/fade/out/fade
-	../tools/fade/out/fade --from-grey --to=assets/bottom_section_flags.pal --output=flags > out/flags_fade.s
+out/flags_fade.s: out/bottom_section_flags.pal ../tools/fade/out/fade
+	../tools/fade/out/fade --from-grey --to=out/bottom_section_flags.pal --output=flags > out/flags_fade.s
 
 out/panelFade.s: assets/panel.pal ../tools/fade/out/fade
 	../tools/fade/out/fade --from-grey --to=assets/panel.pal --output=panel > out/panelFade.s
 
-out/tileFade.s: assets/tileFadeFrom.pal assets/tileFadeTo.pal ../tools/fade/out/fade
-	../tools/fade/out/fade --steps=64 --colors=2 --from=assets/tileFadeFrom.pal --to=assets/tileFadeTo.pal --output=tileFade > out/tileFade.s
+out/tileFade.s: out/tileFadeFrom.pal out/tileFadeTo.pal ../tools/fade/out/fade
+	../tools/fade/out/fade --steps=64 --colors=2 --from=out/tileFadeFrom.pal --to=out/tileFadeTo.pal --output=tileFade > out/tileFade.s
 
 out/foreground-map.s: foreground.tmx
 	../tools/mapgen/out/mapgen --depth=3 --input=foreground.tmx
