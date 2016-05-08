@@ -294,7 +294,6 @@ Update:
 	jsr	InstallNextPathwayColor
 .dontInstallNextPathwayColor:
 	add.w	#1,pathwayFadeCount
-	;; 	jsr	CheckPlayerMiss
 
 	rts
 
@@ -465,7 +464,6 @@ RenderNextForegroundFrame:
 
 RenderPathway:
 	move.w	pathwayXIndex,d5 ; x index
-	;;sub.w	#1,pathwayRenderPending
 .loopX:	
 	move.w	#6,d6 		; y index
 	move.w	#0,d7		; number of rows without a pathway
@@ -691,11 +689,10 @@ PostMissedTile:
 	jsr 	SelectNextPlayerSprite
 	bra	Reset
 
-
 	
 BigBang:
 
-finishScrollLoop:
+.finishScrollLoop: ; finish the current foreground tile scroll to clear any half cleared tiles
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels		
 	and.b	#$f,d0
@@ -709,9 +706,9 @@ finishScrollLoop:
 	jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers
-	bra	finishScrollLoop
-
-.scrollFinished
+	bra	.finishScrollLoop
+.scrollFinished:
+	
 	PlaySound Falling
 	jsr	WaitVerticalBlank		
 	jsr	PlayNextSound		

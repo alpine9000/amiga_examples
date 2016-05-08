@@ -60,7 +60,6 @@ UpdatePlayerFallingAnimation:
 	move.w	spritePlayerFallingAnimation,d0
 	lsr.w	#1,d0
 	mulu.w	#PLAYER_SPRITE_VERTICAL_BYTES,d0
-	;; move.l	#spriteFalling1,a0
 
 	move.l	playerSpriteConfig,a0
 	move.l	PLAYER_SPRITE_FALLING_DATA(a0),a0	
@@ -152,7 +151,6 @@ UpdatePlayer:
 .notLeft:
 	cmp.w	#$cf,spriteX
 	blt	.noScroll
-	;; move.w	#1,moving
 .noScroll:
 	rts
 
@@ -218,7 +216,6 @@ SpriteDisableAuto:
 SetupSpriteData:
 	move.l	currentSprite,a0
 	move.w	spriteLagX,d0
-	;; move.w	spriteX,spriteLagX
 	move.w	d0,d1
 	andi	#1,d1
 

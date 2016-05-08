@@ -166,7 +166,6 @@ _SetupItemSpriteData:
 	;; move.w	ITEM_X(a1),d0
 	move.w	ITEM_LAGX(a1),d0	
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
-	;; 	 move.w	ITEM_X(a1),ITEM_LAGX(a1)
 
 
 	add.w	#ITEM_SPRITE_HORIZONTAL_START_PIXELS,d0
