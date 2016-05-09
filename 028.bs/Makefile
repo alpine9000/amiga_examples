@@ -1,7 +1,8 @@
 EXAMPLE_NAME=game1
 BACKGROUND_COLOR=09e
 BACKGROUND_GREY_COLOR=777
-BACKGROUND_COLOR_LONG=000 153 238 255
+paletteA_BACKGROUND_COLOR_LONG=000 153 238 255
+paletteB_BACKGROUND_COLOR_LONG=000 000 102 187
 
 # userstack used by bootblock
 USERSTACK_ADDRESS=7fffc
@@ -77,21 +78,21 @@ include ../shared/base.mk
 
 out/foreground.bin: assets/assets.png
 	$(IMAGECON) --use-palette=assets/paletteA_foreground_flags.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/foreground
-	sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_COLOR)/" out/foreground-copper-list.s 
+	#sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_COLOR)/" out/foreground-copper-list.s 
 	sed -i '' "1s/.*/        dc.w COLOR00,\$$$(BACKGROUND_GREY_COLOR)/" out/foreground-grey-copper.s
 	sed -i '' "2s/.*/        dc.w COLOR01,\$$888/" out/foreground-grey-copper.s
 	sed -i '' "3s/.*/        dc.w COLOR02,\$$bbb/" out/foreground-grey-copper.s
 
 out/%_foreground-palette-table.s: assets/%_foreground_flags.pal
 	$(IMAGECON) --use-palette=assets/$*_foreground_flags.pal --input assets/assets.png $(IMAGECON_ARGS) --colors 8  --full-color-palette-file --output-palette-asm --output-grey-palette --output-copperlist --output out/$*_foreground
-	sed -i '' "1s/.*/        dc.w \$$$(BACKGROUND_COLOR)/" out/$*_foreground-palette-table.s
+	sed -i '' "1s/.*/        dc.w \$$$($*_BACKGROUND_COLOR)/" out/$*_foreground-palette-table.s
 
 
-out/%_bottom_section_flags.pal: assets/%_foreground_flags.pal assets/background.pal
-	cat assets/$*_foreground_flags.pal  assets/background.pal | sed "1s/.*/$(BACKGROUND_COLOR_LONG)/" > out/$*_bottom_section_flags.pal
+out/%_bottom_section_flags.pal: assets/%_foreground_flags.pal assets/%_background.pal
+	cat assets/$*_foreground_flags.pal  assets/$*_background.pal | sed "1s/.*/$($*_BACKGROUND_COLOR_LONG)/" > out/$*_bottom_section_flags.pal
 
-out/%_bottom_section_playarea.pal: assets/%_foreground_playarea.pal assets/background.pal
-	cat assets/$*_foreground_playarea.pal  assets/background.pal | sed "1s/.*/$(BACKGROUND_COLOR_LONG)/" > out/$*_bottom_section_playarea.pal
+out/%_bottom_section_playarea.pal: assets/%_foreground_playarea.pal assets/%_background.pal
+	cat assets/$*_foreground_playarea.pal  assets/$*_background.pal | sed "1s/.*/$($*_BACKGROUND_COLOR_LONG)/" > out/$*_bottom_section_playarea.pal
 
 out/%_tileFadeFrom.pal: assets/%_foreground_playarea.pal
 	cat assets/$*_foreground_playarea.pal | tail -1 | awk '1;1;' > out/$*_tileFadeFrom.pal
@@ -100,7 +101,7 @@ out/%_tileFadeTo.pal: assets/%_foreground_playarea.pal
 	cat assets/$*_foreground_playarea.pal  | tail -3 | head -2 > out/$*_tileFadeTo.pal
 
 out/background.bin: assets/assets.png
-	$(IMAGECON) --use-palette=assets/background.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/background --palette-offset 8
+	$(IMAGECON) --use-palette=assets/paletteA_background.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/background --palette-offset 8
 
 out/panel.bin: assets/panel.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/panel --use-palette=assets/panel.pal

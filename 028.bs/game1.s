@@ -1227,26 +1227,6 @@ InstallSpriteColorPalette:
 	include "out/sprite_coin-1-palette.s"
 	include "out/sprite_arrow-1-palette.s"	
 	rts
-
-InstallColorPalette:
-	lea	playAreaCopperPalettePtr1,a1
-	lea	playAreaCopperPalettePtr2,a2
-	lea	playAreaCopperPalettePtr3,a3
-	move.l	playAreaPalette,a0
-	add.l	#2,a1
-	add.l	#2,a2
-	add.l	#2,a3
-	move.l	#15,d0
-.loop:
-	move.w	(a0),(a1)
-	move.w	(a0),(a2)
-	move.w	(a0),(a3)
-	add.l	#2,a0
-	add.l	#4,a1
-	add.l	#4,a2
-	add.l	#4,a3
-	dbra	d0,.loop
-	rts
 	
 InstallGreyPalette:
 	lea	playAreaCopperPalettePtr1,a1
@@ -1337,6 +1317,7 @@ InstallNextGreyPalette:
 	lea	playAreaCopperPalettePtr1,a1
 	lea	playAreaCopperPalettePtr2,a2
 	lea	playAreaCopperPalettePtr3,a3
+	lea	panelCopperPalettePtr,a4 ; write color00 for the panel palette here
 	move.l	playareaFadePtr,a0
 	move.l	playareaFade,a5
 	add.l	#(paletteA_playareaFadeComplete-paletteA_playareaFade),a5
@@ -1345,6 +1326,8 @@ InstallNextGreyPalette:
 	add.l	#2,a1
 	add.l	#2,a2
 	add.l	#2,a3
+	add.l	#2,a4			; write color00 for the panel palette here
+	move.w	(a0),(a4)		; write color00 for the panel palette here
 	move.l	#15,d0
 .loop:
 	move.w	(a0),(a1)
@@ -1364,12 +1347,13 @@ InstallNextGreyPanelPalette:
 	lea	panelFadeComplete,a2
 	cmp.l	a2,a0
 	bge	.done
-	add.l	#2,a1
-	move.l	#15,d0
+	add.l	#6,a1		; start at color01 as color00 was written in InstallNextGreyPalette
+	add.l	#2,a0		; start at color01 as color00 was written in InstallNextGreyPalette
+	move.l	#14,d0		; only 15 colors as color00 isn't written
 .loop:
 	move.w	(a0),(a1)
 	add.l	#2,a0
-	add.l	#4,a1	
+	add.l	#4,a1
 	dbra	d0,.loop
 	add.l	#16*2,panelFadePtr
 .done
@@ -1595,13 +1579,13 @@ paletteB_tileFade:
 	include "out/paletteB_tileFade.s"
 
 playAreaPalette:
-	dc.l	paletteB_playAreaPalette
+	dc.l	paletteA_playAreaPalette
 playareaFade:
-	dc.l	paletteB_playareaFade
+	dc.l	paletteA_playareaFade
 flagsFade:
-	dc.l	paletteB_flagsFade
+	dc.l	paletteA_flagsFade
 tileFade:
-	dc.l	paletteB_tileFade
+	dc.l	paletteA_tileFade
 
 paletteInstallers:
 	dc.l	InstallPaletteA	
