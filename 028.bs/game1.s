@@ -1595,13 +1595,13 @@ paletteB_tileFade:
 	include "out/paletteB_tileFade.s"
 
 playAreaPalette:
-	dc.l	paletteA_playAreaPalette
+	dc.l	paletteB_playAreaPalette
 playareaFade:
-	dc.l	paletteA_playareaFade
+	dc.l	paletteB_playareaFade
 flagsFade:
-	dc.l	paletteA_flagsFade
+	dc.l	paletteB_flagsFade
 tileFade:
-	dc.l	paletteA_tileFade
+	dc.l	paletteB_tileFade
 
 paletteInstallers:
 	dc.l	InstallPaletteA	
