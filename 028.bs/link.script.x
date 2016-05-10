@@ -24,5 +24,6 @@ SECTIONS
     bss (NOLOAD) : {
         . = endCode;
         *(.bss)
+	endRam = .;
     } > ram;
 }

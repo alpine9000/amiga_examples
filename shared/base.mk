@@ -131,6 +131,7 @@ ALL_DEPENDS=$(ALL_OBJS:.o=.d)
 out/main.bin: out/main.o $(OBJS)
 	vlink $(LINKER_OPTIONS)  -brawbin1 $< $(OBJS) -o $@
 	@vlink $(LINKER_OPTIONS) -brawbin1 $< $(OBJS) -M -o /tmp/main.bin | grep ", value " | cut -d " " -f3,7 | cut -d "," -f1 > ~/Projects/amiga/debugger.syms
+	@echo "RAM USAGE:" $$((16#`cat ~/Projects/amiga/debugger.syms | grep endRam | sed 's/0x//' | sed 's/endRam: //'`)) bytes
 
 
 out/shrunk.bin: $(SHRINKLER_EXE) out/main.bin

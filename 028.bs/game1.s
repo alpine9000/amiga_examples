@@ -24,6 +24,7 @@
 	xdef	foregroundOnscreen
 	xdef	foregroundOffscreen
 	xdef	foregroundScrollX
+	xdef	foregroundBitplanes1	
 
 	xdef	foregroundMapPtr
 	xdef	pathwayMapPtr
@@ -51,6 +52,9 @@ Entry:
 
 	jsr	StartMusic
 	jsr	ShowSplash
+	if SPLASH_USE_FOREGROUND=1
+	jsr	InstallBlackPalette
+	endif
 	jsr 	BlueFill	
 
 	;; d0 - fg bitplane pointer offset
@@ -872,9 +876,10 @@ Message:
 	;; d1 - ypos
 
 	move.w	d0,d1
-	move.w	#(32*4)<<6|(320/16),d0
+	move.w	#(32*4)<<6|(8),d0
 	lea	mpanelOrig,a0
 	lea	mpanel,a2
+	add.l	#(40*4*8),a2
 	jsr	SimpleBlit
 	
 	lea	mpanel,a0
@@ -1274,10 +1279,34 @@ InstallFlagsGreyPalette:
 	add.l	#4,a2
 	dbra	d0,.loop	
 	
-	rts	
+	rts
 
-
-
+	if SPLASH_USE_FOREGROUND=1	
+InstallBlackPalette:
+	move.w #$000,COLOR00(a6)
+	move.w #$000,COLOR01(a6)
+	move.w #$000,COLOR02(a6)
+	move.w #$000,COLOR03(a6)
+	move.w #$000,COLOR04(a6)
+	move.w #$000,COLOR05(a6)
+	move.w #$000,COLOR06(a6)
+	move.w #$000,COLOR07(a6)
+	move.w #$000,COLOR08(a6)
+	move.w #$000,COLOR09(a6)
+	move.w #$000,COLOR10(a6)
+	move.w #$000,COLOR11(a6)
+	move.w #$000,COLOR12(a6)
+	move.w #$000,COLOR13(a6)
+	move.w #$000,COLOR14(a6)
+	move.w #$000,COLOR15(a6)
+	move.w #$000,COLOR16(a6)
+	move.w #$000,COLOR17(a6)
+	move.w #$000,COLOR18(a6)
+	move.w #$000,COLOR19(a6)
+	move.w #$000,COLOR20(a6)
+	rts
+	endif
+	
 InstallTilePalette:
 	move.l	tileFade,tileFadePtr
 	lea	playAreaCopperPalettePtr2,a1	
@@ -1400,7 +1429,7 @@ InstallPaletteB:
 foregroundOnscreen:
 	dc.l	foregroundBitplanes1
 foregroundOffscreen:
-	dc.l	foregroundBitplanes2	
+	dc.l	foregroundBitplanes1+IMAGESIZE	
 foregroundTilemap:
 	incbin "out/foreground.bin"
 panel:
@@ -1408,7 +1437,7 @@ panel:
 mpanel:
 	incbin "out/mpanel.bin"
 mpanelOrig:
-	incbin "out/mpanel.bin"
+	incbin "out/mpanelOrig.bin"
 level1ForegroundMap:
 	include "out/foreground-map.s"
 	dc.w	$FFFF
@@ -1598,11 +1627,14 @@ nextPaletteInstaller:
 panelFade:
 	include "out/panelFade.s"	
 
-	section .bss
+
 foregroundBitplanes1:
-	ds.b	IMAGESIZE
-foregroundBitplanes2:
-	ds.b	IMAGESIZE
+	if SPLASH_USE_FOREGROUND=1
+	incbin "out/splash.bin"
+	endif	
+.endSplash
+	ds.b	(IMAGESIZE*2)-(.endSplash-foregroundBitplanes1)
+	section .bss
 startUserstack:
 	ds.b	$1000		; size of stack
 userstack:

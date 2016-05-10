@@ -17,6 +17,7 @@ IMAGES=foreground.png \
 	background.png \
 	panel.png \
 	mpanel.png \
+	mpanelOrig.png \
 	sprite_pig-0.png \
 	sprite_pig-1.png \
 	sprite_pig-2.png \
@@ -71,7 +72,6 @@ IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
 VASM_EXTRA_ARGS=-DTIMING_TEST=0 -DSFX=1
 
-#SYMBOL_INFO=-M
 LINKER_OPTIONS=-T link.script.x
 
 include ../shared/base.mk
@@ -109,6 +109,10 @@ out/panel.bin: assets/panel.png
 out/mpanel.bin: assets/mpanel.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/mpanel --use-palette=assets/mpanel.pal
 
+out/mpanelOrig.bin: out/mpanelOrig.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/mpanelOrig --use-palette=assets/mpanel.pal
+
+
 out/sprite_pig-%.bin: out/sprite_pig-%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig-$* --palette-offset 16 --use-palette=assets/pig.pal
 
@@ -135,27 +139,38 @@ out/sprite_arrow%.bin: out/sprite_arrow%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_arrow$* --palette-offset 24  --use-palette=assets/arrow.pal
 
 
+.SECONDARY:
 out/sprite_pig%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_pig --width=16 --height=16 --rows=1 --cols=8 --dx=16 --dy=16 --x=192 --y=112
 
+out/mpanelOrig.png: assets/mpanel.png
+	../tools/croppa/out/croppa --input=assets/mpanel.png --output=out/mpanelOrig.png --width=320 --height=16 --rows=1 --cols=1 --dx=0 --dy=0 --x=0 --y=8
+
+.SECONDARY:
 out/sprite_robot%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_robot --width=16 --height=16 --rows=1 --cols=8 --dx=16 --dy=16 --x=192 --y=176
 
+.SECONDARY:
 out/sprite_tank%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_tank --width=16 --height=16 --rows=1 --cols=8 --dx=16 --dy=16 --x=192 --y=208
 
+.SECONDARY:
 out/sprite_fallingPig%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_fallingPig --width=16 --height=16 --rows=1 --cols=5 --dx=16 --dy=16 --x=192 --y=128
 
+.SECONDARY:
 out/sprite_fallingRobot%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_fallingRobot --width=16 --height=16 --rows=1 --cols=5 --dx=16 --dy=16 --x=192 --y=192
 
+.SECONDARY:
 out/sprite_fallingTank%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_fallingTank --width=16 --height=16 --rows=1 --cols=5 --dx=16 --dy=16 --x=192 --y=224
 
+.SECONDARY:
 out/sprite_coin%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_coin --width=16 --height=15 --rows=1 --cols=4 --dx=16 --dy=16 --x=192 --y=144
 
+.SECONDARY:
 out/sprite_arrow%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_arrow --width=16 --height=15 --rows=1 --cols=4 --dx=16 --dy=16 --x=192 --y=160
 

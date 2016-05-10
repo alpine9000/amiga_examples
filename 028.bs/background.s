@@ -39,10 +39,10 @@ RenderBackgroundTile:
 	jsr	BlitTile
 	cmp.l   #backgroundBitplanes1,backgroundOffscreen
 	bne	.offsetSub
-	add.l	#IMAGESIZE*2,a0
+	add.l	#backgroundBitplanes2-backgroundBitplanes1,a0
 	bra	.doBlit
 .offsetSub:
-	sub.l	#IMAGESIZE*2,a0
+	sub.l	#backgroundBitplanes2-backgroundBitplanes1,a0
 .doBlit:
 	jsr	BlitTile	
 	rts
@@ -64,7 +64,7 @@ RenderNextBackgroundFrame:
 backgroundScrollX:
 	dc.l	0	
 backgroundTilemap:
-	incbin "out/background.bin"
+	incbin "out/background.bin"	
 backgroundMap:
 	include "out/background-map.s"
 	dc.w	$FFFF
@@ -75,9 +75,11 @@ backgroundOffscreen:
 	
 	section .bss
 backgroundBitplanes1:
-	ds.b	IMAGESIZE*2
+	ds.b	IMAGESIZE
+	ds.b	LINESIZE*10
 backgroundBitplanes2:
-	ds.b	IMAGESIZE*2	
+	ds.b	IMAGESIZE
+	ds.b	LINESIZE*10
 
 
 	
