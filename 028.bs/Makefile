@@ -11,7 +11,7 @@ BASE_ADDRESS=4000
 # note: this must be high enough not to conflict with MFMbufE
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o out/sound.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o out/sound.o out/trackloader.o out/disk.o
 
 IMAGES=foreground.png \
 	background.png \
