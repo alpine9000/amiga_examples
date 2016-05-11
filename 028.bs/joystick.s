@@ -1,6 +1,7 @@
 	;; http://eab.abime.net/showpost.php?p=986196&postcount=2
 
 	xdef ReadJoystick
+	xdef WaitForJoystick
 	xdef joystick
 	xdef joystickpos	
 	
@@ -28,7 +29,23 @@ ReadJoystick:
 .conv:
         dc.b      0,5,4,3,1,0,3,2,8,7,0,1,7,6,5,0
 
+WaitForJoystick:
+.joystickPressed:	
+	jsr	ReadJoystick
+	jsr	WaitVerticalBlank
+	jsr	PlayNextSound	
+	btst.b	#0,joystick
+	bne	.joystickPressed
+.wait:
+	jsr	ReadJoystick
+	jsr	WaitVerticalBlank
+	jsr	PlayNextSound		
+	btst.b	#0,joystick
+	beq	.wait
+	rts
+
 joystick:
 	dc.b	0
 joystickpos:
-	dc.b	0	
+	dc.b	0
+	

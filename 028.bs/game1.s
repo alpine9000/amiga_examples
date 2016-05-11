@@ -150,12 +150,7 @@ SetupBoardLoop:
 	bra	SetupBoardLoop
 .gotoGameLoop:
 	add.l	#1,d6
-	jsr	WaitVerticalBlank
-	cmp.l	#50,d6
-	ble	.gotoGameLoop
-	jsr	ReadJoystick
-	btst.b	#0,joystick
-	beq	.gotoGameLoop
+	jsr	WaitForJoystick	
 	move.w	#0,moving
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
 	bsr	HideMessagePanel
@@ -181,7 +176,8 @@ FadeInLoop:
 	bra	GameLoop
 .c1:
 	bra	FadeInLoop
-	
+
+
 GameLoop:
 
 	move.l	verticalBlankCount,d0
@@ -306,18 +302,9 @@ GameOver:
 	move.w	#128,d0
 	jsr	Message
 	jsr	InstallPaletteA
-	
-	move.l	#100,d0	
-.pause:
-	jsr	WaitVerticalBlank	
-	dbra	d0,.pause
-	
-.waitForJoystick:
-	jsr	ReadJoystick
-	btst.b	#0,joystick
-	bne	.gotJoystick
-	bra	.waitForJoystick
-.gotJoystick:
+
+	jsr	WaitForJoystick		
+
 	move.l	#level1ForegroundMap,startForegroundMapPtr
 	move.l	#level1PathwayMap,startPathwayMapPtr
 	move.l	#'0004',livesCounterText	
@@ -345,19 +332,9 @@ LevelComplete:
 	lea	levelCompleteMessage,a1
 	move.w	#100,d0
 	jsr	Message	
+
+	jsr	WaitForJoystick
 	
-	move.l	#100,d0	
-.pause:
-	jsr	WaitVerticalBlank
-	jsr	PlayNextSound
-	dbra	d0,.pause
-	
-.waitForJoystick:
-	jsr	ReadJoystick
-	btst.b	#0,joystick
-	bne	.gotJoystick
-	bra	.waitForJoystick
-.gotJoystick:
 	move.l	#level1ForegroundMap,startForegroundMapPtr
 	move.l	#level1PathwayMap,startPathwayMapPtr
 	move.l	#'0004',livesCounterText	
@@ -532,9 +509,9 @@ RenderPathway:
 	rts
 
 
-ClearPathway:	
+ClearPathway:
 	sub.w	#1,pathwayClearPending
-	move.w	pathwayXIndex,d5 ; x index	
+	move.w  pathwayXIndex,d5 ; x index
 .loopX:	
 	move.w	#6,d6 		; y index
 .loopY:
@@ -542,6 +519,12 @@ ClearPathway:
 	bsr	GetMapTile
 	move.l	d0,a2
 	move.w	(a2),d0
+
+	if 0
+	move.l	foregroundMapPtr,a3
+	move.w	(a3),d0
+	endif
+
 	cmp.w	#0,d0
 	beq	.dontBlit
 	
@@ -565,8 +548,6 @@ ClearPathway:
 	jsr	BlitTile
 	bra	.next
 .dontBlit:
-	cmp.w	pathwayXIndex,d5	
-	beq	.next
 .next:
 	dbra	d6,.loopY
 	dbra	d5,.loopX	
