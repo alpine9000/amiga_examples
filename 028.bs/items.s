@@ -39,6 +39,8 @@ DetectItemCollisions:
 	move.w	#ITEM_NUM_SLOTS-1,d1
 	lea	item1,a1
 .loop:
+	cmp.w	#0,ITEM_SPRITE_ENABLED(a1)
+	beq	.skip
 	cmp.w	#0,ITEM_SPRITE(a1)	
 	beq	.skip
 	move.w	spriteX,d2
@@ -123,7 +125,7 @@ SetupItemSpriteData:
 	rts
 	
 .enableSprites:	
-	move.l	#ITEM_NUM_SLOTS,d0	
+	move.l	#ITEM_NUM_SLOTS-1,d0	
 .loop:
 	bsr 	_SetupItemSpriteData
 	dbra	d0,.loop
@@ -164,9 +166,8 @@ _SetupItemSpriteData:
 	add.l	d2,a0
 
 	;; move.w	ITEM_X(a1),d0
-	move.w	ITEM_LAGX(a1),d0	
+	move.w	ITEM_LAGX(a1),d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
-
 
 	add.w	#ITEM_SPRITE_HORIZONTAL_START_PIXELS,d0
 	move.w	d0,d1
@@ -192,7 +193,7 @@ _SetupItemSpriteData:
 	bra	.done	
 
 .done:
-	;; add.w	#1,ITEM_INDEX(a1)		
+	add.w	#1,ITEM_INDEX(a1)
 .spriteIsNotEnabled:
 	move.l	(sp)+,d0
 	rts
@@ -216,6 +217,8 @@ GetSpriteSlot:
 	sub.w	#1,d0
 	
 	move.w	d0,d1
+	cmp.w	#ITEM_NUM_SLOTS,d0
+	bge	dontAddSprite
 	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
 	lea	item1,a1
 	add.l	d0,a1	
@@ -238,6 +241,7 @@ EnableItemSprites:
 	
 itemSpritesEnabled:
 	dc.l	0
+
 
 	;; coinA
 	ItemControl item1,spriteCoinA1,1

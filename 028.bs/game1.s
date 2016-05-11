@@ -1450,10 +1450,8 @@ level1ForegroundMap:
 	dc.w	$FFFF		
 level1PathwayMap:
 	include "out/pathway-map.s"
-	dc.w	$FFFF
 itemsMap:
 	include "out/items-indexes.s"
-	dc.w	$FFFF
 itemsMapOffset:
 	dc.l	itemsMap-level1ForegroundMap
 foregroundMapPtr:
