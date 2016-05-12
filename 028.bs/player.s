@@ -306,7 +306,6 @@ CheckPlayerMiss:
 	blt	.doBigBang
 	sub.w	#PLAYER_LEFT_X,d0
 	lsr.w	#4,d0      	; x columns
-	move.w	d0,pathwayXIndex
 	
 	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
 	sub.w	d0,d1
@@ -327,6 +326,7 @@ CheckPlayerMiss:
 	add.l	d1,a3	
 
 	;; a2 now points at the pathway tile under the sprite
+	move.l	a2,pathwayPlayerTileAddress	
 	move.w	(a2),d0
 	move.w	d0,spriteCurrentPathwayTile
 	bsr	CheckDirection
@@ -335,6 +335,7 @@ CheckPlayerMiss:
 	bge	.noBigBang
 
 	;; a3 now points at the tile under the sprite
+	move.l	a3,foregroundPlayerTileAddress
 	move.w	(a3),d0	
 	
 	cmp.w	#FOREGROUND_TILE_EMPTY,d0	; empty tile

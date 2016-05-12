@@ -6,7 +6,7 @@
 	xdef	RenderCounter
 	
 	xdef	pathwayRenderPending
-	xdef	pathwayXIndex
+	xdef	pathwayPlayerTileAddress
 	xdef	pathwayFadeCount	
 	xdef	pathwayClearPending
 	xdef	InstallTilePalette	
@@ -25,7 +25,8 @@
 	xdef	foregroundOffscreen
 	xdef	foregroundScrollX
 	xdef	foregroundBitplanes1	
-
+	xdef	foregroundPlayerTileAddress
+	
 	xdef	foregroundMapPtr
 	xdef	pathwayMapPtr
 	xdef	startForegroundMapPtr
@@ -459,15 +460,25 @@ RenderNextForegroundFrame:
 	rts
 
 RenderPathway:
-	move.w	pathwayXIndex,d5 ; x index
+	move.l	pathwayPlayerTileAddress,d5
+	andi.w	#$fff0,d5       ; point the address to the last tile of the previous column
+	addq	#2,d5		;
+	move.l	d5,a4
+	move.w	#1,d5
 .loopX:	
 	move.w	#6,d6 		; y index
 	move.w	#0,d7		; number of rows without a pathway
 .loopY:
 	move.l	pathwayMapPtr,a2
 	bsr	GetMapTile
+	cmp.l	a4,a2		; search for the start column
+	ble	.next	
+	cmp.l	pathwayPlayerTileAddress,a2
+	beq	.next
+	
 	move.l	d0,a2
 	move.w	(a2),d0
+	
 	cmp.w	#0,d0
 	beq	.dontBlit
 	
@@ -491,8 +502,6 @@ RenderPathway:
 	jsr	BlitTile
 	bra	.next
 .dontBlit:
-	cmp.w	pathwayXIndex,d5 ; skip the start column
-	beq	.next
 	add.w	#1,d7
 	cmp.w	#7,d7
 	beq	.skip
@@ -511,12 +520,16 @@ RenderPathway:
 
 ClearPathway:
 	sub.w	#1,pathwayClearPending
-	move.w  pathwayXIndex,d5 ; x index
+	move.l	foregroundPlayerTileAddress,d7
+	andi.w	#$fff0,d7	 ; address of the last tile in the previous column
+	move.w	#0,d5		 ; x index
 .loopX:	
 	move.w	#6,d6 		; y index
 .loopY:
 	move.l	foregroundMapPtr,a2 ;; todo: this will be too slow, it will render too many tiles
 	bsr	GetMapTile
+	cmp.l	d7,a2		; finished clearing...
+	bgt	.done
 	move.l	d0,a2
 	move.w	(a2),d0
 
@@ -550,7 +563,10 @@ ClearPathway:
 .dontBlit:
 .next:
 	dbra	d6,.loopY
-	dbra	d5,.loopX	
+	add.w	#1,d5
+	bra	.loopX
+	;; dbra	d5,.loopX
+.done
 	rts	
 
 
@@ -1458,10 +1474,13 @@ movingCounter:
 	dc.w	0
 moving:
 	dc.w	0
+
+foregroundPlayerTileAddress:
+	dc.l	0
 pathwayRenderPending:
 	dc.w	0
-pathwayXIndex
-	dc.w	0
+pathwayPlayerTileAddress:
+	dc.l	0
 pathwayClearPending:
 	dc.w	0
 pathwayFadeCount:
