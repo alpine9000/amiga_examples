@@ -452,11 +452,13 @@ RenderNextForegroundFrame:
 	move.l	d3,d2
 	bsr	RenderForegroundTile
 	bsr	ClearForegroundTile
-	jsr	RenderItemSprite	
+	jsr	RenderItemSprite
+	
 	add.l	#2,a2
 	add.l	#1,d3
 	cmp.l 	#FOREGROUND_PLAYAREA_HEIGHT_WORDS,d3
 	blt	.loop
+	jsr	PrepareItemSpriteData	
 	rts
 
 RenderPathway:

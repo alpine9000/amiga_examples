@@ -38,6 +38,11 @@ WaitBlitter:	macro
 
 
 ItemSprite:	macro
+	_ItemSprite \1,\2
+	_ItemSprite \1_1,\2
+	endm
+
+_ItemSprite:	macro
 \1:
 	dc.b	ITEM_SPRITE_VSTART	 ; vstart
 	dc.b	0			 ; hstart

@@ -8,6 +8,7 @@
 	xdef DetectItemCollisions
 	xdef InitialiseItems
 	xdef SwitchItemSpriteBuffers
+	xdef PrepareItemSpriteData
 	
 DeleteItemSprite:
 	move.w	#0,ITEM_SPRITE(a1)
@@ -116,12 +117,12 @@ SwitchItemSpriteBuffers:
 	rts
 
 
-SetupItemSpriteData:	
+PrepareItemSpriteData:
 	cmp.l	#0,itemSpritesEnabled
 	bne	.enableSprites
-	move.l	#deadSprite,SPR2PTH(a6)
-	move.l	#deadSprite,SPR3PTH(a6)
-	move.l	#deadSprite,SPR4PTH(a6)	
+	move.l	#deadSprite,sprite2Pointer
+	move.l	#deadSprite,sprite3Pointer
+	move.l	#deadSprite,sprite4Pointer
 	rts
 	
 .enableSprites:	
@@ -129,6 +130,18 @@ SetupItemSpriteData:
 .loop:
 	bsr 	_SetupItemSpriteData
 	dbra	d0,.loop
+	rts
+	
+SetupItemSpriteData:
+	move.l	sprite2Pointer,SPR2PTH(a6)
+	move.l	sprite3Pointer,SPR3PTH(a6)
+	move.l	sprite4Pointer,SPR4PTH(a6)
+	cmp.w	#0,spriteBufferIndex
+	beq	.zero
+	move.w	#0,spriteBufferIndex
+	rts
+.zero:
+	move.w	#ITEM_SPRITE_BYTES,spriteBufferIndex
 	rts
 	
 
@@ -146,7 +159,7 @@ _SetupItemSpriteData:
 
 	move.w	ITEM_Y(a1),d2	
 	move.l	ITEM_SPRITE_ADDRESS(a1),a0
-
+	
 	cmp.w	#(ITEM_NUM_COIN_ANIMS-1)<<3,ITEM_INDEX(a1)
 	ble	.dontResetIndex
 	move.w	#0,ITEM_INDEX(a1)
@@ -158,15 +171,17 @@ _SetupItemSpriteData:
 
 	move.l	#0,d0
 	move.w	ITEM_INDEX(a1),d0
-	lsr.l	#3,d0
-	mulu.w	#ITEM_SPRITE_BYTES,d0
+	
+	lsr.l	#3,d0	
+	mulu.w	#ITEM_SPRITE_BYTES*2,d0
+	add.w	spriteBufferIndex,d0
 	add.l	d0,a0
 
 	mulu.w	#ITEM_SPRITE_VERTICAL_BYTES,d2
 	add.l	d2,a0
 
-	;; move.w	ITEM_X(a1),d0
-	move.w	ITEM_LAGX(a1),d0
+	move.w	ITEM_X(a1),d0
+	;; move.w	ITEM_LAGX(a1),d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 
 	add.w	#ITEM_SPRITE_HORIZONTAL_START_PIXELS,d0
@@ -177,19 +192,20 @@ _SetupItemSpriteData:
 	move.b	d0,1(a0)	;spriteHStart
 
 .c1:
+
 	sub.l	d2,a0	;#1*ITEM_SPRITE_VERTICAL_BYTES,a0
 	cmp.b	#ITEM_SPRITE_ARROW_INDEX,d4
 	bge	.arrowSprite
 	cmp.b	#ITEM_SPRITE_COINB_INDEX,d4
 	bge	.coinBSprite
 .coinASprite:
-	move.l	a0,SPR2PTH(a6)
+	move.l	a0,sprite2Pointer
 	bra	.done
 .coinBSprite:
-	move.l	a0,SPR3PTH(a6)
+	move.l	a0,sprite3Pointer
 	bra	.done	
 .arrowSprite:
-	move.l	a0,SPR4PTH(a6)
+	move.l	a0,sprite4Pointer
 	bra	.done	
 
 .done:
@@ -242,7 +258,16 @@ EnableItemSprites:
 itemSpritesEnabled:
 	dc.l	0
 
-
+spriteBufferIndex:
+	dc.l	0
+	
+sprite2Pointer:
+	dc.l	0
+sprite3Pointer:
+	dc.l	0
+sprite4Pointer:
+	dc.l	0	
+	
 	;; coinA
 	ItemControl item1,spriteCoinA1,1
 	ItemControl item2,spriteCoinA1,1
