@@ -100,6 +100,7 @@ ResetItems:
 	add.l	#ITEM_STRUCT_SIZE,a1		; multiply by 16 (item control structure size)	
 	dbra	d1,.loop1
 	move.l	#0,itemSpritesEnabled
+	bsr	PrepareItemSpriteData
 	rts
 
 

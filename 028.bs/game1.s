@@ -743,7 +743,9 @@ BigBang:
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers
 	jsr	UpdatePlayerFallingAnimation
+	jsr	PrepareItemSpriteData
 
+	
 	move.l	foregroundMapPtr,a2
 	move.l	foregroundScrollX,d0	
 	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
