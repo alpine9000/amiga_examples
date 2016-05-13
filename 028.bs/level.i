@@ -12,6 +12,7 @@ InstallLevel\1:
 	move.l	#palette\1_tileFade,tileFade
 	rts
 
+	align 4
 level\1ForegroundMap:
 	include "out/level\1_foreground-map.s"
 	dc.w	$FFFF
