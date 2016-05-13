@@ -2,44 +2,36 @@
 
 	xdef    LevelComplete
 	xdef    BigBang
-	xdef 	IncrementCounter
-	xdef	RenderCounter
+	xdef	InstallTilePalette
 	
 	xdef	pathwayRenderPending
 	xdef	pathwayPlayerTileAddress
 	xdef	pathwayFadeCount	
 	xdef	pathwayClearPending
-	xdef	InstallTilePalette	
-
-	xdef	copperList
-	xdef	mpanelCopperList
-	xdef	copperListBpl1Ptr
-	xdef	copperListBpl2Ptr
-
-	xdef	copperListBpl1Ptr_MP
-	xdef	copperListBpl1Ptr2_MP
-	xdef	copperListBpl2Ptr_MP
-	xdef	copperListBpl2Ptr2_MP
+	xdef	pathwayMapPtr
 	
 	xdef	foregroundOnscreen
 	xdef	foregroundOffscreen
 	xdef	foregroundScrollX
 	xdef	foregroundBitplanes1	
-	xdef	foregroundPlayerTileAddress
-	
+	xdef	foregroundPlayerTileAddress	
 	xdef	foregroundMapPtr
-	xdef	pathwayMapPtr
+	xdef	foregroundTilemap
+	xdef 	foregroundScrollPixels
+	
 	xdef	startForegroundMapPtr
 	xdef 	startPathwayMapPtr
-	
-	xdef   	itemsMapOffset
-	xdef	moving
-	xdef 	foregroundScrollPixels
 
-	
+	xdef	moving	
+	xdef   	itemsMapOffset
+	xdef	livesCounterText
+	xdef	panel
+
+
 byteMap:
 	dc.l	Entry
 	dc.l	endCode-byteMap
+
 
 Entry:
 	lea	userstack,a7
@@ -74,29 +66,24 @@ Entry:
 	lea	panel,a1
 	jsr	PokePanelBitplanePointers	
 
-	lea	mpanelCopperListBpl1Ptr,a0
-	lea	mpanel,a1
-	jsr	PokePanelBitplanePointers
+	jsr	InitialiseMessagePanel
 	
-	bsr	ShowMessagePanel
+	jsr	ShowMessagePanel
 
 	jsr	Init		  ; enable the playfield
 	jsr	InstallSpriteColorPalette
 
 	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR|DMAF_COPPER|DMAF_RASTER|DMAF_MASTER),DMACON(a6)
 
-	jsr	InitialiseItems	
-	jsr	InstallLevelA
+	bra	InitialiseNewGame
+
 Reset:
-	lea	livesCounterText,a0
-	bsr	DecrementCounter
 	move.w	#218,d0
 	lea	livesCounterShortText,a1	
 	jsr	RenderCounter	
 	lea	player1Text,a1
 	move.w	#192,d0
 	jsr	RenderCounter
-
 
 	move.l  startForegroundMapPtr,foregroundMapPtr
 	move.l  startPathwayMapPtr,pathwayMapPtr
@@ -123,9 +110,8 @@ Reset:
 	move.l	startMessage,a1
 	jsr	Message
 	
-	
 MainLoop:
-	MOVE.W  #$0024,BPLCON2(a6)
+	move.w  #$0024,BPLCON2(a6)
 	move.l	#0,frameCount
 	
 SetupBoardLoop:
@@ -156,7 +142,7 @@ SetupBoardLoop:
 	jsr	WaitForJoystick	
 	move.w	#0,moving
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
-	bsr	HideMessagePanel
+	jsr	HideMessagePanel
 	
 FadeInLoop:
 	add.l	#1,frameCount
@@ -169,20 +155,18 @@ FadeInLoop:
 	bsr	InstallNextGreyPalette
 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,d6
 	bne	.c1
-	jsr	InitialisePlayer
+	jsr	ResetPlayer
 	jsr	EnableItemSprites
 
 	move.l	#0,verticalBlankCount
 	move.l	#1,frameCount
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
-
 	bra	GameLoop
 .c1:
 	bra	FadeInLoop
 
 
 GameLoop:
-
 	move.l	verticalBlankCount,d0
 	move.l	frameCount,d1	
 	cmp.l	d1,d0
@@ -196,12 +180,9 @@ GameLoop:
 	lea	skippedFramesCounterText,a1	
 	move.w	#110,d0
 	jsr	RenderCounter		
-.noSkippedFrames:
-
-	
+.noSkippedFrames:	
 	add.l	#1,frameCount
 	move.l	frameCount,d6			
-
 	jsr	WaitVerticalBlank
 	
 	if      TIMING_TEST=1
@@ -220,7 +201,6 @@ GameLoop:
 	bne	.s2
 	move.w	#0,moving
 .s2:	
-
 	jsr	ProcessJoystick
 	cmp.w	#PLAYER_INITIAL_X+16*3,spriteX
 	bge	.setMoving
@@ -232,19 +212,15 @@ GameLoop:
 	move.w	#0,movingCounter
 	move.w	#1,moving
 .notMoving:
-
-
-	
 	
 	bsr 	Update
 	jsr	CheckPlayerMiss
 	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame
 
-
 	cmp.w	#0,pathwayClearPending
 	beq	.dontClearPathway
-	bsr	ClearPathway
+	jsr	ClearPathway
 .dontClearPathway:
 	
 	cmp.w	#0,pathwayRenderPending
@@ -259,7 +235,8 @@ GameLoop:
 
 	jsr	PlayNextSound	
 	bra	GameLoop
-	
+
+
 Update:	
 	jsr	UpdatePlayer
 
@@ -296,27 +273,27 @@ Update:
 	jsr	InstallNextPathwayColor
 .dontInstallNextPathwayColor:
 	add.w	#1,pathwayFadeCount
-
 	rts
+
+
+InitialiseNewGame:
+	jsr	InitialiseItems
+	jsr	InitialisePlayer
+	jsr	InstallLevelA	
+	bra	Reset	
 
 
 GameOver:
 	lea	gameOverMessage,a1
 	jsr	Message
-	jsr	InstallLevelA
-
-	jsr	WaitForJoystick		
-
-
-	move.l	#'0004',livesCounterText	
-	jsr	InitialiseItems
-	bra	Reset
+	jsr	WaitForJoystick
+	bra	InitialiseNewGame
 
 
 LevelComplete:
 	PlaySound Yay
 	jsr	ResetItems
-	jsr	ResetPlayer
+	jsr	HidePlayer
 	jsr 	SelectNextPlayerSprite
 	move.l	levelCompleteMessage,a1
 	jsr	Message		
@@ -334,23 +311,10 @@ LevelComplete:
 	
 	jsr	WaitForJoystick
 	
-	move.l	#'0004',livesCounterText	
 	jsr	ResetItems
 	bra	Reset
-	
-ShowMessagePanel:
-	jsr	WaitVerticalBlank
-	lea	mpanelCopperList,a0
-	move.l	a0,COP1LC(a6)
-	rts
 
 
-HideMessagePanel:
-	jsr	WaitVerticalBlank
-	lea	copperList,a0
-	move.l	a0,COP1LC(a6)
-	rts	
-	
 HoriScrollPlayfield:
 	;; d0 - fg x position in pixels
 	;; d1 - bg x position in pixels	
@@ -386,7 +350,8 @@ InitAnimPattern:
 	dbra	d0,.loop
 	move.l	#animIndexPattern,animIndexPatternPtr
 	rts	
-	
+
+
 ResetAnimPattern:
 	lea	animIndex,a0
 	move.l	#animIndexPattern,a1
@@ -401,6 +366,7 @@ ResetAnimPattern:
 	move.l	a0,animIndexPatternPtr
 .s1:
 	rts
+
 
 ResetDeAnimPattern:
 	lea	deAnimIndex,a0
@@ -435,7 +401,7 @@ ResetBigBangPattern:
 	dbra	d1,.loop1
 	rts	
 
-	
+
 RenderNextForegroundFrame:
 	move.l	foregroundMapPtr,a2
 	move.l	foregroundScrollX,d0	
@@ -457,210 +423,6 @@ RenderNextForegroundFrame:
 	jsr	PrepareItemSpriteData	
 	rts
 
-RenderPathway:
-	move.l	pathwayPlayerTileAddress,d5
-	andi.w	#$fff0,d5       ; point the address to the last tile of the previous column
-	addq	#2,d5		;
-	move.l	d5,a4
-	move.w	#1,d5
-.loopX:	
-	move.w	#6,d6 		; y index
-	move.w	#0,d7		; number of rows without a pathway
-.loopY:
-	move.l	pathwayMapPtr,a2
-	bsr	GetMapTile
-	cmp.l	a4,a2		; search for the start column
-	ble	.next	
-	cmp.l	pathwayPlayerTileAddress,a2
-	beq	.next
-	
-	move.l	d0,a2
-	move.w	(a2),d0
-	
-	cmp.w	#0,d0
-	beq	.dontBlit
-	
-	lea 	foregroundTilemap,a1	
-	add.w	d0,a1 	; source tile	
-	
-	move.l	foregroundScrollX,d0
-	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
-	lsr.w   #3,d0		; bytes to scroll
-	move.l	foregroundOffscreen,a0
-	add.l	d0,a0
-
-	move.l	#-BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*8,d0
-	move.w	d5,d4
-	mulu.w	#2,d4
-	add.l	d4,d0
-	add.l	#10,d0
-	add.l	d0,a0
-	move.l	#10,d2
-	sub.l	d6,d2
-	jsr	BlitTile
-	bra	.next
-.dontBlit:
-	add.w	#1,d7
-	cmp.w	#7,d7
-	beq	.skip
-.next:
-	dbra	d6,.loopY
-	add.w	#1,d5
-	cmp.w	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-0,d5 ; don't render pathways off the play area
-	beq	.pathwayNotComplete
-	bra	.loopX
-.skip:
-	sub.w	#1,pathwayRenderPending	
-	rts
-.pathwayNotComplete:
-	rts
-
-
-ClearPathway:
-	sub.w	#1,pathwayClearPending
-	move.l	foregroundPlayerTileAddress,d7
-	andi.w	#$fff0,d7	 ; address of the last tile in the previous column
-	move.w	#0,d5		 ; x index
-.loopX:	
-	move.w	#6,d6 		; y index
-.loopY:
-	move.l	foregroundMapPtr,a2 ;; todo: this will be too slow, it will render too many tiles
-	bsr	GetMapTile
-	cmp.l	d7,a2		; finished clearing...
-	bgt	.done
-	move.l	d0,a2
-	move.w	(a2),d0
-
-	if 0
-	move.l	foregroundMapPtr,a3
-	move.w	(a3),d0
-	endif
-
-	cmp.w	#0,d0
-	beq	.dontBlit
-	
-	lea 	foregroundTilemap,a1	
-	add.w	d0,a1 	; source tile	
-	
-	move.l	foregroundScrollX,d0
-	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
-	lsr.w   #3,d0		; bytes to scroll
-	move.l	foregroundOffscreen,a0
-	add.l	d0,a0
-
-	move.l	#-BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*8,d0
-	move.w	d5,d4
-	mulu.w	#2,d4
-	add.l	d4,d0
-	add.l	#10,d0
-	add.l	d0,a0
-	move.l	#10,d2
-	sub.l	d6,d2
-	jsr	BlitTile
-	bra	.next
-.dontBlit:
-.next:
-	dbra	d6,.loopY
-	add.w	#1,d5
-	bra	.loopX
-	;; dbra	d5,.loopX
-.done
-	rts	
-
-
-RenderMapTile:
-	;; d5 - x map index
-	;; d6 - y map index
-
-	move.l	foregroundMapPtr,a2
-	bsr	GetMapTile
-	move.l	d0,a2
-	move.w	(a2),d0
-	cmp.w	#0,d0
-	beq	.dontBlit
-	
-	lea 	foregroundTilemap,a1	
-	add.w	d0,a1 	; source tile
-	
-	move.l	foregroundScrollX,d0
-	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
-	lsr.w   #3,d0		; bytes to scroll
-	move.l	foregroundOffscreen,a0
-	add.l	d0,a0
-
-	move.l	#-BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*8,d0
-	move.w	d5,d4
-	mulu.w	#2,d4
-	add.l	d4,d0
-	add.l	#10,d0
-	add.l	d0,a0
-	move.l	#10,d2
-	sub.l	d6,d2
-	jsr	BlitTile
-.dontBlit:
-	rts
-	
-GetMapTile:
-	;; d5 - x board index
-	;; d6 - y board index
-	;; a2 - map
-	;;
-	;; d0 - pathwayOffset
-	
-	
-	;; calculate the a2 offset of the top right tile based on foreground scroll
-	move.l	foregroundScrollX,d0		
-	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
-	lsr.l	#1,d0
-	and.b   #$f0,d0
-	add.l	d0,a2
-
-	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
-	sub.w	d5,d1		; x column
-	mulu.w  #FOREGROUND_PLAYAREA_HEIGHT_WORDS*2,d1
-	sub.l	d1,a2		; player x if y == bottom ?
-
-	sub.l	d1,d1
-	move.w	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d1
-	sub.w	d6,d1 		; y row
-	lsl.w	#1,d1
-	add.l	d1,a2
-
-	;; a2 now points at the tile at the coordinate
-	move.l	a2,d0
-	rts
-		
-	
-RenderNextForegroundPathwayFrame:
-	move.l	pathwayMapPtr,a2
-	move.l	foregroundScrollX,d0	
-	lsr.l   #FOREGROUND_SCROLL_TILE_INDEX_CONVERT,d0
-	lsr.l	#1,d0
-	and.b   #$f0,d0
-	add.l	d0,a2		
-	move.l	0,d3
-.loop:
-	move.l	d3,d2
-	bsr	RenderForegroundTile
-	add.l	#2,a2
-	add.l	#1,d3
-	cmp.l 	#FOREGROUND_PLAYAREA_HEIGHT_WORDS,d3
-	blt	.loop
-	rts	
-
-
-RenderForegroundTile_NoAnim:
-	;; a2 - address of tileIndex
-	move.l	foregroundScrollX,d0
-	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
-	lsr.w   #3,d0		; bytes to scroll
-	move.l	foregroundOffscreen,a0
-	add.l	d0,a0
-	lea 	foregroundTilemap,a1	
-	add.w	(a2),a1 	; source tile	
-	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0	
-	jsr	BlitTile
-	rts	
 
 RenderForegroundTile:
 	;; a2 - address of tileIndex
@@ -671,8 +433,6 @@ RenderForegroundTile:
 	add.l	d0,a0
 	lea 	foregroundTilemap,a1	
 	move.w	(a2),d0
-	;; 	cmp.l	#0,d0
-	;; 	beq	.s2
 	add.w	(a2),a1 	; source tile	
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0
 	cmp.w	#$ffff,d0
@@ -700,11 +460,12 @@ stopScrolling:
 	
 
 PostMissedTile:
+	lea	livesCounterText,a0
+	jsr	DecrementCounter
 	bra	Reset
 
 	
 BigBang:
-
 .finishScrollLoop: ; finish the current foreground tile scroll to clear any half cleared tiles
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels		
@@ -751,24 +512,19 @@ BigBang:
 	add.l	#(FOREGROUND_PLAYAREA_HEIGHT_WORDS-1)*2,a2
 	
 	move.l	foregroundScrollX,d0
-	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels
-	lsr.w   #3,d0		; bytes to scroll
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0	; convert to pixels
+	lsr.w   #3,d0					; bytes to scroll
 	move.l	foregroundOffscreen,a0
 	add.l	d0,a0
 	lea 	foregroundTilemap,a1	
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0	
 
-
 	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d5
-
 	move.l	#BIGBANG_ANIM_DELAY,d0
-
 	lea 	bigBangIndex,a4
 .loop3:
 	jsr	WaitVerticalBlank
-	dbra	d0,.loop3
-
-	
+	dbra	d0,.loop3	
 .loop1:	
 	move.l  #FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d2
 .loop2:
@@ -797,13 +553,12 @@ ClearForegroundTile3:
 	bra	.s2
 .s1:
 	lea 	foregroundTilemap,a1
-	;; add.w	#21520,a1 	; source tile
 	add.w	#$0,a1
 .s2:
 	jsr	BlitTile
 	rts
 
-	
+
 ClearForegroundTile:	
 	;; a0 - pointer to tile just rendered (on the screen right) in destination bitplane
 	lea 	foregroundTilemap,a1		
@@ -833,7 +588,6 @@ ClearForegroundTile:
 	bra	.s2
 .s1:
 	lea 	foregroundTilemap,a1
-	;; 	add.w	#21520,a1 	; source tile		
 	add.w	#$0,a1
 .s2:
 	jsr	BlitTile
@@ -866,371 +620,13 @@ Level3InterruptHandler:
 	rte
 
 
-Message:
-	;; a0 - bitplane
-	;; a1 - text
-	;; d0 - xpos
-	;; d1 - ypos
-
-	move.w	#SCREEN_WIDTH/2,d0
-	move.l	a1,a2
-.loop:
-	cmp.b 	#0,(a2)+
-	beq	.lengthComplete
-	sub.w	#4,d0
-	bra	.loop
-	
-.lengthComplete:
-	move.w	d0,d1
-	move.w	#(32*4)<<6|(8),d0
-	lea	mpanelOrig,a0
-	lea	mpanel,a2
-	add.l	#(40*4*8),a2
-	jsr	SimpleBlit
-	
-	lea	mpanel,a0
-	move.w	d1,d0
-	move.w	#11,d1
-	jsr	DrawMaskedText8
-	bsr	ShowMessagePanel
-	rts
-
-	
-RenderCounter:
-	lea	panel,a0
-	move.w	#20,d1
-	jsr	DrawText8
-	rts
-
-
-ResetCounter:
-	move.l	#"0000",(a0)
-	rts
-	
-IncrementCounter:
-	move.l	a0,a1
-	add.l	#3,a0
-.loop:
-	sub.l	d0,d0
-	move.b	(a0),d0
-	addq.b	#1,d0
-	cmp.b	#'9',d0
-	ble	.done
-	move.b	#'0',d0
-	move.b	d0,(a0)	
-	sub.l	#1,a0
-	cmp.l	a1,a0
-	blt	.startOfText
-	bra	.loop
-.done:
-	move.b	d0,(a0)
-.startOfText:
-	rts
-
-
-DecrementCounter:
-	move.l	a0,a1	
-	add.l	#3,a0
-.loop:
-	sub.l	d0,d0
-	move.b	(a0),d0
-	cmp.b	#'0',d0
-	beq	.dontWrap
-	subq.b	#1,d0
-	bra	.done
-.dontWrap:
-	move.b	#'9',d0
-	move.b	d0,(a0)	
-	sub.l	#1,a0
-	cmp.l	a1,a0
-	blt	.startOfText	
-	bra	.loop
-.done:
-	move.b	d0,(a0)
-.startOfText:
-	rts	
-
-
-player1Text:
-	dc.b	"P1"
-	dc.b	0
-	align	4
-
-player2Text:
-	dc.b	"P2"
-	dc.b	0
-	align	4	
-
-	
-gameOverMessage:
-	dc.b	"GAME OVER"
-	dc.b	0
-	align 	4
-
-
-skippedFramesCounterText:
-	dc.b	"0000"
-	dc.b	0
-	align 	4
-	
-livesCounterText:
-	dc.b	"00"
-livesCounterShortText:
-	dc.b	"04"
-	dc.b	0
-	align	4
-	
-copperList:
-panelCopperListBpl1Ptr:	
-	dc.w	BPL1PTL,0
-	dc.w	BPL1PTH,0
-	dc.w	BPL2PTL,0
-	dc.w	BPL2PTH,0
-	dc.w	BPL3PTL,0
-	dc.w	BPL3PTH,0
-	dc.w	BPL4PTL,0
-	dc.w	BPL4PTH,0		
-	dc.w    BPLCON1,0
-	dc.w	DDFSTRT,(RASTER_X_START/2-SCREEN_RES)
-	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))
-	dc.w	BPLCON0,(4<<12)|COLOR_ON ; 4 bit planes
-	dc.w	BPL1MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
-	dc.w	BPL2MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
-panelCopperPalettePtr:	
-	include "out/panel-copper-list.s"
-	dc.w    $5bd1,$fffe
-
-
-	dc.w	BPL1MOD,BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2
-	dc.w	BPL2MOD,BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2	
-	
-	dc.w    BPLCON1
-copperListScrollPtr:	
-	dc.w	0
-copperListBpl1Ptr:
-	;; this is where bitplanes are assigned to playfields
-	;; http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0079.html
-	;; 3 bitplanes per playfield, playfield1 gets bitplanes 1,3,5
-	dc.w	BPL1PTL,0
-	dc.w	BPL1PTH,0
-	dc.w	BPL3PTL,0
-	dc.w	BPL3PTH,0
-	dc.w	BPL5PTL,0
-	dc.w	BPL5PTH,0
-copperListBpl2Ptr:
-	;; 3 bitplanes per playfield, playfield2 gets bitplanes 2,4,6
-	dc.w	BPL2PTL,0
-	dc.w	BPL2PTH,0
-	dc.w	BPL4PTL,0
-	dc.w	BPL4PTH,0
-	dc.w	BPL6PTL,0
-	dc.w	BPL6PTH,0
-
-	dc.w	DDFSTRT,(RASTER_X_START/2-SCREEN_RES)-8 ; -8 for extra scrolling word
-	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))	
-	dc.w	BPLCON0,(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF	
-
-	
-	if TIMING_TEST=1
-	dc.l	$fffffffe
-	endif
-
-
-playAreaCopperPalettePtr1:	
-	;; the foreground color values are just place holders and will be poked with the correcr value
-	include "out/foreground-copper-list.s"
-	include "out/background-copper-list.s"	
-
-	;; top flag row has it's own palette
-	dc.w    $84d1
-	dc.w	$fffe		
-flagsCopperPalettePtr1:
-	;; the foreground color values are just place holders and will be poked with the correcr value	
-	include "out/foreground-copper-list.s"
-	include "out/background-copper-list.s"
-	dc.w    $94d1
-	dc.w	$fffe
-	;; 
-
-	
-playAreaCopperPalettePtr2:
-	;; the foreground color values are just place holders and will be poked with the correcr value	
-	include "out/foreground-copper-list.s"
-	include "out/background-copper-list.s"		
-	
-
-	;; bottom flag row has it's own palette
-	dc.w    $f4d1
-	dc.w	$fffe		
-flagsCopperPalettePtr2:
-	;; the foreground color values are just place holders and will be poked with the correcr value	
-	include "out/foreground-copper-list.s"
-	include "out/background-copper-list.s"
-	dc.w    $ffdf
-	dc.w	$fffe
-	dc.w    $04d1
-	dc.w	$fffe	
-
-playAreaCopperPalettePtr3:
-	;; the foreground color values are just place holders and will be poked with the correcr value	
-	include "out/foreground-copper-list.s"
-	include "out/background-copper-list.s"
-	
-	
-	dc.l	$fffffffe
-
-
-mpanelCopperList:
-panelCopperListBpl1Ptr_MP:	
-	dc.w	BPL1PTL,0
-	dc.w	BPL1PTH,0
-	dc.w	BPL2PTL,0
-	dc.w	BPL2PTH,0
-	dc.w	BPL3PTL,0
-	dc.w	BPL3PTH,0
-	dc.w	BPL4PTL,0
-	dc.w	BPL4PTH,0		
-	dc.w    BPLCON1,0
-	dc.w	DDFSTRT,(RASTER_X_START/2-SCREEN_RES)
-	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))
-	dc.w	BPLCON0,(4<<12)|COLOR_ON ; 4 bit planes
-	dc.w	BPL1MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
-	dc.w	BPL2MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
-	include "out/panel-grey-copper.s"
-	dc.w    $5bd1,$fffe
-
-
-	dc.w	BPL1MOD,BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2
-	dc.w	BPL2MOD,BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2	
-	
-	dc.w    BPLCON1
-copperListScrollPtr_MP:	
-	dc.w	0
-copperListBpl1Ptr_MP:
-	;; this is where bitplanes are assigned to playfields
-	;; http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0079.html
-	;; 3 bitplanes per playfield, playfield1 gets bitplanes 1,3,5
-	dc.w	BPL1PTL,0
-	dc.w	BPL1PTH,0
-	dc.w	BPL3PTL,0
-	dc.w	BPL3PTH,0
-	dc.w	BPL5PTL,0
-	dc.w	BPL5PTH,0
-	
-copperListBpl2Ptr_MP:
-	;; 3 bitplanes per playfield, playfield2 gets bitplanes 2,4,6
-	dc.w	BPL2PTL,0
-	dc.w	BPL2PTH,0
-	dc.w	BPL4PTL,0
-	dc.w	BPL4PTH,0
-	dc.w	BPL6PTL,0
-	dc.w	BPL6PTH,0
-
-	dc.w	DDFSTRT,(RASTER_X_START/2-SCREEN_RES)-8 ; -8 for extra scrolling word
-	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))	
-	dc.w	BPLCON0,(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF	
-
-
-playAreaCopperPalettePtr1_MP:	
-	include "out/foreground-grey-copper.s"
-	include "out/background-grey-copper.s"
-	
-	dc.w    $84d1
-	dc.w	$fffe		
-flagsCopperPalettePtr1_MP:	
-	include "out/foreground-grey-copper.s"
-	include "out/background-grey-copper.s"	
-	dc.w    $94d1
-	dc.w	$fffe
-
-playAreaCopperPalettePtr2_MP:	
-	include "out/foreground-grey-copper.s"
-	include "out/background-grey-copper.s"
-	
-	
-mpanelWaitLinePtr:	
-	dc.w    MPANEL_COPPER_WAIT
-	dc.w	$fffe
-
-mpanelCopperListBpl1Ptr:	
-	dc.w	BPL1PTL,0
-	dc.w	BPL1PTH,0
-	dc.w	BPL2PTL,0
-	dc.w	BPL2PTH,0
-	dc.w	BPL3PTL,0
-	dc.w	BPL3PTH,0
-	dc.w	BPL4PTL,0
-	dc.w	BPL4PTH,0		
-	dc.w    BPLCON1,0
-	dc.w	DDFSTRT,(RASTER_X_START/2-SCREEN_RES)
-	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))
-	dc.w	BPLCON0,(4<<12)|COLOR_ON ; 4 bit planes
-	dc.w	BPL1MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
-	dc.w	BPL2MOD,SCREEN_WIDTH_BYTES*4-SCREEN_WIDTH_BYTES
-mpanelCopperPalettePtr_MP:	
-	include "out/mpanel-copper-list.s"
-	
-	dc.w    $BAd1,$fffe
-
-
-	dc.w	BPL1MOD,BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2
-	dc.w	BPL2MOD,BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH-SCREEN_WIDTH_BYTES-2	
-	
-	dc.w    BPLCON1
-copperListScrollPtr2_MP:	
-	dc.w	0
-copperListBpl1Ptr2_MP:
-	;; this is where bitplanes are assigned to playfields
-	;; http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0079.html
-	;; 3 bitplanes per playfield, playfield1 gets bitplanes 1,3,5
-	dc.w	BPL1PTL,0
-	dc.w	BPL1PTH,0
-	dc.w	BPL3PTL,0
-	dc.w	BPL3PTH,0
-	dc.w	BPL5PTL,0
-	dc.w	BPL5PTH,0
-
-copperListBpl2Ptr2_MP:
-	;; 3 bitplanes per playfield, playfield2 gets bitplanes 2,4,6
-	dc.w	BPL2PTL,0
-	dc.w	BPL2PTH,0
-	dc.w	BPL4PTL,0
-	dc.w	BPL4PTH,0
-	dc.w	BPL6PTL,0
-	dc.w	BPL6PTH,0
-
-	dc.w	DDFSTRT,(RASTER_X_START/2-SCREEN_RES)-8 ; -8 for extra scrolling word
-	dc.w	DDFSTOP,(RASTER_X_START/2-SCREEN_RES)+(8*((SCREEN_WIDTH/16)-1))	
-	dc.w	BPLCON0,(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF	
-
-playAreaCopperPalettePtr3_MP:	
-	include "out/foreground-grey-copper.s"
-	include "out/background-grey-copper.s"
-
-
-	dc.w    $f4d1
-	dc.w	$fffe		
-flagsCopperPalettePtr2_MP:	
-	include "out/foreground-grey-copper.s"
-	include "out/background-grey-copper.s"
-	dc.w    $ffdf
-	dc.w	$fffe
-	dc.w    $04d1
-	dc.w	$fffe	
-
-playAreaCopperPalettePtr4_MP:	
-	include "out/foreground-grey-copper.s"
-	include "out/background-grey-copper.s"
-	
-	
-	dc.l	$fffffffe		
-
 InstallSpriteColorPalette:
 	jsr	InstallPlayerColorPalette
 	include "out/sprite_coin-1-palette.s"
 	include "out/sprite_arrow-1-palette.s"	
 	rts
-	
+
+
 InstallGreyPalette:
 	lea	playAreaCopperPalettePtr1,a1
 	lea	playAreaCopperPalettePtr2,a2
@@ -1261,7 +657,6 @@ InstallPanelGreyPalette:
 	add.l	#4,a1	
 	dbra	d0,.loop
 
-
 InstallFlagsGreyPalette:
 	lea	flagsCopperPalettePtr1,a1
 	lea	flagsCopperPalettePtr2,a2
@@ -1276,7 +671,6 @@ InstallFlagsGreyPalette:
 	add.l	#4,a1
 	add.l	#4,a2
 	dbra	d0,.loop	
-	
 	rts
 
 	if SPLASH_USE_FOREGROUND=1	
@@ -1304,7 +698,8 @@ InstallBlackPalette:
 	move.w #$000,COLOR20(a6)
 	rts
 	endif
-	
+
+
 InstallTilePalette:
 	move.l	tileFade,tileFadePtr
 	lea	playAreaCopperPalettePtr2,a1	
@@ -1317,16 +712,16 @@ InstallTilePalette:
 	add.l	#4,a1
 	dbra	d0,.loop
 	rts
-	
+
+
 InstallNextPathwayColor:
 	lea	playAreaCopperPalettePtr2,a1
 	add.l	#6,a1 		; point to COLOR01
 	move.l	tileFadePtr,a0
 	move.l	tileFade,a5
 	add.l	#(paletteA_tileFadeFadeComplete-paletteA_tileFade),a5
-	;; 	lea	tileFadeFadeComplete,a5
 	cmp.l	a5,a0
-	bge	.reset
+	bge	.done
 	move.l	#1,d0 		; 2 colors to update
 .loop:
 	move.w	(a0),(a1)
@@ -1334,12 +729,10 @@ InstallNextPathwayColor:
 	add.l	#4,a1
 	dbra	d0,.loop
 	add.l	#2*2,tileFadePtr
-	bra	.done
-.reset:
-	;; move.l	#tileFade,tileFadePtr
 .done:
 	rts
-	
+
+
 InstallNextGreyPalette:
 	lea	playAreaCopperPalettePtr1,a1
 	lea	playAreaCopperPalettePtr2,a2
@@ -1366,7 +759,7 @@ InstallNextGreyPalette:
 	add.l	#4,a3
 	dbra	d0,.loop
 	add.l	#16*2,playareaFadePtr
-.done
+.done:
 	
 InstallNextGreyPanelPalette:
 	lea	panelCopperPalettePtr,a1	
@@ -1383,8 +776,7 @@ InstallNextGreyPanelPalette:
 	add.l	#4,a1
 	dbra	d0,.loop
 	add.l	#16*2,panelFadePtr
-.done
-
+.done:
 
 InstallFlagGreyPalette:
 	lea	flagsCopperPalettePtr1,a1
@@ -1392,7 +784,6 @@ InstallFlagGreyPalette:
 	move.l	flagsFadePtr,a0
 	move.l	flagsFade,a5
 	add.l	#(paletteA_flagsFadeComplete-paletteA_flagsFade),a5
-	;; 	lea	flagsFadeComplete,a5
 	cmp.l	a5,a0
 	bge	.done
 	add.l	#2,a1
@@ -1413,7 +804,24 @@ InstallFlagGreyPalette:
 	Level	A,"LEVEL 1"
 	Level	B,"LEVEL 2"
 
-	
+	include "copper.i"
+
+player1Text:
+	dc.b	"P1"
+	dc.b	0
+	align	4
+player2Text:
+	dc.b	"P2"
+	dc.b	0
+	align	4		
+gameOverMessage:
+	dc.b	"GAME OVER"
+	dc.b	0
+	align 	4
+skippedFramesCounterText:
+	dc.b	"0000"
+	dc.b	0
+	align 	4
 foregroundOnscreen:
 	dc.l	foregroundBitplanes1
 foregroundOffscreen:
@@ -1422,40 +830,16 @@ foregroundTilemap:
 	incbin "out/foreground.bin"
 panel:
 	incbin "out/panel.bin"
-mpanel:
-	incbin "out/mpanel.bin"
-mpanelOrig:
-	incbin "out/mpanelOrig.bin"	
 itemsMapOffset:
 	dc.l	levelAItemsMap-levelAForegroundMap
 foregroundScrollPixels:
 	dc.l	FOREGROUND_SCROLL_PIXELS
-frameCount:
-	dc.l	0
-verticalBlankCount:
-	dc.l	0
-movingCounter:
-	dc.w	0
-moving:
-	dc.w	0
-pathwayFadeCount:
-	dc.w	0
-tileFadePtr:
-	dc.l	0
-playareaFadePtr:
-	dc.l	0
-panelFadePtr:
-	dc.l	panelFade
-flagsFadePtr:
-	dc.l	0
 bigBangIndex:
-	ds.l	FOREGROUND_PLAYAREA_HEIGHT_WORDS*FOREGROUND_PLAYAREA_WIDTH_WORDS,0
-	
+	ds.l	FOREGROUND_PLAYAREA_HEIGHT_WORDS*FOREGROUND_PLAYAREA_WIDTH_WORDS,0	
 animIndex:
 	ds.l	16,0
 deAnimIndex:
 	ds.l	16,0	
-	
 animIndexPatternPtr:
 	dc.l	animIndexPattern
 animIndexPattern:
@@ -1492,7 +876,6 @@ animIndexPattern:
 	dc.l	12*4
 	dc.l	0
 	dc.l	$ffffffff
-
 deAnimIndexPatternPtr:
 	dc.l	deAnimIndexPattern
 deAnimIndexPattern:
@@ -1528,39 +911,56 @@ deAnimIndexPattern:
 	dc.l	8*4
 	dc.l	2*4
 	dc.l	0	
-	dc.l	$ffffffff	
-
+	dc.l	$ffffffff
 panelGreyPalette:
 	include "out/panel-grey-table.s"
-	
-playAreaPalette:
-	dc.l	paletteA_playAreaPalette
-playareaFade:
-	dc.l	paletteA_playareaFade
-flagsFade:
-	dc.l	paletteA_flagsFade
-tileFade:
-	dc.l	paletteA_tileFade
-
 levelInstallers:
 	dc.l	InstallLevelA	
 	dc.l	InstallLevelB
 	dc.l	0
-
 nextLevelInstaller:
 	dc.l	levelInstallers+4
-	
 panelFade:
-	include "out/panelFade.s"	
+	include "out/panelFade.s"
 
-
+	if SPLASH_USE_FOREGROUND=1	
 foregroundBitplanes1:
-	if SPLASH_USE_FOREGROUND=1
 	incbin "out/splash.bin"
-	endif	
 .endSplash
 	ds.b	(IMAGESIZE*2)-(.endSplash-foregroundBitplanes1)
+	endif	
 
+	section .bss	
+	if SPLASH_USE_FOREGROUND=0
+foregroundBitplanes1:
+	ds.b	IMAGESIZE*2
+	endif	
+playAreaPalette:
+	dc.l	0
+playareaFade:
+	dc.l	0
+flagsFade:
+	dc.l	0
+tileFade:
+	dc.l	0
+frameCount:
+	dc.l	0
+verticalBlankCount:
+	dc.l	0
+movingCounter:
+	dc.w	0
+moving:
+	dc.w	0
+pathwayFadeCount:
+	dc.w	0
+tileFadePtr:
+	dc.l	0
+playareaFadePtr:
+	dc.l	0
+panelFadePtr:
+	dc.l	0
+flagsFadePtr:
+	dc.l	0
 startMessage:
 	dc.l	0
 levelCompleteMessage:
@@ -1583,8 +983,12 @@ pathwayClearPending:
 	dc.w	0	
 foregroundScrollX:
 	dc.l	0
-
-	section .bss	
+livesCounterText:
+	dc.b	"00"
+livesCounterShortText:
+	dc.b	"00"
+	dc.b	0
+	align	4	
 	
 startUserstack:
 	ds.b	$1000		; size of stack

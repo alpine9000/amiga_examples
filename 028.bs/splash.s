@@ -50,9 +50,7 @@ ShowSplash:
 	
 .wait:
 	jsr	WaitVerticalBlank
-	jsr	ReadJoystick
-	btst.b	#0,joystick
-	beq	.wait
+	jsr	WaitForJoystick
 	rts
 
 

@@ -23,7 +23,7 @@ PLAYER_INSTALL_COLOR_PALETTE	equ 0
 PLAYER_SPRITE_DATA		equ 4
 PLAYER_SPRITE_FALLING_DATA	equ 8	
 
-InitialisePlayer:
+ResetPlayer:
 	move.l	playerSpriteConfig,a0
 	move.l	PLAYER_SPRITE_DATA(a0),d0	
 	add.l	#6*PLAYER_SPRITE_VERTICAL_BYTES,d0 
@@ -36,17 +36,16 @@ InitialisePlayer:
 	move.w	#PLAYER_INITIAL_Y+16,spriteYEnd
 	rts
 
-ResetPlayer:
+HidePlayer:
 	move.w	#0,spriteX
 	move.w	#0,spriteY
 	move.w	#0,spriteYEnd
 	rts
 
-HidePlayer:
-	move.w	#$7000,spriteX
-	rts			
-
-
+InitialisePlayer:
+	move.l	#PLAYER_LIVES_COUNTER,livesCounterText
+	rts
+	
 ScrollSprites:
 	cmp.l	#0,foregroundScrollPixels
 	beq	.skip
