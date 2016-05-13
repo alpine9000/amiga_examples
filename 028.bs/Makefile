@@ -192,14 +192,14 @@ out/panelFade.s: assets/panel.pal ../tools/fade/out/fade
 out/%_tileFade.s: out/%_tileFadeFrom.pal out/%_tileFadeTo.pal ../tools/fade/out/fade
 	../tools/fade/out/fade --steps=64 --colors=2 --from=out/$*_tileFadeFrom.pal --to=out/$*_tileFadeTo.pal --output=$*_tileFade > out/$*_tileFade.s
 
-out/foreground-map.s: foreground.tmx
-	../tools/mapgen/out/mapgen --depth=3 --input=foreground.tmx
-	@mv foreground-map.s out
+out/%_foreground-map.s: levels/%_foreground.tmx
+	../tools/mapgen/out/mapgen --depth=3 --input=levels/$*_foreground.tmx
+	@mv foreground-map.s out/$*_foreground-map.s
 	@rm items-map.s
-	@mv items-indexes.s out
+	@mv items-indexes.s out/$*_items-indexes.s
 	@rm foreground-indexes.s
-	@mv pathway-map.s out
-	@mv pathway-indexes.s out
+	@mv pathway-map.s out/$*_pathway-map.s
+	@mv pathway-indexes.s out/$*_pathway-indexes.s
 
 
 out/background-map.s: background.tmx
@@ -222,7 +222,9 @@ out/chaching.raw: assets/chaching.wav
 out/yay.raw: assets/yay.wav
 	sox -v 2.0 assets/yay.wav -c 1 -r 4000 -b 8 out/yay.raw
 
-out/main.o: $(IMAGEDATA) out/background-map.s out/foreground-map.s Makefile link.script.x\
+out/main.o: $(IMAGEDATA) \
+	out/levelA_foreground-map.s out/levelB_foreground-map.s \
+	out/background-map.s  Makefile link.script.x\
 	out/paletteA_playarea_fade.s out/paletteA_flags_fade.s out/paletteA_foreground-palette-table.s out/paletteA_tileFade.s\
 	out/paletteB_playarea_fade.s out/paletteB_flags_fade.s out/paletteB_foreground-palette-table.s out/paletteB_tileFade.s\
 	out/panelFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw out/yay.raw

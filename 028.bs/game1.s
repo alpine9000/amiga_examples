@@ -86,6 +86,7 @@ Entry:
 	move.w	#(DMAF_SPRITE|DMAF_BLITTER|DMAF_SETCLR|DMAF_COPPER|DMAF_RASTER|DMAF_MASTER),DMACON(a6)
 
 	jsr	InitialiseItems	
+	jsr	InstallLevelA
 Reset:
 	lea	livesCounterText,a0
 	bsr	DecrementCounter
@@ -95,9 +96,11 @@ Reset:
 	lea	player1Text,a1
 	move.w	#192,d0
 	jsr	RenderCounter
+
+
+	move.l  startForegroundMapPtr,foregroundMapPtr
+	move.l  startPathwayMapPtr,pathwayMapPtr
 	
-	move.l	startForegroundMapPtr,foregroundMapPtr
-	move.l	startPathwayMapPtr,pathwayMapPtr	
 	move.w	#0,pathwayRenderPending
 	move.w	#0,pathwayClearPending
 	move.w	#0,moving
@@ -117,8 +120,7 @@ Reset:
 	bne	.notGameOver
 	bra	GameOver
 .notGameOver:
-	lea	message,a1
-	move.w	#128,d0
+	move.l	startMessage,a1
 	jsr	Message
 	
 	
@@ -300,14 +302,12 @@ Update:
 
 GameOver:
 	lea	gameOverMessage,a1
-	move.w	#128,d0
 	jsr	Message
-	jsr	InstallPaletteA
+	jsr	InstallLevelA
 
 	jsr	WaitForJoystick		
 
-	move.l	#level1ForegroundMap,startForegroundMapPtr
-	move.l	#level1PathwayMap,startPathwayMapPtr
+
 	move.l	#'0004',livesCounterText	
 	jsr	InitialiseItems
 	bra	Reset
@@ -319,25 +319,22 @@ LevelComplete:
 	jsr	ResetPlayer
 
 	jsr 	SelectNextPlayerSprite
-	move.l	nextPaletteInstaller,a0
+	move.l	nextLevelInstaller,a0
 	cmp.l	#0,(a0)
-	bne	.dontResetPaletteInstaller
-	move.l	#paletteInstallers,nextPaletteInstaller
-	move.l	nextPaletteInstaller,a0	
-.dontResetPaletteInstaller:
+	bne	.dontResetLevelInstaller
+	move.l	#levelInstallers,nextLevelInstaller
+	move.l	nextLevelInstaller,a0	
+.dontResetLevelInstaller:
 	move.l	(a0),a1
 	jsr	(a1)
 	add.l	#4,a0
-	move.l	a0,nextPaletteInstaller
+	move.l	a0,nextLevelInstaller
 	
-	lea	levelCompleteMessage,a1
-	move.w	#100,d0
+	move.l	levelCompleteMessage,a1
 	jsr	Message	
 
 	jsr	WaitForJoystick
 	
-	move.l	#level1ForegroundMap,startForegroundMapPtr
-	move.l	#level1PathwayMap,startPathwayMapPtr
 	move.l	#'0004',livesCounterText	
 	jsr	InitialiseItems
 	bra	Reset
@@ -876,6 +873,15 @@ Message:
 	;; d0 - xpos
 	;; d1 - ypos
 
+	move.w	#SCREEN_WIDTH/2,d0
+	move.l	a1,a2
+.loop:
+	cmp.b 	#0,(a2)+
+	beq	.lengthComplete
+	sub.w	#4,d0
+	bra	.loop
+	
+.lengthComplete:
 	move.w	d0,d1
 	move.w	#(32*4)<<6|(8),d0
 	lea	mpanelOrig,a0
@@ -955,21 +961,13 @@ player2Text:
 	dc.b	"P2"
 	dc.b	0
 	align	4	
-	
-message:
-	dc.b	"LETS PLAY!"
-	dc.b	0
-	align 	4
+
 	
 gameOverMessage:
 	dc.b	"GAME OVER"
 	dc.b	0
 	align 	4
 
-levelCompleteMessage:
-	dc.b	"LEVEL COMPLETE!"
-	dc.b	0
-	align 	4		
 
 skippedFramesCounterText:
 	dc.b	"0000"
@@ -1413,19 +1411,9 @@ InstallFlagGreyPalette:
 	rts		
 
 
-InstallPaletteA:
-	move.l	#paletteA_playAreaPalette,playAreaPalette
-	move.l	#paletteA_playareaFade,playareaFade
-	move.l	#paletteA_flagsFade,flagsFade
-	move.l	#paletteA_tileFade,tileFade
-	rts
+	Level	A,"LEVEL 1"
+	Level	B,"LEVEL 2"
 
-InstallPaletteB:
-	move.l	#paletteB_playAreaPalette,playAreaPalette
-	move.l	#paletteB_playareaFade,playareaFade
-	move.l	#paletteB_flagsFade,flagsFade
-	move.l	#paletteB_tileFade,tileFade
-	rts	
 	
 foregroundOnscreen:
 	dc.l	foregroundBitplanes1
@@ -1438,38 +1426,11 @@ panel:
 mpanel:
 	incbin "out/mpanel.bin"
 mpanelOrig:
-	incbin "out/mpanelOrig.bin"
-level1ForegroundMap:
-	include "out/foreground-map.s"
-	dc.w	$FFFF
-	dc.w	$FFFF
-	dc.w	$FFFF
-	dc.w	$FFFF
-	dc.w	$FFFF
-	dc.w	$FFFF
-	dc.w	$FFFF
-	dc.w	$FFFF		
-level1PathwayMap:
-	include "out/pathway-map.s"
-itemsMap:
-	include "out/items-indexes.s"
+	incbin "out/mpanelOrig.bin"	
 itemsMapOffset:
-	dc.l	itemsMap-level1ForegroundMap
-foregroundMapPtr:
-	dc.l	0
-pathwayMapPtr:
-	dc.l	0
-startForegroundMapPtr:
-	dc.l	level1ForegroundMap
-startPathwayMapPtr:
-	dc.l	level1PathwayMap	
-	
-	
-
+	dc.l	levelAItemsMap-levelAForegroundMap
 foregroundScrollPixels:
-	dc.l	FOREGROUND_SCROLL_PIXELS	
-foregroundScrollX:
-	dc.l	0
+	dc.l	FOREGROUND_SCROLL_PIXELS
 frameCount:
 	dc.l	0
 verticalBlankCount:
@@ -1478,18 +1439,8 @@ movingCounter:
 	dc.w	0
 moving:
 	dc.w	0
-
-foregroundPlayerTileAddress:
-	dc.l	0
-pathwayRenderPending:
-	dc.w	0
-pathwayPlayerTileAddress:
-	dc.l	0
-pathwayClearPending:
-	dc.w	0
 pathwayFadeCount:
 	dc.w	0
-	
 tileFadePtr:
 	dc.l	0
 playareaFadePtr:
@@ -1583,32 +1534,6 @@ deAnimIndexPattern:
 panelGreyPalette:
 	include "out/panel-grey-table.s"
 	
-paletteA_playAreaPalette:
-	include	"out/paletteA_foreground-palette-table.s"
-	include	"out/background-palette-table.s"	
-
-paletteA_playareaFade:
-	include "out/paletteA_playarea_fade.s"
-
-paletteA_flagsFade:
-	include "out/paletteA_flags_fade.s"	
-
-paletteA_tileFade:
-	include "out/paletteA_tileFade.s"
-
-paletteB_playAreaPalette:
-	include	"out/paletteB_foreground-palette-table.s"
-	include	"out/background-palette-table.s"	
-
-paletteB_playareaFade:
-	include "out/paletteB_playarea_fade.s"
-
-paletteB_flagsFade:
-	include "out/paletteB_flags_fade.s"	
-
-paletteB_tileFade:
-	include "out/paletteB_tileFade.s"
-
 playAreaPalette:
 	dc.l	paletteA_playAreaPalette
 playareaFade:
@@ -1618,13 +1543,13 @@ flagsFade:
 tileFade:
 	dc.l	paletteA_tileFade
 
-paletteInstallers:
-	dc.l	InstallPaletteA	
-	dc.l	InstallPaletteB
+levelInstallers:
+	dc.l	InstallLevelA	
+	dc.l	InstallLevelB
 	dc.l	0
 
-nextPaletteInstaller:
-	dc.l	paletteInstallers+4
+nextLevelInstaller:
+	dc.l	levelInstallers+4
 	
 panelFade:
 	include "out/panelFade.s"	
@@ -1636,7 +1561,32 @@ foregroundBitplanes1:
 	endif	
 .endSplash
 	ds.b	(IMAGESIZE*2)-(.endSplash-foregroundBitplanes1)
-	section .bss
+
+startMessage:
+	dc.l	0
+levelCompleteMessage:
+	dc.l	0
+foregroundMapPtr:
+	dc.l	0
+pathwayMapPtr:
+	dc.l	0
+startForegroundMapPtr:
+	dc.l	0
+startPathwayMapPtr:
+	dc.l	0
+foregroundPlayerTileAddress:
+	dc.l	0
+pathwayRenderPending:
+	dc.w	0
+pathwayPlayerTileAddress:
+	dc.l	0
+pathwayClearPending:
+	dc.w	0	
+foregroundScrollX:
+	dc.l	0
+
+	section .bss	
+	
 startUserstack:
 	ds.b	$1000		; size of stack
 userstack:

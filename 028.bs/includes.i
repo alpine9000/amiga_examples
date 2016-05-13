@@ -7,3 +7,4 @@
 	include "hardware/blit.i"
 	include "constants.i"
 	include "macros.i"
+	include "level.i"
