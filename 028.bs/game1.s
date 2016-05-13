@@ -317,8 +317,10 @@ LevelComplete:
 	PlaySound Yay
 	jsr	ResetItems
 	jsr	ResetPlayer
-
 	jsr 	SelectNextPlayerSprite
+	move.l	levelCompleteMessage,a1
+	jsr	Message		
+	
 	move.l	nextLevelInstaller,a0
 	cmp.l	#0,(a0)
 	bne	.dontResetLevelInstaller
@@ -330,13 +332,10 @@ LevelComplete:
 	add.l	#4,a0
 	move.l	a0,nextLevelInstaller
 	
-	move.l	levelCompleteMessage,a1
-	jsr	Message	
-
 	jsr	WaitForJoystick
 	
 	move.l	#'0004',livesCounterText	
-	jsr	InitialiseItems
+	jsr	ResetItems
 	bra	Reset
 	
 ShowMessagePanel:
