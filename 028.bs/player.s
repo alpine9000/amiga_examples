@@ -29,6 +29,9 @@ ResetPlayer:
 	add.l	#6*PLAYER_SPRITE_VERTICAL_BYTES,d0 
 	move.l	d0,currentSprite
 
+	move.w	#PATHWAY_CONFIG_FREE,pathwayLastConfig	
+	move.w	#0,pathwayMissPending
+	
 	bsr	SpriteDisableAuto
 	move.w	#0,spritePlayerFallingAnimation
 	move.w	#PLAYER_INITIAL_X,spriteX
@@ -286,6 +289,11 @@ CheckPlayerMiss:
 	rts
 
 .check:
+	cmp.w	#1,pathwayMissPending
+	beq	.doBigBang
+
+	move.w	#PATHWAY_CONFIG_FREE,pathwayLastConfig		
+	
 	move.l	pathwayMapPtr,a2	
 	move.l	foregroundMapPtr,a3
 
@@ -488,36 +496,42 @@ CheckDirection:
 	jmp	BigBang		
 	
 .horizontal:
+	move.w	#PATHWAY_CONFIG_HORIZONTAL,pathwayLastConfig
 	cmp.w	spriteR,d1
 	beq	.ok
 	cmp.w	spriteL,d1
 	beq	.ok	
 	jmp	BigBang
 .vertical:
+	move.w	#PATHWAY_CONFIG_VERTICAL,pathwayLastConfig
 	cmp.w	spriteU,d1
 	beq	.ok
 	cmp.w	spriteD,d1
 	beq	.ok
 	jmp	BigBang
 .topLeft:
+	move.w	#PATHWAY_CONFIG_TOP_LEFT,pathwayLastConfig		
 	cmp.w	spriteR,d1
 	beq	.ok
 	cmp.w	spriteD,d1
 	beq	.ok	
 	jmp	BigBang
 .topRight:
+	move.w	#PATHWAY_CONFIG_TOP_RIGHT,pathwayLastConfig		
 	cmp.w	spriteD,d1
 	beq	.ok
 	cmp.w	spriteL,d1
 	beq	.ok		
 	jmp	BigBang			
 .rightBottom:
+	move.w	#PATHWAY_CONFIG_BOT_RIGHT,pathwayLastConfig	
 	cmp.w	spriteU,d1
 	beq	.ok
 	cmp.w	spriteL,d1
 	beq	.ok		
 	jmp	BigBang		
 .leftBottom:
+	move.w	#PATHWAY_CONFIG_BOT_LEFT,pathwayLastConfig	
 	cmp.w	spriteR,d1
 	beq	.ok
 	cmp.w	spriteU,d1
@@ -595,4 +609,9 @@ playerJumpPixels:
 playerPausePixels
 	dc.w	PLAYER_PAUSE_PIXELS
 playerMissPixels
-	dc.w	PLAYER_CHECK_MISS_PIXELS	
+	dc.w	PLAYER_CHECK_MISS_PIXELS
+pathwayLastConfig:
+	dc.w	PATHWAY_CONFIG_FREE
+pathwayMissPending:
+	dc.w	0
+	

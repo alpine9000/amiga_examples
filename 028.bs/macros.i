@@ -100,6 +100,16 @@ ItemControl:	macro
 
 
 PlayerMoveRight: macro
+	cmp.w	#PATHWAY_CONFIG_VERTICAL,pathwayLastConfig
+	beq	.\@miss
+	cmp.w	#PATHWAY_CONFIG_TOP_LEFT,pathwayLastConfig
+	beq	.\@miss
+	cmp.w	#PATHWAY_CONFIG_BOT_LEFT,pathwayLastConfig
+	beq	.\@miss		
+	bra	.\@ok
+.\@miss:	
+	move.w	#1,pathwayMissPending
+.\@ok:
 	move.w	playerJumpPixels,d1
 	add.w	playerPausePixels,d1
 	move.w	d1,spriteR
@@ -124,6 +134,16 @@ PlayerMoveDown:	macro
 	endm
 
 PlayerMoveLeft:	macro
+	cmp.w	#PATHWAY_CONFIG_VERTICAL,pathwayLastConfig
+	beq	.\@miss
+	cmp.w	#PATHWAY_CONFIG_TOP_RIGHT,pathwayLastConfig
+	beq	.\@miss
+	cmp.w	#PATHWAY_CONFIG_BOT_RIGHT,pathwayLastConfig
+	beq	.\@miss
+	bra	.\@ok
+.\@miss:	
+	move.w	#1,pathwayMissPending
+.\@ok:
 	move.w	playerJumpPixels,d1
 	add.w	playerPausePixels,d1
 	move.w	d1,spriteL

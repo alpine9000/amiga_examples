@@ -6,9 +6,8 @@
 RenderPathway:
 	move.l	pathwayPlayerTileAddress,d5
 	andi.w	#$fff0,d5       ; point the address to the last tile of the previous column
-	addq	#2,d5		;
 	move.l	d5,a4
-	move.w	#1,d5
+	move.w	#0,d5
 .loopX:	
 	move.w	#6,d6 		; y index
 	move.w	#0,d7		; number of rows without a pathway
