@@ -39,7 +39,7 @@ p61system=0	;1=system-friendly. Use for DOS/Workbench programs.
 
 p61exec	=0	;0 if execbase is destroyed, such as in a trackmo.
 
-p61fade	=0	;enable channel volume fading from your demo
+p61fade	=1	;enable channel volume fading from your demo
 
 	if SFX=1
 channels=3	;<4 for game sound effects in the higher channels. Incompatible

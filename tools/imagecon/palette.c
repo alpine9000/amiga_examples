@@ -89,6 +89,11 @@ palette_output(imagecon_image_t* ic, char* outFilename)
   }
   
   for (int i = 0; i < (config.ehbMode ? ic->numColors/2 : ic->numColors); i++) {
+    if (config.darken != 0) {
+      ic->palette[i].r *= config.darken;
+      ic->palette[i].g *= config.darken;
+      ic->palette[i].b *= config.darken;
+    }
     if (config.verbose) {
       printf("%02d: hex=%03x r=%03d g=%03d b=%03d a=%03d\n", i , RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b), ic->palette[i].r, ic->palette[i].g, ic->palette[i].b, ic->palette[i].a);
     }

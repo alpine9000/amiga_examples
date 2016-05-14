@@ -44,6 +44,7 @@ typedef struct {
   int quantize;
   int outputPng;
   int verbose;
+  float darken;
   char** argv;  
 } imagecon_config_t;
 

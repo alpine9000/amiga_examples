@@ -27,6 +27,8 @@
 	xdef	livesCounterText
 	xdef	panel
 
+	xdef	nextLevelInstaller
+	xdef	levelInstallers
 
 byteMap:
 	dc.l	Entry
@@ -44,10 +46,10 @@ Entry:
  	move.l	a3,LVL3_INT_VECTOR
 
 	jsr	StartMusic
-	jsr	ShowSplash
-	if SPLASH_USE_FOREGROUND=1
-	jsr	InstallBlackPalette
-	endif
+	jsr	ShowSplash	
+MainMenu:
+	jsr	ShowMenu
+
 	jsr 	BlueFill	
 
 	;; d0 - fg bitplane pointer offset
@@ -66,9 +68,9 @@ Entry:
 	lea	panel,a1
 	jsr	PokePanelBitplanePointers	
 
-	jsr	InitialiseMessagePanel
-	
-	jsr	ShowMessagePanel
+	jsr	InitialiseMessagePanel	
+	lea	nullText,a1
+	jsr	Message
 
 	jsr	Init		  ; enable the playfield
 	jsr	InstallSpriteColorPalette
@@ -279,25 +281,19 @@ Update:
 InitialiseNewGame:
 	jsr	InitialiseItems
 	jsr	InitialisePlayer
-	jsr	InstallLevelA	
+	jsr	InstallNextLevel
 	bra	Reset	
 
 
 GameOver:
+	move.l	#levelInstallers,nextLevelInstaller
 	lea	gameOverMessage,a1
 	jsr	Message
 	jsr	WaitForJoystick
-	bra	InitialiseNewGame
+	bra	MainMenu
 
 
-LevelComplete:
-	PlaySound Yay
-	jsr	ResetItems
-	jsr	HidePlayer
-	jsr 	SelectNextPlayerSprite
-	move.l	levelCompleteMessage,a1
-	jsr	Message		
-	
+InstallNextLevel:
 	move.l	nextLevelInstaller,a0
 	cmp.l	#0,(a0)
 	bne	.dontResetLevelInstaller
@@ -308,6 +304,17 @@ LevelComplete:
 	jsr	(a1)
 	add.l	#4,a0
 	move.l	a0,nextLevelInstaller
+	rts
+	
+LevelComplete:
+	PlaySound Yay
+	jsr	ResetItems
+	jsr	HidePlayer
+	jsr 	SelectNextPlayerSprite
+	move.l	levelCompleteMessage,a1
+	jsr	Message		
+	
+	bsr	InstallNextLevel
 	
 	jsr	WaitForJoystick
 	
@@ -673,33 +680,6 @@ InstallFlagsGreyPalette:
 	dbra	d0,.loop	
 	rts
 
-	if SPLASH_USE_FOREGROUND=1	
-InstallBlackPalette:
-	move.w #$000,COLOR00(a6)
-	move.w #$000,COLOR01(a6)
-	move.w #$000,COLOR02(a6)
-	move.w #$000,COLOR03(a6)
-	move.w #$000,COLOR04(a6)
-	move.w #$000,COLOR05(a6)
-	move.w #$000,COLOR06(a6)
-	move.w #$000,COLOR07(a6)
-	move.w #$000,COLOR08(a6)
-	move.w #$000,COLOR09(a6)
-	move.w #$000,COLOR10(a6)
-	move.w #$000,COLOR11(a6)
-	move.w #$000,COLOR12(a6)
-	move.w #$000,COLOR13(a6)
-	move.w #$000,COLOR14(a6)
-	move.w #$000,COLOR15(a6)
-	move.w #$000,COLOR16(a6)
-	move.w #$000,COLOR17(a6)
-	move.w #$000,COLOR18(a6)
-	move.w #$000,COLOR19(a6)
-	move.w #$000,COLOR20(a6)
-	rts
-	endif
-
-
 InstallTilePalette:
 	move.l	tileFade,tileFadePtr
 	lea	playAreaCopperPalettePtr2,a1	
@@ -806,6 +786,9 @@ InstallFlagGreyPalette:
 
 	include "copper.i"
 
+nullText:
+	dc.b	0
+	align	4
 player1Text:
 	dc.b	"P1"
 	dc.b	0
@@ -919,22 +902,14 @@ levelInstallers:
 	dc.l	InstallLevelB
 	dc.l	0
 nextLevelInstaller:
-	dc.l	levelInstallers+4
+	dc.l	levelInstallers
 panelFade:
 	include "out/panelFade.s"
 
-	if SPLASH_USE_FOREGROUND=1	
-foregroundBitplanes1:
-	incbin "out/splash.bin"
-.endSplash
-	ds.b	(IMAGESIZE*2)-(.endSplash-foregroundBitplanes1)
-	endif	
 
 	section .bss	
-	if SPLASH_USE_FOREGROUND=0
 foregroundBitplanes1:
 	ds.b	IMAGESIZE*2
-	endif	
 playAreaPalette:
 	dc.l	0
 playareaFade:

@@ -1,6 +1,7 @@
 	include "P6112-Options.i"
 	xdef	P61_Init
 	xdef	P61_Music
+	xdef	P61_Master
 ;		#-----+-----------------------------------------#
 ;		|Name:| P6112 - Optimized Player 6.1 Playroutine|
 ;		+-----+-----------------------------------------+

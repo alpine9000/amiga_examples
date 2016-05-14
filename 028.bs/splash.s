@@ -1,7 +1,8 @@
 	include "includes.i"
 
 	xdef	ShowSplash
-
+	xdef	splash
+	
 SPLASH_COLOR_DEPTH		equ 5
 SPLASH_SCREEN_WIDTH_BYTES	equ 40
 
@@ -20,11 +21,7 @@ ShowSplash:
 	move.w	#SPLASH_SCREEN_WIDTH_BYTES*SPLASH_COLOR_DEPTH-SPLASH_SCREEN_WIDTH_BYTES,BPL2MOD(a6)
 
 	;; poke bitplane pointers
-	if SPLASH_USE_FOREGROUND=1
-	lea	foregroundBitplanes1,a1
-	else
 	lea	splash(pc),a1
-	endif
 	lea     splashCopperListBplPtr(pc),a2
 	moveq	#SPLASH_COLOR_DEPTH-1,d0
 .bitplaneloop:
@@ -44,10 +41,13 @@ ShowSplash:
 	;; set up default palette
 	include "out/splash-palette.s"
 
+	lea COLOR31(a6),a0
+	move.w #$f00,(a0)	
+	
 	jsr	WaitVerticalBlank			
 	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)		
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
-	
+
 .wait:
 	jsr	WaitVerticalBlank
 	jsr	WaitForJoystick
@@ -70,7 +70,5 @@ splashCopperListBplPtr:
 	dc.w	BPL6PTH,0
 	dc.l	$fffffffe		
 
-	if SPLASH_USE_FOREGROUND=0
 splash:	
 	incbin "out/splash.bin"
-	endif

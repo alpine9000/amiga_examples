@@ -22,7 +22,8 @@ imagecon_config_t config = {
   .overridePalette = 0,
   .paletteOffset = 0,
   .maskTransparentColor = 0,
-  .fullColorPaletteFile = 0
+  .fullColorPaletteFile = 0,
+  .darken = 0
 };
 
 
@@ -51,6 +52,7 @@ usage()
 	  "  --use-palette <palette file>\n"\
 	  "  --full-color-palette-file\n"\
 	  "  --palette-offset <index>\n"\
+	  "  --darken <percentage>\n"\
 	  "  --verbose\n", config.argv[0]);
   exit(1);
 }
@@ -506,6 +508,7 @@ main(int argc, char **argv)
       {"output",  required_argument, 0, 'o'},
       {"colors",  required_argument, 0, 'c'},
       {"input",   required_argument, 0, 'i'},
+      {"darken",   required_argument, 0, 'd'},
       {"transparent-color",   required_argument, 0, 't'},
       {0, 0, 0, 0}
     };
@@ -528,6 +531,11 @@ main(int argc, char **argv)
       break;	
     case 'p':
       config.overridePalette = optarg;
+      break;
+    case 'd':
+      if (sscanf(optarg, "%f", &config.darken) != 1) {
+	abort_("invalid darken argument");
+      }
       break;
     case 'l':
       if (sscanf(optarg, "%d", &config.paletteOffset) != 1) {

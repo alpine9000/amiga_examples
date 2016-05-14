@@ -11,7 +11,7 @@ BASE_ADDRESS=4000
 # note: this must be high enough not to conflict with MFMbufE
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o out/sound.o out/trackloader.o out/disk.o out/counter.o out/map.o out/message.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blitmtext85.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o out/sound.o out/trackloader.o out/disk.o out/counter.o out/map.o out/message.o out/menu.o
 
 IMAGES=foreground.png \
 	background.png \
@@ -66,7 +66,9 @@ IMAGES=foreground.png \
 	sprite_fallingTank-3.png \
 	sprite_fallingTank-4.png \
 	font8x8.png\
-	splash.png
+	font8x85.png\
+	splash.png\
+	splashSave.png
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
@@ -177,8 +179,18 @@ out/sprite_arrow%.png: assets/assets.png
 out/font%.bin: assets/font%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/font$* --colors=16 --use-palette assets/mpanel.pal --full-color-palette-file --output-mask --transparent-color=0,0,0 --output-png
 
+out/font8x85.bin: assets/font8x8.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/font8x85 --colors=32 --use-palette assets/font8x85.pal --full-color-palette-file --output-mask --transparent-color=0,0,0 --output-png
+
+out/splashSave.bin: assets/splash.png out/splash.bin
+	../tools/croppa/out/croppa --input=assets/splash.png --output=out/splashSave.png --width=96 --height=64 --rows=1 --cols=1 --dx=0 --dy=0 --x=112 --y=150
+	$(IMAGECON) --input out/splashSave.png $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/splashSave --colors=32 --output-copperlist --full-color-palette-file --use-palette=out/splash.pal
+
 out/splash.bin: assets/splash.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/splash --colors=32  --full-color-palette-file --output-png --output-copperlist
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/splash --colors=32 --output-copperlist --full-color-palette-file
+
+out/menu-palette.s: assets/splash.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-palette-asm --output-palette --output out/menu --colors=32 --output-copperlist --full-color-palette-file --darken=0.55
 
 out/%_playarea_fade.s: out/%_bottom_section_playarea.pal ../tools/fade/out/fade
 	../tools/fade/out/fade --from-grey --to=out/$*_bottom_section_playarea.pal --output=$*_playarea > out/$*_playarea_fade.s
@@ -225,6 +237,7 @@ out/yay.raw: assets/yay.wav
 out/main.o: $(IMAGEDATA) \
 	out/levelA_foreground-map.s out/levelB_foreground-map.s \
 	out/background-map.s  Makefile link.script.x\
+	out/menu-palette.s\
 	out/paletteA_playarea_fade.s out/paletteA_flags_fade.s out/paletteA_foreground-palette-table.s out/paletteA_tileFade.s\
 	out/paletteB_playarea_fade.s out/paletteB_flags_fade.s out/paletteB_foreground-palette-table.s out/paletteB_tileFade.s\
 	out/panelFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw out/yay.raw
