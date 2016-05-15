@@ -10,6 +10,10 @@ InstallLevel\1:
 	move.l	#palette\1_playareaFade,playareaFade
 	move.l	#palette\1_flagsFade,flagsFade
 	move.l	#palette\1_tileFade,tileFade
+	move.w	#\3,pathwayFadeTimerCount
+	move.l	#\4,pathwayFadeRate
+	move.w	#\5,playerLevelPausePixels
+	move.w	#\6,playerLevelMissPixels
 	rts
 
 	align 4

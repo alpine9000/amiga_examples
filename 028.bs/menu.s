@@ -134,22 +134,26 @@ ToggleMusic:
 	rts
 
 ToggleDifficulty:
-	cmp.l	#levelInstallers,nextLevelInstaller
-	beq	.currentlyEasy
-.currentlyHard:
-	move.l	#levelInstallers,nextLevelInstaller	
+	add.l	#4,nextLevelInstaller
+	cmp.l	#levelInstallers+8,nextLevelInstaller
 	bra	RefreshDifficulty
-.currentlyEasy:			
-	move.l	#levelInstallers+4,nextLevelInstaller	
-	bra	RefreshDifficulty
-RefreshDifficulty:
+	ble	RefreshDifficulty
+	move.l	#levelInstallers,nextLevelInstaller
+RefreshDifficulty:	
 	cmp.l	#levelInstallers,nextLevelInstaller
-	beq	.easy	
+	beq	.easy
+	cmp.l	#levelInstallers+4,nextLevelInstaller
+	beq	.medium		
 .hard:
 	lea	difficultyHard,a0
 	lea	difficulty,a1
 	bsr	StrCpy
 	bra	.done
+.medium:
+	lea	difficultyMedium,a0
+	lea	difficulty,a1
+	bsr	StrCpy
+	bra	.done	
 .easy:
 	lea	difficultyEasy,a0
 	lea	difficulty,a1
@@ -252,11 +256,15 @@ credits:
 difficultyEasy:
 	dc.b	"LEVEL - EASY"
 	dc.b	0
-
+	align	2
+difficultyMedium:	
+	dc.b	"LEVEL - MED "
+	dc.b	0	
+	align	2	
 difficultyHard:
 	dc.b	"LEVEL - HARD"
 	dc.b	0	
-	
+	align	2	
 musicOn:
 	dc.b	"MUSIC - ON  "
 	dc.b	0	

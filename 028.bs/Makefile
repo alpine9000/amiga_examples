@@ -3,6 +3,7 @@ BACKGROUND_COLOR=09e
 BACKGROUND_GREY_COLOR=777
 paletteA_BACKGROUND_COLOR_LONG=000 153 238 255
 paletteB_BACKGROUND_COLOR_LONG=000 000 102 187
+paletteC_BACKGROUND_COLOR_LONG=020 020 020 255
 
 # userstack used by bootblock
 USERSTACK_ADDRESS=7fffc
@@ -235,11 +236,12 @@ out/yay.raw: assets/yay.wav
 	sox -v 2.0 assets/yay.wav -c 1 -r 4000 -b 8 out/yay.raw
 
 out/main.o: $(IMAGEDATA) \
-	out/levelA_foreground-map.s out/levelB_foreground-map.s \
+	out/levelA_foreground-map.s out/levelB_foreground-map.s out/levelC_foreground-map.s\
 	out/background-map.s  Makefile link.script.x\
 	out/menu-palette.s\
 	out/paletteA_playarea_fade.s out/paletteA_flags_fade.s out/paletteA_foreground-palette-table.s out/paletteA_tileFade.s\
 	out/paletteB_playarea_fade.s out/paletteB_flags_fade.s out/paletteB_foreground-palette-table.s out/paletteB_tileFade.s\
+	out/paletteC_playarea_fade.s out/paletteC_flags_fade.s out/paletteC_foreground-palette-table.s out/paletteC_tileFade.s\
 	out/panelFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw out/yay.raw
 
 setuptiming:

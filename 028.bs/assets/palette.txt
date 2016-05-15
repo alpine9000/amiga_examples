@@ -1,0 +1,21 @@
+playarea
+--------
+# background (not set here)
+# ???
+# ???
+# safe tile #1
+# safe tile #2
+# normal tile #1
+# normal tile #2
+# pathway
+
+flags
+--------
+# background (don't set here)
+# flag color #1
+# flag color #2
+# safe tile #1
+# safe tile #2
+# flag color #3
+# normal tile #2 (not used ?)
+# pathway (not used ?)

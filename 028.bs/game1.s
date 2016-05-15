@@ -267,8 +267,8 @@ Update:
 	rts
 .c1:
 .skipForegroundUpdates:
-
-	cmp.w	#PATHWAY_FADE_TIMER_COUNT,pathwayFadeCount
+	move.w	pathwayFadeCount,d0
+	cmp.w	pathwayFadeTimerCount,d0
 	blt	.dontInstallNextPathwayColor
 	jsr	InstallNextPathwayColor
 .dontInstallNextPathwayColor:
@@ -704,7 +704,9 @@ InstallNextPathwayColor:
 	add.l	#2,a0
 	add.l	#4,a1
 	dbra	d0,.loop
-	add.l	#2*2,tileFadePtr
+	move.l	tileFadePtr,d1
+	add.l	pathwayFadeRate,d1
+	move.l	d1,tileFadePtr
 .done:
 	rts
 
@@ -777,8 +779,15 @@ InstallFlagGreyPalette:
 	rts		
 
 
-	Level	A,"LEVEL 1"
-	Level	B,"LEVEL 2"
+	;; variable prefix
+	;; level name
+	;; frames before pathway starts fading
+	;; pathway fading steps per frame (must be a factor of 64)
+	;; frames player pauses between each jump
+	;; frames after jump before player miss is checked
+	Level	A,"LEVEL 1",100,2*2,12,10
+	Level	B,"LEVEL 2",100,2*2,12,10
+	Level	C,"LEVEL 3",50,4*2,8,6		
 
 	include "copper.i"
 
@@ -896,6 +905,7 @@ panelGreyPalette:
 levelInstallers:
 	dc.l	InstallLevelA	
 	dc.l	InstallLevelB
+	dc.l	InstallLevelC	
 	dc.l	0
 nextLevelInstaller:
 	dc.l	levelInstallers
@@ -921,6 +931,10 @@ verticalBlankCount:
 movingCounter:
 	dc.w	0
 moving:
+	dc.w	0
+pathwayFadeRate
+	dc.l	0
+pathwayFadeTimerCount:
 	dc.w	0
 pathwayFadeCount:
 	dc.w	0

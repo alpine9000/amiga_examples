@@ -18,12 +18,17 @@
 	xdef spriteLagX
 	xdef spriteY
 	xdef spriteX
+
+	xdef playerLevelPausePixels
+	xdef playerLevelMissPixels
 	
 PLAYER_INSTALL_COLOR_PALETTE	equ 0
 PLAYER_SPRITE_DATA		equ 4
 PLAYER_SPRITE_FALLING_DATA	equ 8	
 
 ResetPlayer:
+	bsr	SpriteDisableAuto
+	
 	move.l	playerSpriteConfig,a0
 	move.l	PLAYER_SPRITE_DATA(a0),d0	
 	add.l	#6*PLAYER_SPRITE_VERTICAL_BYTES,d0 
@@ -174,10 +179,10 @@ ProcessJoystick:
 	cmp.w	#0,spriteAutoMoveEnabled
 	beq	.autoMoveDisabled
 
+	;; Set fast as default, will be overridden to correct speed
 	move.w	#PLAYER_FAST_PAUSE_PIXELS,playerPausePixels
 	move.w	#PLAYER_FAST_CHECK_MISS_PIXELS,playerMissPixels
-	
-	
+		
 	bsr	GetNextAutoMove
 	cmp.w	#1,d0
 	beq	.skip
@@ -211,8 +216,8 @@ SpriteDisableAuto:
 	move.w	#0,spriteAutoMoveEnabled
 	move.w	#PLAYER_JUMP_PIXELS,playerJumpPixels
 	move.w	#PLAYER_MOVE_PIXELS,playerMovePixels
-	move.w	#PLAYER_PAUSE_PIXELS,playerPausePixels
-	move.w	#PLAYER_CHECK_MISS_PIXELS,playerMissPixels		
+	move.w	playerLevelPausePixels,playerPausePixels
+	move.w	playerLevelMissPixels,playerMissPixels		
 	rts
 	
 SetupSpriteData:
@@ -606,10 +611,14 @@ playerMovePixels:
 	dc.w	PLAYER_MOVE_PIXELS
 playerJumpPixels:
 	dc.w	PLAYER_JUMP_PIXELS
-playerPausePixels
-	dc.w	PLAYER_PAUSE_PIXELS
-playerMissPixels
-	dc.w	PLAYER_CHECK_MISS_PIXELS
+playerPausePixels:
+	dc.w	0
+playerMissPixels:
+	dc.w	0
+playerLevelPausePixels:
+	dc.w	0
+playerLevelMissPixels
+	dc.w	0
 pathwayLastConfig:
 	dc.w	PATHWAY_CONFIG_FREE
 pathwayMissPending:
