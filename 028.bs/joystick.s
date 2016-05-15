@@ -32,7 +32,10 @@ ReadJoystick:
 WaitForJoystick:
 .joystickPressed:	
 	jsr	ReadJoystick
+	move.w	#5-1,d0
+.debounce:
 	jsr	WaitVerticalBlank
+	dbra	d0,.debounce	; I have a bodgy joystick
 	jsr	PlayNextSound	
 	btst.b	#0,joystick
 	bne	.joystickPressed

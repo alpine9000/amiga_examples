@@ -11,14 +11,14 @@ InitialiseBackground:
 	move.l	#0,backgroundScrollX
 	move.l	backgroundOffscreen,a0
 	move.l	#0,d0
-	move.l	#256,d1
+	move.l	#256+10,d1
 	move.l	#0,d2
 	jsr	BlitFillColor
 	jsr     WaitVerticalBlank
 	jsr	SwitchBuffers
 	move.l	backgroundOffscreen,a0
 	move.l	#0,d0
-	move.l	#256,d1
+	move.l	#256+10,d1
 	move.l	#0,d2
 	jsr	BlitFillColor
 	rts

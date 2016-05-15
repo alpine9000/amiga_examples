@@ -92,7 +92,7 @@ Credits:
 RenderText:
 	lea	credits,a1
 
-	move.w	#80,d0
+	move.w	#72,d0
 	move.w	#20,d1	
 .loop:
 	cmp.b	#0,(a1)
@@ -109,21 +109,21 @@ RenderText:
 
 
 credits:
-	dc.b	"     BLOCKY SKIES   "
+	dc.b	"      BLOCKY SKIES"
 	dc.b	0
-	dc.b	"     ------------   "
+	dc.b	"      ------------"
 	dc.b	0
 	dc.b	" "
 	dc.b	0	
-	dc.b	"GAME DESIGN - NOBODY"
+	dc.b	"GAME DESIGN - CHIPMUNK"
 	dc.b	0	
-	dc.b	"GRAPHICS    - NOBODY"
+	dc.b	"GRAPHICS    - CHIPMUNK"
 	dc.b	0	
 	dc.b	"MUSIC       - SOMEBODY"
 	dc.b	0	
 	dc.b	"CODE        - ALPINE9000"
 	dc.b	0
-	dc.b	"LEVELS      - NOBODY/ALPINE9000"
+	dc.b	"LEVELS      - CHIPMUNK/ALPINE9000"
 	dc.b	0	
 	dc.b	"TRACKLOADER - PHOTON/SCOOPEX"	
 	dc.b	0	
@@ -131,9 +131,9 @@ credits:
 	dc.b	0
 	dc.b	" "
 	dc.b	0	
-	dc.b	"       THANKS       "
+	dc.b	"        THANKS"
 	dc.b	0
-	dc.b	"       ------"
+	dc.b	"        ------"
 	dc.b	0	
 	dc.b	"WIN-UAE    - TONI WILEN"
 	dc.b	0
