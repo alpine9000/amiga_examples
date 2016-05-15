@@ -8,6 +8,7 @@ SPLASH_SCREEN_WIDTH_BYTES	equ 40
 PLAY_COPPER_WORD		equ $bad1
 MUSIC_COPPER_WORD		equ PLAY_COPPER_WORD+$2000
 DIFFICULTY_COPPER_WORD		equ PLAY_COPPER_WORD+$1000	
+CREDITS_COPPER_WORD		equ PLAY_COPPER_WORD+$3000	
 
 MENU_SELECTED_TOP_COLOR		equ $be0 ;$e71
 MENU_SELECTED_BOTTOM_COLOR	equ $9d4 ;$fe7
@@ -136,7 +137,6 @@ ToggleMusic:
 ToggleDifficulty:
 	add.l	#4,nextLevelInstaller
 	cmp.l	#levelInstallers+8,nextLevelInstaller
-	bra	RefreshDifficulty
 	ble	RefreshDifficulty
 	move.l	#levelInstallers,nextLevelInstaller
 RefreshDifficulty:	
@@ -169,7 +169,9 @@ ButtonPressed:
 	cmp.w	#MUSIC_COPPER_WORD,selectedStartPtr
 	beq	.musicButton
 	cmp.w	#DIFFICULTY_COPPER_WORD,selectedStartPtr
-	beq	.difficultyButton	
+	beq	.difficultyButton
+	cmp.w	#CREDITS_COPPER_WORD,selectedStartPtr
+	beq	.creditsButton		
 	bra	.done
 .difficultyButton:
 	bsr	ToggleDifficulty
@@ -177,6 +179,9 @@ ButtonPressed:
 .musicButton:
 	bsr	ToggleMusic
 	bra	.done
+.creditsButton:
+	jsr	Credits
+	bra	ShowMenu
 .done:
 	bra	_ProcessJoystick	
 .playButton:

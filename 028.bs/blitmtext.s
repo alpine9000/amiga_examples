@@ -1,6 +1,7 @@
 	include "includes.i"
 	xdef DrawMaskedText8
-
+	xdef DrawWSMaskedText8
+	
 BLIT_LF_MINTERM		equ $ca		; cookie cut
 BLIT_WIDTH_WORDS	equ 2		; blit 2 words to allow shifting
 BLIT_WIDTH_BYTES	equ 4
@@ -44,6 +45,41 @@ DrawMaskedText8:
 	movem.l	(sp)+,d0-d7/a0-a4
 	rts
 
+DrawWSMaskedText8:
+	;; a0 - bitplane
+	;; a1 - text
+	;; d0 - xpos
+	;; d1 - ypos	
+	movem.l	d0-d7/a0-a4,-(sp)
+	WaitBlitter
+
+	;; blitter config that is shared for every character
+	move.w  #BC0F_SRCA|BC0F_SRCB|BC0F_SRCC|BC0F_DEST|BLIT_LF_MINTERM,d6 ; BLTCON0 value (masked version)
+	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTAMOD(a6)	; A modulo (only used for masked version)
+	move.w 	#FONTMAP_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTBMOD(a6)	; B modulo
+	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTCMOD(a6)	; C modulo
+	move.w 	#BITPLANE_WIDTH_BYTES-BLIT_WIDTH_BYTES,BLTDMOD(a6)	; D modulo
+        mulu.w	#BITPLANE_WIDTH_BYTES*_SCREEN_BIT_DEPTH,d1		; ypos bytes
+	move.w	#$0000,BLTALWM(a6) 					; mask out extra word used for shifting
+	move.w	#$ffff,BLTADAT(a6) 					; preload source mask so only BLTA?WM mask is used
+	move.l	a1,a3							; character pointer
+	move.l	#font,a5						; font pointer
+	move.l	#fontMask,d7						; font mask pointer
+	move.w	#FONTMAP_WIDTH_BYTES*_SCREEN_BIT_DEPTH*FONT_HEIGHT,d3 	; bytes per font line
+.loop:
+	clr.l	d2
+	move.b	(a3)+,d2	; get next character
+	cmp.b	#0,d2		; 0 terminates the string
+	beq	.done
+	move.l	a0,a4		; bitplane pointer
+	bsr	DrawChar8	; draw it
+	add.l	#FONT_WIDTH,d0	; increment the x position
+	bra	.loop
+.done:
+	movem.l	(sp)+,d0-d7/a0-a4
+	rts
+
+	
 DrawChar8:
 	;; kills d2,d4,d5,a1,a2,a4
 	;; d0  - xpos

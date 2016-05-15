@@ -46,7 +46,7 @@ Entry:
  	move.l	a3,LVL3_INT_VECTOR
 
 	jsr	StartMusic
-	jsr	ShowSplash	
+	jsr	ShowSplash
 MainMenu:
 	jsr	ShowMenu
 
