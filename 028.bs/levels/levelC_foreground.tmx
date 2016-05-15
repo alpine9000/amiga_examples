@@ -8,17 +8,17 @@
  </tileset>
  <layer name="foreground" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjZ2BgsGLEjtlH5eguZwekmYBYDAtNidxWPHKVNLBvqMtZQuNFC4c8iB5scrvJ1Fc/BPwAiw9K4no0ndM/fywnMx3QOw+QK4fPf/jyFbXdSY38MSpHvXIDOX/QOw/QO50PJncSyh/SDLjbYLSQG4xtzMEkBwB88FuB
+   eJxjZ2BgsGLEjtlH5eguZwekmYBYDAs9EHJbydRXOYj8QI5bLKHxooVDHkSD5OrxyOHTN1Tk6O2/3TjkYPExEGmZXH1DJa+SI0ds/hgq6Y6cNDmY8ipy/lhIx3QwKjcw+YMWcsuHsVtg8SHNgLsNRgu5wdjGHExyAIlbW78=
   </data>
  </layer>
  <layer name="pathway" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJztVDEOwjAQS5AyZUfq1Bcw9f8PYOIFnXhBp64QCavGOInoghB4uZLkfHZyRwh//ArWTwt4A+fwqtettXDZmed4FhODfLdQNEwxhFPc1lL0+TnWucta4WA/Z/req6V3fryfncNz3Uxr4Fwkb6WY4paXGrV7HkouODjyHteeTK1cWSv5V9GQiFv34J/vYSRuV6enpXU3ys9vgm/cwUG48V6juTP1pfp4hi5m370J++HaANd0nlljOYt+zZUIDI/fWg+ctTnGXKkW7afef4nzXuLxoUl1wt9AXhfjC+A31HpaU+cDfmo91qpdy+O+c3pagG/ELBzuDbHG0c046wYnz7j+j7aAPPSJqwdO1VvTrHs1cG84Tgfe49l5F3P/yG5OfnvcqfOp0J7543txA2baaMw=
+   eJztVbsOgzAMDJWY2Ct16hd06v9/ABNfwMQXdGItVnPS9eSYIKHSgZMiRHK2z49ASidOxJgref2yns32sy0YlvVo6jX9E6B9DddlXYLzNvtATV8FXkexpvThDfnZ7dAL1tIG/kwn90tjQxNQymeLHo7NczfT3s3RrFrZzqBaDagt8pocn14849me2Xn187SMKe75Pfsxn559nzkcj+dpzu9d882PZs2rSU858n3V3nMsD6Xa8Nwh1xo7T4PCanwXDvprPr18S/VmvcYZ8zu+BdwvYKIzaBnpDFrQmyhHjcM5RjOpYD40qJ1qVnvdi+7hGtAL6NU7h3qXZkDzVB7yrQHf49J/rlTvvYD6HwWvvwzu0690rmk6cTzeGchSEw==
   </data>
  </layer>
- <layer name="items" width="100" height="8" visible="0">
+ <layer name="items" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJztlVsOgyAQRWVpPotalaS2+1+KmpRkSoB5QI0fnk+8c2e4k2BR3FyJSvFrSmKNUbweVjcIZsI8zyJHvyPfWMa1+tVK/KFHj3iMiXeqM2Qi9aDUvRCNzZiSNdxdE9A/A+chvUtsX2tC1qG5pFDuI81C79/bb9YaaI1TB/dhGHu0tAQt7EnRT4jmffKbxeG4nzv/h7AriG8nHDqkRuKZo//sOcdmjeHzk3py/xPcDB8R/b/3kcpy8flu8rEBFKASqQ==
+   eJxjYBgFQwU4MWIXd8Qhjq4vgIC6gQa4/DeQ9jnT2U0g+zwJ2BlMopvo7QdCgFL3EErv6GpJUU8OIBRfwwG4EPCjB1QeFNYeSGphZY4rkrwjWnlESfy4YtFLy3IOm30DZS4uPYTC0wNNHlucUBMMVL3jRmN7KTGf1DSPHIbuFPprsLcDqA0oDa9RQDsAAFEDDEE=
   </data>
  </layer>
 </map>

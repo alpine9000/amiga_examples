@@ -19,3 +19,10 @@ flags
 # flag color #3
 # normal tile #2 (not used ?)
 # pathway (not used ?)
+
+background
+----------
+#
+# ???
+# main cloud
+# cloud hilight

@@ -123,6 +123,8 @@ credits:
 	dc.b	0	
 	dc.b	"CODE        - ALPINE9000"
 	dc.b	0
+	dc.b	"LEVELS      - NOBODY/ALPINE9000"
+	dc.b	0	
 	dc.b	"TRACKLOADER - PHOTON/SCOOPEX"	
 	dc.b	0	
 	dc.b	" "
