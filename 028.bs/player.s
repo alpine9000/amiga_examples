@@ -274,7 +274,6 @@ InstallTankColorPalette:
 	rts			
 
 CheckPlayerMiss:
-
 	;; check if player has fallen off the left side of the play area
 	cmpi.w	#PLAYER_INITIAL_X-15,spriteX
 	blt	.doBigBang

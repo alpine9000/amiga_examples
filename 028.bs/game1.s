@@ -80,6 +80,7 @@ MainMenu:
 	bra	InitialiseNewGame
 
 Reset:
+	move.w	#0,stopScrollingPending	
 	move.w	#218,d0
 	lea	livesCounterShortText,a1	
 	jsr	RenderCounter	
@@ -199,6 +200,9 @@ GameLoop:
 	cmp.b	#$f,d0
 	bne	.s2
 	move.w	#0,moving
+	cmp.w	#1,stopScrollingPending
+	bne	.s2
+	move.l	#0,foregroundScrollPixels	
 .s2:	
 	jsr	ProcessJoystick
 	cmp.w	#PLAYER_INITIAL_X+16*3,spriteX
@@ -460,7 +464,7 @@ RenderForegroundTile:
 .s2:
 	rts
 stopScrolling:
-	move.l	#0,foregroundScrollPixels
+	move.w	#1,stopScrollingPending
 	rts
 	
 
@@ -974,6 +978,8 @@ livesCounterShortText:
 	dc.b	"00"
 	dc.b	0
 	align	4	
+stopScrollingPending:
+	dc.w	0
 	
 startUserstack:
 	ds.b	$1000		; size of stack
