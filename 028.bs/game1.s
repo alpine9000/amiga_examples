@@ -118,7 +118,6 @@ MainLoop:
 	
 SetupBoardLoop:
 	add.l	#1,frameCount
-	move.l	frameCount,d6		
 	move.l	#(FOREGROUND_SCROLL_PIXELS*16)-1,foregroundScrollPixels
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers
@@ -140,7 +139,7 @@ SetupBoardLoop:
 	bge	.gotoGameLoop
 	bra	SetupBoardLoop
 .gotoGameLoop:
-	add.l	#1,d6
+	add.l	#1,frameCount
 	jsr	WaitForJoystick	
 	move.w	#0,moving
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
@@ -148,14 +147,13 @@ SetupBoardLoop:
 	
 FadeInLoop:
 	add.l	#1,frameCount
-	move.l	frameCount,d6				
 
 	move.l	#0,d0
 .loop:
 	jsr 	WaitVerticalBlank
 	dbra	d0,.loop
 	bsr	InstallNextGreyPalette
-	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,d6
+	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS+25,frameCount
 	bne	.c1
 	jsr	ResetPlayer
 	jsr	EnableItemSprites
@@ -184,7 +182,6 @@ GameLoop:
 	jsr	RenderCounter		
 .noSkippedFrames:	
 	add.l	#1,frameCount
-	move.l	frameCount,d6			
 	jsr	WaitVerticalBlank
 	
 	if      TIMING_TEST=1
@@ -243,8 +240,9 @@ Update:
 	jsr	UpdatePlayer
 
 .backgroundUpdates:
-	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX		
-	btst	#FOREGROUND_DELAY_BIT,d6
+	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX
+	move.l	frameCount,d0
+	btst	#FOREGROUND_DELAY_BIT,d0
 	beq	.skipForegroundUpdates
 	;; ---- Foreground updates ----------------------------------------	
 .foregroundUpdates:
@@ -480,7 +478,6 @@ BigBang:
 	cmp.b	#$f,d0
 	beq	.scrollFinished	
 	add.l	#1,frameCount
-	move.l	frameCount,d6	
 	jsr	Update
 	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame	
@@ -502,7 +499,6 @@ BigBang:
 	add.l	#1,frameCount
 	cmp.l	#BIGBANG_POST_DELAY,frameCount
 	beq	PostMissedTile
-	move.l	frameCount,d6	
 	jsr	WaitVerticalBlank	
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers
