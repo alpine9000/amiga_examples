@@ -15,6 +15,7 @@ PlayNextSound:
 	xdef    PlayChachingSound
 	xdef    PlayWhooshSound
 	xdef    PlayYaySound	
+	xdef	PlayZapSound
 	
 PlayJumpSound:
 	lea     jump(pc),a1
@@ -64,7 +65,17 @@ PlayYaySound:
         move.w  #64,AUD3VOL(a6) 
 	move.w  #(endYay-yay)/2,AUD3LEN(a6) ;Set length in words
 	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
-	rts			
+	rts
+
+PlayZapSound:
+	KillSound	
+	lea     zap,a1
+        move.l  a1,AUD3LCH(a6)
+        move.w  #124,AUD3PER(a6)
+        move.w  #64,AUD3VOL(a6) 
+	move.w  #(endZap-zap)/2,AUD3LEN(a6) ;Set length in words
+	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
+	rts
 
 	align	4
 jump:
@@ -85,7 +96,12 @@ endWhoosh:
 	align 4
 yay:
 	incbin	"out/yay.raw"
-endYay:	
+endYay:
+zap:
+	;; incbin	"out/zap.raw"
+	incbin	"out/yay.raw"	
+endZap:
+	align 4
 
 	align	2
 emptySound:

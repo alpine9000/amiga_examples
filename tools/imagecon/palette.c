@@ -76,12 +76,12 @@ palette_output(imagecon_image_t* ic, char* outFilename)
     paletteGreyPaletteFP = file_openWrite("%s-grey.pal", outFilename);
     paletteGreyTableFP = file_openWrite("%s-grey-table.s", outFilename);
     paletteGreyCopperFP = file_openWrite("%s-grey-copper.s", outFilename);
-    fprintf(paletteGreyFP, "\tmovem.l d0-a6,-(sp)\n\tlea CUSTOM,a6\n");
+    // fprintf(paletteGreyFP, "\tmovem.l d0-a6,-(sp)\n\tlea CUSTOM,a6\n");
   }
 
   if (config.outputPaletteAsm) {
     paletteAsmFP = file_openWrite("%s-palette.s", outFilename);
-    fprintf(paletteAsmFP, "\tmovem.l d0-a6,-(sp)\n\tlea CUSTOM,a6\n");
+    //  fprintf(paletteAsmFP, "\tmovem.l d0-a6,-(sp)\n\tlea CUSTOM,a6\n");
   }
 
   if (config.verbose) {
@@ -106,12 +106,12 @@ palette_output(imagecon_image_t* ic, char* outFilename)
       }
     }
     if (paletteAsmFP) {
-      fprintf(paletteAsmFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i+config.paletteOffset, RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b));
+      fprintf(paletteAsmFP, "\tmove.w #$%03x,COLOR%02d(a6)\n",  RGB24TORGB12(ic->palette[i].r) << 8 | RGB24TORGB12(ic->palette[i].g) << 4 | RGB24TORGB12(ic->palette[i].b), i+config.paletteOffset);
     }
     if (paletteGreyFP) {
       // TODO: this is for compat, can be better
       unsigned grey = ((RGB24TORGB12(ic->palette[i].r) + RGB24TORGB12(ic->palette[i].g) + RGB24TORGB12(ic->palette[i].b))/3);
-      fprintf(paletteGreyFP, "\tlea COLOR%02d(a6),a0\n\tmove.w #$%03x,(a0)\n", i, grey << 8 | grey << 4 | grey);
+      fprintf(paletteGreyFP, "\tmove.w #$%03x,COLOR%02d(a6)\n", grey << 8 | grey << 4 | grey, i);
       grey = (((ic->palette[i].r) + (ic->palette[i].g) + (ic->palette[i].b))/3);
       fprintf(paletteGreyPaletteFP, "%03d %03d %03d 255\n", grey, grey, grey);      
     }
@@ -150,7 +150,7 @@ palette_output(imagecon_image_t* ic, char* outFilename)
   }
 
   if (paletteGreyFP) {
-    fprintf(paletteGreyFP, "\tmovem.l (sp)+,d0-a6\n");
+    //   fprintf(paletteGreyFP, "\tmovem.l (sp)+,d0-a6\n");
     fclose(paletteGreyFP);
   }
 
@@ -160,7 +160,7 @@ palette_output(imagecon_image_t* ic, char* outFilename)
   }
 
   if (paletteAsmFP) {
-    fprintf(paletteAsmFP, "\tmovem.l (sp)+,d0-a6\n");
+    //   fprintf(paletteAsmFP, "\tmovem.l (sp)+,d0-a6\n");
     fclose(paletteFP);
   }
 

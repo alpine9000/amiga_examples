@@ -84,7 +84,7 @@ ItemControl:	macro
 \1:
 .itemX:
 	dc.w	0
-.itemLagX:
+.itemYOffset:
 	dc.w	0
 .itemY:
 	dc.w	0

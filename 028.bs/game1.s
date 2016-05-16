@@ -242,6 +242,8 @@ GameLoop:
 
 Update:	
 	jsr	UpdatePlayer
+	jsr	VerticalScrollBees
+	jsr	DetectBeeCollisions
 
 .backgroundUpdates:
 	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX
@@ -250,6 +252,7 @@ Update:
 	beq	.skipForegroundUpdates
 	;; ---- Foreground updates ----------------------------------------	
 .foregroundUpdates:
+	
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	andi.l	#$f,d0
@@ -260,7 +263,7 @@ Update:
 	add.l	d0,foregroundScrollX
 
 	jsr	ScrollSprites
-
+	
 	move.l	foregroundScrollX,d0
 	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 	andi.l	#$f,d0
@@ -630,7 +633,6 @@ Level3InterruptHandler:
 InstallSpriteColorPalette:
 	jsr	InstallPlayerColorPalette
 	include "out/sprite_coin-1-palette.s"
-	include "out/sprite_arrow-1-palette.s"	
 	rts
 
 

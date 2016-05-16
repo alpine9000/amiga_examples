@@ -9,12 +9,50 @@
 	xdef InitialiseItems
 	xdef SwitchItemSpriteBuffers
 	xdef PrepareItemSpriteData
+	xdef VerticalScrollBees
+	xdef DetectBeeCollisions
 	
 DeleteItemSprite:
 	move.w	#0,ITEM_SPRITE(a1)
 	move.w	#0,ITEM_X(a1)
-	move.w	#0,ITEM_LAGX(a1)
+	move.w	#0,ITEM_Y_OFFSET(a1)
 	move.w	ITEM_Y(a1),d2
+	rts
+
+VerticalScrollBees:
+	lea	item25,a1
+	move.w	#ITEM_NUM_BEES-1,d6
+.loop:
+	cmp.w	#0,ITEM_SPRITE(a1)
+	beq	.done
+	move.w	ITEM_Y(a1),d4
+	mulu.w	#ITEM_SPRITE_SPACING,d4
+	add.w	#ITEM_SPRITE_VSTART,d4
+	lsl.w	#ITEM_Y_OFFSET_SHIFT_CONVERT,d4
+	move.w	ITEM_Y_OFFSET(a1),d0
+	add.w	d0,d4	
+	cmp.w	#1,beeMovingDown
+	bne	.up
+.down:	
+	add.w	#1,d0
+	bra	.c1
+.up:
+	sub.w	#1,d0
+.c1:
+	move.w	d0,ITEM_Y_OFFSET(a1)
+	cmp.w	#(ITEM_SPRITE_VSTART+(16*5))<<ITEM_Y_OFFSET_SHIFT_CONVERT,d4
+	bge	.beeAtBottom
+	cmp.w	#0,d0
+	ble	.beeAtTop
+	bra	.done
+.beeAtTop:
+	move.w	#1,beeMovingDown
+	bra	.done	
+.beeAtBottom:
+	move.w	#0,beeMovingDown
+.done:
+	add.l	#ITEM_STRUCT_SIZE,a1
+	dbra	d6,.loop
 	rts
 	
 ScrollItemSprites:
@@ -29,7 +67,7 @@ ScrollItemSprites:
 	bgt	.skip
 	move.w	#0,ITEM_SPRITE(a1)
 	move.w	#0,ITEM_X(a1)
-	move.w	#0,ITEM_LAGX(a1)
+	move.w	#0,ITEM_Y_OFFSET(a1)
 	move.w	ITEM_Y(a1),d2
 .skip:
 	add.l	#ITEM_STRUCT_SIZE,a1		; multiply by 16 (item control structure size)
@@ -37,7 +75,7 @@ ScrollItemSprites:
 	rts
 
 DetectItemCollisions:
-	move.w	#ITEM_NUM_SLOTS-1,d1
+	move.w	#ITEM_NUM_SLOTS-ITEM_NUM_BEES-1,d1
 	lea	item1,a1
 .loop:
 	cmp.w	#0,ITEM_SPRITE_ENABLED(a1)
@@ -79,6 +117,59 @@ DetectItemCollisions:
 	rts
 
 
+DetectBeeCollisions:
+	lea	item25,a1
+	move.w	#ITEM_NUM_BEES-1,d7
+.loop:
+	cmp.w	#0,ITEM_SPRITE_ENABLED(a1)
+	beq	.skip
+	cmp.w	#0,ITEM_SPRITE(a1)	
+	beq	.skip
+	move.w	spriteX,d2
+	move.w	ITEM_X(a1),d3
+	move.w	ITEM_Y(a1),d4
+	mulu.w	#ITEM_SPRITE_SPACING,d4
+	add.w	#ITEM_SPRITE_VSTART,d4
+	move.w	ITEM_Y_OFFSET(a1),d5
+	lsr.l	#ITEM_Y_OFFSET_SHIFT_CONVERT,d5	
+	add.w	d5,d4
+	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d3 ; convert to pixels
+	add.w	#ITEM_SPRITE_HORIZONTAL_START_PIXELS,d3
+	move.w	spriteY,d5
+	;; d2 = playerX pixels
+	;; d3 = beeX pixels
+	;; d4 = beeY pixels
+	;; d5 = player Y pixels
+
+
+	move.w	d3,d6
+	add.w	#BEE_COLLIDE_SIZE,d6
+	cmp.w	d2,d6 		; r1.x >= r2.x+w
+	ble	.skip
+
+	move.w	d2,d6
+	add.w	#BEE_COLLIDE_SIZE,d6
+	cmp.w	d3,d6		; r1.x+w <= r2.x
+	ble	.skip
+
+	move.w	d4,d6
+	add.w	#BEE_COLLIDE_SIZE,d6
+	cmp.w	d5,d6		; r1.y >= r2.y+h
+	ble	.skip
+
+	move.w	d5,d6
+	add.w	#BEE_COLLIDE_SIZE,d6
+	cmp.w	d4,d6		; r1.y+h < r2.y
+	ble	.skip
+
+	bsr	DeleteItemSprite
+	jmp	BigBang
+.skip:
+	add.w	#ITEM_STRUCT_SIZE,a1
+	dbra	d7,.loop	
+	rts	
+
+
 RenderCoinScore:
 	lea	coinCounterText,a1	
 	move.w	#31,d0
@@ -95,7 +186,6 @@ ResetItems:
 .loop1:
 	move.w	#0,ITEM_SPRITE(a1)
 	move.w	#0,ITEM_X(a1)
-	move.w	#0,ITEM_LAGX(a1)
 	move.w	ITEM_Y(a1),d2	
 	add.l	#ITEM_STRUCT_SIZE,a1		; multiply by 16 (item control structure size)	
 	dbra	d1,.loop1
@@ -112,7 +202,6 @@ SwitchItemSpriteBuffers:
 	move.w	d1,d0
 	lea	item1,a1
 .loop:
-	move.w	ITEM_X(a1),ITEM_LAGX(a1)
 	adda.l	#ITEM_STRUCT_SIZE,a1		
 	dbra	d1,.loop
 	rts
@@ -124,6 +213,7 @@ PrepareItemSpriteData:
 	move.l	#deadSprite,sprite2Pointer
 	move.l	#deadSprite,sprite3Pointer
 	move.l	#deadSprite,sprite4Pointer
+	move.l	#deadSprite,sprite5Pointer	
 	rts
 	
 .enableSprites:	
@@ -137,6 +227,7 @@ SetupItemSpriteData:
 	move.l	sprite2Pointer,SPR2PTH(a6)
 	move.l	sprite3Pointer,SPR3PTH(a6)
 	move.l	sprite4Pointer,SPR4PTH(a6)
+	move.l	sprite5Pointer,SPR5PTH(a6)	
 	cmp.w	#0,spriteBufferIndex
 	beq	.zero
 	move.w	#0,spriteBufferIndex
@@ -157,7 +248,7 @@ _SetupItemSpriteData:
 
 	cmpi.w	#0,ITEM_SPRITE_ENABLED(a1)
 	beq	.spriteIsNotEnabled
-
+	
 	move.w	ITEM_Y(a1),d2	
 	move.l	ITEM_SPRITE_ADDRESS(a1),a0
 	
@@ -182,7 +273,6 @@ _SetupItemSpriteData:
 	add.l	d2,a0
 
 	move.w	ITEM_X(a1),d0
-	;; move.w	ITEM_LAGX(a1),d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
 
 	add.w	#ITEM_SPRITE_HORIZONTAL_START_PIXELS,d0
@@ -192,9 +282,25 @@ _SetupItemSpriteData:
 	lsr.l	#1,d0
 	move.b	d0,1(a0)	;spriteHStart
 
+	move.w	ITEM_Y_OFFSET(a1),d1
+	cmp.w	#0,d1
+	;; beq	.noYOffset
+
+	move.w	ITEM_Y(a1),d0
+	mulu.w	#16,d0
+	lsr.w	#ITEM_Y_OFFSET_SHIFT_CONVERT,d1
+	add.w   d1,d0
+	add.w	#ITEM_SPRITE_VSTART,d0
+	move.b	d0,(a0) ; spriteVStart
+	add.w	#ITEM_SPRITE_HEIGHT,d0
+	move.b	d0,2(a0) ; spriteVStart
+	
+.noYOffset:	
 .c1:
 
 	sub.l	d2,a0	;#1*ITEM_SPRITE_VERTICAL_BYTES,a0
+	cmp.b	#ITEM_SPRITE_BEE_INDEX,d4
+	bge	.beeSprite	
 	cmp.b	#ITEM_SPRITE_ARROW_INDEX,d4
 	bge	.arrowSprite
 	cmp.b	#ITEM_SPRITE_COINB_INDEX,d4
@@ -207,6 +313,15 @@ _SetupItemSpriteData:
 	bra	.done	
 .arrowSprite:
 	move.l	a0,sprite4Pointer
+	cmp.w	#0,ITEM_X(a1)
+	beq	.done
+	bsr	InstallArrowPalette
+	bra	.done
+.beeSprite:
+	move.l	a0,sprite5Pointer
+	cmp.w	#0,ITEM_X(a1)
+	beq	.done	
+	bsr	InstallBeePalette	
 	bra	.done	
 
 .done:
@@ -243,8 +358,8 @@ GetSpriteSlot:
 	move.w	#336<<FOREGROUND_SCROLL_SHIFT_CONVERT,ITEM_X(a1)
 	sub.l	#1,d2
 	move.w	d2,ITEM_Y(a1)
-	move.w	ITEM_X(a1),ITEM_LAGX(a1)
-
+	move.w	#0,ITEM_Y_OFFSET(a1)
+	
 	add.w	#1,d1
 	move.w	d1,ITEM_SPRITE(a1)
 
@@ -254,6 +369,14 @@ dontAddSprite:
 
 EnableItemSprites:
 	move.l	#1,itemSpritesEnabled
+	rts
+
+InstallBeePalette:
+	include "bee-palette.s"	
+	rts
+
+InstallArrowPalette:
+	include "out/sprite_arrow-1-palette.s"
 	rts
 	
 itemSpritesEnabled:
@@ -267,7 +390,11 @@ sprite2Pointer:
 sprite3Pointer:
 	dc.l	0
 sprite4Pointer:
-	dc.l	0	
+	dc.l	0
+sprite5Pointer:
+	dc.l	0
+beeMovingDown:
+	dc.w	1
 	
 	;; coinA
 	ItemControl item1,spriteCoinA1,1
@@ -299,6 +426,14 @@ sprite4Pointer:
 	ItemControl item23,spriteArrow1,0
 	ItemControl item24,spriteArrow1,0
 
+	;; bee
+	ItemControl item25,spriteBee1,1
+	ItemControl item26,spriteBee1,1
+	if 0
+	ItemControl item27,spriteArrow1,1
+	ItemControl item28,spriteArrow1,1
+	endif
+
 	ItemSprite spriteCoinA1,sprite_coin-0.bin
 	ItemSprite spriteCoinA2,sprite_coin-0.bin
 	ItemSprite spriteCoinA3,sprite_coin-1.bin
@@ -324,7 +459,18 @@ sprite4Pointer:
 	ItemSprite spriteArrow5,sprite_arrow-3.bin
 	ItemSprite spriteArrow6,sprite_arrow-2.bin
 	ItemSprite spriteArrow7,sprite_arrow-1.bin
-	ItemSprite spriteArrow8,sprite_arrow-1.bin	
+	ItemSprite spriteArrow8,sprite_arrow-1.bin
+
+	ItemSprite spriteBee1,sprite_arrow-1.bin
+	ItemSprite spriteBee2,sprite_arrow-2.bin
+	ItemSprite spriteBee3,sprite_arrow-3.bin
+	ItemSprite spriteBee4,sprite_arrow-1.bin
+	ItemSprite spriteBee5,sprite_arrow-2.bin
+	ItemSprite spriteBee6,sprite_arrow-3.bin
+	ItemSprite spriteBee7,sprite_arrow-1.bin
+	ItemSprite spriteBee8,sprite_arrow-2.bin		
+
+	
 
 nextSpriteSlot:
 	dc.w	0

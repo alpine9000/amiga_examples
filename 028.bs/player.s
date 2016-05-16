@@ -250,7 +250,6 @@ SetupSpriteData:
 	jsr 	SetupItemSpriteData
 	
 	move.l	#deadSprite,SPR1PTH(a6) ; unused - could only use if sprite resused player sprite palette
-	move.l	#deadSprite,SPR5PTH(a6) ; unused - we only allow one arrow per line per screen
 	move.l	#deadSprite,SPR6PTH(a6) ; unused - incompatible with oversize playfield data fetch
 	move.l	#deadSprite,SPR7PTH(a6)	; unused - incompatible with oversize playfield data fetch
 	rts
