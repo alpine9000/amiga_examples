@@ -11,13 +11,15 @@
 	xdef PrepareItemSpriteData
 	xdef VerticalScrollBees
 	xdef DetectBeeCollisions
-	
+
+
 DeleteItemSprite:
 	move.w	#0,ITEM_SPRITE(a1)
 	move.w	#0,ITEM_X(a1)
 	move.w	#0,ITEM_Y_OFFSET(a1)
 	move.w	ITEM_Y(a1),d2
 	rts
+
 
 VerticalScrollBees:
 	lea	item25,a1
@@ -26,7 +28,7 @@ VerticalScrollBees:
 	cmp.w	#0,ITEM_SPRITE(a1)
 	beq	.done
 	move.w	ITEM_Y(a1),d4
-	mulu.w	#ITEM_SPRITE_SPACING,d4
+	lsl.w	#ITEM_SPRITE_SPACING_SHIFT_CONVERT,d4
 	add.w	#ITEM_SPRITE_VSTART,d4
 	lsl.w	#ITEM_Y_OFFSET_SHIFT_CONVERT,d4
 	move.w	ITEM_Y_OFFSET(a1),d0
@@ -54,7 +56,8 @@ VerticalScrollBees:
 	add.l	#ITEM_STRUCT_SIZE,a1
 	dbra	d6,.loop
 	rts
-	
+
+
 ScrollItemSprites:
 	move.w	#ITEM_NUM_SLOTS-1,d1
 	lea	item1,a1
@@ -74,6 +77,7 @@ ScrollItemSprites:
 	dbra	d1,.loop
 	rts
 
+
 DetectItemCollisions:
 	move.w	#ITEM_NUM_SLOTS-ITEM_NUM_BEES-1,d1
 	lea	item1,a1
@@ -85,7 +89,7 @@ DetectItemCollisions:
 	move.w	spriteX,d2
 	move.w	ITEM_X(a1),d3
 	move.w	ITEM_Y(a1),d4
-	mulu.w	#ITEM_SPRITE_SPACING,d4
+	lsl.w	#ITEM_SPRITE_SPACING_SHIFT_CONVERT,d4
 	add.w	#ITEM_SPRITE_VSTART,d4
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d3 ; convert to pixels
 	add.w	#ITEM_SPRITE_HORIZONTAL_START_PIXELS,d3
@@ -97,7 +101,6 @@ DetectItemCollisions:
 	bne	.skip	
 	cmpi.w	#ITEM_SPRITE_ARROW_INDEX,ITEM_SPRITE(a1)		
 	bge	.arrowCollision
-
 .coinCollision:	
 	bsr	DeleteItemSprite
 	lea	coinCounterText,a0
@@ -128,7 +131,7 @@ DetectBeeCollisions:
 	move.w	spriteX,d2
 	move.w	ITEM_X(a1),d3
 	move.w	ITEM_Y(a1),d4
-	mulu.w	#ITEM_SPRITE_SPACING,d4
+	lsl.w	#ITEM_SPRITE_SPACING_SHIFT_CONVERT,d4
 	add.w	#ITEM_SPRITE_VSTART,d4
 	move.w	ITEM_Y_OFFSET(a1),d5
 	lsr.l	#ITEM_Y_OFFSET_SHIFT_CONVERT,d5	
@@ -140,8 +143,6 @@ DetectBeeCollisions:
 	;; d3 = beeX pixels
 	;; d4 = beeY pixels
 	;; d5 = player Y pixels
-
-
 	move.w	d3,d6
 	add.w	#BEE_COLLIDE_SIZE,d6
 	cmp.w	d2,d6 		; r1.x >= r2.x+w
@@ -176,6 +177,7 @@ RenderCoinScore:
 	jsr	RenderCounter	
 	rts
 
+
 InitialiseItems:
 	move.l	#"0000",coinCounterText
 	bsr	RenderCoinScore
@@ -195,9 +197,7 @@ ResetItems:
 
 
 SwitchItemSpriteBuffers:
-
 	move.w	spriteX,spriteLagX	
-	
 	move.w	#ITEM_NUM_SLOTS-1,d1
 	move.w	d1,d0
 	lea	item1,a1
@@ -222,7 +222,8 @@ PrepareItemSpriteData:
 	bsr 	_SetupItemSpriteData
 	dbra	d0,.loop
 	rts
-	
+
+
 SetupItemSpriteData:
 	move.l	sprite2Pointer,SPR2PTH(a6)
 	move.l	sprite3Pointer,SPR3PTH(a6)
@@ -238,7 +239,7 @@ SetupItemSpriteData:
 	
 
 _SetupItemSpriteData:
-	;; d0 - item slot	
+	;; d0.l - item slot	
 	move.l	d0,-(sp)
 	move.l	d0,d4 					; save item slot
 	
@@ -261,16 +262,15 @@ _SetupItemSpriteData:
 	bra	.c1
 .setupSprite:
 
-	move.l	#0,d0
 	move.w	ITEM_INDEX(a1),d0
 	
 	lsr.l	#3,d0	
 	mulu.w	#ITEM_SPRITE_BYTES*2,d0
 	add.w	spriteBufferIndex,d0
-	add.l	d0,a0
+	adda.w	d0,a0
 
-	mulu.w	#ITEM_SPRITE_VERTICAL_BYTES,d2
-	add.l	d2,a0
+	lsl.w	#ITEM_SPRITE_VERTICAL_BYTES_SHIFT_CONVERT,d2
+	adda.w	d2,a0
 
 	move.w	ITEM_X(a1),d0
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
@@ -287,7 +287,7 @@ _SetupItemSpriteData:
 	;; beq	.noYOffset
 
 	move.w	ITEM_Y(a1),d0
-	mulu.w	#16,d0
+	lsl.w	#ITEM_SPRITE_SPACING_SHIFT_CONVERT,d0
 	lsr.w	#ITEM_Y_OFFSET_SHIFT_CONVERT,d1
 	add.w   d1,d0
 	add.w	#ITEM_SPRITE_VSTART,d0
@@ -329,31 +329,32 @@ _SetupItemSpriteData:
 .spriteIsNotEnabled:
 	move.l	(sp)+,d0
 	rts
-	
+
+
 RenderItemSprite:
-	;; d2 - y tile index ?
+	;; d2.l - y tile index ?
 	movem.l	d2-d3,-(sp)
 
 	move.l	foregroundScrollX,d1
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d1 ; convert to pixels
 	andi.w	#$f,d1
 	cmp.b	#$f,d1		; only add sprite after tile has scrolled in
-	bne	dontAddSprite
+	bne	.dontAddSprite
 	move.l	a2,a3
 	add.l	itemsMapOffset,a3
 	cmpi.w	#0,(a3)
-	beq	dontAddSprite
+	beq	.dontAddSprite
 
-GetSpriteSlot:
+.getSpriteSlot:
 	move.w	(a3),d0 		; sprite slot
 	sub.w	#1,d0
 	
 	move.w	d0,d1
 	cmp.w	#ITEM_NUM_SLOTS,d0
-	bge	dontAddSprite
+	bge	.dontAddSprite
 	lsl.w	#ITEM_STRUCT_MULU_SHIFT,d0		; multiply by 16 (item control structure size)
 	lea	item1,a1
-	add.l	d0,a1	
+	adda.w	d0,a1	
 	
 	move.w	#336<<FOREGROUND_SCROLL_SHIFT_CONVERT,ITEM_X(a1)
 	sub.l	#1,d2
@@ -363,28 +364,30 @@ GetSpriteSlot:
 	add.w	#1,d1
 	move.w	d1,ITEM_SPRITE(a1)
 
-dontAddSprite:
+.dontAddSprite:
 	movem.l	(sp)+,d2-d3
 	rts
+
 
 EnableItemSprites:
 	move.l	#1,itemSpritesEnabled
 	rts
 
+
 InstallBeePalette:
 	include "bee-palette.s"	
 	rts
 
+
 InstallArrowPalette:
 	include "out/sprite_arrow-1-palette.s"
 	rts
-	
+
+
 itemSpritesEnabled:
 	dc.l	0
-
 spriteBufferIndex:
-	dc.l	0
-	
+	dc.l	0	
 sprite2Pointer:
 	dc.l	0
 sprite3Pointer:
@@ -470,6 +473,15 @@ beeMovingDown:
 	ItemSprite spriteBee7,sprite_arrow-1.bin
 	ItemSprite spriteBee8,sprite_arrow-2.bin		
 
+	ItemSprite spriteBat1,sprite_arrow-1.bin
+	ItemSprite spriteBat2,sprite_arrow-2.bin
+	ItemSprite spriteBat3,sprite_arrow-3.bin
+	ItemSprite spriteBat4,sprite_arrow-1.bin
+	ItemSprite spriteBat5,sprite_arrow-2.bin
+	ItemSprite spriteBat6,sprite_arrow-3.bin
+	ItemSprite spriteBat7,sprite_arrow-1.bin
+	ItemSprite spriteBat8,sprite_arrow-2.bin		
+	
 	
 
 nextSpriteSlot:
