@@ -103,7 +103,7 @@ out/%_tileFadeFrom.pal: assets/%_foreground_playarea.pal
 out/%_tileFadeTo.pal: assets/%_foreground_playarea.pal
 	cat assets/$*_foreground_playarea.pal  | tail -3 | head -2 > out/$*_tileFadeTo.pal
 
-out/background.bin: assets/assets.png
+out/background.bin: assets/background.png
 	$(IMAGECON) --use-palette=assets/paletteA_background.pal --input $< $(IMAGECON_ARGS) --colors 8 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-grey-palette --output-palette --output-png --output-copperlist --output out/background --palette-offset 8
 
 out/panel.bin: assets/panel.png

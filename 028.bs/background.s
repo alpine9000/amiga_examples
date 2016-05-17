@@ -36,7 +36,7 @@ RenderBackgroundTile:
 	move.l	backgroundScrollX,d2
 	lsr.b	#BACKGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
 	andi.w	#$f,d2		; find the shift component		
-	jsr	BlitTile
+	jsr	BlitBackgroundTile
 	cmp.l   #backgroundBitplanes1,backgroundOffscreen
 	bne	.offsetSub
 	add.l	#backgroundBitplanes2-backgroundBitplanes1,a0
@@ -44,7 +44,7 @@ RenderBackgroundTile:
 .offsetSub:
 	sub.l	#backgroundBitplanes2-backgroundBitplanes1,a0
 .doBlit:
-	jsr	BlitTile	
+	jsr	BlitBackgroundTile	
 	rts
 
 RenderNextBackgroundFrame:

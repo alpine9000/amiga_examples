@@ -2,6 +2,7 @@
 
 	xdef BlitFillColor
 	xdef BlitTile
+	xdef BlitBackgroundTile
 	xref BlueFill
 	xref SimpleBlit
 
@@ -112,6 +113,29 @@ BlitTile:
 	move.w	#BC0F_SRCA|BC0F_DEST|$f0,BLTCON0(a6)
 	
 	move.w 	#TILEMAP_WIDTH_BYTES-2,BLTAMOD(a6)
+	move.w 	#BITPLANE_WIDTH_BYTES-2,BLTDMOD(a6)		;
+
+	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16,d2
+	add.l	d2,a0
+	move.l 	a1,BLTAPTH(a6) 		; source
+	move.l 	a0,BLTDPTH(a6)		; dest
+	move.w	#$ffff,BLTAFWM(a6)
+	move.w	#$ffff,BLTALWM(a6)
+	move.w 	#(16*SCREEN_BIT_DEPTH)<<6|(1),BLTSIZE(a6)	;rectangle size, starts blit
+	movem.l	(sp)+,d2/a0
+	rts
+	
+BlitBackgroundTile:
+	;; a0 - dest bitplane pointer
+	;; a1 - source tile pointer
+	;; d2 - y tile index
+
+	WaitBlitter	
+	movem.l	d2/a0,-(sp)
+	move.w	#0,BLTCON1(a6)		;
+	move.w	#BC0F_SRCA|BC0F_DEST|$f0,BLTCON0(a6)
+	
+	move.w 	#BACKGROUND_TILEMAP_WIDTH_BYTES-2,BLTAMOD(a6)
 	move.w 	#BITPLANE_WIDTH_BYTES-2,BLTDMOD(a6)		;
 
 	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16,d2
