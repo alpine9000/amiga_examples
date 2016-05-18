@@ -127,7 +127,7 @@ credits:
 	dc.b	0	
 	dc.b	"TRACKLOADER - PHOTON/SCOOPEX"	
 	dc.b	0	
-	dc.b	" "
+	dc.b	"P61 PLAYER  - GURU,PHOTON"
 	dc.b	0
 	dc.b	" "
 	dc.b	0	

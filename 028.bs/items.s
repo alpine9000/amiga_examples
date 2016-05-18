@@ -320,11 +320,20 @@ _SetupItemSpriteData:
 .beeSprite:
 	move.l	a0,sprite5Pointer
 	cmp.w	#0,ITEM_X(a1)
-	beq	.done	
-	bsr	InstallBeePalette	
-	bra	.done	
+	beq	.dontAnimate
+	bsr	InstallBeePalette
+	bra	.dontAnimate
 
-.done:
+.dontAnimate:
+	cmp.w	#1,beeMovingDown
+	beq	.setBeeDown
+.setBeeUp:
+	move.w	#1<<3,ITEM_INDEX(a1)
+	bra	.spriteIsNotEnabled	
+.setBeeDown:
+	move.w	#0,ITEM_INDEX(a1)	
+	bra	.spriteIsNotEnabled
+.done:	
 	add.w	#1,ITEM_INDEX(a1)
 .spriteIsNotEnabled:
 	move.l	(sp)+,d0
@@ -375,7 +384,7 @@ EnableItemSprites:
 
 
 InstallBeePalette:
-	include "bee-palette.s"	
+	include "out/sprite_bee-0-palette.s"
 	rts
 
 
@@ -464,25 +473,15 @@ beeMovingDown:
 	ItemSprite spriteArrow7,sprite_arrow-1.bin
 	ItemSprite spriteArrow8,sprite_arrow-1.bin
 
-	ItemSprite spriteBee1,sprite_arrow-1.bin
-	ItemSprite spriteBee2,sprite_arrow-2.bin
-	ItemSprite spriteBee3,sprite_arrow-3.bin
-	ItemSprite spriteBee4,sprite_arrow-1.bin
-	ItemSprite spriteBee5,sprite_arrow-2.bin
-	ItemSprite spriteBee6,sprite_arrow-3.bin
-	ItemSprite spriteBee7,sprite_arrow-1.bin
-	ItemSprite spriteBee8,sprite_arrow-2.bin		
+	ItemSprite spriteBee1,sprite_bee-1.bin
+	ItemSprite spriteBee2,sprite_bee-0.bin
+	ItemSprite spriteBee3,sprite_bee-1.bin
+	ItemSprite spriteBee4,sprite_bee-0.bin
+	ItemSprite spriteBee5,sprite_bee-1.bin
+	ItemSprite spriteBee6,sprite_bee-0.bin
+	ItemSprite spriteBee7,sprite_bee-1.bin
+	ItemSprite spriteBee8,sprite_bee-0.bin		
 
-	ItemSprite spriteBat1,sprite_arrow-1.bin
-	ItemSprite spriteBat2,sprite_arrow-2.bin
-	ItemSprite spriteBat3,sprite_arrow-3.bin
-	ItemSprite spriteBat4,sprite_arrow-1.bin
-	ItemSprite spriteBat5,sprite_arrow-2.bin
-	ItemSprite spriteBat6,sprite_arrow-3.bin
-	ItemSprite spriteBat7,sprite_arrow-1.bin
-	ItemSprite spriteBat8,sprite_arrow-2.bin		
-	
-	
 
 nextSpriteSlot:
 	dc.w	0

@@ -66,6 +66,8 @@ IMAGES=foreground.png \
 	sprite_fallingTank-2.png \
 	sprite_fallingTank-3.png \
 	sprite_fallingTank-4.png \
+	sprite_bee-0.png\
+	sprite_bee-1.png\
 	font8x8.png\
 	font8x85.png\
 	splash.png\
@@ -73,7 +75,7 @@ IMAGES=foreground.png \
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
-VASM_EXTRA_ARGS=-DTIMING_TEST=0 -DSFX=1
+VASM_EXTRA_ARGS=-DTIMING_TEST=0 -DSFX=0
 
 LINKER_OPTIONS=-T link.script.x
 
@@ -138,6 +140,9 @@ out/sprite_fallingTank-%.bin: out/sprite_fallingTank-%.png
 out/sprite_coin%.bin: out/sprite_coin%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_coin$* --palette-offset 20  --use-palette=assets/coin.pal
 
+out/sprite_bee%.bin: out/sprite_bee%.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_bee$* --palette-offset 24  --use-palette=assets/bee.pal
+
 out/sprite_arrow%.bin: out/sprite_arrow%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_arrow$* --palette-offset 24  --use-palette=assets/arrow.pal
 
@@ -172,6 +177,10 @@ out/sprite_fallingTank%.png: assets/assets.png
 .SECONDARY:
 out/sprite_coin%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_coin --width=16 --height=15 --rows=1 --cols=4 --dx=16 --dy=16 --x=192 --y=144
+
+.SECONDARY:
+out/sprite_bee%.png: assets/assets.png
+	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_bee --width=16 --height=15 --rows=1 --cols=2 --dx=16 --dy=16 --x=192 --y=96
 
 .SECONDARY:
 out/sprite_arrow%.png: assets/assets.png
