@@ -6,14 +6,15 @@ SPLASH_COLOR_DEPTH		equ 5
 SPLASH_SCREEN_WIDTH_BYTES	equ 40
 
 PLAY_COPPER_WORD		equ $bad1
-MUSIC_COPPER_WORD		equ PLAY_COPPER_WORD+$2000
-DIFFICULTY_COPPER_WORD		equ PLAY_COPPER_WORD+$1000	
-CREDITS_COPPER_WORD		equ PLAY_COPPER_WORD+$3000	
 
 MENU_SELECTED_TOP_COLOR		equ $be0 ;$e71
 MENU_SELECTED_BOTTOM_COLOR	equ $9d4 ;$fe7
 MENU_TEXT_COLOR			equ $7ef
+MENU_TEXT_BOTTOM_COLOR		equ $5cd	
 
+MENU_OFFSET			equ levelTopColor-playTopColor
+MENU_BOTTOM_OFFSET		equ (playBottomColor-playTopColor)
+	
 ShowMenu:
 	lea 	CUSTOM,a6
 
@@ -97,22 +98,34 @@ RenderMenu:
 	rts
 	
 MenuUp:
-	cmp.w	#PLAY_COPPER_WORD,selectedStartPtr
+	cmp.l	#playTopColor,selectedPtr
 	beq	.done
 	PlaySound Jump
-	sub.w	#$1000,selectedStartPtr
-	sub.w	#$1000,selectedStartPtr2	
-	sub.w	#$1000,selectedEndPtr	
+	move.l	selectedPtr,a0
+	move.w 	#MENU_TEXT_COLOR,(a0)
+	add.l	#MENU_BOTTOM_OFFSET,a0
+	move.w	#MENU_TEXT_BOTTOM_COLOR,(a0)
+	sub.l	#MENU_OFFSET,selectedPtr
+	move.l	selectedPtr,a0	
+	move.w 	#MENU_SELECTED_TOP_COLOR,(a0)
+	add.l	#MENU_BOTTOM_OFFSET,a0
+	move.w	#MENU_SELECTED_BOTTOM_COLOR,(a0)
 .done:
 	rts
 
 MenuDown:
-	cmp.w	#$ead1,selectedStartPtr
+	cmp.l	#creditsTopColor,selectedPtr
 	beq	.done
 	PlaySound Jump		
-	add.w	#$1000,selectedStartPtr
-	add.w	#$1000,selectedStartPtr2	
-	add.w	#$1000,selectedEndPtr	
+	move.l	selectedPtr,a0
+	move.w 	#MENU_TEXT_COLOR,(a0)
+	add.l	#MENU_BOTTOM_OFFSET,a0
+	move.w	#MENU_TEXT_BOTTOM_COLOR,(a0)
+	add.l	#MENU_OFFSET-MENU_BOTTOM_OFFSET,a0
+	move.w 	#MENU_SELECTED_TOP_COLOR,(a0)
+	add.l	#MENU_BOTTOM_OFFSET,a0
+	move.w	#MENU_SELECTED_BOTTOM_COLOR,(a0)
+	add.l	#MENU_OFFSET,selectedPtr
 .done:
 	rts	
 
@@ -164,13 +177,13 @@ RefreshDifficulty:
 	rts
 	
 ButtonPressed:
-	cmp.w	#PLAY_COPPER_WORD,selectedStartPtr
+	cmp.l	#playTopColor,selectedPtr
 	beq	.playButton
-	cmp.w	#MUSIC_COPPER_WORD,selectedStartPtr
+	cmp.l	#musicTopColor,selectedPtr
 	beq	.musicButton
-	cmp.w	#DIFFICULTY_COPPER_WORD,selectedStartPtr
+	cmp.l	#levelTopColor,selectedPtr
 	beq	.difficultyButton
-	cmp.w	#CREDITS_COPPER_WORD,selectedStartPtr
+	cmp.l	#creditsTopColor,selectedPtr
 	beq	.creditsButton		
 	bra	.done
 .difficultyButton:
@@ -277,6 +290,7 @@ musicOff:
 	dc.b	"MUSIC - OFF "
 	dc.b	0	
 
+	align 4
 splashCopperList:
 splashCopperListBplPtr:
 	dc.w	BPL1PTL,0
@@ -292,19 +306,40 @@ splashCopperListBplPtr:
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
 
-	dc.w	COLOR31,MENU_TEXT_COLOR
-selectedStartPtr:
-	dc.w	PLAY_COPPER_WORD,$fffe
-	dc.w	COLOR31,MENU_SELECTED_TOP_COLOR
-selectedStartPtr2:	
-	dc.w	PLAY_COPPER_WORD+(($1000/4)*3),$fffe
-	dc.w	COLOR31,MENU_SELECTED_BOTTOM_COLOR
 
-selectedEndPtr:
+	dc.w	PLAY_COPPER_WORD,$fffe
+	dc.w	COLOR31
+playTopColor:	
+	dc.w	MENU_SELECTED_TOP_COLOR
+	dc.w	PLAY_COPPER_WORD+(($1000/4)*3),$fffe
+	dc.w	COLOR31
+playBottomColor:	
+	dc.w	MENU_SELECTED_BOTTOM_COLOR
+
 	dc.w	PLAY_COPPER_WORD+$1000,$fffe
-	dc.w	COLOR31,MENU_TEXT_COLOR
+	dc.w	COLOR31
+levelTopColor:	
+	dc.w	MENU_TEXT_COLOR
+	dc.w	PLAY_COPPER_WORD+$1000+(($1000/4)*3),$fffe
+	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
+
+	dc.w	PLAY_COPPER_WORD+$2000,$fffe
+	dc.w	COLOR31
+musicTopColor:
+	dc.w	MENU_TEXT_COLOR
+	dc.w	PLAY_COPPER_WORD+$2000+(($1000/4)*3),$fffe
+	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
+
+	dc.w	PLAY_COPPER_WORD+$3000,$fffe
+	dc.w	COLOR31
+creditsTopColor:
+	dc.w	MENU_TEXT_COLOR
+	dc.w	PLAY_COPPER_WORD+$3000+(($1000/4)*3),$fffe
+	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR		
 	
 	dc.l	$fffffffe		
 
+selectedPtr:
+	dc.l	playTopColor
 splashSave:	
 	incbin "out/splashSave.bin"

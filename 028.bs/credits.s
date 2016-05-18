@@ -92,13 +92,13 @@ Credits:
 RenderText:
 	lea	credits,a1
 
-	move.w	#72,d0
+	move.w	#48,d0
 	move.w	#20,d1	
 .loop:
 	cmp.b	#0,(a1)
 	beq	.done
 	lea	foregroundBitplanes1,a0
-	jsr	DrawWSMaskedText8
+ 	jsr	DrawWSMaskedText8
 .findNull:
 	cmp.b	#0,(a1)+
 	bne	.findNull
@@ -109,9 +109,9 @@ RenderText:
 
 
 credits:
-	dc.b	"      BLOCKY SKIES"
+	dc.b	"        BLOCKY SKIES"
 	dc.b	0
-	dc.b	"      ------------"
+	dc.b	"        ------------"
 	dc.b	0
 	dc.b	" "
 	dc.b	0	
@@ -119,7 +119,7 @@ credits:
 	dc.b	0	
 	dc.b	"GRAPHICS    - CHIPMUNK"
 	dc.b	0	
-	dc.b	"MUSIC       - SOMEBODY"
+	dc.b	"MUSIC       - Simone \"JMD\" Bernacchia"
 	dc.b	0	
 	dc.b	"CODE        - ALPINE9000"
 	dc.b	0
@@ -127,17 +127,17 @@ credits:
 	dc.b	0	
 	dc.b	"TRACKLOADER - PHOTON/SCOOPEX"	
 	dc.b	0	
-	dc.b	"P61 PLAYER  - GURU,PHOTON"
+	dc.b	"P6112 CODE  - GURU&PHOTON/SCOOPEX"
 	dc.b	0
 	dc.b	" "
 	dc.b	0	
-	dc.b	"        THANKS"
+	dc.b	"           THANKS"
 	dc.b	0
-	dc.b	"        ------"
+	dc.b	"           ------"
 	dc.b	0	
 	dc.b	"WIN-UAE    - TONI WILEN"
 	dc.b	0
-	dc.b	"FS-UAE     - FrodeSolheim"
+	dc.b	"FS-UAE     - Frode Solheim"
 	dc.b	0
 	dc.b	"VASM/VLINK - PHX/Volker"
 	align	4
