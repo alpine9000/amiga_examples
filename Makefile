@@ -1,6 +1,7 @@
 SUBDIRS=tools/makeadf \
 	tools/imagecon\
 	tools/resize\
+	tools/croppa\
 	tools/external/shrinkler\
 	tools/external/doynamite68k\
 	000.trackdisk\
@@ -27,7 +28,11 @@ SUBDIRS=tools/makeadf \
 	021.calling_c\
 	022.photons_bootloader\
 	023.slideshow\
-	024.simple_text
+	024.simple_text\
+	025.scroll_text\
+	026.tile_hscroll\
+	027.parallax\
+	028.bs
 
 .PHONY: subdirs $(SUBDIRS)
 
@@ -61,6 +66,12 @@ test:
 	@echo "Testing tools/resize..."	
 	@echo "-------------------------"
 	make -C tools/resize test
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "Testing tools/croppa..."	
+	@echo "-------------------------"
+	make -C tools/croppa test
 	@echo ""
 	@echo ""
 	@echo ""
