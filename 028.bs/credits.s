@@ -123,7 +123,7 @@ credits:
 	dc.b	0	
 	dc.b	"CODE        - ALPINE9000"
 	dc.b	0
-	dc.b	"LEVELS      - CHIPMUNK/ALPINE9000"
+	dc.b	"LEVELS      - CHIPMUNK&ALPINE9000"
 	dc.b	0	
 	dc.b	"TRACKLOADER - PHOTON/SCOOPEX"	
 	dc.b	0	
@@ -139,7 +139,7 @@ credits:
 	dc.b	0
 	dc.b	"FS-UAE     - Frode Solheim"
 	dc.b	0
-	dc.b	"VASM/VLINK - PHX/Volker"
+	dc.b	"VASM/VLINK - PHX&Volker"
 	align	4
 copperList:
 copperListBplPtr:
