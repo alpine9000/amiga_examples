@@ -2,9 +2,9 @@
 ==========================================================
 introduction
 ------------
-This repo contains example programs I have written as I re-learn how to program an amiga.  The programs are written in assembler and directly access the hardware. The target is an Amiga 500 (my long lost friend). Currently I do not own an amiga, so I can only test using UAE, so it's possible they will not work on the real hardware.
+This repo contains example programs I have written as I re-learn how to program an amiga.  The programs are written in assembler and directly access the hardware.  Most of the examples have been tested using FS-UAE and my Amiga 500. Some require 1mb of chip ram, most work fine with 512kb.
 
-Don't use this as an amiga programming guide. I don't do things the "correct" way. There are heaps of great guides out there if you want to do things the right way.
+Don't use this as an amiga programming guide. I don't do things the "correct" way. There are heaps of great guides out there if you want to do things the right way. My a68k asm vocab starts out pretty small, and grows only very slowly, so again, this is not guide on the best way to do things.
 
 documentation
 -------------
