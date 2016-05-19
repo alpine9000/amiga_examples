@@ -1,7 +1,8 @@
 	include "includes.i"
 
 	xdef	ShowMenu
-
+	xdef	levelCounter
+	
 SPLASH_COLOR_DEPTH		equ 5
 SPLASH_SCREEN_WIDTH_BYTES	equ 40
 
@@ -88,6 +89,10 @@ RenderMenu:
 	move.w	#(320/2)-(6*8),d0	
 	add.w	#16,d1	
 	jsr	DrawMaskedText85
+	lea	levelCounter,a1
+	move.w	#(320/2)-(6*8)+(8*8),d0	
+	jsr	DrawMaskedText85
+	move.w	#(320/2)-(6*8),d0	
 	lea	music,a1
 	add.w	#16,d1		
 	jsr	DrawMaskedText85
@@ -151,31 +156,14 @@ ToggleMusic:
 
 ToggleDifficulty:
 	PlaySound Jump
-	add.l	#4*5,nextLevelInstaller
-	cmp.l	#levelInstallers+(4*8),nextLevelInstaller
+	add.l	#4,nextLevelInstaller
+	lea	levelCounter,a0
+	jsr	IncrementCounter
+	cmp.l	#nextLevelInstaller-8,nextLevelInstaller
 	ble	RefreshDifficulty
 	move.l	#levelInstallers,nextLevelInstaller
+	move.l	#"0001",levelCounter
 RefreshDifficulty:	
-	cmp.l	#levelInstallers,nextLevelInstaller
-	beq	.easy
-	cmp.l	#levelInstallers+4,nextLevelInstaller
-	beq	.medium		
-.hard:
-	lea	difficultyHard,a0
-	lea	difficulty,a1
-	bsr	StrCpy
-	bra	.done
-.medium:
-	lea	difficultyMedium,a0
-	lea	difficulty,a1
-	bsr	StrCpy
-	bra	.done	
-.easy:
-	lea	difficultyEasy,a0
-	lea	difficulty,a1
-	bsr	StrCpy
-	bra	.done
-.done:
 	bsr	RenderMenu
 	rts
 	
@@ -260,13 +248,18 @@ StrCpy:
 .done:
 	rts
 
+levelCounter:
+	dc.b	"0001"
+	dc.b	0
+
+	align	2
 musicOnFlag:
 	dc.w	1
 menu:
 	dc.b	" PLAY NOW!  "
 	dc.b	0
 difficulty:
-	dc.b	"LEVEL - EASY"
+	dc.b	"LEVEL - "
 	dc.b	0
 music:
 	dc.b	"MUSIC - ON  "
@@ -277,17 +270,6 @@ credits:
 	align	4
 
 
-difficultyEasy:
-	dc.b	"LEVEL - EASY"
-	dc.b	0
-	align	2
-difficultyMedium:	
-	dc.b	"LEVEL - MED "
-	dc.b	0	
-	align	2	
-difficultyHard:
-	dc.b	"LEVEL - HARD"
-	dc.b	0	
 	align	2	
 musicOn:
 	dc.b	"MUSIC - ON  "

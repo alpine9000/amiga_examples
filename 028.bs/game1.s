@@ -292,6 +292,7 @@ InitialiseNewGame:
 
 GameOver:
 	move.l	#levelInstallers,nextLevelInstaller
+	move.l	#"0001",levelCounter
 	lea	gameOverMessage,a1
 	jsr	Message
 	jsr	WaitForJoystick
@@ -798,8 +799,16 @@ InstallFlagGreyPalette:
 	Level	3,"ARROWS ARE YOUR FRIEND!",100,2*2,12,10,"LEVEL 3",A		
 	Level	4,"WATCH OUT FOR BEES!",100,2*2,12,10,"LEVEL 4",A
 	Level	5,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"LEVEL 5",A
-	Level	B,"LEVEL 2",100,2*2,12,10,"2",B
-	Level	C,"LEVEL 3",50,4*2,8,6,"3",C
+
+	Level	6,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 6",B
+	Level	7,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 7",B
+
+	Level	8,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 8",C
+	Level	9,"LETS GO?",25,4*2,8,6,"LEVEL 9",C
+
+	Level	10,"WHAT? WHAT?!",15,4*2,8,6,"YOU'RE GOOD, LEVEL 10",C
+	
+	;; Level	7,"LEVEL 3",50,4*2,8,6,"3",C
 	Palette	A
 	Palette	B
 	Palette	C	
@@ -923,8 +932,14 @@ levelInstallers:
 	dc.l	InstallLevel3
 	dc.l	InstallLevel4
 	dc.l	InstallLevel5	
-	dc.l	InstallLevelB
-	dc.l	InstallLevelC	
+
+	dc.l	InstallLevel6
+	dc.l	InstallLevel7
+
+	dc.l	InstallLevel8
+	dc.l	InstallLevel9
+
+	dc.l	InstallLevel10	
 	dc.l	0
 nextLevelInstaller:
 	dc.l	levelInstallers

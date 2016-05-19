@@ -256,7 +256,11 @@ out/main.o: $(IMAGEDATA) \
 	out/level3_foreground-map.s\
 	out/level4_foreground-map.s\
 	out/level5_foreground-map.s\
-	out/levelA_foreground-map.s out/levelB_foreground-map.s out/levelC_foreground-map.s\
+	out/level6_foreground-map.s\
+	out/level7_foreground-map.s\
+	out/level8_foreground-map.s\
+	out/level9_foreground-map.s\
+	out/level10_foreground-map.s\
 	out/background-map.s  Makefile link.script.x\
 	out/menu-palette.s\
 	out/paletteA_playarea_fade.s out/paletteA_flags_fade.s out/paletteA_foreground-palette-table.s out/paletteA_tileFade.s\
