@@ -791,10 +791,19 @@ InstallFlagGreyPalette:
 	;; pathway fading steps per frame (must be a factor of 64)
 	;; frames player pauses between each jump
 	;; frames after jump before player miss is checked
-	Level	A,"LEVEL 1",100,2*2,12,10
-	Level	B,"LEVEL 2",100,2*2,12,10
-	Level	C,"LEVEL 3",50,4*2,8,6		
-
+	;; level complete name
+	;; palette
+	Level	1,"STAY ON THE PATHWAYS!",100,2*2,12,10,"LEVEL 1",A
+	Level	2,"COLLECT COINS!",100,2*2,12,10,"LEVEL 2",A
+	Level	3,"ARROWS ARE YOUR FRIEND!",100,2*2,12,10,"LEVEL 3",A		
+	Level	4,"WATCH OUT FOR BEES!",100,2*2,12,10,"LEVEL 4",A
+	Level	5,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"LEVEL 5",A
+	Level	B,"LEVEL 2",100,2*2,12,10,"2",B
+	Level	C,"LEVEL 3",50,4*2,8,6,"3",C
+	Palette	A
+	Palette	B
+	Palette	C	
+	
 	include "copper.i"
 
 nullText:
@@ -825,7 +834,7 @@ foregroundTilemap:
 panel:
 	incbin "out/panel.bin"
 itemsMapOffset:
-	dc.l	levelAItemsMap-levelAForegroundMap
+	dc.l	level1ItemsMap-level1ForegroundMap
 foregroundScrollPixels:
 	dc.l	FOREGROUND_SCROLL_PIXELS
 bigBangIndex:
@@ -909,7 +918,11 @@ deAnimIndexPattern:
 panelGreyPalette:
 	include "out/panel-grey-table.s"
 levelInstallers:
-	dc.l	InstallLevelA	
+	dc.l	InstallLevel1
+	dc.l	InstallLevel2
+	dc.l	InstallLevel3
+	dc.l	InstallLevel4
+	dc.l	InstallLevel5	
 	dc.l	InstallLevelB
 	dc.l	InstallLevelC	
 	dc.l	0

@@ -52,6 +52,7 @@ Credits:
 	bsr	RenderText
 	
 	jsr	WaitVerticalBlank
+	jsr	PlayNextSound
 	;; poke bitplane pointers
 	lea	foregroundBitplanes1,a1
 	lea     copperListBplPtr(pc),a2
@@ -85,6 +86,7 @@ Credits:
 	move.l	a0,COP1LC(a6)	
 	
 	jsr	WaitForJoystick
+	PlaySound Jump	
 	
 	rts
 
@@ -109,37 +111,35 @@ RenderText:
 
 
 credits:
-	dc.b	"        BLOCKY SKIES"
-	dc.b	0
-	dc.b	"        ------------"
+	dc.b	"          BLOCKY SKIES"
 	dc.b	0
 	dc.b	" "
 	dc.b	0	
-	dc.b	"GAME DESIGN - CHIPMUNK"
+	dc.b	"GAME DESIGN   CHIPMUNK"
 	dc.b	0	
-	dc.b	"GRAPHICS    - CHIPMUNK"
+	dc.b	"   GRAPHICS   CHIPMUNK"
 	dc.b	0	
-	dc.b	"MUSIC       - Simone \"JMD\" Bernacchia"
+	dc.b	"      MUSIC   Simone \"JMD\" Bernacchia"
 	dc.b	0	
-	dc.b	"CODE        - ALPINE9000"
+	dc.b	"       CODE   ALPINE9000"
 	dc.b	0
-	dc.b	"LEVELS      - CHIPMUNK&ALPINE9000"
+	dc.b	"     LEVELS   CHIPMUNK & ALPINE9000"
 	dc.b	0	
-	dc.b	"TRACKLOADER - PHOTON/SCOOPEX"	
-	dc.b	0	
-	dc.b	"P6112 CODE  - GURU&PHOTON/SCOOPEX"
-	dc.b	0
 	dc.b	" "
 	dc.b	0	
-	dc.b	"           THANKS"
+	dc.b	"             THANKS"
 	dc.b	0
-	dc.b	"           ------"
+	dc.b	" "
+	dc.b	0		
+	dc.b	"TRACKLOADER   PHOTON/SCOOPEX"	
 	dc.b	0	
-	dc.b	"WIN-UAE    - TONI WILEN"
+	dc.b	" P6112 CODE   GURU & PHOTON/SCOOPEX"
 	dc.b	0
-	dc.b	"FS-UAE     - Frode Solheim"
+	dc.b	"    WIN-UAE   TONI WILEN"
 	dc.b	0
-	dc.b	"VASM/VLINK - PHX&Volker"
+	dc.b	"     FS-UAE   Frode Solheim"
+	dc.b	0
+	dc.b	" VASM/VLINK   PHX & Volker"
 	align	4
 copperList:
 copperListBplPtr:
@@ -155,5 +155,6 @@ copperListBplPtr:
 	dc.w	BPL5PTH,0
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
+	include	"out/credits_copperlist.i"
 	dc.l	$fffffffe		
 	

@@ -6,10 +6,10 @@ InstallLevel\1:
 	move.l	#level\1PathwayMap,startPathwayMapPtr
 	move.l	#level\1ForegroundMap,foregroundMapPtr
 	move.l	#level\1PathwayMap,pathwayMapPtr	
-	move.l	#palette\1_playAreaPalette,playAreaPalette
-	move.l	#palette\1_playareaFade,playareaFade
-	move.l	#palette\1_flagsFade,flagsFade
-	move.l	#palette\1_tileFade,tileFade
+	move.l	#palette\8_playAreaPalette,playAreaPalette
+	move.l	#palette\8_playareaFade,playareaFade
+	move.l	#palette\8_flagsFade,flagsFade
+	move.l	#palette\8_tileFade,tileFade
 	move.w	#\3,pathwayFadeTimerCount
 	move.l	#\4,pathwayFadeRate
 	move.w	#\5,playerLevelPausePixels
@@ -38,12 +38,16 @@ level\1StartMessage:
 	align 	4
 
 level\1CompleteMessage:
-	dc.b	\2
+	dc.b	\7
 	dc.b 	" COMPLETE!"
 	dc.b	0
 	align 	4
 
 
+	endm
+
+
+Palette:	macro
 palette\1_playAreaPalette:
 	include	"out/palette\1_foreground-palette-table.s"
 	include	"out/background-palette-table.s"	

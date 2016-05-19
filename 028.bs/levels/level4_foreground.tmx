@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="8" tilewidth="16" tileheight="16" nextobjectid="1">
+ <tileset firstgid="1" name="foreground" tilewidth="16" tileheight="16" tilecount="320" columns="20">
+  <image source="../assets/assets.png" width="320" height="256"/>
+ </tileset>
+ <tileset firstgid="321" name="items" tilewidth="16" tileheight="16" tilecount="320" columns="20">
+  <image source="../assets/items.png" trans="000000" width="320" height="256"/>
+ </tileset>
+ <layer name="foreground" width="100" height="8">
+  <data encoding="base64" compression="zlib">
+   eJxjZ2BgsGLEjtlpIDeK8WM7YNgxAbEYFppcOctB4K+hirWA4bcbR9hq4QhvQnKj8UE+piR/VI7mD6pjQnlg+Wj+oCserT8GFya3jhjNH7TB0njaprSQG8X4MQAt/aRm
+  </data>
+ </layer>
+ <layer name="pathway" width="100" height="8">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUEAK6jAwM3wfaEaMABdxlwIyTk1AxZNqYkc4OG8EAFCeg8NZlRBWTZ0TQMPAYiD8C8XkGiHp0faOA/gAUJ5KjcTAKRsEooAMAAJUwDuA=
+  </data>
+ </layer>
+ <layer name="items" width="100" height="8">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFQwFEMeKWc8QjNwooB6DwBWFvHOHsjCQejUMNvvgbBaQBWHonJt2D1LiMhj3dAHqcBDBiysPUBKDFo+9oPFEFEMoXHkTEidtoXAwo8B8N/1EwAgAAjF8HYw==
+  </data>
+ </layer>
+</map>

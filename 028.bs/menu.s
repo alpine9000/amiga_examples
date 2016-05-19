@@ -130,15 +130,17 @@ MenuDown:
 	rts	
 
 ToggleMusic:
-	eor.w	#64,P61_Master
-	cmp.w	#64,P61_Master
+	eor.w	#1,musicOnFlag
+	cmp.w	#1,musicOnFlag
 	beq	.musicOn
 .musicOff:
+	move.w	#-2,fadeMusic 	; fade out
 	lea	musicOff,a0
 	lea	music,a1
 	bsr	StrCpy
 	bra	.done
 .musicOn:
+	move.w	#2,fadeMusic 	; fade in
 	lea	musicOn,a0
 	lea	music,a1
 	bsr	StrCpy
@@ -148,8 +150,9 @@ ToggleMusic:
 	rts
 
 ToggleDifficulty:
-	add.l	#4,nextLevelInstaller
-	cmp.l	#levelInstallers+8,nextLevelInstaller
+	PlaySound Jump
+	add.l	#4*5,nextLevelInstaller
+	cmp.l	#levelInstallers+(4*8),nextLevelInstaller
 	ble	RefreshDifficulty
 	move.l	#levelInstallers,nextLevelInstaller
 RefreshDifficulty:	
@@ -193,6 +196,7 @@ ButtonPressed:
 	bsr	ToggleMusic
 	bra	.done
 .creditsButton:
+	PlaySound Jump	
 	jsr	Credits
 	bra	ShowMenu
 .done:
@@ -256,6 +260,8 @@ StrCpy:
 .done:
 	rts
 
+musicOnFlag:
+	dc.w	1
 menu:
 	dc.b	" PLAY NOW!  "
 	dc.b	0

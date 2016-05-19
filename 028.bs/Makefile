@@ -75,7 +75,7 @@ IMAGES=foreground.png \
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
-VASM_EXTRA_ARGS=-DTIMING_TEST=0 -DSFX=0
+VASM_EXTRA_ARGS=-DTIMING_TEST=0 -DSFX=1
 
 LINKER_OPTIONS=-T link.script.x
 
@@ -138,13 +138,13 @@ out/sprite_fallingTank-%.bin: out/sprite_fallingTank-%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_fallingTank-$* --palette-offset 16 --use-palette=assets/tank.pal
 
 out/sprite_coin%.bin: out/sprite_coin%.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_coin$* --palette-offset 20  --use-palette=assets/coin.pal
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_coin$* --palette-offset 24  --use-palette=assets/coin.pal
 
 out/sprite_bee%.bin: out/sprite_bee%.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_bee$* --palette-offset 24  --use-palette=assets/bee.pal
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_bee$* --palette-offset 20  --use-palette=assets/bee.pal
 
 out/sprite_arrow%.bin: out/sprite_arrow%.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_arrow$* --palette-offset 24  --use-palette=assets/arrow.pal
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_arrow$* --palette-offset 20  --use-palette=assets/arrow.pal
 
 
 .SECONDARY:
@@ -244,7 +244,18 @@ out/chaching.raw: assets/chaching.wav
 out/yay.raw: assets/yay.wav
 	sox -v 2.0 assets/yay.wav -c 1 -r 4000 -b 8 out/yay.raw
 
+out/credits_copperlist.i: credits_copper.c
+	gcc credits_copper.c -o out/credits_copper
+	out/credits_copper > out/credits_copperlist.i
+
+out/credits.o:	out/credits_copperlist.i
+
 out/main.o: $(IMAGEDATA) \
+	out/level1_foreground-map.s\
+	out/level2_foreground-map.s\
+	out/level3_foreground-map.s\
+	out/level4_foreground-map.s\
+	out/level5_foreground-map.s\
 	out/levelA_foreground-map.s out/levelB_foreground-map.s out/levelC_foreground-map.s\
 	out/background-map.s  Makefile link.script.x\
 	out/menu-palette.s\

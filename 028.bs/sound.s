@@ -1,8 +1,23 @@
 	include "includes.i"
 
 	xdef	PlayNextSound
+	xdef	fadeMusic
 	
 PlayNextSound:
+	cmp.w	#0,fadeMusic
+	beq	.dontFadeOutMusic
+	move.w	fadeMusic,d0
+	add.w	d0,P61_Master
+	cmp.w	#0,P61_Master
+	beq	.fadeComplete
+	cmp.w	#64,P61_Master
+	beq	.fadeComplete	
+	bra	.dontFadeOutMusic
+.fadeComplete:
+	move.w	#0,fadeMusic
+.dontFadeOutMusic:
+	
+	
 	if SFX=1	
 	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played	
 	move.l	#emptySound,AUD3LCH(a6)
@@ -76,7 +91,7 @@ PlayZapSound:
 	move.w  #(endZap-zap)/2,AUD3LEN(a6) ;Set length in words
 	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
 	rts
-
+	
 	align	4
 jump:
 	incbin	"out/jump.raw"
@@ -107,3 +122,7 @@ endZap:
 emptySound:
 	dc.l	0
 	endif
+
+fadeMusic: 			; 0 - no fade, 1 - fade out 2, fade in
+	dc.w	0
+	

@@ -408,27 +408,27 @@ _SetupItemSpriteData:
 	cmp.b	#ITEM_SPRITE_COINB_INDEX,d4
 	bge	.coinBSprite
 .coinASprite:
-	move.l	a0,sprite2Pointer
+	move.l	a0,sprite4Pointer
 	bra	.done
 .coinBSprite:
-	move.l	a0,sprite3Pointer
+	move.l	a0,sprite5Pointer
 	bra	.done	
 .arrowSprite:	
 	cmp.w	#0,ITEM_X(a1)
 	beq	.done
-	move.l	a0,sprite4Pointer	
+	move.l	a0,sprite2Pointer	
 	bsr	InstallArrowPalette
 	bra	.done
 .beeDownSprite:
 	cmp.w	#0,ITEM_X(a1)
 	beq	.dontAnimateDownBee
-	move.l	a0,sprite4Pointer	
+	move.l	a0,sprite2Pointer	
 	bsr	InstallBeePalette
 	bra	.dontAnimateDownBee
 .beeUpSprite:
 	cmp.w	#0,ITEM_X(a1)
 	beq	.dontAnimateUpBee
-	move.l	a0,sprite5Pointer	
+	move.l	a0,sprite3Pointer	
 	bsr	InstallBeePalette
 	bra	.dontAnimateUpBee
 .dontAnimateDownBee:
