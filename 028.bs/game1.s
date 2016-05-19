@@ -184,13 +184,14 @@ GameLoop:
 .noSkippedFrames:	
 	add.l	#1,frameCount
 	jsr	WaitVerticalBlank
-	
+
 	if      TIMING_TEST=1
 	move.l	#4000,d0
 .looooo:
 	dbra	d0,.looooo	
 	move.w	#$0f0,COLOR00(a6)
 	endif
+
 	
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers
@@ -806,7 +807,8 @@ InstallFlagGreyPalette:
 	Level	8,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 8",C
 	Level	9,"LETS GO?",25,4*2,8,6,"LEVEL 9",C
 
-	Level	10,"WHAT? WHAT?!",15,4*2,8,6,"YOU'RE GOOD, LEVEL 10",C
+	Level	10,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 10",A
+	;; Level	10,"WHAT? WHAT?!",15,4*2,8,6,"YOU'RE GOOD, LEVEL 10",C
 	
 	;; Level	7,"LEVEL 3",50,4*2,8,6,"3",C
 	Palette	A
