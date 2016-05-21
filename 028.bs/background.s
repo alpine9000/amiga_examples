@@ -4,8 +4,8 @@
 	xdef	RenderNextBackgroundFrame
 	xdef	backgroundScrollX
 	xdef	backgroundOnscreen
-	xdef	backgroundOffscreen	
-
+	xdef	backgroundOffscreen
+	xdef	backgroundTilemap
 	
 InitialiseBackground:
 	move.l	#0,backgroundScrollX
@@ -32,10 +32,21 @@ RenderBackgroundTile:
 	add.l	d0,a0
 	lea 	backgroundTilemap,a1	
 	add.l	#BITPLANE_WIDTH_BYTES-2,a0 ; dest
-	add.w	(a2),a1 	; source tile
+	move.w	(a2),d0  	; source tile
+	add.w	d0,a1
 	move.l	backgroundScrollX,d2
 	lsr.b	#BACKGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
 	andi.w	#$f,d2		; find the shift component		
+
+
+	if BALOON_BOB=1	
+	cmp.w	#$306,d0
+	bne	.dontTriggerBaloon
+	move.w	d2,d0
+	jsr	TriggerBaloon
+.dontTriggerBaloon:
+	endif	
+	
 	jsr	BlitBackgroundTile
 	cmp.l   #backgroundBitplanes1,backgroundOffscreen
 	bne	.offsetSub
@@ -57,10 +68,15 @@ RenderNextBackgroundFrame:
 	bne	.skip
 	move.l	#0,backgroundScrollX
 .skip:
-	bsr	RenderBackgroundTile	
+
+	if BALOON_BOB=1
+	jsr	RenderBaloon
+	endif
+	bsr	RenderBackgroundTile
+	
 	rts
-
-
+	
+	
 backgroundScrollX:
 	dc.l	0	
 backgroundTilemap:
@@ -72,6 +88,7 @@ backgroundOnscreen:
 	dc.l	backgroundBitplanes1
 backgroundOffscreen:
 	dc.l	backgroundBitplanes2
+
 	
 	section .bss
 backgroundBitplanes1:
@@ -80,6 +97,5 @@ backgroundBitplanes1:
 backgroundBitplanes2:
 	ds.b	IMAGESIZE
 	ds.b	LINESIZE*10
-
 
 	

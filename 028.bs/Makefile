@@ -12,7 +12,7 @@ BASE_ADDRESS=4000
 # note: this must be high enough not to conflict with MFMbufE
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blitmtext85.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o out/sound.o out/trackloader.o out/disk.o out/counter.o out/map.o out/message.o out/menu.o out/credits.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blitmtext85.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o out/sound.o out/trackloader.o out/disk.o out/counter.o out/map.o out/message.o out/menu.o out/credits.o out/baloon.o
 
 IMAGES=foreground.png \
 	background.png \
@@ -71,11 +71,12 @@ IMAGES=foreground.png \
 	font8x8.png\
 	font8x85.png\
 	splash.png\
-	splashSave.png
+	splashSave.png\
+	baloonMask.png
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
-VASM_EXTRA_ARGS=-DTIMING_TEST=0 -DSFX=1
+VASM_EXTRA_ARGS=-DTIMING_TEST=0 -DSFX=1 -DBALOON_BOB=1
 
 LINKER_OPTIONS=-T link.script.x
 
@@ -195,6 +196,10 @@ out/font8x85.bin: assets/font8x8.png
 out/splashSave.bin: assets/splash.png out/splash.bin
 	../tools/croppa/out/croppa --input=assets/splash.png --output=out/splashSave.png --width=96 --height=64 --rows=1 --cols=1 --dx=0 --dy=0 --x=112 --y=150
 	$(IMAGECON) --input out/splashSave.png $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/splashSave --colors=32 --output-copperlist --full-color-palette-file --use-palette=out/splash.pal
+
+out/baloonMask.bin: assets/background.png
+	#../tools/croppa/out/croppa --input=assets/background.png --output=out/baloonMask.png --width=48 --height=32 --rows=1 --cols=1 --dx=0 --dy=0 --x=0 --y=64
+	$(IMAGECON) --input assets/baloonMask.png $(IMAGECON_ARGS) --output-mask --output out/baloonMask --colors=8 --transparent-color=0,0,0 --output-png --palette-offset=8
 
 out/splash.bin: assets/splash.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/splash --colors=32 --output-copperlist --full-color-palette-file

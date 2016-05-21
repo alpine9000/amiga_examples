@@ -23,10 +23,6 @@ module
 	section	.noload
 	cnop	0,512	
 diskmodule:
-	if SFX=1
-	incbin	"assets/P61.placeholder"
-	else
-	incbin	"assets/P61.song1"
-	endif
+	incbin	"assets/P61.jmd-songA"
 	cnop	0,512
 enddiskmodule:	

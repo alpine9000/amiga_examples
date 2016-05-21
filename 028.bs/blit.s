@@ -169,7 +169,10 @@ BlueFill:
 	jsr	BlitFillColor
 	jsr     WaitVerticalBlank
 	jsr	SwitchBuffers
-	jsr	InitialiseBackground
+	;; jsr	InitialiseBackground
+	if BALOON_BOB=1
+	jsr	DisableBaloon
+	endif
 	movem.l	(sp)+,d0-a6
 	rts	
 

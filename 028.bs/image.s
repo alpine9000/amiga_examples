@@ -19,14 +19,14 @@ SwitchBuffers:
 	move.l	a0,a1
 
 	lea 	copperListBpl1Ptr,a0
-	bsr.s	PokeBitplanePointers
+	bsr	PokeBitplanePointers
 
 	lea 	copperListBpl1Ptr_MP,a0
-	bsr.s	PokeBitplanePointers		
+	bsr	PokeBitplanePointers		
 
 	add.l	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(96-1),d0	
 	lea 	copperListBpl1Ptr2_MP,a0
-	bsr.s	PokeBitplanePointers
+	bsr	PokeBitplanePointers
 				
 SwitchBackgroundBuffers:
 	
@@ -34,6 +34,16 @@ SwitchBackgroundBuffers:
 	lsr.w	#BACKGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels	
 	lsr.w   #3,d0		; bytes to scroll		
 
+	if BALOON_BOB=1
+	move.l	baloonSaveOffscreen,a0
+	move.l	baloonSaveOnscreen,baloonSaveOffscreen
+	move.l	a0,baloonSaveOnscreen	
+
+	move.l	baloonLastSaveOffscreen,a0
+	move.l	baloonLastSaveOnscreen,baloonLastSaveOffscreen
+	move.l	a0,baloonLastSaveOnscreen	
+	endif
+	
 	move.l	backgroundOffscreen,a0
 	move.l	backgroundOnscreen,backgroundOffscreen
 	move.l	a0,backgroundOnscreen

@@ -49,8 +49,9 @@ Entry:
 	jsr	ShowSplash
 MainMenu:
 	jsr	ShowMenu
-
-	jsr 	BlueFill	
+	
+	jsr 	BlueFill
+	jsr	InitialiseBackground
 
 	;; d0 - fg bitplane pointer offset
 	;; d1 - bg bitplane pointer offset		
@@ -162,12 +163,15 @@ FadeInLoop:
 	move.l	#0,verticalBlankCount
 	move.l	#1,frameCount
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
+	if BALOON_BOB=1
+	jsr	EnableBaloon
+	endif
 	bra	GameLoop
 .c1:
 	bra	FadeInLoop
 
 
-GameLoop:
+GameLoop:	
 	move.l	verticalBlankCount,d0
 	move.l	frameCount,d1	
 	cmp.l	d1,d0
@@ -315,6 +319,9 @@ InstallNextLevel:
 	
 LevelComplete:
 	PlaySound Yay
+	if BALOON_BOB=1
+	jsr	DisableBaloon
+	endif
 	jsr	ResetItems
 	jsr	HidePlayer
 	jsr 	SelectNextPlayerSprite
@@ -498,7 +505,10 @@ BigBang:
 .scrollFinished:
 	
 	PlaySound Falling
-	jsr	WaitVerticalBlank		
+	jsr	WaitVerticalBlank
+	if BALOON_BOB=1
+	jsr	DisableBaloon
+	endif
 	jsr	PlayNextSound		
 	jsr	ResetItems
 	move.w	#0,moving
