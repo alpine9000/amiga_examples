@@ -45,6 +45,7 @@ Entry:
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR
 
+	move.w	#0,d0
 	jsr	StartMusic
 	jsr	ShowSplash
 MainMenu:
@@ -632,6 +633,8 @@ Level3InterruptHandler:
 	move.w	#INTF_VERTB,INTREQ(a6)	; clear interrupt bit	
 	add.l	#1,verticalBlankCount
 	jsr 	SetupSpriteData
+	cmp.w	#0,P61_Master
+	beq	.checkCopper
 	jsr	P61_Music
 .checkCopper:
 	move.w	INTREQR(a6),d0
@@ -808,19 +811,19 @@ InstallFlagGreyPalette:
 	;; frames after jump before player miss is checked
 	;; level complete name
 	;; palette
-	Level	1,"STAY ON THE PATHWAYS!",100,2*2,12,10,"LEVEL 1",A,21
-	Level	2,"COLLECT COINS!",100,2*2,12,10,"LEVEL 2",A,21
-	Level	3,"ARROWS ARE YOUR FRIEND!",100,2*2,12,10,"LEVEL 3",A,21
-	Level	4,"WATCH OUT FOR BEES!",100,2*2,12,10,"LEVEL 4",A,21
-	Level	5,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"LEVEL 5",A,21
+	Level	1,"STAY ON THE PATHWAYS!",100,2*2,12,10,"LEVEL 1",A,21,0
+	Level	2,"COLLECT COINS!",100,2*2,12,10,"LEVEL 2",A,21,1
+	Level	3,"ARROWS ARE YOUR FRIEND!",100,2*2,12,10,"LEVEL 3",A,21,2
+	Level	4,"WATCH OUT FOR BEES!",100,2*2,12,10,"LEVEL 4",A,21,0
+	Level	5,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"LEVEL 5",A,21,0
 
-	Level	6,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 6",B,98
-	Level	7,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 7",B,98
+	Level	6,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 6",B,98,2
+	Level	7,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 7",B,98,2
 
-	Level	8,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 8",C,98
-	Level	9,"LETS GO?",25,4*2,8,6,"LEVEL 9",C,98
+	Level	8,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 8",C,98,2
+	Level	9,"LETS GO?",25,4*2,8,6,"LEVEL 9",C,98,2
 
-	Level	10,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 10",A,98
+	Level	10,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 10",A,98,1
 	;; Level	10,"WHAT? WHAT?!",15,4*2,8,6,"YOU'RE GOOD, LEVEL 10",C
 	
 	;; Level	7,"LEVEL 3",50,4*2,8,6,"3",C

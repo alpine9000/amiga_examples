@@ -14,8 +14,10 @@ InstallLevel\1:
 	move.l	#\4,pathwayFadeRate
 	move.w	#\5,playerLevelPausePixels
 	move.w	#\6,playerLevelMissPixels
-	move.l	#\9,playerXColumnLastSafe,
+	move.l	#\9,playerXColumnLastSafe
 	move.l	#\9,playerXColumn
+	move.w	#\a,d0
+	jsr	StartMusic
 	rts
 
 	align 4

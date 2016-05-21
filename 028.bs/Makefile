@@ -5,6 +5,8 @@ paletteA_BACKGROUND_COLOR_LONG=000 153 238 255
 paletteB_BACKGROUND_COLOR_LONG=000 000 102 187
 paletteC_BACKGROUND_COLOR_LONG=210 002 053 255
 
+MAX_P61_SIZE=$(shell ls -Sl assets/P61.* | awk '{print $$5}' | head -1)
+
 # userstack used by bootblock
 USERSTACK_ADDRESS=7fffc
 # if you change this you must also change link.script.x
@@ -76,7 +78,7 @@ IMAGES=foreground.png \
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
-VASM_EXTRA_ARGS=-DTIMING_TEST=0 -DSFX=1 -DBALOON_BOB=1
+VASM_EXTRA_ARGS=-DTIMING_TEST=0 -DSFX=1 -DBALOON_BOB=1 -DMAX_P61_SIZE=$(MAX_P61_SIZE) -allmp
 
 LINKER_OPTIONS=-T link.script.x
 

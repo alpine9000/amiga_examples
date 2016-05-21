@@ -170,3 +170,11 @@ PlayerMoveLeft:	macro
 	add.l   #1,playerXColumn
 	jsr	UpdatePlayerScore
 	endm
+
+P61Module: macro
+	cnop	0,512	
+diskmodule\1:
+	incbin	\2
+	cnop	0,512
+enddiskmodule\1:
+	endm
