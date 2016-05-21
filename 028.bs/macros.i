@@ -129,6 +129,8 @@ PlayerMoveRight: macro
 	move.w	d1,spriteR
 	move.w	#PLAYER_MOVE_RIGHT,spriteLastMove
 	PlaySound Jump
+	sub.l	#1,playerXColumn
+	jsr	UpdatePlayerScore
 	endm
 
 PlayerMoveUp:	macro
@@ -137,6 +139,7 @@ PlayerMoveUp:	macro
 	move.w	d1,spriteU	
 	move.w	#PLAYER_MOVE_UP,spriteLastMove	
 	PlaySound Jump
+	jsr	UpdatePlayerScore
 	endm
 
 PlayerMoveDown:	macro
@@ -145,6 +148,7 @@ PlayerMoveDown:	macro
 	move.w	d1,spriteD
 	move.w	#PLAYER_MOVE_DOWN,spriteLastMove	
 	PlaySound Jump
+	jsr	UpdatePlayerScore
 	endm
 
 PlayerMoveLeft:	macro
@@ -163,4 +167,6 @@ PlayerMoveLeft:	macro
 	move.w	d1,spriteL
 	move.w	#PLAYER_MOVE_LEFT,spriteLastMove	
 	PlaySound Jump
+	add.l   #1,playerXColumn
+	jsr	UpdatePlayerScore
 	endm

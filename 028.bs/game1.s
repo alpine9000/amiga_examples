@@ -88,7 +88,9 @@ Reset:
 	lea	player1Text,a1
 	move.w	#192,d0
 	jsr	RenderCounter
-
+	move.l  playerXColumnLastSafe,playerXColumn
+	jsr	RenderPlayerScore
+	
 	move.l  startForegroundMapPtr,foregroundMapPtr
 	move.l  startPathwayMapPtr,pathwayMapPtr
 	
@@ -159,7 +161,6 @@ FadeInLoop:
 	bne	.c1
 	jsr	ResetPlayer
 	jsr	EnableItemSprites
-
 	move.l	#0,verticalBlankCount
 	move.l	#1,frameCount
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
@@ -183,8 +184,10 @@ GameLoop:
 	lea	skippedFramesCounterText,a0
 	jsr	IncrementCounter
 	lea	skippedFramesCounterText,a1	
+	if 0
 	move.w	#110,d0
-	jsr	RenderCounter		
+	jsr	RenderCounter
+	endif
 .noSkippedFrames:	
 	add.l	#1,frameCount
 	jsr	WaitVerticalBlank
@@ -805,19 +808,19 @@ InstallFlagGreyPalette:
 	;; frames after jump before player miss is checked
 	;; level complete name
 	;; palette
-	Level	1,"STAY ON THE PATHWAYS!",100,2*2,12,10,"LEVEL 1",A
-	Level	2,"COLLECT COINS!",100,2*2,12,10,"LEVEL 2",A
-	Level	3,"ARROWS ARE YOUR FRIEND!",100,2*2,12,10,"LEVEL 3",A		
-	Level	4,"WATCH OUT FOR BEES!",100,2*2,12,10,"LEVEL 4",A
-	Level	5,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"LEVEL 5",A
+	Level	1,"STAY ON THE PATHWAYS!",100,2*2,12,10,"LEVEL 1",A,21
+	Level	2,"COLLECT COINS!",100,2*2,12,10,"LEVEL 2",A,21
+	Level	3,"ARROWS ARE YOUR FRIEND!",100,2*2,12,10,"LEVEL 3",A,21
+	Level	4,"WATCH OUT FOR BEES!",100,2*2,12,10,"LEVEL 4",A,21
+	Level	5,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"LEVEL 5",A,21
 
-	Level	6,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 6",B
-	Level	7,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 7",B
+	Level	6,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 6",B,98
+	Level	7,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 7",B,98
 
-	Level	8,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 8",C
-	Level	9,"LETS GO?",25,4*2,8,6,"LEVEL 9",C
+	Level	8,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 8",C,98
+	Level	9,"LETS GO?",25,4*2,8,6,"LEVEL 9",C,98
 
-	Level	10,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 10",A
+	Level	10,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 10",A,98
 	;; Level	10,"WHAT? WHAT?!",15,4*2,8,6,"YOU'RE GOOD, LEVEL 10",C
 	
 	;; Level	7,"LEVEL 3",50,4*2,8,6,"3",C

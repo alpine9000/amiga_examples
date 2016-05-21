@@ -1,5 +1,7 @@
 	include "includes.i"
 
+	xdef score
+	
 	xdef SetupItemSpriteData
 	xdef ScrollItemSprites
 	xdef RenderItemSprite
@@ -11,7 +13,8 @@
 	xdef PrepareItemSpriteData
 	xdef VerticalScrollBees
 	xdef DetectBeeCollisions
-
+	xdef RenderScore
+	
 
 DetectBeeCollisions:
 	bsr 	DetectDownBeeCollisions
@@ -141,9 +144,8 @@ DetectItemCollisions:
 	bge	.arrowCollision
 .coinCollision:	
 	bsr	DeleteItemSprite
-	lea	coinCounterText,a0
-	jsr	IncrementCounter
-	bsr	RenderCoinScore
+	add.l	#SCORE_COINS_ADDITION,score
+	bsr	RenderScore
 	PlaySound Chaching
 	rts
 	
@@ -251,16 +253,16 @@ DetectUpBeeCollisions:
 	rts		
 
 
-RenderCoinScore:
-	lea	coinCounterText,a1	
-	move.w	#31,d0
-	jsr	RenderCounter	
+RenderScore:
+	move.l	score,d0
+	move.w	#31,d1
+	jsr	RenderNumber4
 	rts
 
 
 InitialiseItems:
-	move.l	#"0000",coinCounterText
-	bsr	RenderCoinScore
+	move.l	#0,score
+	bsr	RenderScore
 	
 ResetItems:
 	lea	item1,a1	
@@ -612,7 +614,6 @@ nextSpriteSlot:
 	dc.w	0
 
 
-coinCounterText:
-	dc.b	"0000"
-	dc.b	0
+score:
+	dc.l	0
 	align	4

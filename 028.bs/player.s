@@ -9,6 +9,7 @@
 	xdef HidePlayer
 	xdef SetupSpriteData
 	xdef ScrollSprites
+	xdef RenderPlayerScore
 	xdef deadSprite 	; used in items
 	xdef UpdatePlayerFallingAnimation
 	xdef InstallPlayerColorPalette
@@ -18,7 +19,9 @@
 	xdef spriteLagX
 	xdef spriteY
 	xdef spriteX
-
+	xdef playerXColumn
+	xdef playerXColumnLastSafe
+	
 	xdef playerLevelPausePixels
 	xdef playerLevelMissPixels
 	
@@ -379,6 +382,7 @@ CheckPlayerMiss:
 	bra	.dontClearPathway
 .clearPathway:
 	move.w	#2,pathwayClearPending
+	move.l  playerXColumn,playerXColumnLastSafe
 
 
 	move.l	#PLAYER_BOTTOM_Y,d0	
@@ -554,6 +558,18 @@ SelectNextPlayerSprite:
 .done:
 	bsr	InstallPlayerColorPalette	
 	rts
+
+
+UpdatePlayerScore:
+	add.l	#10,score
+RenderPlayerScore:	
+	jsr	RenderScore
+	move.l	playerXColumn,d0
+	move.w	#110,d1
+	jsr	RenderNumber4
+
+	rts
+	
 	
 pigPlayerSpriteConfig:
 	dc.l	InstallPigColorPalette
@@ -621,4 +637,7 @@ pathwayLastConfig:
 	dc.w	PATHWAY_CONFIG_FREE
 pathwayMissPending:
 	dc.w	0
-	
+playerXColumn:
+	dc.l	0
+playerXColumnLastSafe:
+	dc.l	0	
