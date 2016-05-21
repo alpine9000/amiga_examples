@@ -78,6 +78,20 @@ _ItemSprite:	macro
 	endm
 
 
+ItemSingleSprite:	macro
+	_ItemSingleSprite \1,\2
+	_ItemSingleSprite \1_1,\2
+	endm
+
+_ItemSingleSprite:	macro
+\1:
+	dc.b	ITEM_SPRITE_VSTART	 ; vstart
+	dc.b	0			 ; hstart
+	dc.b	ITEM_SPRITE_VSTART+ITEM_SPRITE_HEIGHT; vstop
+	dc.b	0
+	incbin	"out/\2"
+	dc.l	0
+	endm
 
 ItemControl:	macro
 	align 4

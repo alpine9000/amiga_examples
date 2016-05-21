@@ -25,9 +25,10 @@ DeleteItemSprite:
 	move.w	ITEM_Y(a1),d2
 	rts
 
+
 VerticalScrollBees:
 	bsr	VerticalScrollDownBee
-	bsr	VerticalScrollUpBee	
+	bsr	VerticalScrollUpBee
 	rts
 
 VerticalScrollDownBee:
@@ -345,8 +346,24 @@ _SetupItemSpriteData:
 	move.w	ITEM_INDEX(a1),d0
 	
 	lsr.l	#3,d0	
+
+	cmp.l	#item25,a1
+	beq	.singleSprite
+	cmp.l	#item26,a1
+	beq	.singleSprite	
 	mulu.w	#ITEM_SPRITE_BYTES*2,d0
 	add.w	spriteBufferIndex,d0
+	bra	.continueSingleSprite
+.singleSprite:
+	mulu.w	#ITEM_SINGLE_SPRITE_BYTES*2,d0
+	cmp.w	#0,spriteBufferIndex
+	beq	.continueSingleSprite
+	add.w	#ITEM_SINGLE_SPRITE_BYTES,d0
+
+
+.continueSingleSprite:
+
+
 	adda.w	d0,a0
 
 	lsl.w	#ITEM_SPRITE_VERTICAL_BYTES_SHIFT_CONVERT,d2
@@ -400,9 +417,9 @@ _SetupItemSpriteData:
 
 	sub.l	d3,a0	;#1*ITEM_SPRITE_VERTICAL_BYTES,a0 or 0 for bee
 	cmp.b	#ITEM_SPRITE_BEE_UP_INDEX,d4
-	bge	.beeUpSprite		
+	beq	.beeUpSprite		
 	cmp.b	#ITEM_SPRITE_BEE_DOWN_INDEX,d4
-	bge	.beeDownSprite		
+	beq	.beeDownSprite		
 	cmp.b	#ITEM_SPRITE_ARROW_INDEX,d4
 	bge	.arrowSprite
 	cmp.b	#ITEM_SPRITE_COINB_INDEX,d4
@@ -432,7 +449,7 @@ _SetupItemSpriteData:
 	bsr	InstallBeePalette
 	bra	.dontAnimateUpBee
 .dontAnimateDownBee:
-	cmp.w	#1,beeDownMovingDown
+	cmp.w	#1,beeDownMovingDown	
 	beq	.setBeeDown
 	bra	.setBeeUp
 .dontAnimateUpBee:
@@ -585,11 +602,11 @@ beeDownMovingDown:
 	ItemSprite spriteArrow7,sprite_arrow-1.bin
 	ItemSprite spriteArrow8,sprite_arrow-1.bin
 
-	ItemSprite spriteBeeDown1,sprite_bee-1.bin
-	ItemSprite spriteBeeDown2,sprite_bee-0.bin
-
-	ItemSprite spriteBeeUp1,sprite_bee-0.bin
-	ItemSprite spriteBeeUp2,sprite_bee-1.bin	
+	ItemSingleSprite spriteBeeDown1,sprite_bee-1.bin
+	ItemSingleSprite spriteBeeDown2,sprite_bee-0.bin
+	
+	ItemSingleSprite spriteBeeUp1,sprite_bee-0.bin
+	ItemSingleSprite spriteBeeUp2,sprite_bee-1.bin
 
 nextSpriteSlot:
 	dc.w	0
