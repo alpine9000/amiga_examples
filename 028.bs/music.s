@@ -5,6 +5,7 @@
 
 StartMusic:
 .wait: 				; In case there is currently  fade in progress
+	jsr	WaitVerticalBlank
 	jsr	PlayNextSound	
 	cmp.w	#0,P61_Master
 	beq	.skip

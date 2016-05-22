@@ -12,20 +12,26 @@ KillSound:	macro
         move.w  #1,AUD3PER(a6)	
 	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played
 	move.l	#emptySound,AUD3LCH(a6)	
+	WaitScanLines 1
+	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
+.\@skip:
+	endif
+	endm
+
+WaitScanLines: macro
+	if \1 != 0
 	lea 	$dff006,a0
-	move.w	#4,d2
+	move.w	#\1-1,d2
 .\@nTimes:
 	move.w	(a0),d0
 	lsr.w	#8,d0
 .\@loop:
-	move.l	(a0),d1
+	move.w	(a0),d1
 	lsr.w	#8,d1
 	cmp.w	d0,d1
 	beq	.\@loop
 	dbra	d2,.\@nTimes
-
-	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
-.\@skip:
+.\@done:
 	endif
 	endm
 
