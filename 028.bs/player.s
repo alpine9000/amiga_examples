@@ -212,7 +212,15 @@ ProcessJoystick:
 
 SpriteEnableAuto:
 	PlaySound Whoosh
+	CompareScore SCORE_ARROW_SUBTRACTION
+	ble	.toZero
+	AddToScore SCORE_ARROW_SUBTRACTION
+	bra	.done
+.toZero:
+	ResetScore
+.done:
 	move.w	#1,spriteAutoMoveEnabled
+	bsr	RenderPlayerScore
 	rts
 
 SpriteDisableAuto:
@@ -561,13 +569,12 @@ SelectNextPlayerSprite:
 
 
 UpdatePlayerScore:
-	add.l	#10,score
+	AddToScore 10
 RenderPlayerScore:	
 	jsr	RenderScore
 	move.l	playerXColumn,d0
-	move.w	#110,d1
-	jsr	RenderNumber4
-
+	move.w	#PANEL_COLUMNS_REMAINING_X,d1
+	jsr	RenderNumber5	
 	rts
 	
 	

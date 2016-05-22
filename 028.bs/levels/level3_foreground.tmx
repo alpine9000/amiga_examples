@@ -8,12 +8,12 @@
  </tileset>
  <layer name="foreground" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjZ2BgsGLEjtlpIDeK8WM7YNgxAbEYFppcOctB4K+hirVwhCmIJlduND7Ix5Tkj8rR/EF1DErnu/HkgeWj+YOueLT+GFx4tP4YXFgaT9uUFnKjGD8GACo/pGY=
+   eJxjZ2BgsGLEjtlpIDeK8WM7YNgxAbEYFppcOctB4K+hirVwhCmIJlduND7Ix5Tkj8rR/EF1DErnu/HkgeWj+YOueLT+GFyYUB2BL++M5g/qY2k8bVNayI1i/BgAGV2lCw==
   </data>
  </layer>
  <layer name="pathway" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUkAvOA/FHJHoUDCxgZWRg4GZE0CeBYsaMA+2q4Q90gWH8HYfcXSCWZ0TQMPCYAZF3QPpB8aQ7GldUA6DwxhUnuAAoTiRH44BmABQno+l8FIwCCAAA8cMPBA==
+   eJxjYBgFo2AUkAvOA/FHJHoUDCxgZWRg4GZE0CeBYsaMA+2q4Q90gWH8HYfcXSCWZ0TQMPCYAZF3QPpB8aQ7GldUA6DwxhUnuAAoTiRH44BmABQn6OkcOe2P5oFRMJIAALyTD/Y=
   </data>
  </layer>
  <layer name="items" width="100" height="8">

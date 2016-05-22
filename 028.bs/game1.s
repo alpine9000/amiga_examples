@@ -3,6 +3,8 @@
 	xdef    LevelComplete
 	xdef    BigBang
 	xdef	InstallTilePalette
+	xdef 	RevealPathway
+	xdef	FreezeScrolling
 	
 	xdef	pathwayRenderPending
 	xdef	pathwayPlayerTileAddress
@@ -25,6 +27,7 @@
 	xdef	moving	
 	xdef   	itemsMapOffset
 	xdef	livesCounterText
+	xdef	livesCounterShortText	
 	xdef	panel
 
 	xdef	nextLevelInstaller
@@ -83,11 +86,11 @@ MainMenu:
 
 Reset:
 	move.w	#0,stopScrollingPending	
-	move.w	#218,d0
+	move.w	#PANEL_LIVES_X,d0
 	lea	livesCounterShortText,a1	
 	jsr	RenderCounter	
 	lea	player1Text,a1
-	move.w	#192,d0
+	move.w	#PANEL_PLAYER1_X,d0
 	jsr	RenderCounter
 	move.l  playerXColumnLastSafe,playerXColumn
 	jsr	RenderPlayerScore
@@ -105,6 +108,8 @@ Reset:
 	move.l	tileFade,tileFadePtr
 	move.l	#0,foregroundScrollX
 	move.l	#-1,frameCount		
+	move.w	#0,freezeCountdownCounter
+	bsr	RenderFreezeCountdown	
 	bsr	InitAnimPattern
 	jsr	ResetBigBangPattern
 	jsr 	BlueFill
@@ -185,22 +190,14 @@ GameLoop:
 	lea	skippedFramesCounterText,a0
 	jsr	IncrementCounter
 	lea	skippedFramesCounterText,a1	
-	if 0
-	move.w	#110,d0
+	if 1
+	move.w	#275,d0
 	jsr	RenderCounter
 	endif
 .noSkippedFrames:	
 	add.l	#1,frameCount
 	jsr	WaitVerticalBlank
 
-	if      TIMING_TEST=1
-	move.l	#4000,d0
-.looooo:
-	dbra	d0,.looooo	
-	move.w	#$0f0,COLOR00(a6)
-	endif
-
-	
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers
 	move.l	foregroundScrollX,d0
@@ -222,6 +219,8 @@ GameLoop:
 	bra	.notMoving
 .setMoving:
 	move.w	#0,movingCounter
+	cmp.w	#0,freezeCountdownCounter
+	bgt	.notMoving
 	move.w	#1,moving
 .notMoving:
 	
@@ -240,11 +239,6 @@ GameLoop:
 	jsr	RenderPathway
 .dontRenderPathway:
 
-	if TIMING_TEST=1
-	move.w	#$f00,COLOR00(a6)
-	move.w	#$f00,COLOR02(a6)			
-	endif
-
 	jsr	PlayNextSound	
 	bra	GameLoop
 
@@ -254,6 +248,11 @@ Update:
 	jsr	VerticalScrollBees
 	jsr	DetectBeeCollisions
 
+	cmp.w	#0,freezeCountdownCounter
+	beq	.notFrozen
+	bsr	UpdateFreezeCountdown
+.notFrozen:
+	
 .backgroundUpdates:
 	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX
 	move.l	frameCount,d0
@@ -291,6 +290,17 @@ Update:
 	add.w	#1,pathwayFadeCount
 	rts
 
+RevealPathway:
+	PlaySound Whoosh	
+	move.w	#50,pathwayFadeCount
+	jsr	InstallTilePalette
+	rts
+
+FreezeScrolling:
+	PlaySound Whoosh
+	move.w	#150,freezeCountdownCounter
+	move.w	#0,moving	
+	rts
 
 InitialiseNewGame:
 	jsr	InitialiseItems
@@ -803,6 +813,43 @@ InstallFlagGreyPalette:
 	rts		
 
 
+UpdateFreezeCountdown:	
+	sub.w	#1,freezeCountdownCounter
+RenderFreezeCountdown:
+	move.w	freezeCountdownCounter,d0
+	cmp.w	#0,d0
+	beq	.skip
+	ext.l	d0
+	divu.w	#50,d0
+	add.w	#2,d0
+	bsr	BlitCountdown
+	rts
+.skip:
+	move.w	#0,d0
+	bsr	BlitCountdown	
+	rts	
+	
+BlitCountdown:
+	WaitBlitter	
+	;; d0.w	countdown digit
+	lsl.w	#1,d0 		; *2 because I was lazy (look at image)
+	move.w 	#BC0F_SRCB|BC0F_SRCC|BC0F_DEST|$ca,BLTCON0(a6)
+	lea	countdownImages,a0	
+	move.l	#panel+(SCREEN_WIDTH_BYTES/2)+(SCREEN_WIDTH_BYTES*PANEL_BIT_DEPTH*18),a1	
+	adda.w	d0,a0	
+	move.w 	#4<<12,BLTCON1(a6) 
+	move.w 	#$0ff0,BLTALWM(a6)
+	move.w 	#$ffff,BLTAFWM(a6)
+	move.w 	#$ffff,BLTADAT(a6) ; preload source mask so only BLTA?WM mask is used	
+	move.w 	#(COUNTDOWN_BITMAP_WIDTH/8)-COUNTDOWN_BLIT_WIDTH_BYTES,BLTBMOD(a6)
+	move.w 	#SCREEN_WIDTH_BYTES-COUNTDOWN_BLIT_WIDTH_BYTES,BLTCMOD(a6)
+	move.w 	#SCREEN_WIDTH_BYTES-COUNTDOWN_BLIT_WIDTH_BYTES,BLTDMOD(a6)
+	move.l 	a0,BLTBPTH(a6)	;source graphic top left corner
+	move.l 	a1,BLTCPTH(a6) ;destination top left corner
+	move.l  a1,BLTDPTH(a6) ;destination top left corner	
+	move.w 	#(12*PANEL_BIT_DEPTH)<<6|(COUNTDOWN_BLIT_WIDTH_WORDS),BLTSIZE(a6)
+	rts
+	
 	;; variable prefix
 	;; level name
 	;; frames before pathway starts fading
@@ -812,18 +859,22 @@ InstallFlagGreyPalette:
 	;; level complete name
 	;; palette
 	Level	1,"STAY ON THE PATHWAYS!",100,2*2,12,10,"LEVEL 1",A,21,0
-	Level	2,"COLLECT COINS!",100,2*2,12,10,"LEVEL 2",A,21,1
-	Level	3,"ARROWS ARE YOUR FRIEND!",100,2*2,12,10,"LEVEL 3",A,21,2
+	Level	2,"COLLECT COINS!",100,2*2,12,10,"LEVEL 2",A,21,0
+	Level	3,"ARROWS COST 500 POINTS!",100,2*2,12,10,"LEVEL 3",A,21,0
 	Level	4,"WATCH OUT FOR BEES!",100,2*2,12,10,"LEVEL 4",A,21,0
 	Level	5,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"LEVEL 5",A,21,0
+	Level	6,"CLOCKS FREEZE THE BOARD",200,2*2,12,10,"LEVEL 6",A,21,0
+	Level	7,"EYES SHOW THE BOARD",100,2*2,12,10,"LEVEL 7",A,21,0
+	
+	Level	8,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 8",B,98,2
+	Level	9,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 9",B,98,2
 
-	Level	6,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 6",B,98,2
-	Level	7,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 7",B,98,2
+	Level	10,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 10",C,98,2
+	Level	11,"LETS GO?",25,4*2,8,6,"LEVEL 11",C,98,2
 
-	Level	8,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 8",C,98,2
-	Level	9,"LETS GO?",25,4*2,8,6,"LEVEL 9",C,98,2
+	Level	12,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 10",A,98,1
 
-	Level	10,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 10",A,98,1
+
 	;; Level	10,"WHAT? WHAT?!",15,4*2,8,6,"YOU'RE GOOD, LEVEL 10",C
 	
 	;; Level	7,"LEVEL 3",50,4*2,8,6,"3",C
@@ -860,6 +911,8 @@ foregroundTilemap:
 	incbin "out/foreground.bin"
 panel:
 	incbin "out/panel.bin"
+countdownImages:
+	incbin "out/countdown.bin"	
 itemsMapOffset:
 	dc.l	level1ItemsMap-level1ForegroundMap
 foregroundScrollPixels:
@@ -950,14 +1003,17 @@ levelInstallers:
 	dc.l	InstallLevel3
 	dc.l	InstallLevel4
 	dc.l	InstallLevel5	
-
 	dc.l	InstallLevel6
-	dc.l	InstallLevel7
-
+	dc.l	InstallLevel7	
+	
 	dc.l	InstallLevel8
 	dc.l	InstallLevel9
 
-	dc.l	InstallLevel10	
+	dc.l	InstallLevel10
+	dc.l	InstallLevel11
+
+	dc.l	InstallLevel12
+
 	dc.l	0
 nextLevelInstaller:
 	dc.l	levelInstallers
@@ -1027,6 +1083,8 @@ livesCounterShortText:
 	dc.b	0
 	align	4	
 stopScrollingPending:
+	dc.w	0
+freezeCountdownCounter:
 	dc.w	0
 	
 startUserstack:

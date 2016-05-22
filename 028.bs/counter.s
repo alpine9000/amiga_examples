@@ -2,7 +2,8 @@
 	xdef	ResetCounter
 	xdef	IncrementCounter
 	xdef	DecrementCounter
-	xdef    RenderNumber4
+	xdef    RenderNumber5
+	xdef    RenderNumber4	
 	
 RenderCounter:
 	;; d0.w x position
@@ -24,6 +25,19 @@ RenderNumber4:
 	move.w	d3,d0
 	jsr	DrawText8
 	rts
+
+RenderNumber5:
+	;; d0.l	number
+	;; d1.w x position
+	move.l	d1,d3
+	move.l	#5,d2
+	bsr	ToAscii
+	move.l	a0,a1
+	lea	panel,a0
+	move.w	#20,d1
+	move.w	d3,d0
+	jsr	DrawText8
+	rts	
 
 ResetCounter:
 	move.l	#"0000",(a0)
@@ -83,6 +97,7 @@ ToAscii:
 	lea	staticBuffer,a0
 	move.l	a0,a1
 	add.l	d2,a0
+	move.b	#0,(a0)
 	moveq #10,d2
 .loop:
 	divu.w	d2,d0
@@ -103,6 +118,6 @@ ToAscii:
 	rts
 
 staticBuffer:
-	dc.b	"0000"
+	dc.b	"00000"
 	dc.b	0
 

@@ -1,6 +1,7 @@
 	include "includes.i"
 
-	xdef score
+	xdef __score
+	xdef __nextPlayerBonus
 	
 	xdef SetupItemSpriteData
 	xdef ScrollItemSprites
@@ -14,89 +15,16 @@
 	xdef VerticalScrollBees
 	xdef DetectBeeCollisions
 	xdef RenderScore
-	
 
-DetectBeeCollisions:
-	bsr 	DetectDownBeeCollisions
-	bsr 	DetectUpBeeCollisions	
-	rts
-	
+	include "bees.i"
+
+
 DeleteItemSprite:
 	move.w	#0,ITEM_SPRITE(a1)
 	move.w	#0,ITEM_X(a1)
 	move.w	#0,ITEM_Y_OFFSET(a1)
 	move.w	ITEM_Y(a1),d2
 	rts
-
-
-VerticalScrollBees:
-	bsr	VerticalScrollDownBee
-	bsr	VerticalScrollUpBee
-	rts
-
-VerticalScrollDownBee:
-	lea	item25,a1
-	cmp.w	#0,ITEM_SPRITE(a1)
-	beq	.done
-	move.w	ITEM_Y(a1),d4
-	lsl.w	#ITEM_SPRITE_SPACING_SHIFT_CONVERT,d4
-	add.w	#ITEM_SPRITE_VSTART,d4
-	lsl.w	#ITEM_Y_OFFSET_SHIFT_CONVERT,d4
-	move.w	ITEM_Y_OFFSET(a1),d0
-	add.w	d0,d4	
-	cmp.w	#1,beeDownMovingDown
-	bne	.up
-.down:	
-	add.w	#1,d0
-	bra	.c1
-.up:
-	sub.w	#1,d0
-.c1:
-	move.w	d0,ITEM_Y_OFFSET(a1)
-	cmp.w	#(ITEM_SPRITE_VSTART+(16*5))<<ITEM_Y_OFFSET_SHIFT_CONVERT,d4
-	bge	.beeAtBottom
-	cmp.w	#0,d0
-	ble	.beeAtTop
-	bra	.done
-.beeAtTop:
-	move.w	#1,beeDownMovingDown
-	bra	.done	
-.beeAtBottom:
-	move.w	#0,beeDownMovingDown
-.done:
-	rts
-
-VerticalScrollUpBee:
-	lea	item26,a1
-	cmp.w	#0,ITEM_SPRITE(a1)
-	beq	.done
-	move.w	ITEM_Y(a1),d4
-	lsl.w	#ITEM_SPRITE_SPACING_SHIFT_CONVERT,d4
-	add.w	#ITEM_SPRITE_VSTART,d4
-	lsl.w	#ITEM_Y_OFFSET_SHIFT_CONVERT,d4
-	move.w	ITEM_Y_OFFSET(a1),d0
-	sub.w	d0,d4	
-	cmp.w	#1,beeUpMovingDown
-	bne	.up
-.down:	
-	add.w	#1,d0
-	bra	.c1
-.up:
-	sub.w	#1,d0
-.c1:
-	move.w	d0,ITEM_Y_OFFSET(a1)
-	cmp.w	#(ITEM_SPRITE_VSTART)<<ITEM_Y_OFFSET_SHIFT_CONVERT,d4
-	ble	.beeAtBottom
-	cmp.w	#0,d0
-	ble	.beeAtTop
-	bra	.done
-.beeAtTop:
-	move.w	#1,beeUpMovingDown
-	bra	.done	
-.beeAtBottom:
-	move.w	#0,beeUpMovingDown
-.done:
-	rts	
 
 
 ScrollItemSprites:
@@ -140,130 +68,47 @@ DetectItemCollisions:
 	add.w	#ITEM_SPRITE_Y_COLLISION_OFFSET,d2	
 	cmp.w	d2,d4
 	bne	.skip	
+	cmp.l	#itemClock,a1
+	beq	.clockCollision
+	cmp.l	#itemEye,a1
+	beq	.eyeCollision	
 	cmpi.w	#ITEM_SPRITE_ARROW_INDEX,ITEM_SPRITE(a1)		
 	bge	.arrowCollision
 .coinCollision:	
 	bsr	DeleteItemSprite
-	add.l	#SCORE_COINS_ADDITION,score
+	AddToScore SCORE_COINS_ADDITION
 	bsr	RenderScore
 	PlaySound Chaching
-	rts
-	
+	rts	
 .arrowCollision:
 	bsr	DeleteItemSprite	
 	jsr	SpriteEnableAuto
 	rts
-	
+.clockCollision:
+	bsr	DeleteItemSprite	
+	jsr	FreezeScrolling
+	rts
+.eyeCollision:
+	bsr	DeleteItemSprite
+	jsr	RevealPathway
+	rts
 .skip:
 	add.l	#ITEM_STRUCT_SIZE,a1
 	dbra	d1,.loop	
 	rts
 
 
-DetectDownBeeCollisions:
-	lea	item25,a1
-	cmp.w	#0,ITEM_SPRITE_ENABLED(a1)
-	beq	.skip
-	cmp.w	#0,ITEM_SPRITE(a1)	
-	beq	.skip
-	move.w	spriteX,d2
-	move.w	ITEM_X(a1),d3
-	move.w	ITEM_Y(a1),d4
-	lsl.w	#ITEM_SPRITE_SPACING_SHIFT_CONVERT,d4
-	add.w	#ITEM_SPRITE_VSTART,d4
-	move.w	ITEM_Y_OFFSET(a1),d5
-	lsr.l	#ITEM_Y_OFFSET_SHIFT_CONVERT,d5	
-	add.w	d5,d4
-	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d3 ; convert to pixels
-	add.w	#ITEM_SPRITE_HORIZONTAL_START_PIXELS,d3
-	move.w	spriteY,d5
-	;; d2 = playerX pixels
-	;; d3 = beeX pixels
-	;; d4 = beeY pixels
-	;; d5 = player Y pixels
-	move.w	d3,d6
-	add.w	#BEE_COLLIDE_SIZE,d6
-	cmp.w	d2,d6 		; r1.x >= r2.x+w
-	ble	.skip
-
-	move.w	d2,d6
-	add.w	#BEE_COLLIDE_SIZE,d6
-	cmp.w	d3,d6		; r1.x+w <= r2.x
-	ble	.skip
-
-	move.w	d4,d6
-	add.w	#BEE_COLLIDE_SIZE,d6
-	cmp.w	d5,d6		; r1.y >= r2.y+h
-	ble	.skip
-
-	move.w	d5,d6
-	add.w	#BEE_COLLIDE_SIZE,d6
-	cmp.w	d4,d6		; r1.y+h < r2.y
-	ble	.skip
-
-	bsr	DeleteItemSprite
-	jmp	BigBang
-.skip:
-	rts
-
-DetectUpBeeCollisions:
-	lea	item26,a1
-	cmp.w	#0,ITEM_SPRITE_ENABLED(a1)
-	beq	.skip
-	cmp.w	#0,ITEM_SPRITE(a1)	
-	beq	.skip
-	move.w	spriteX,d2
-	move.w	ITEM_X(a1),d3
-	move.w	ITEM_Y(a1),d4
-	lsl.w	#ITEM_SPRITE_SPACING_SHIFT_CONVERT,d4
-	add.w	#ITEM_SPRITE_VSTART,d4
-	move.w	ITEM_Y_OFFSET(a1),d5
-	lsr.l	#ITEM_Y_OFFSET_SHIFT_CONVERT,d5	
-	sub.w	d5,d4
-	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d3 ; convert to pixels
-	add.w	#ITEM_SPRITE_HORIZONTAL_START_PIXELS,d3
-	move.w	spriteY,d5
-	;; d2 = playerX pixels
-	;; d3 = beeX pixels
-	;; d4 = beeY pixels
-	;; d5 = player Y pixels
-	move.w	d3,d6
-	add.w	#BEE_COLLIDE_SIZE,d6
-	cmp.w	d2,d6 		; r1.x >= r2.x+w
-	ble	.skip
-
-	move.w	d2,d6
-	add.w	#BEE_COLLIDE_SIZE,d6
-	cmp.w	d3,d6		; r1.x+w <= r2.x
-	ble	.skip
-
-	move.w	d4,d6
-	add.w	#BEE_COLLIDE_SIZE,d6
-	cmp.w	d5,d6		; r1.y >= r2.y+h
-	ble	.skip
-
-	move.w	d5,d6
-	add.w	#BEE_COLLIDE_SIZE,d6
-	cmp.w	d4,d6		; r1.y+h < r2.y
-	ble	.skip
-
-	bsr	DeleteItemSprite
-	jmp	BigBang
-.skip:
-	rts		
-
 
 RenderScore:
-	move.l	score,d0
-	move.w	#31,d1
-	jsr	RenderNumber4
+	move.l	__score,d0
+	move.w	#PANEL_SCORE_X,d1
+	jsr	RenderNumber5
 	rts
 
 
 InitialiseItems:
-	move.l	#0,score
-	bsr	RenderScore
-	
+	ResetScore
+	bsr	RenderScore	
 ResetItems:
 	lea	item1,a1	
 	move.w  #ITEM_NUM_SLOTS-1,d1
@@ -299,7 +144,7 @@ PrepareItemSpriteData:
 	bne	.enableSprites
 	rts
 	
-.enableSprites:	
+.enableSprites:
 	move.l	#ITEM_NUM_SLOTS-1,d0	
 .loop:
 	bsr 	_SetupItemSpriteData	
@@ -349,10 +194,8 @@ _SetupItemSpriteData:
 	
 	lsr.l	#3,d0	
 
-	cmp.l	#item25,a1
-	beq	.singleSprite
-	cmp.l	#item26,a1
-	beq	.singleSprite	
+	cmp.l	#itemEye,a1
+	bge	.singleSprite
 	mulu.w	#ITEM_SPRITE_BYTES*2,d0
 	add.w	spriteBufferIndex,d0
 	bra	.continueSingleSprite
@@ -371,15 +214,13 @@ _SetupItemSpriteData:
 	lsl.w	#ITEM_SPRITE_VERTICAL_BYTES_SHIFT_CONVERT,d2
 	move.w	d2,d3
 	
-	cmp.l	#item25,a1
-	beq	.bee
-	cmp.l	#item26,a1
-	beq	.bee	
+	cmp.l	#itemEye,a1
+	bge	.singleSprite2
 	bra	.continueBee
-.bee:
+.singleSprite2:
 	move.w	#0,d3		
 .continueBee:
-	
+
 
 	adda.w	d3,a0 		; ITEM_Y or 0 for bee
 
@@ -401,7 +242,8 @@ _SetupItemSpriteData:
 	lsl.w	#ITEM_SPRITE_SPACING_SHIFT_CONVERT,d0
 	lsr.w	#ITEM_Y_OFFSET_SHIFT_CONVERT,d1
 
-	cmp.b	#ITEM_SPRITE_BEE_UP_INDEX,d4
+	
+	cmp.l	#itemBeeUp,a1	
 	bne	.notBeeUp
 	sub.w   d1,d0
 	bra	.afterNotBeeUp
@@ -417,10 +259,15 @@ _SetupItemSpriteData:
 .noYOffset:	
 .c1:
 
+	
 	sub.l	d3,a0	;#1*ITEM_SPRITE_VERTICAL_BYTES,a0 or 0 for bee
-	cmp.b	#ITEM_SPRITE_BEE_UP_INDEX,d4
+	cmp.l   #itemEye,a1	
+	beq	.eyeSprite
+	cmp.l   #itemClock,a1	
+	beq	.clockSprite	
+	cmp.l   #itemBeeUp,a1
 	beq	.beeUpSprite		
-	cmp.b	#ITEM_SPRITE_BEE_DOWN_INDEX,d4
+	cmp.l   #itemBeeDown,a1
 	beq	.beeDownSprite		
 	cmp.b	#ITEM_SPRITE_ARROW_INDEX,d4
 	bge	.arrowSprite
@@ -432,6 +279,18 @@ _SetupItemSpriteData:
 .coinBSprite:
 	move.l	a0,sprite5Pointer
 	bra	.done	
+.eyeSprite:
+	cmp.w	#0,ITEM_X(a1)
+	beq	.spriteIsNotEnabled
+	move.l	a0,sprite2Pointer	
+	bsr	InstallArrowPalette
+	bra	.spriteIsNotEnabled
+.clockSprite:
+	cmp.w	#0,ITEM_X(a1)
+	beq	.spriteIsNotEnabled
+	move.l	a0,sprite2Pointer	
+	bsr	InstallClockPalette
+	bra	.spriteIsNotEnabled	
 .arrowSprite:	
 	cmp.w	#0,ITEM_X(a1)
 	beq	.done
@@ -474,7 +333,6 @@ _SetupItemSpriteData:
 RenderItemSprite:
 	;; d2.l - y tile index ?
 	movem.l	d2-d3,-(sp)
-
 	move.l	foregroundScrollX,d1
 	lsr.w	#FOREGROUND_SCROLL_SHIFT_CONVERT,d1 ; convert to pixels
 	andi.w	#$f,d1
@@ -524,6 +382,11 @@ InstallArrowPalette:
 	rts
 
 
+InstallClockPalette:
+	include "out/sprite_clock-0-palette.s"
+	rts	
+
+
 itemSpritesEnabled:
 	dc.l	0
 spriteBufferIndex:
@@ -571,11 +434,18 @@ beeDownMovingDown:
 	ItemControl item23,spriteArrow1,0
 	ItemControl item24,spriteArrow1,0
 
+	;; eye
+	ItemControl itemEye,spriteEye,1
+
+	;; clock
+	ItemControl itemClock,spriteClock,1			
+	
 	;; beeDown
-	ItemControl item25,spriteBeeDown1,1
+	ItemControl itemBeeDown,spriteBeeDown1,1
 
 	;; beeUp
-	ItemControl item26,spriteBeeUp1,1	
+	ItemControl itemBeeUp,spriteBeeUp1,1
+
 
 	ItemSprite spriteCoinA1,sprite_coin-0.bin
 	ItemSprite spriteCoinA2,sprite_coin-0.bin
@@ -610,10 +480,17 @@ beeDownMovingDown:
 	ItemSingleSprite spriteBeeUp1,sprite_bee-0.bin
 	ItemSingleSprite spriteBeeUp2,sprite_bee-1.bin
 
+	ItemSingleSprite spriteEye,sprite_eye-0.bin
+	ItemSingleSprite spriteClock,sprite_clock-0.bin	
 nextSpriteSlot:
 	dc.w	0
 
 
-score:
+__score:
 	dc.l	0
+
+__nextPlayerBonus:
+	dc.l	0
+
 	align	4
+	

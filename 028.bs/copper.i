@@ -49,10 +49,6 @@ copperListBpl2Ptr:
 	dc.w	BPLCON0,(SCREEN_BIT_DEPTH*2<<12)|COLOR_ON|DBLPF	
 
 	
-	if TIMING_TEST=1
-	dc.l	$fffffffe
-	endif
-
 
 playAreaCopperPalettePtr1:	
 	;; the foreground color values are just place holders and will be poked with the correcr value

@@ -4,8 +4,13 @@
 
 
 StartMusic:
+.wait: 				; In case there is currently  fade in progress
+	jsr	PlayNextSound	
 	cmp.w	#0,P61_Master
 	beq	.skip
+	cmp.w	#64,P61_Master
+	blt	.wait
+
 	cmp.w	currentModule,d0
 	beq	.skip
 	cmp.w	#-1,currentModule

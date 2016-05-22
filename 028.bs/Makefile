@@ -70,15 +70,18 @@ IMAGES=foreground.png \
 	sprite_fallingTank-4.png \
 	sprite_bee-0.png\
 	sprite_bee-1.png\
+	sprite_eye-0.png\
+	sprite_clock-0.png\
 	font8x8.png\
 	font8x85.png\
 	splash.png\
 	splashSave.png\
-	baloonMask.png
+	baloonMask.png\
+	countdown.png
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
-VASM_EXTRA_ARGS=-DTIMING_TEST=0 -DSFX=1 -DBALOON_BOB=1 -DMAX_P61_SIZE=$(MAX_P61_SIZE) -allmp
+VASM_EXTRA_ARGS=-DSFX=1 -DBALOON_BOB=1 -DMAX_P61_SIZE=$(MAX_P61_SIZE) -allmp
 
 LINKER_OPTIONS=-T link.script.x
 
@@ -114,6 +117,9 @@ out/background.bin: assets/background.png
 out/panel.bin: assets/panel.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/panel --use-palette=assets/panel.pal
 
+out/countdown.bin: assets/countdown.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/countdown --use-palette=assets/panel.pal
+
 out/mpanel.bin: assets/mpanel.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/mpanel --use-palette=assets/mpanel.pal
 
@@ -145,6 +151,12 @@ out/sprite_coin%.bin: out/sprite_coin%.png
 
 out/sprite_bee%.bin: out/sprite_bee%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_bee$* --palette-offset 20  --use-palette=assets/bee.pal
+
+out/sprite_eye%.bin: out/sprite_eye%.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_eye$* --palette-offset 20  --use-palette=assets/eye.pal
+
+out/sprite_clock%.bin: out/sprite_clock%.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_clock$* --palette-offset 20  --use-palette=assets/clock.pal
 
 out/sprite_arrow%.bin: out/sprite_arrow%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_arrow$* --palette-offset 20  --use-palette=assets/arrow.pal
@@ -184,6 +196,14 @@ out/sprite_coin%.png: assets/assets.png
 .SECONDARY:
 out/sprite_bee%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_bee --width=16 --height=15 --rows=1 --cols=2 --dx=16 --dy=16 --x=192 --y=96
+
+.SECONDARY:
+out/sprite_eye%.png: assets/assets.png
+	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_eye-0.png --width=16 --height=15 --rows=1 --cols=1 --dx=16 --dy=16 --x=192 --y=64
+
+.SECONDARY:
+out/sprite_clock%.png: assets/assets.png
+	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_clock-0.png --width=16 --height=15 --rows=1 --cols=1 --dx=16 --dy=16 --x=192 --y=80
 
 .SECONDARY:
 out/sprite_arrow%.png: assets/assets.png
@@ -268,6 +288,8 @@ out/main.o: $(IMAGEDATA) \
 	out/level8_foreground-map.s\
 	out/level9_foreground-map.s\
 	out/level10_foreground-map.s\
+	out/level11_foreground-map.s\
+	out/level12_foreground-map.s\
 	out/background-map.s  Makefile link.script.x\
 	out/menu-palette.s\
 	out/paletteA_playarea_fade.s out/paletteA_flags_fade.s out/paletteA_foreground-palette-table.s out/paletteA_tileFade.s\
@@ -275,8 +297,5 @@ out/main.o: $(IMAGEDATA) \
 	out/paletteC_playarea_fade.s out/paletteC_flags_fade.s out/paletteC_foreground-palette-table.s out/paletteC_tileFade.s\
 	out/panelFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw out/yay.raw
 
-setuptiming:
-	$(eval	VASM_EXTRA_ARGS=-DTIMING_TEST=1 -DSFX=1)
-	echo $(VASM_EXTRA_ARGS)
 
-timing: setuptiming all
+

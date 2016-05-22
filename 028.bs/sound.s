@@ -29,9 +29,10 @@ PlayNextSound:
 	xdef	PlayFallingSound
 	xdef    PlayChachingSound
 	xdef    PlayWhooshSound
-	xdef    PlayYaySound	
+	xdef    PlayYaySound
 	
 PlayJumpSound:
+	move.w	#0,dontKillSound	
 	lea     jump(pc),a1
         move.l  a1,AUD3LCH(a6)
         move.w  #123,AUD3PER(a6)
@@ -42,6 +43,7 @@ PlayJumpSound:
 
 PlayWhooshSound:
 	KillSound
+	move.w	#0,dontKillSound	
 	lea     whoosh,a1
         move.l  a1,AUD3LCH(a6)
         move.w  #256,AUD3PER(a6)
@@ -53,6 +55,7 @@ PlayWhooshSound:
 
 PlayFallingSound:
 	KillSound
+	move.w	#1,dontKillSound	
 	lea     falling(pc),a1
         move.l  a1,AUD3LCH(a6)
         move.w  #256,AUD3PER(a6)
@@ -62,7 +65,8 @@ PlayFallingSound:
 	rts
 
 PlayChachingSound:
-	KillSound	
+	KillSound
+	move.w	#0,dontKillSound
 	lea     chaching,a1
         move.l  a1,AUD3LCH(a6)
         move.w  #256,AUD3PER(a6)
@@ -72,7 +76,8 @@ PlayChachingSound:
 	rts
 
 PlayYaySound:
-	KillSound	
+	KillSound
+	move.w	#1,dontKillSound
 	lea     yay,a1
         move.l  a1,AUD3LCH(a6)
         move.w  #423,AUD3PER(a6)
@@ -105,8 +110,9 @@ endYay:
 	align	2
 emptySound:
 	dc.l	0
+dontKillSound:
+	dc.w	0
 	endif
 
 fadeMusic: 			; 0 - no fade, 1 - fade out 2, fade in
 	dc.w	0
-	

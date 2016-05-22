@@ -6,26 +6,26 @@ PlaySound:	macro
 
 KillSound:	macro
 	if	SFX=1
+	cmp.w	#1,dontKillSound
+	beq	.\@skip
 	move.w	#(DMAF_AUD3),DMACON(a6)
         move.w  #1,AUD3PER(a6)	
 	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played
 	move.l	#emptySound,AUD3LCH(a6)	
-
-
 	lea 	$dff006,a0
-
 	move.w	#4,d2
-.nTimes:
+.\@nTimes:
 	move.w	(a0),d0
 	lsr.w	#8,d0
-.loop:
+.\@loop:
 	move.l	(a0),d1
 	lsr.w	#8,d1
 	cmp.w	d0,d1
-	beq	.loop
-	dbra	d2,.nTimes
+	beq	.\@loop
+	dbra	d2,.\@nTimes
 
 	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
+.\@skip:
 	endif
 	endm
 
@@ -178,3 +178,34 @@ diskmodule\1:
 	cnop	0,512
 enddiskmodule\1:
 	endm
+
+AddToScore: macro 
+	 add.l	#\1,__score
+	 move.l	__score,d0	 
+	 cmp.l	__nextPlayerBonus,d0
+	 blt	.\@skip
+	 movem.l d0-a6,-(sp)
+	 PlaySound Yay
+	 lea	livesCounterText,a0
+	 jsr	IncrementCounter
+	 lea	livesCounterShortText,a1
+	 move.w	#PANEL_LIVES_X,d0
+	 add.l	#LIVES_PLAYER_BONUS,__nextPlayerBonus
+	 jsr	RenderCounter	
+	 movem.l (sp)+,d0-a6
+.\@skip:
+	 cmp.l	#SCORE_MAX,__score
+	 blt	.\@skip2
+	 move.l	#0,__score
+	 move.l	#LIVES_PLAYER_BONUS,__nextPlayerBonus
+.\@skip2:
+	 endm
+
+ResetScore: macro
+	 move.l	#0,__score
+	 move.l	#LIVES_PLAYER_BONUS,__nextPlayerBonus
+	 endm
+
+CompareScore: macro
+	 cmp.l	#\1,__score
+	 endm
