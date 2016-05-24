@@ -6,9 +6,16 @@
 SPLASH_COLOR_DEPTH		equ 5
 SPLASH_SCREEN_WIDTH_BYTES	equ 40
 
+ReloadSplashScreen:
+	move.l	#endDiskSplash-diskSplash,d0
+	move.l	#splash,a0
+	move.l	#diskSplash,a1	
+	jsr	LoadDiskData
+	rts
+	
 ShowSplash:
 	lea 	CUSTOM,a6
-		
+	
 	;; set up playfield
 	move.w  #(RASTER_Y_START<<8)|RASTER_X_START,DIWSTRT(a6)
 	move.w	#((RASTER_Y_STOP-256)<<8)|(RASTER_X_STOP-256),DIWSTOP(a6)
@@ -20,8 +27,10 @@ ShowSplash:
 	move.w	#SPLASH_SCREEN_WIDTH_BYTES*SPLASH_COLOR_DEPTH-SPLASH_SCREEN_WIDTH_BYTES,BPL1MOD(a6)
 	move.w	#SPLASH_SCREEN_WIDTH_BYTES*SPLASH_COLOR_DEPTH-SPLASH_SCREEN_WIDTH_BYTES,BPL2MOD(a6)
 
+	bsr	ReloadSplashScreen
+	
 	;; poke bitplane pointers
-	lea	splash(pc),a1
+	lea	splash,a1
 	lea     splashCopperListBplPtr(pc),a2
 	moveq	#SPLASH_COLOR_DEPTH-1,d0
 .bitplaneloop:
@@ -70,5 +79,14 @@ splashCopperListBplPtr:
 	dc.w	BPL6PTH,0
 	dc.l	$fffffffe		
 
-splash:	
+
+	section	.bss
+splash:
+	ds.b	endDiskSplash-diskSplash
+	cnop	0,1024
+	
+	section	.noload
+diskSplash:
 	incbin "out/splash.bin"
+endDiskSplash:
+	cnop	0,512	

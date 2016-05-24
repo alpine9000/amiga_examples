@@ -2,6 +2,7 @@
 
 	xdef SwitchBuffers
 	xdef SwitchBackgroundBuffers
+	xdef SwitchBackgroundBuffers2	
 	xdef PokePanelBitplanePointers
 
 	
@@ -29,26 +30,17 @@ SwitchBuffers:
 	bsr	PokeBitplanePointers
 				
 SwitchBackgroundBuffers:
-	
+
 	move.l	backgroundScrollX,d0
 	lsr.w	#BACKGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels	
 	lsr.w   #3,d0		; bytes to scroll		
 
-	if BALOON_BOB=1
-	move.l	baloonSaveOffscreen,a0
-	move.l	baloonSaveOnscreen,baloonSaveOffscreen
-	move.l	a0,baloonSaveOnscreen	
-
-	move.l	baloonLastSaveOffscreen,a0
-	move.l	baloonLastSaveOnscreen,baloonLastSaveOffscreen
-	move.l	a0,baloonLastSaveOnscreen	
-	endif
-	
+	eor.l	#4,bobBufferOffset	
 	move.l	backgroundOffscreen,a0
 	move.l	backgroundOnscreen,backgroundOffscreen
 	move.l	a0,backgroundOnscreen
 	move.l	a0,a1
-
+	
 	lea 	copperListBpl2Ptr,a0
 	bsr.s	PokeBitplanePointers
 
@@ -59,10 +51,24 @@ SwitchBackgroundBuffers:
 	lea 	copperListBpl2Ptr2_MP,a0
 	bsr.s	PokeBitplanePointers
 
+	
 	jsr	SwitchItemSpriteBuffers	
 	
 	rts
 
+
+SwitchBackgroundBuffers2:
+	move.l	backgroundScrollX,d0
+	lsr.w	#BACKGROUND_SCROLL_SHIFT_CONVERT,d0		; convert to pixels	
+	lsr.w   #3,d0		; bytes to scroll		
+
+	eor.l	#4,bobBufferOffset	
+	move.l	backgroundOffscreen,a0
+	move.l	backgroundOnscreen,backgroundOffscreen
+	move.l	a0,backgroundOnscreen
+	move.l	a0,a1
+
+	rts
 PokeBitplanePointers:
 	; d0 = frame offset in bytes
 	; a0 = BPLP copper list address

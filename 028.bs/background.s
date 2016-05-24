@@ -22,8 +22,27 @@ InitialiseBackground:
 	move.l	#0,d2
 	jsr	BlitFillColor
 	rts
-	
+
 RenderBackgroundTile:	
+	;; a2 - map
+	move.l	backgroundScrollX,d0
+	lsr.w	#BACKGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
+	lsr.w   #3,d0		; bytes to scroll
+	add.l	d0,a0
+	lea 	backgroundTilemap,a1	
+	add.l	#BITPLANE_WIDTH_BYTES-2,a0 ; dest
+	move.w	(a2),d0  	; source tile
+	add.w	d0,a1
+	move.l	backgroundScrollX,d2
+	lsr.b	#BACKGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
+	andi.w	#$f,d2		; find the shift component		
+
+	;;  this is where the old baloon was triggered - won't work anymore
+	jsr	BlitBackgroundTile
+
+	rts
+	
+OldRenderBackgroundTile:	
 	;; a2 - map
 	move.l	backgroundScrollX,d0
 	lsr.w	#BACKGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels
@@ -38,16 +57,8 @@ RenderBackgroundTile:
 	lsr.b	#BACKGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
 	andi.w	#$f,d2		; find the shift component		
 
-
-	if BALOON_BOB=1	
-	cmp.w	#$306,d0
-	bne	.dontTriggerBaloon
-	move.w	d2,d0
-	jsr	TriggerBaloon
-.dontTriggerBaloon:
-	endif	
-	
 	jsr	BlitBackgroundTile
+
 	cmp.l   #backgroundBitplanes1,backgroundOffscreen
 	bne	.offsetSub
 	add.l	#backgroundBitplanes2-backgroundBitplanes1,a0
@@ -55,7 +66,9 @@ RenderBackgroundTile:
 .offsetSub:
 	sub.l	#backgroundBitplanes2-backgroundBitplanes1,a0
 .doBlit:
-	jsr	BlitBackgroundTile	
+
+	jsr	BlitBackgroundTile
+
 	rts
 
 RenderNextBackgroundFrame:
@@ -69,11 +82,29 @@ RenderNextBackgroundFrame:
 	move.l	#0,backgroundScrollX
 .skip:
 
-	if BALOON_BOB=1
-	jsr	RenderBaloon
-	endif
+
+	if 1 			; new background tile render method
+
+	jsr	RestoreBobBackgrounds
+	move.l	backgroundOffscreen,a0
 	bsr	RenderBackgroundTile
 	
+	add.l	#2,a2
+	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX
+	move.l	backgroundOffscreen,a0
+	bsr	RenderBackgroundTile
+	sub.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX
+	sub.l	#2,a2
+
+	else
+
+	jsr	RestoreBobBackgrounds
+	move.l	backgroundOffscreen,a0
+	bsr	OldRenderBackgroundTile	
+	
+	endif
+	
+	jsr	RenderBob
 	rts
 	
 	

@@ -136,19 +136,21 @@ SetupBoardLoop:
 	bsr 	Update
 
 	jsr	RenderNextForegroundFrame	
-	
+
+	jsr 	SwitchBackgroundBuffers2
 	move.w	#15,d5
 	sub.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX			
 .renderNextBackgroundFrameLoop:	
 	add.l	#BACKGROUND_SCROLL_PIXELS,backgroundScrollX		
 	jsr	RenderNextBackgroundFrame
-	jsr 	SwitchBackgroundBuffers
+	jsr 	SwitchBackgroundBuffers2
 	dbra	d5,.renderNextBackgroundFrameLoop
-	
+
 	cmp.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,frameCount	
 	bge	.gotoGameLoop
 	bra	SetupBoardLoop
 .gotoGameLoop:
+	jsr 	SwitchBackgroundBuffers	
 	add.l	#1,frameCount
 	jsr	WaitForJoystick	
 	move.w	#0,moving
@@ -170,9 +172,7 @@ FadeInLoop:
 	move.l	#0,verticalBlankCount
 	move.l	#1,frameCount
 	move.l	#FOREGROUND_SCROLL_PIXELS,foregroundScrollPixels
-	if BALOON_BOB=1
-	jsr	EnableBaloon
-	endif
+	jsr	EnableBobs
 	bra	GameLoop
 .c1:
 	bra	FadeInLoop
@@ -197,7 +197,6 @@ GameLoop:
 .noSkippedFrames:	
 	add.l	#1,frameCount
 	jsr	WaitVerticalBlank
-
 	bsr	HoriScrollPlayfield
 	jsr 	SwitchBuffers
 	move.l	foregroundScrollX,d0
@@ -223,7 +222,7 @@ GameLoop:
 	bgt	.notMoving
 	move.w	#1,moving
 .notMoving:
-	
+
 	bsr 	Update
 	jsr	CheckPlayerMiss
 	bsr	RenderNextForegroundFrame
@@ -239,6 +238,7 @@ GameLoop:
 	jsr	RenderPathway
 .dontRenderPathway:
 
+	
 	jsr	PlayNextSound	
 	bra	GameLoop
 
@@ -333,9 +333,7 @@ InstallNextLevel:
 	
 LevelComplete:
 	PlaySound Yay
-	if BALOON_BOB=1
-	jsr	DisableBaloon
-	endif
+	jsr	ResetBobs	
 	jsr	ResetItems
 	jsr	HidePlayer
 	jsr 	SelectNextPlayerSprite
@@ -520,9 +518,7 @@ BigBang:
 	
 	PlaySound Falling
 	jsr	WaitVerticalBlank
-	if BALOON_BOB=1
-	jsr	DisableBaloon
-	endif
+	jsr	ResetBobs
 	jsr	PlayNextSound		
 	jsr	ResetItems
 	move.w	#0,moving
