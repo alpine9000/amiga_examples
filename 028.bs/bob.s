@@ -13,19 +13,42 @@
 	;; BLITTER_OBJECT
 	;; index,startX,y,dx,mapLine,blitHeight
 bob:	
-	BALOON_BOB 0,15,24
+	CLOUD_BOB 0,15,8
 endBob:
-	BALOON_BOB 1,150,32
 
-	CLOUD_BOB 2,64,8
-	CLOUD_BOB 3,170,12
+	CLOUD_BOB 1,96,10
+	CLOUD_BOB 2,170,12
+	BALOON_BOB 3,15,24
 	dc.l	0	
+
 ResetBobs:
+	move.w	#2,bobsEnabled 	; disables bob movement
 	bsr	RestoreBobBackgrounds
+	bsr	RenderBob
 	eor.l	#4,bobBufferOffset
+	move.l	backgroundOffscreen,a0
+	move.l	backgroundOnscreen,backgroundOffscreen
+	move.l	a0,backgroundOnscreen
 	bsr	RestoreBobBackgrounds
+	bsr	RenderBob	
 	eor.l	#4,bobBufferOffset
+	move.l	backgroundOffscreen,a0
+	move.l	backgroundOnscreen,backgroundOffscreen
+	move.l	a0,backgroundOnscreen	
 	move.w	#0,bobsEnabled
+	lea	bob,a5
+.loop:
+	cmp.l	#0,(a5)
+	beq	.done
+	lea	BOB_LAST_DEST_ADDRESS(a5),a1
+	move.l	#0,(a1)
+	adda.l	bobBufferOffset,a1
+	move.l	#0,(a1)
+	move.l	#320<<BOB_SHIFT_CONVERT,BOB_X(a5)
+	adda.l	#endBob-bob,a5	
+	bra	.loop
+.done:	
+	
 	rts
 	
 
@@ -68,13 +91,6 @@ RestoreBobBackgrounds:
 	movem.l	(sp)+,d0/a2
 	rts
 	
-SaveBackground:
-	;; a5.l	bob address
-	;; kills a0,a2
-
-
-	rts
-
 SaveBobBackgrounds:
 	WaitBlitter		
 	move.w	#$ffff,BLTAFWM(a6)
@@ -91,7 +107,10 @@ SaveBobBackgrounds:
 	beq	.done	
 
 	move.l	BOB_X(a5),d2
+	cmp.w	#2,bobsEnabled
+	beq	.dontMoveBob
 	sub.l	BOB_DX(a5),d2
+.dontMoveBob:
 	cmp.l	#-32<<BOB_SHIFT_CONVERT,d2
 	bgt	.dontReset
 	move.l	#320<<BOB_SHIFT_CONVERT,d2
@@ -132,6 +151,7 @@ RenderBob:
 	cmp.w	#0,bobsEnabled
 	beq	.dontRenderBobs
 	movem.l	d0-a5,-(sp)
+
 
 	bsr	 SaveBobBackgrounds
 

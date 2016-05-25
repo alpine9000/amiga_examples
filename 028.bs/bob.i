@@ -45,5 +45,5 @@ BALOON_BOB: macro
 	endm
 
 CLOUD_BOB: macro
-	BLITTER_OBJECT \1,320,\2,\3,24,18
+	BLITTER_OBJECT \1,320,\2,\3,0,16
 	endm	

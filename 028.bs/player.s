@@ -570,7 +570,7 @@ SelectNextPlayerSprite:
 
 UpdatePlayerScore:
 	AddToScore 10
-RenderPlayerScore:	
+RenderPlayerScore:
 	jsr	RenderScore
 	move.l	playerXColumn,d0
 	move.w	#PANEL_COLUMNS_REMAINING_X,d1

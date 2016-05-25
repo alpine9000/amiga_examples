@@ -5,7 +5,6 @@
 	xdef BlitBackgroundTile
 	xref BlueFill
 	xref SimpleBlit
-
 	
 ;;       A(mask) B(bob)  C(bg)   D(dest)
 ;;       -       -       -       - 
@@ -103,28 +102,54 @@ _BlitScroll:
 
 
 BlitTile:
-	;; a0 - dest bitplane pointer
-	;; a1 - source tile pointer
-	;; d2 - y tile index
+	;; a0.l - dest bitplane pointer
+	;; a1.l - source tile pointer
+	;; d2.w - y tile index
+
+
+	movem.l	d2/a0/a2,-(sp)
+
+	if 0
+	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16,d2
+	adda.w	d2,a0
+	endif
+	lea	blitTileMuluTable(pc),a2
+	add.w	d2,d2
+	adda.w	0(a2,d2.w),a0	
 
 	WaitBlitter	
-	movem.l	d2/a0,-(sp)
 	move.w	#0,BLTCON1(a6)		;
 	move.w	#BC0F_SRCA|BC0F_DEST|$f0,BLTCON0(a6)
-	
 	move.w 	#TILEMAP_WIDTH_BYTES-2,BLTAMOD(a6)
 	move.w 	#BITPLANE_WIDTH_BYTES-2,BLTDMOD(a6)		;
-
-	mulu.w	#BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16,d2
-	add.l	d2,a0
 	move.l 	a1,BLTAPTH(a6) 		; source
 	move.l 	a0,BLTDPTH(a6)		; dest
 	move.w	#$ffff,BLTAFWM(a6)
 	move.w	#$ffff,BLTALWM(a6)
 	move.w 	#(16*SCREEN_BIT_DEPTH)<<6|(1),BLTSIZE(a6)	;rectangle size, starts blit
-	movem.l	(sp)+,d2/a0
+	movem.l	(sp)+,d2/a0/a2
 	rts
+
+blitTileMuluTable:
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*0
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*1
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*2
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*3
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*4
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*5
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*6
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*7
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*8
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*9
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*10
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*11
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*12
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*13
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*14
+	dc.w	BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*16*15	
 	
+
+
 BlitBackgroundTile:
 	;; a0 - dest bitplane pointer
 	;; a1 - source tile pointer

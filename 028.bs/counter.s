@@ -26,6 +26,7 @@ RenderNumber4:
 	jsr	DrawText8
 	rts
 
+	
 RenderNumber5:
 	;; d0.l	number
 	;; d1.w x position
@@ -92,7 +93,6 @@ DecrementCounter:
 ToAscii:
 	;; d0.l number
 	;; d2.l numb chars
-	;; a0.l buffer
 	;; 	movem.l d0-d2/a1,-(a7)
 	lea	staticBuffer,a0
 	move.l	a0,a1
