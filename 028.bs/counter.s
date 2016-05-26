@@ -3,7 +3,8 @@
 	xdef	IncrementCounter
 	xdef	DecrementCounter
 	xdef    RenderNumber5
-	xdef    RenderNumber4	
+	xdef    RenderNumber4
+	xdef    RenderNumber2	
 	
 RenderCounter:
 	;; d0.w x position
@@ -26,6 +27,23 @@ RenderNumber4:
 	jsr	DrawText8
 	rts
 
+RenderNumber2:
+	;; d0.l	number
+	;; d1.w x position
+	move.l	d1,d3
+	move.l	#2,d2
+	bsr	ToAscii
+	move.l	a0,a1
+	lea	panel,a0
+	move.w	#20,d1
+	move.w	d3,d0
+	jsr	DrawText8
+	rts	
+
+
+test:
+	dc.b	"HELLO"
+	dc.b	0
 	
 RenderNumber5:
 	;; d0.l	number

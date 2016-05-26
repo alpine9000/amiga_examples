@@ -10,6 +10,7 @@
 	xdef SetupSpriteData
 	xdef ScrollSprites
 	xdef RenderPlayerScore
+	xdef PreRenderColumnsRemaining
 	xdef deadSprite 	; used in items
 	xdef UpdatePlayerFallingAnimation
 	xdef InstallPlayerColorPalette
@@ -573,8 +574,14 @@ UpdatePlayerScore:
 RenderPlayerScore:
 	jsr	RenderScore
 	move.l	playerXColumn,d0
+	move.w	#PANEL_COLUMNS_REMAINING_X+(8*3),d1
+	jsr	RenderNumber2
+	rts
+
+PreRenderColumnsRemaining:
+	move.l	playerXColumn,d0	
 	move.w	#PANEL_COLUMNS_REMAINING_X,d1
-	jsr	RenderNumber5	
+	jsr	RenderNumber5
 	rts
 	
 	

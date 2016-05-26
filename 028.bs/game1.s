@@ -93,6 +93,7 @@ Reset:
 	move.w	#PANEL_PLAYER1_X,d0
 	jsr	RenderCounter
 	move.l  playerXColumnLastSafe,playerXColumn
+	jsr	PreRenderColumnsRemaining
 	jsr	RenderPlayerScore
 	
 	move.l  startForegroundMapPtr,foregroundMapPtr
@@ -228,6 +229,13 @@ GameLoop:
 	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame
 
+	if 0
+	jsr	RenderPlayerScore
+	move.w	#$0f0,COLOR00(a6)
+	jsr	RenderPlayerScore
+	move.w	#$0,COLOR00(a6)
+	endif
+	
 	cmp.w	#0,pathwayClearPending
 	beq	.dontClearPathway
 	jsr	ClearPathway
