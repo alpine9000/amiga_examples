@@ -85,6 +85,7 @@ MainMenu:
 	bra	InitialiseNewGame
 
 Reset:
+	move.w	#1,splashInvalid
 	move.w	#0,stopScrollingPending	
 	move.w	#PANEL_LIVES_X,d0
 	lea	livesCounterShortText,a1	

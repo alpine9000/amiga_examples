@@ -19,6 +19,8 @@ MENU_BOTTOM_OFFSET		equ (playBottomColor-playTopColor)
 ShowMenu:
 	lea 	CUSTOM,a6
 
+	jsr	ReloadSplashScreen	
+	
 	jsr	WaitVerticalBlank	
 	;; set up default palette
 	include "out/menu-palette.s"

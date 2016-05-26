@@ -1,16 +1,22 @@
 	include "includes.i"
 
 	xdef	ShowSplash
+	xdef	ReloadSplashScreen
 	xdef	splash
+	xdef	splashInvalid
 	
 SPLASH_COLOR_DEPTH		equ 5
 SPLASH_SCREEN_WIDTH_BYTES	equ 40
 
 ReloadSplashScreen:
+	cmp.w	#0,splashInvalid
+	beq	.skip
+	move.w	#0,splashInvalid
 	move.l	#endDiskSplash-diskSplash,d0
 	move.l	#splash,a0
 	move.l	#diskSplash,a1	
 	jsr	LoadDiskData
+.skip:
 	rts
 	
 ShowSplash:
@@ -79,7 +85,9 @@ splashCopperListBplPtr:
 	dc.w	BPL6PTH,0
 	dc.l	$fffffffe		
 
-
+splashInvalid:
+	dc.w	1
+	
 	section	.bss
 splash:
 	ds.b	endDiskSplash-diskSplash
