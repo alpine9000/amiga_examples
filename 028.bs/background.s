@@ -110,6 +110,7 @@ RenderNextBackgroundFrame:
 	add.l	d0,a2
 	cmp.w	#$FFFF,20(a2)
 	bne	.skip
+	jsr	ClearBobs
 	move.l	#0,backgroundScrollX
 .skip:
 
@@ -135,7 +136,7 @@ RenderNextBackgroundFrame:
 	
 	endif
 
-	cmp.l	#320,backgroundScrollX
+	cmp.l	#SCREEN_WIDTH*2,backgroundScrollX
 	ble	.dontRenderBobs
 	jsr	RenderBob
 .dontRenderBobs:

@@ -125,12 +125,6 @@ ResetItems:
 
 SwitchItemSpriteBuffers:
 	move.w	spriteX,spriteLagX	
-	move.w	#ITEM_NUM_SLOTS-1,d1
-	move.w	d1,d0
-	lea	item1,a1
-.loop:
-	adda.l	#ITEM_STRUCT_SIZE,a1		
-	dbra	d1,.loop
 	rts
 
 

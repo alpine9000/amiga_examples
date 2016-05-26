@@ -137,7 +137,8 @@ SetupBoardLoop:
 	move.w	#1,moving
 	bsr 	Update
 
-	jsr	RenderNextForegroundFrame	
+	jsr	RenderNextForegroundFrame
+	jsr	PrepareItemSpriteData			
 
 	jsr 	SwitchBackgroundBuffers2
 	move.w	#15,d5
@@ -248,7 +249,8 @@ GameLoop:
 .dontRenderPathway:
 
 	
-	jsr	PlayNextSound	
+	jsr	PlayNextSound
+	jsr	PrepareItemSpriteData
 	bra	GameLoop
 
 
@@ -462,7 +464,7 @@ RenderNextForegroundFrame:
 	add.l	#1,d3
 	cmp.l 	#FOREGROUND_PLAYAREA_HEIGHT_WORDS,d3
 	blt	.loop
-	jsr	PrepareItemSpriteData	
+	;; 	jsr	PrepareItemSpriteData	
 	rts
 
 
@@ -517,6 +519,7 @@ BigBang:
 	add.l	#1,frameCount
 	jsr	Update
 	bsr	RenderNextForegroundFrame
+	jsr	PrepareItemSpriteData			
 	jsr 	RenderNextBackgroundFrame	
 	jsr	WaitVerticalBlank
 	jsr	PlayNextSound		

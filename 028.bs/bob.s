@@ -5,6 +5,7 @@
 	xdef AddBobBaloon
 	xdef RenderBob
 	xdef ResetBobs
+	xdef ClearBobs
 	xdef RestoreBobBackgrounds
 	xdef bobBufferOffset
 	xdef EnableBobs
@@ -58,6 +59,33 @@ AddBobCloud:
 	adda.l	#endBob-bob,a5	
 	bra	.loop
 .done:
+	rts
+
+ClearBobs:
+	move.w	#2,bobsEnabled 	; disables bob movement
+	bsr	RestoreBobBackgrounds
+	eor.l	#4,bobBufferOffset
+	move.l	backgroundOffscreen,a0
+	move.l	backgroundOnscreen,backgroundOffscreen
+	move.l	a0,backgroundOnscreen
+	bsr	RestoreBobBackgrounds
+	eor.l	#4,bobBufferOffset
+	move.l	backgroundOffscreen,a0
+	move.l	backgroundOnscreen,backgroundOffscreen
+	move.l	a0,backgroundOnscreen	
+	move.w	#1,bobsEnabled
+	lea	bob,a5
+.loop:
+	cmp.l	#0,(a5)
+	beq	.done
+	lea	BOB_LAST_DEST_ADDRESS(a5),a1
+	move.l	#0,(a1)
+	adda.l	bobBufferOffset,a1
+	move.l	#0,(a1)
+	move.l	#BOB_IDLE_X+1,BOB_X(a5)
+	adda.l	#endBob-bob,a5	
+	bra	.loop
+.done:	
 	rts
 	
 ResetBobs:
