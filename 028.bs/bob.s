@@ -1,6 +1,8 @@
 	include "includes.i"
 	include "bob.i"
-	
+
+	xdef AddBobCloud
+	xdef AddBobBaloon
 	xdef RenderBob
 	xdef ResetBobs
 	xdef RestoreBobBackgrounds
@@ -10,17 +12,54 @@
 	;; BALOON_BOB/CLOUD_BOB
 	;; index,y,dx
 	
-	;; BLITTER_OBJECT
-	;; index,startX,y,dx,mapLine,blitHeight
 bob:	
 	CLOUD_BOB 0,15,8
 endBob:
-
 	CLOUD_BOB 1,96,10
 	CLOUD_BOB 2,170,12
+baloonBob:
 	BALOON_BOB 3,15,24
 	dc.l	0	
 
+
+AddBobBaloon:
+	lea	baloonBob,a5
+	cmp.l	#BOB_IDLE_X,BOB_X(a5)
+	bne	.continue
+	move.l	#320<<BOB_SHIFT_CONVERT,BOB_X(a5)
+	lsl.w	#4,d1
+	move.w	d1,BOB_Y+2(a5)
+	move.l	#24,BOB_DX(a5)
+	rts
+.continue:
+	rts
+	
+AddBobCloud:
+	lea	bob,a5
+.loop:
+	cmp.l	#0,(a5)
+	beq	.done
+	cmp.l	#baloonBob,a5
+	beq	.done
+	cmp.l	#BOB_IDLE_X,BOB_X(a5)
+	bne	.continue
+	move.l	#320<<BOB_SHIFT_CONVERT,BOB_X(a5)
+	move.l	#backgroundTilemap,a3
+	adda.w	d0,a3
+	move.l	a3,BOB_SOURCE_ADDRESS(a5)
+	move.l	#bobMask,a3
+	adda.w	d0,a3
+	move.l	a3,BOB_MASK_ADDRESS(a5)	
+	lsl.w	#4,d1
+	move.w	d1,BOB_Y+2(a5)	
+	move.l	#12,BOB_DX(a5)
+	bra	.done
+.continue:
+	adda.l	#endBob-bob,a5	
+	bra	.loop
+.done:
+	rts
+	
 ResetBobs:
 	move.w	#2,bobsEnabled 	; disables bob movement
 	bsr	RestoreBobBackgrounds
@@ -44,7 +83,7 @@ ResetBobs:
 	move.l	#0,(a1)
 	adda.l	bobBufferOffset,a1
 	move.l	#0,(a1)
-	move.l	#320<<BOB_SHIFT_CONVERT,BOB_X(a5)
+	move.l	#BOB_IDLE_X+1,BOB_X(a5)
 	adda.l	#endBob-bob,a5	
 	bra	.loop
 .done:	
@@ -111,9 +150,10 @@ SaveBobBackgrounds:
 	beq	.dontMoveBob
 	sub.l	BOB_DX(a5),d2
 .dontMoveBob:
-	cmp.l	#-32<<BOB_SHIFT_CONVERT,d2
+	cmp.l	#BOB_IDLE_X,d2
 	bgt	.dontReset
-	move.l	#320<<BOB_SHIFT_CONVERT,d2
+	move.l	#BOB_IDLE_X,d2
+	
 .dontReset:
 	move.l	d2,BOB_X(a5)
 	add.l	backgroundScrollX,d2
@@ -141,7 +181,7 @@ SaveBobBackgrounds:
 	adda.l	bobBufferOffset,a2
 	
 	move.l	a0,(a2)	
-	
+
 	adda.l	#endBob-bob,a5
 	bra	.loop
 .done:

@@ -32,14 +32,45 @@ RenderBackgroundTile:
 	lea 	backgroundTilemap,a1	
 	add.l	#BITPLANE_WIDTH_BYTES-2,a0 ; dest
 	move.w	(a2),d0  	; source tile
-	add.w	d0,a1
 	move.l	backgroundScrollX,d2
 	lsr.b	#BACKGROUND_SCROLL_SHIFT_CONVERT,d2		; convert to pixels
 	andi.w	#$f,d2		; find the shift component		
 
 	;;  this is where the old baloon was triggered - won't work anymore
+
+	cmp.l	#backgroundBitplanes2,backgroundOffscreen
+	bne	.dontProcessBobs
+	cmp.w	#0,d0
+	beq	.addCloud
+	cmp.w	#$900,d0
+	beq	.addCloud	
+	cmp.w	#$c00,d0
+	beq	.addBaloon
+	bra	.dontProcessBobs
+.addCloud:
+	move.w	d2,d1
+	jsr	AddBobCloud
+	bra	.skip
+.addBaloon:
+	move.w	d2,d1
+	jsr	AddBobBaloon
+	bra	.skip	
+	
+.dontProcessBobs:
+	cmp.w	#0,d0
+	beq	.skip
+	cmp.w	#$c00,d0
+	beq	.skip
+	cmp.w	#$900,d0
+	beq	.skip	
+	bra	.blit
+.skip:
+	move.l	#$8,d0		
+.blit:
+	add.w	d0,a1	
 	jsr	BlitBackgroundTile
 
+	
 	rts
 	
 OldRenderBackgroundTile:	
@@ -103,8 +134,11 @@ RenderNextBackgroundFrame:
 	bsr	OldRenderBackgroundTile	
 	
 	endif
-	
+
+	cmp.l	#320,backgroundScrollX
+	ble	.dontRenderBobs
 	jsr	RenderBob
+.dontRenderBobs:
 	rts
 	
 	
