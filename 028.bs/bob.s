@@ -62,6 +62,7 @@ AddBobCloud:
 	rts
 
 ClearBobs:
+	move.w	bobsEnabled,-(sp)
 	move.w	#2,bobsEnabled 	; disables bob movement
 	bsr	RestoreBobBackgrounds
 	eor.l	#4,bobBufferOffset
@@ -73,7 +74,7 @@ ClearBobs:
 	move.l	backgroundOffscreen,a0
 	move.l	backgroundOnscreen,backgroundOffscreen
 	move.l	a0,backgroundOnscreen	
-	move.w	#1,bobsEnabled
+	move.w	(sp)+,bobsEnabled
 	lea	bob,a5
 .loop:
 	cmp.l	#0,(a5)
