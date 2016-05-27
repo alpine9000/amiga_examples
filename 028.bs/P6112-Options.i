@@ -4,8 +4,11 @@ P61mode	=2	;Try other modes ONLY IF there are no Fxx commands >= 20.
 
 ;;    ---  options common to all P61modes  ---
 
-		
-usecode=$8159|$800D40D|$1559;$8000	;CHANGE! to the USE hexcode from P61con for a big 
+songAusecode equ $8159
+songBusecode equ $800D40D
+songCusecode equ $9559		
+usecode=songAusecode|songBusecode|songCusecode
+		;CHANGE! to the USE hexcode from P61con for a big 
 		;CPU-time gain! (See module usecodes at end of source)
 		;Multiple songs, single playroutine? Just "OR" the 
 		;usecodes together!
