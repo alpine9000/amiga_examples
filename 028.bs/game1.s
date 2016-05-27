@@ -434,7 +434,7 @@ ResetBigBangPattern:
 	andi.l	#$fff0,d0
 	move.l	#MainLoop,a1	
 	add.l	d0,a1
-	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d1
+	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2),d1
 .loop1:	
 	move.l	#FOREGROUND_PLAYAREA_HEIGHT_WORDS-1,d0
 .loop:
@@ -510,24 +510,6 @@ PostMissedTile:
 
 	
 BigBang:
-.finishScrollLoop: ; finish the current foreground tile scroll to clear any half cleared tiles
-	move.l	foregroundScrollX,d0
-	lsr.l	#FOREGROUND_SCROLL_SHIFT_CONVERT,d0 ; convert to pixels		
-	and.b	#$f,d0
-	cmp.b	#$f,d0
-	beq	.scrollFinished	
-	add.l	#1,frameCount
-	jsr	Update
-	bsr	RenderNextForegroundFrame
-	jsr	PrepareItemSpriteData			
-	jsr 	RenderNextBackgroundFrame	
-	jsr	WaitVerticalBlank
-	jsr	PlayNextSound		
-	bsr	HoriScrollPlayfield
-	jsr 	SwitchBuffers
-	bra	.finishScrollLoop
-.scrollFinished:
-	
 	PlaySound Falling
 	jsr	WaitVerticalBlank
 	jsr	ResetBobs
@@ -562,8 +544,8 @@ BigBang:
 	add.l	d0,a0
 	lea 	foregroundTilemap,a1	
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0	
-
-	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-1,d5
+	
+	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-0,d5
 	move.l	#BIGBANG_ANIM_DELAY,d0
 	lea 	bigBangIndex,a4
 .loop3:
@@ -579,7 +561,6 @@ BigBang:
 	dbra	d5,.loop1
 	bra	.bigBangLoop
 
-
 ClearForegroundTile3:	
 	;;  a4 - pointed to animation offset for tile
 	lea 	foregroundTilemap,a1		
@@ -591,6 +572,8 @@ ClearForegroundTile3:
 	move.l	(a4),d1
 	cmp.l	#10,d1
 	bge	.s1	
+	cmp.l	#0,d5 		; this is the last row which might have partially animated tiles so
+	beq	.s1 		; clear it to prevent backwards animations
 	add.l	d1,a1
 	add.l	#2,(a4)	
 	add.l	#4,a4
@@ -926,7 +909,7 @@ itemsMapOffset:
 foregroundScrollPixels:
 	dc.l	FOREGROUND_SCROLL_PIXELS
 bigBangIndex:
-	ds.l	FOREGROUND_PLAYAREA_HEIGHT_WORDS*FOREGROUND_PLAYAREA_WIDTH_WORDS,0	
+	ds.l	FOREGROUND_PLAYAREA_HEIGHT_WORDS*FOREGROUND_PLAYAREA_WIDTH_WORDS+1,0	
 animIndex:
 	ds.l	16,0
 deAnimIndex:
