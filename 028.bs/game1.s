@@ -26,6 +26,7 @@
 
 	xdef	moving	
 	xdef   	itemsMapOffset
+	xdef	itemsMapEndPtr
 	xdef	livesCounterText
 	xdef	livesCounterShortText	
 	xdef	panel
@@ -480,7 +481,7 @@ RenderForegroundTile:
 	add.w	(a2),a1 	; source tile	
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0
 	cmp.w	#$ffff,d0
-	beq	stopScrolling
+	;; beq	stopScrolling
 
 	lea 	animIndex,a4
 	move.l	d2,d1
@@ -491,7 +492,10 @@ RenderForegroundTile:
 	cmp.l	#10,d1
 	bge	.s1
 	add.l	d1,a1
+	cmp.l	endForegroundMapPtr,a2
+	bge	.dontBlit
 	jsr	BlitTile
+.dontBlit:
 	cmp.l	#2,(a4)
 	blt	.s2
 .s1:
@@ -565,10 +569,10 @@ ClearForegroundTile3:
 	;;  a4 - pointed to animation offset for tile
 	lea 	foregroundTilemap,a1		
 	sub.l	d0,d0
+	cmp.l	endForegroundMapPtr,a2
+	bge	.s1
 	move.w	(a2),d0
 	add.l	d0,a1
-	move.l	foregroundMapPtr,a3
-	add.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS*FOREGROUND_PLAYAREA_HEIGHT_WORDS,a3
 	move.l	(a4),d1
 	cmp.l	#10,d1
 	bge	.s1	
@@ -906,6 +910,8 @@ countdownImages:
 	incbin "out/countdown.bin"	
 itemsMapOffset:
 	dc.l	level1ItemsMap-level1ForegroundMap
+itemsMapEndPtr:
+	dc.l	0
 foregroundScrollPixels:
 	dc.l	FOREGROUND_SCROLL_PIXELS
 bigBangIndex:
@@ -1054,6 +1060,8 @@ foregroundMapPtr:
 pathwayMapPtr:
 	dc.l	0
 startForegroundMapPtr:
+	dc.l	0
+endForegroundMapPtr:
 	dc.l	0
 startPathwayMapPtr:
 	dc.l	0

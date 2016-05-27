@@ -17,12 +17,15 @@ InstallLevel\1:
 	move.l	#\9,playerXColumnLastSafe
 	move.l	#\9,playerXColumn
 	move.w	#\a,d0
+	move.l	#level\1ForegroundMapEnd,endForegroundMapPtr
+	move.l	#level\1ItemsMapEnd,itemsMapEndPtr
 	jsr	StartMusic
 	rts
 
 	align 4
 level\1ForegroundMap:
 	include "out/level\1_foreground-map.s"
+level\1ForegroundMapEnd:
 	dc.w	$FFFF
 	dc.w	$FFFF
 	dc.w	$FFFF
@@ -35,6 +38,7 @@ level\1PathwayMap:
 	include "out/level\1_pathway-map.s"
 level\1ItemsMap:
 	include "out/level\1_items-indexes.s"
+level\1ItemsMapEnd:
 
 level\1StartMessage:
 	dc.b	\2

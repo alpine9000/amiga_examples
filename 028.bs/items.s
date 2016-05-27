@@ -334,6 +334,8 @@ RenderItemSprite:
 	bne	.dontAddSprite
 	move.l	a2,a3
 	add.l	itemsMapOffset,a3
+	cmp.l	itemsMapEndPtr,a3
+	bge	.dontAddSprite
 	cmpi.w	#0,(a3)
 	beq	.dontAddSprite
 
