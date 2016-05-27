@@ -9,17 +9,14 @@
 	xdef RestoreBobBackgrounds
 	xdef bobBufferOffset
 	xdef EnableBobs
-
-	;; BALOON_BOB/CLOUD_BOB
-	;; index,y,dx
 	
 bob:	
-	CLOUD_BOB 0,15,8
+	CLOUD_BOB 0
 endBob:
-	CLOUD_BOB 1,96,10
-	CLOUD_BOB 2,170,12
+	CLOUD_BOB 1
+	CLOUD_BOB 2
 baloonBob:
-	BALOON_BOB 3,15,24
+	BALOON_BOB 3
 	dc.l	0	
 
 
@@ -30,7 +27,7 @@ AddBobBaloon:
 	move.l	#320<<BOB_SHIFT_CONVERT,BOB_X(a5)
 	lsl.w	#4,d1
 	move.w	d1,BOB_Y+2(a5)
-	move.l	#24,BOB_DX(a5)
+	move.l	#BOB_BALLOON_DX,BOB_DX(a5)
 	rts
 .continue:
 	rts
@@ -53,7 +50,7 @@ AddBobCloud:
 	move.l	a3,BOB_MASK_ADDRESS(a5)	
 	lsl.w	#4,d1
 	move.w	d1,BOB_Y+2(a5)	
-	move.l	#12,BOB_DX(a5)
+	move.l	#BOB_CLOUD_DX,BOB_DX(a5)
 	bra	.done
 .continue:
 	adda.l	#endBob-bob,a5	
