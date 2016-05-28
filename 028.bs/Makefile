@@ -76,7 +76,6 @@ IMAGES=foreground.png \
 	font8x8.png\
 	font8x85.png\
 	splash.png\
-	splashSave.png\
 	backgroundMask-mask.png\
 	countdown.png
 
@@ -219,10 +218,6 @@ out/font%.bin: assets/font%.png
 out/font8x85.bin: assets/font8x8.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/font8x85 --colors=32 --use-palette assets/font8x85.pal --full-color-palette-file --output-mask --transparent-color=0,0,0 --output-png
 
-out/splashSave.bin: assets/splash.png out/splash.bin
-	../tools/croppa/out/croppa --input=assets/splash.png --output=out/splashSave.png --width=96 --height=64 --rows=1 --cols=1 --dx=0 --dy=0 --x=112 --y=150
-	$(IMAGECON) --input out/splashSave.png $(IMAGECON_ARGS) --output-bitplanes --output-grey-palette-asm --output-palette-asm --output-palette --output out/splashSave --colors=32 --output-copperlist --full-color-palette-file --use-palette=out/splash.pal
-
 out/backgroundMask-mask.bin: assets/background.png
 	$(IMAGECON) --input assets/background.png $(IMAGECON_ARGS) --output-mask --output out/backgroundMask --output-png  --colors=8 --transparent-color=0,0,14 --output-png --palette-offset=8
 
@@ -281,18 +276,18 @@ out/credits_copperlist.i: credits_copper.c
 out/credits.o:	out/credits_copperlist.i
 
 out/main.o: $(IMAGEDATA) \
+	out/level91_foreground-map.s\
+	out/level92_foreground-map.s\
+	out/level93_foreground-map.s\
+	out/level94_foreground-map.s\
+	out/level95_foreground-map.s\
+	out/level96_foreground-map.s\
+	out/level97_foreground-map.s\
 	out/level1_foreground-map.s\
 	out/level2_foreground-map.s\
 	out/level3_foreground-map.s\
 	out/level4_foreground-map.s\
 	out/level5_foreground-map.s\
-	out/level6_foreground-map.s\
-	out/level7_foreground-map.s\
-	out/level8_foreground-map.s\
-	out/level9_foreground-map.s\
-	out/level10_foreground-map.s\
-	out/level11_foreground-map.s\
-	out/level12_foreground-map.s\
 	out/background-map.s  Makefile link.script.x\
 	out/menu-palette.s\
 	out/paletteA_playarea_fade.s out/paletteA_flags_fade.s out/paletteA_foreground-palette-table.s out/paletteA_tileFade.s\

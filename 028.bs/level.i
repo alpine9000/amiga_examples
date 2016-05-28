@@ -47,7 +47,6 @@ level\1StartMessage:
 
 level\1CompleteMessage:
 	dc.b	\7
-	dc.b 	" COMPLETE!"
 	dc.b	0
 	align 	4
 

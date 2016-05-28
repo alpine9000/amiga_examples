@@ -6,21 +6,35 @@
 SPLASH_COLOR_DEPTH		equ 5
 SPLASH_SCREEN_WIDTH_BYTES	equ 40
 
-PLAY_COPPER_WORD		equ $bad1
+PLAY_COPPER_WORD		equ $aad1
 
 MENU_SELECTED_TOP_COLOR		equ $be0 ;$e71
 MENU_SELECTED_BOTTOM_COLOR	equ $9d4 ;$fe7
 MENU_TEXT_COLOR			equ $7ef
 MENU_TEXT_BOTTOM_COLOR		equ $5cd	
 
-MENU_OFFSET			equ levelTopColor-playTopColor
+MENU_OFFSET			equ tutorialTopColor-playTopColor
 MENU_BOTTOM_OFFSET		equ (playBottomColor-playTopColor)
 	
 ShowMenu:
 	lea 	CUSTOM,a6
 
 	jsr	ReloadSplashScreen	
-	
+
+	lea	splash,a0
+	add.l	#(150*40*5)+((320-96)/16),a0
+
+	WaitBlitter	
+	move.w #(BC0F_SRCA|BC0F_DEST|$f0),BLTCON0(A6)
+	move.w #0,BLTCON1(a6) 
+	move.l #$ffffffff,BLTAFWM(a6) 		;no masking of first/last word
+	move.w #(320-96)/8,BLTAMOD(a6)		;A modulo
+	move.w #0,BLTDMOD(a6)			;D modulo	
+	move.l a0,BLTAPTH(a6)			;source graphic top left corner
+	move.l backgroundOffscreen,BLTDPTH(a6)	;destination top left corner
+	move.w #((64*5)<<6)|(96/16),BLTSIZE(a6)	
+
+ReShowMenu:	
 	jsr	WaitVerticalBlank	
 	;; set up default palette
 	include "out/menu-palette.s"
@@ -68,7 +82,7 @@ ShowMenu:
 
 
 RenderMenu:
-	lea	splashSave,a0
+	move.l	backgroundOffscreen,a0
 	lea	splash,a2
 	add.l	#(150*40*5)+((320-96)/16),a2
 
@@ -85,7 +99,11 @@ RenderMenu:
 	lea	menu,a1
 	lea	splash,a0
 	move.w	#(320/2)-(6*8)+4,d0
-	move.w	#150,d1
+	move.w	#150-16,d1
+	jsr	DrawMaskedText85
+	lea	tutorial,a1
+	move.w	#(320/2)-(6*8),d0	
+	add.w	#16,d1	
 	jsr	DrawMaskedText85
 	lea	difficulty,a1
 	move.w	#(320/2)-(6*8),d0	
@@ -178,6 +196,8 @@ ButtonPressed:
 	beq	.difficultyButton
 	cmp.l	#creditsTopColor,selectedPtr
 	beq	.creditsButton		
+	cmp.l	#tutorialTopColor,selectedPtr
+	beq	.tutorialButton
 	bra	.done
 .difficultyButton:
 	bsr	ToggleDifficulty
@@ -188,10 +208,13 @@ ButtonPressed:
 .creditsButton:
 	PlaySound Jump	
 	jsr	Credits
-	bra	ShowMenu
+	bra	ReShowMenu
 .done:
 	bra	_ProcessJoystick	
 .playButton:
+	rts
+.tutorialButton:
+	move.l	#tutorialLevelInstallers,nextLevelInstaller	
 	rts
 
 WaitForButtonRelease:
@@ -263,6 +286,9 @@ menu:
 difficulty:
 	dc.b	"LEVEL - "
 	dc.b	0
+tutorial:
+	dc.b	"  TUTORIAL  "
+	dc.b	0	
 music:
 	dc.b	"MUSIC - ON  "
 	dc.b	0
@@ -308,28 +334,33 @@ playBottomColor:
 
 	dc.w	PLAY_COPPER_WORD+$1000,$fffe
 	dc.w	COLOR31
-levelTopColor:	
+tutorialTopColor:	
 	dc.w	MENU_TEXT_COLOR
 	dc.w	PLAY_COPPER_WORD+$1000+(($1000/4)*3),$fffe
 	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
 
 	dc.w	PLAY_COPPER_WORD+$2000,$fffe
-	dc.w	COLOR31
-musicTopColor:
+	dc.w	COLOR31	
+levelTopColor:	
 	dc.w	MENU_TEXT_COLOR
 	dc.w	PLAY_COPPER_WORD+$2000+(($1000/4)*3),$fffe
 	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
 
 	dc.w	PLAY_COPPER_WORD+$3000,$fffe
 	dc.w	COLOR31
-creditsTopColor:
+musicTopColor:
 	dc.w	MENU_TEXT_COLOR
 	dc.w	PLAY_COPPER_WORD+$3000+(($1000/4)*3),$fffe
+	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
+
+	dc.w	PLAY_COPPER_WORD+$4000,$fffe
+	dc.w	COLOR31
+creditsTopColor:
+	dc.w	MENU_TEXT_COLOR
+	dc.w	PLAY_COPPER_WORD+$4000+(($1000/4)*3),$fffe
 	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR		
 	
 	dc.l	$fffffffe		
 
 selectedPtr:
 	dc.l	playTopColor
-splashSave:	
-	incbin "out/splashSave.bin"

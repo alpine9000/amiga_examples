@@ -34,6 +34,7 @@
 
 	xdef	nextLevelInstaller
 	xdef	levelInstallers
+	xdef	tutorialLevelInstallers
 
 byteMap:
 	dc.l	Entry
@@ -313,6 +314,8 @@ GameOver:
 
 InstallNextLevel:
 	move.l	nextLevelInstaller,a0
+	cmp.l	#endTutorialLevelInstaller,a0
+	beq	GameOver
 	cmp.l	#0,(a0)
 	bne	.dontResetLevelInstaller
 	move.l	#levelInstallers,nextLevelInstaller
@@ -829,21 +832,21 @@ BlitCountdown:
 	;; frames after jump before player miss is checked
 	;; level complete name
 	;; palette
-	Level	1,"STAY ON THE PATHWAYS!",100,2*2,12,10,"LEVEL 1",A,21,0
-	Level	2,"COLLECT COINS!",100,2*2,12,10,"LEVEL 2",A,21,0
-	Level	3,"ARROWS COST 500 POINTS!",100,2*2,12,10,"LEVEL 3",A,21,0
-	Level	4,"WATCH OUT FOR BEES!",100,2*2,12,10,"LEVEL 4",A,21,0
-	Level	5,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"LEVEL 5",A,21,0
-	Level	6,"CLOCKS FREEZE THE BOARD",200,2*2,12,10,"LEVEL 6",A,21,0
-	Level	7,"EYES SHOW THE BOARD",100,2*2,12,10,"LEVEL 7",A,21,0
+	Level	91,"STAY ON THE PATHWAYS!",100,2*2,12,10,"WELL DONE!",A,21,0
+	Level	92,"COLLECT COINS!",100,2*2,12,10,"NEXT COLLECT AN ARROW...",A,21,0
+	Level	93,"PRESS FIRE TO ACTIVE THE ARROW",100,2*2,12,10,"WHOOHOO",A,21,0
+	Level	94,"WATCH OUT FOR BEES!",100,2*2,12,10,"LOL - BEES",A,21,0
+	Level	95,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"CLOCKS WILL STOP THE BOARD MOVING",A,21,0
+	Level	96,"PRESS FIRE TO ACTIVE THE CLOCK",200,2*2,12,10,"EYES WILL UNHIDE THE BOARD",A,21,0
+	Level	97,"PRESS FIRE TO ACTIVE THE EYE",100,2*2,12,10,"LEVEL 7",A,21,0
 	
-	Level	8,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 8",B,98,2
-	Level	9,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 9",B,98,2
+	Level	1,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 1 COMPLETE!",B,98,2
+	Level	2,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 2",B,98,2
 
-	Level	10,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 10",C,98,2
-	Level	11,"LETS GO?",25,4*2,8,6,"LEVEL 11",C,98,2
+	Level	3,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 3 COMPLETE!",C,98,2
+	Level	4,"LETS GO?",25,4*2,8,6,"LEVEL 4 COMPLETE",C,98,2
 
-	Level	12,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 10",A,98,1
+	Level	5,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 5 COMPLETE!",A,98,1
 
 	Palette	A
 	Palette	B
@@ -967,21 +970,21 @@ levelInstallers:
 	dc.l	InstallLevel2
 	dc.l	InstallLevel3
 	dc.l	InstallLevel4
-	dc.l	InstallLevel5	
-	dc.l	InstallLevel6
-	dc.l	InstallLevel7	
-	
-	dc.l	InstallLevel8
-	dc.l	InstallLevel9
-
-	dc.l	InstallLevel10
-	dc.l	InstallLevel11
-
-	dc.l	InstallLevel12
-
+	dc.l	InstallLevel5
 	dc.l	0
 nextLevelInstaller:
-	dc.l	levelInstallers
+	dc.l	levelInstallers	
+
+tutorialLevelInstallers:
+	dc.l	InstallLevel91
+	dc.l	InstallLevel92
+	dc.l	InstallLevel93
+	dc.l	InstallLevel94
+	dc.l	InstallLevel95	
+	dc.l	InstallLevel96
+	dc.l	InstallLevel97
+endTutorialLevelInstaller:	
+	dc.l	0	
 panelFade:
 	include "out/panelFade.s"
 
