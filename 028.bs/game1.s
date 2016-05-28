@@ -304,18 +304,24 @@ InitialiseNewGame:
 
 
 GameOver:
-	move.l	#levelInstallers,nextLevelInstaller
-	move.l	#"0001",levelCounter
+	sub.l	#4,nextLevelInstaller
 	lea	gameOverMessage,a1
 	jsr	Message
 	jsr	WaitForJoystick
 	bra	MainMenu
-
+	
+TutorialOver:
+	move.l	#levelInstallers,nextLevelInstaller
+	move.l	#"0001",levelCounter
+	lea	tutorialOverMessage,a1	
+	jsr	Message
+	jsr	WaitForJoystick
+	bra	MainMenu
 
 InstallNextLevel:
 	move.l	nextLevelInstaller,a0
 	cmp.l	#endTutorialLevelInstaller,a0
-	beq	GameOver
+	beq	TutorialOver
 	cmp.l	#0,(a0)
 	bne	.dontResetLevelInstaller
 	move.l	#levelInstallers,nextLevelInstaller
@@ -865,6 +871,10 @@ gameOverMessage:
 	dc.b	"GAME OVER"
 	dc.b	0
 	align 	4
+tutorialOverMessage:
+	dc.b	"TUTORIAL COMPLETE!"
+	dc.b	0
+	align 	4
 skippedFramesCounterText:
 	dc.b	"0000"
 	dc.b	0
@@ -977,13 +987,13 @@ nextLevelInstaller:
 
 tutorialLevelInstallers:
 	dc.l	InstallLevel91
+endTutorialLevelInstaller:		
 	dc.l	InstallLevel92
 	dc.l	InstallLevel93
 	dc.l	InstallLevel94
 	dc.l	InstallLevel95	
 	dc.l	InstallLevel96
 	dc.l	InstallLevel97
-endTutorialLevelInstaller:	
 	dc.l	0	
 panelFade:
 	include "out/panelFade.s"

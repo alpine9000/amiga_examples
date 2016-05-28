@@ -13,12 +13,12 @@
  </layer>
  <layer name="pathway" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFQwmcBOLvWOhRQFugy4g9nLmB4qyMmPQooD24y4AZJ9jigns0PugGQHFizAjJL8hi8owIGpY/HgPxRyA+zwBRj65vFNAegOoPeaQwB8WJ5GgcDBgAhf9oHhgFIwUAALbNEg8=
+   eJxjYBgFQwmcBOLvWOhRQFugy4g9nLmB4qyMmPQooD24y4AZJ9jightLfJwH4o90cONIAqAwlcQS1qB4kmdE0LD88ZgBEgcwfSC+7mjeoRoAhbcxIyRMjXGEK6j+kEeSA8UBtjgcBfQBo3lgFIwkAAAjFhWH
   </data>
  </layer>
  <layer name="items" width="100" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AU4AOOjBDszYhd3hmH+CigDXBkRKVHweAB6HESgMaPYkSoCUCLR9/R+KQKIDVfOGKJE7fRuBhQ4D8a/qNgBAAAqqgFWA==
+   eJxjYBgFQwlEMQ60C0YecGSEYG8cYe88Gid0BY6MqDQlIGY07qgK0OMkAEv4wtQEoMWj72hcUAWQmi9g5RsIwOLEDUrHjsbJgAD/0XAfBSMAAACwAAYT
   </data>
  </layer>
 </map>
