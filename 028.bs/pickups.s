@@ -12,9 +12,9 @@ PICKUP_OFFSET 		equ	(SCREEN_WIDTH_BYTES*PANEL_BIT_DEPTH*17)+(272/8)
 PICKUP_NUM_FLASHES	equ	6
 
 ResetPickupItem:	macro
+	move.w	#0,pickup\1FlashCounter
 	cmp.w	#0,has\1Pickup
 	beq	.\@skip
-	move.w	#PICKUP_NUM_FLASHES,has\1Pickup
 	bsr	Show\1Pickup
 .\@skip:
 	endm
@@ -30,6 +30,9 @@ InitialisePickups:
 	move.w	#0,hasEyePickup
 	move.w	#0,hasArrowPickup
 	move.w	#0,hasClockPickup
+	move.w	#0,pickupEyeFlashCounter
+	move.w	#0,pickupArrowFlashCounter
+	move.w	#0,pickupClockFlashCounter		
 	bsr	HideEyePickup
 	bsr	HideArrowPickup
 	bsr	HideClockPickup
@@ -54,12 +57,14 @@ UsePickup:
 	PlaySound Whoosh
 	bsr	HideEyePickup
 	move.w	#0,hasEyePickup
+	move.w	#PICKUP_NUM_FLASHES,pickupEyeFlashCounter	
 	jsr	RevealPathway
 	bra	.done
 .useClock:
 	PlaySound Whoosh
 	bsr	HideClockPickup
 	move.w	#0,hasClockPickup
+	move.w	#PICKUP_NUM_FLASHES,pickupClockFlashCounter	
 	jsr	FreezeScrolling
 	bra	.done
 .useArrow:
@@ -72,8 +77,8 @@ UsePickup:
 	cmp.w	#$1682,d0	; dont active on safe zones
 	beq	.done	
 	PlaySound Whoosh
-	bsr	HideArrowPickup
 	move.w	#0,hasArrowPickup
+	move.w	#PICKUP_NUM_FLASHES,pickupArrowFlashCounter
 	jsr	SpriteEnableAuto
 	bra	.done
 .done:
@@ -81,11 +86,19 @@ UsePickup:
 	
 
 FlashItem:	macro
-	move.w	has\1Pickup,d0
-	cmp.w	#PICKUP_NUM_FLASHES,d0
-	beq	.\@skip
+	move.w	pickup\1FlashCounter,d0
 	cmp.w	#0,d0
 	beq	.\@skip
+	cmp.w	#1,d0
+	bgt	.\@continue
+	cmp.w	#0,has\1Pickup
+	bne	.\@has
+	bsr	Hide\1Pickup
+	bra	.\@done
+.\@has:
+	bsr	Show\1Pickup
+	bra	.\@done
+.\@continue:
 	btst	#0,d0
 	bne	.\@on
 	bsr	Hide\1Pickup
@@ -93,15 +106,14 @@ FlashItem:	macro
 .\@on:
 	bsr	Show\1Pickup
 .\@done:
-	add.w	#1,has\1Pickup
-.\@skip
+	sub.w	#1,pickup\1FlashCounter
+.\@skip:
 	endm
 	
 FlashPickup:
 	cmp.w	#0,flashCount
 	bgt	.skip
 	move.w	#8,flashCount
-
 	FlashItem Arrow
 	FlashItem Clock
 	FlashItem Eye	
@@ -119,6 +131,7 @@ PickupItem: macro
 .\@doPickup:	
 	bsr	Show\1Pickup
 	move.w	#1,has\1Pickup
+	move.w	#PICKUP_NUM_FLASHES,pickup\1FlashCounter
 .\@done:
 	endm
 
@@ -203,8 +216,16 @@ hasEyePickup:
 	dc.w	0
 hasArrowPickup:
 	dc.w	0	
+pickupArrowFlashCounter:
+	dc.w	0
+pickupEyeFlashCounter:
+	dc.w	0
+pickupClockFlashCounter:
+	dc.w	0	
+	
 lastPickupFrameCount:
 	dc.l	0
+
 flashCount:
 	dc.w	0
 
