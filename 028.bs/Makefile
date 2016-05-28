@@ -1,3 +1,4 @@
+TRACKLOADER=1
 EXAMPLE_NAME=game1
 BACKGROUND_COLOR=09e
 BACKGROUND_GREY_COLOR=777
@@ -81,7 +82,7 @@ IMAGES=foreground.png \
 
 IMAGEDATA=$(addprefix out/, $(IMAGES:.png=.bin))
 
-VASM_EXTRA_ARGS=-DSFX=1 -DMAX_P61_SIZE=$(MAX_P61_SIZE) -allmp
+VASM_EXTRA_ARGS=-DSFX=1 -DMAX_P61_SIZE=$(MAX_P61_SIZE) -allmp -DTRACKLOADER=$(TRACKLOADER)
 
 LINKER_OPTIONS=-T link.script.x
 
@@ -296,4 +297,5 @@ out/main.o: $(IMAGEDATA) \
 	out/panelFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw out/yay.raw
 
 
-
+out/main.exe: out/main.o $(OBJS)
+	vlink	-hunkattr DATA=2 -hunkattr CODE=2 -hunkattr .text=2 -hunkattr .code=2 -hunkattr .data=2	-hunkattr .noload=2 -hunkattr .bss=2 $< $(OBJS) -o $@

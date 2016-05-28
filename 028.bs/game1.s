@@ -36,17 +36,35 @@
 	xdef	levelInstallers
 	xdef	tutorialLevelInstallers
 
+	if TRACKLOADER=1
 byteMap:
 	dc.l	Entry
 	dc.l	endCode-byteMap
+	endif
 
 
 Entry:
+	if TRACKLOADER=0
+	jmp 	StartupFromOS
+Entry2:
 	lea	userstack,a7
+	endif
+	
 	lea 	CUSTOM,a6
 
 	move	#$7ff,DMACON(a6)	; disable all dma
 	move	#$7fff,INTENA(a6) 	; disable all interrupts		
+
+	jsr 	WaitVerticalBlank		
+	
+	move.w	#$7FFF,d0
+	move.w	d0,$9A(a6)	; Disable Interrupts
+	move.w	d0,$96(a6)	; Clear all DMA channels
+	move.w	d0,$9C(a6)	; Clear all INT requests
+	move.w	d0,$9C(a6)	; Clear all INT requests	
+
+	move.w	#$0C00,$106(a6) ;BPLCON3
+	move.w	#$0011,$10C(a6) ;BPLCON4	
 
 	lea	Level3InterruptHandler,a3
  	move.l	a3,LVL3_INT_VECTOR
@@ -54,6 +72,7 @@ Entry:
 	move.w	#0,d0
 	jsr	StartMusic
 	jsr	ShowSplash
+
 MainMenu:
 	jsr	ShowMenu
 	
@@ -829,6 +848,36 @@ BlitCountdown:
 	move.l  a1,BLTDPTH(a6) ;destination top left corner	
 	move.w 	#(12*PANEL_BIT_DEPTH)<<6|(COUNTDOWN_BLIT_WIDTH_WORDS),BLTSIZE(a6)
 	rts
+
+	if TRACKLOADER=0
+; from Photon http://coppershade.org/asmskool/SOURCES/Developing-Demo-Effects/DDE2/Coppershade-DDE2/PhotonsMiniWrapper1.04!.S	
+StartupFromOS:			
+	move.l	4.w,a6		;Exec library base address in a6
+	sub.l	a4,a4
+	btst 	#0,297(a6)	;68000 CPU?
+	beq.s 	.yes68k
+	lea 	.GetVBR(pc),a5	;else fetch vector base address to a4:
+	jsr 	-30(a6)		;enter Supervisor mode
+	;; 	    *--- save view+coppers ---*
+.yes68k:
+	lea 	.GfxLib(pc),a1 	;either way return to here and open
+	jsr 	-408(a6)	;graphics library
+	tst.l 	d0		;if not OK,
+	beq.s 	.quit		;exit program.
+	move.l 	d0,a5		;a5=gfxbase
+	move.l 	a5,a6
+	move.l 	34(a6),-(sp)
+	sub.l 	a1,a1		;blank screen to trigger screen switch
+	jsr 	-222(a6)	;on Amigas with graphics cards
+	jmp	Entry2
+	
+.quit:	moveq #0,d0		;clear error return code to OS
+	rts
+	
+.GfxLib:dc.b "graphics.library",0,0
+.GetVBR:dc.w $4e7a,$c801 ;hex for "movec VBR,a4"
+	rte
+	endif
 	
 	;; variable prefix
 	;; level name
@@ -987,13 +1036,13 @@ nextLevelInstaller:
 
 tutorialLevelInstallers:
 	dc.l	InstallLevel91
-endTutorialLevelInstaller:		
 	dc.l	InstallLevel92
 	dc.l	InstallLevel93
 	dc.l	InstallLevel94
 	dc.l	InstallLevel95	
 	dc.l	InstallLevel96
 	dc.l	InstallLevel97
+endTutorialLevelInstaller:	
 	dc.l	0	
 panelFade:
 	include "out/panelFade.s"
@@ -1065,9 +1114,11 @@ livesCounterShortText:
 stopScrollingPending:
 	dc.w	0
 freezeCountdownCounter:
-	dc.w	0
+	dc.w	0	
+	if TRACKLOADER=0
 startUserstack:
 	ds.b	$1000		; size of stack
 userstack:
-
+	endif
+	
 	end
