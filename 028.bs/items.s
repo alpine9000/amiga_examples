@@ -82,15 +82,18 @@ DetectItemCollisions:
 	rts	
 .arrowCollision:
 	bsr	DeleteItemSprite	
-	jsr	SpriteEnableAuto
+	;; jsr	SpriteEnableAuto
+	jsr	PickupArrow
 	rts
 .clockCollision:
 	bsr	DeleteItemSprite	
-	jsr	FreezeScrolling
+	;; jsr	FreezeScrolling
+	jsr	PickupClock
 	rts
 .eyeCollision:
 	bsr	DeleteItemSprite
-	jsr	RevealPathway
+	;; 	jsr	RevealPathway
+	jsr	PickupEye
 	rts
 .skip:
 	add.l	#ITEM_STRUCT_SIZE,a1
@@ -489,4 +492,5 @@ __nextPlayerBonus:
 	dc.l	0
 
 	align	4
-	
+
+

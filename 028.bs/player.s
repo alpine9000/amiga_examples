@@ -25,6 +25,7 @@
 	
 	xdef playerLevelPausePixels
 	xdef playerLevelMissPixels
+	xdef spriteCurrentPathwayTile
 	
 PLAYER_INSTALL_COLOR_PALETTE	equ 0
 PLAYER_SPRITE_DATA		equ 4
@@ -40,6 +41,7 @@ ResetPlayer:
 
 	move.w	#PATHWAY_CONFIG_FREE,pathwayLastConfig	
 	move.w	#0,pathwayMissPending
+	move.l	#0,foregroundPlayerTileAddress
 	
 	bsr	SpriteDisableAuto
 	move.w	#0,spritePlayerFallingAnimation
@@ -192,6 +194,11 @@ ProcessJoystick:
 	beq	.skip
 
 .autoMoveDisabled:
+	btst.b	#0,joystick
+	beq	.joystickNotPressed	
+	jsr	UsePickup
+.joystickNotPressed:
+	
 	cmp.b	#3,joystickpos
  	bne	.notRight
 	PlayerMoveRight
@@ -212,7 +219,6 @@ ProcessJoystick:
 	rts
 
 SpriteEnableAuto:
-	PlaySound Whoosh
 	CompareScore SCORE_ARROW_SUBTRACTION
 	ble	.toZero
 	AddToScore SCORE_ARROW_SUBTRACTION
@@ -413,7 +419,7 @@ CheckPlayerMiss:
 
 GetNextAutoMove:
 	move.w	spriteCurrentPathwayTile,d0
-	lsr.w	#4,d0
+	lsr.w	#4,d0	       ; light and dark colored tiles
 
 	cmp.w	#$708,d0
 	beq	.horizontal
@@ -427,6 +433,16 @@ GetNextAutoMove:
 	beq	.topRight
 	cmp.w	#$618,d0
 	beq	.vertical
+
+	move.l	foregroundPlayerTileAddress,a0
+	move.w	(a0),d0
+	lsr.w	#4,d0		; light and dark colored tiles
+	cmp.w	#$3c0,d0
+	beq	.topLeft
+	cmp.w	#$2d0,d0
+	beq	.leftBottom
+	cmp.w	#$438,d0
+	beq	.horizontal
 	bra	.skip
 .horizontal:
 	cmp.w	#PLAYER_MOVE_RIGHT,spriteLastMove

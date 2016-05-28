@@ -14,11 +14,12 @@ BASE_ADDRESS=4000
 # note: this must be high enough not to conflict with MFMbufE
 
 BOOTBLOCK_ASM=alpine_bootblock.s
-OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blitmtext85.o out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o out/sound.o out/trackloader.o out/disk.o out/counter.o out/map.o out/message.o out/menu.o out/credits.o out/bob.o
+OBJS=out/init.o out/utils.o out/image.o out/blit.o out/joystick.o out/player.o out/items.o out/blitmtext.o out/blitmtext85.o  out/blittext.o out/music.o out/P6112-Play.o out/splash.o out/background.o out/sound.o out/trackloader.o out/disk.o out/counter.o out/map.o out/message.o out/menu.o out/credits.o out/bob.o out/pickups.o
 
 IMAGES=foreground.png \
 	background.png \
 	panel.png \
+	pickups.png \
 	mpanel.png \
 	mpanelOrig.png \
 	sprite_pig-0.png \
@@ -116,6 +117,9 @@ out/background.bin: assets/background.png
 
 out/panel.bin: assets/panel.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/panel --use-palette=assets/panel.pal
+
+out/pickups.bin: assets/pickups.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/pickups --use-palette=assets/panel.pal
 
 out/countdown.bin: assets/countdown.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/countdown --use-palette=assets/panel.pal

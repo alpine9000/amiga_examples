@@ -24,6 +24,7 @@
 	xdef	startForegroundMapPtr
 	xdef 	startPathwayMapPtr
 
+	xdef	frameCount
 	xdef	moving	
 	xdef   	itemsMapOffset
 	xdef	itemsMapEndPtr
@@ -97,6 +98,7 @@ Reset:
 	move.l  playerXColumnLastSafe,playerXColumn
 	jsr	PreRenderColumnsRemaining
 	jsr	RenderPlayerScore
+	jsr	ResetPickups
 	
 	move.l  startForegroundMapPtr,foregroundMapPtr
 	move.l  startPathwayMapPtr,pathwayMapPtr
@@ -252,6 +254,8 @@ GameLoop:
 	
 	jsr	PlayNextSound
 	jsr	PrepareItemSpriteData
+
+	jsr	FlashPickup
 	bra	GameLoop
 
 
@@ -303,13 +307,11 @@ Update:
 	rts
 
 RevealPathway:
-	PlaySound Whoosh	
 	move.w	#50,pathwayFadeCount
 	jsr	InstallTilePalette
 	rts
 
 FreezeScrolling:
-	PlaySound Whoosh
 	move.w	#150,freezeCountdownCounter
 	move.w	#0,moving	
 	rts
@@ -317,6 +319,7 @@ FreezeScrolling:
 InitialiseNewGame:
 	jsr	InitialiseItems
 	jsr	InitialisePlayer
+	jsr	InitialisePickups
 	jsr	InstallNextLevel
 	bra	Reset	
 
@@ -508,6 +511,7 @@ stopScrolling:
 	
 
 PostMissedTile:
+	jsr	InitialisePickups
 	lea	livesCounterText,a0
 	jsr	DecrementCounter
 	bra	Reset
@@ -1085,7 +1089,6 @@ stopScrollingPending:
 	dc.w	0
 freezeCountdownCounter:
 	dc.w	0
-	
 startUserstack:
 	ds.b	$1000		; size of stack
 userstack:
