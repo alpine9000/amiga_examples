@@ -1,7 +1,7 @@
 tile hscroll
 ============
 
-In this example we used the [Tilled](http://www.mapeditor.org/) map editor to create a tile map.
+In this example we used the [Tiled](http://www.mapeditor.org/) map editor to create a tile map.
 
 Next we use a new utility I wrote [mapgen](../tools/mapgen) to convert the tiled map data into bitplane offsets that we then use to blit tiles just to the right of the visible screen.
 
