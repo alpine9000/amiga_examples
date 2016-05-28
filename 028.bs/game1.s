@@ -185,22 +185,7 @@ FadeInLoop:
 
 
 GameLoop:	
-	move.l	verticalBlankCount,d0
-	move.l	frameCount,d1	
-	cmp.l	d1,d0
-	beq	.noSkippedFrames
-	addq	#1,d0
-	cmp.l	d1,d0
-	beq	.noSkippedFrames
-	move.l	frameCount,verticalBlankCount
-	lea	skippedFramesCounterText,a0
-	jsr	IncrementCounter
-	lea	skippedFramesCounterText,a1	
-	if 1
-	move.w	#275,d0
-	jsr	RenderCounter
-	endif
-.noSkippedFrames:	
+	RenderSkippedFramesCounter
 	add.l	#1,frameCount
 	jsr	WaitVerticalBlank
 	bsr	HoriScrollPlayfield
@@ -233,13 +218,6 @@ GameLoop:
 	jsr	CheckPlayerMiss
 	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame
-
-	if 0
-	jsr	RenderPlayerScore
-	move.w	#$0f0,COLOR00(a6)
-	jsr	RenderPlayerScore
-	move.w	#$0,COLOR00(a6)
-	endif
 	
 	cmp.w	#0,pathwayClearPending
 	beq	.dontClearPathway
@@ -254,8 +232,8 @@ GameLoop:
 	
 	jsr	PlayNextSound
 	jsr	PrepareItemSpriteData
-
 	jsr	FlashPickup
+	
 	bra	GameLoop
 
 
@@ -468,7 +446,6 @@ RenderNextForegroundFrame:
 	add.l	#1,d3
 	cmp.l 	#FOREGROUND_PLAYAREA_HEIGHT_WORDS,d3
 	blt	.loop
-	;; 	jsr	PrepareItemSpriteData	
 	rts
 
 
@@ -483,9 +460,6 @@ RenderForegroundTile:
 	move.w	(a2),d0
 	add.w	(a2),a1 	; source tile	
 	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0
-	cmp.w	#$ffff,d0
-	;; beq	stopScrolling
-
 	lea 	animIndex,a4
 	move.l	d2,d1
 	lsl.l	#2,d1
@@ -535,7 +509,6 @@ BigBang:
 	jsr 	SwitchBuffers
 	jsr	UpdatePlayerFallingAnimation
 	jsr	PrepareItemSpriteData
-
 	
 	move.l	foregroundMapPtr,a2
 	move.l	foregroundScrollX,d0	
@@ -551,8 +524,7 @@ BigBang:
 	move.l	foregroundOffscreen,a0
 	add.l	d0,a0
 	lea 	foregroundTilemap,a1	
-	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0	
-	
+	add.l	#(BITPLANE_WIDTH_BYTES*SCREEN_BIT_DEPTH*(256-(16*8)+32)/4)+BITPLANE_WIDTH_BYTES-FOREGROUND_PLAYAREA_RIGHT_MARGIN_BYTES,a0		
 	move.l	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-0,d5
 	move.l	#BIGBANG_ANIM_DELAY,d0
 	lea 	bigBangIndex,a4
@@ -568,6 +540,7 @@ BigBang:
 	sub.l	#2,a0
 	dbra	d5,.loop1
 	bra	.bigBangLoop
+
 
 ClearForegroundTile3:	
 	;;  a4 - pointed to animation offset for tile
@@ -607,8 +580,7 @@ ClearForegroundTile:
 	cmp.l	a3,a2		; don't clear until the full play area has scrolled in
 	blt	.s3
 	sub.l	#FOREGROUND_PLAYAREA_WIDTH_WORDS,a0
-	lea     deAnimIndex,a4
-	
+	lea     deAnimIndex,a4	
 	move.l	d2,d1
 	lsl.l	#2,d1
 	add.l	d1,a4
@@ -628,7 +600,7 @@ ClearForegroundTile:
 	jsr	BlitTile
 .s3:
 	rts
-	
+
 
 Level3InterruptHandler:
 	movem.l	d0-a6,-(sp)
@@ -873,10 +845,6 @@ BlitCountdown:
 
 	Level	12,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 10",A,98,1
 
-
-	;; Level	10,"WHAT? WHAT?!",15,4*2,8,6,"YOU'RE GOOD, LEVEL 10",C
-	
-	;; Level	7,"LEVEL 3",50,4*2,8,6,"3",C
 	Palette	A
 	Palette	B
 	Palette	C	
@@ -890,10 +858,6 @@ player1Text:
 	dc.b	"P1"
 	dc.b	0
 	align	4
-player2Text:
-	dc.b	"P2"
-	dc.b	0
-	align	4		
 gameOverMessage:
 	dc.b	"GAME OVER"
 	dc.b	0

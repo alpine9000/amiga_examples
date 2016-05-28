@@ -1,4 +1,5 @@
 	xdef	RenderCounter
+	xdef	RenderCounterAtY
 	xdef	ResetCounter
 	xdef	IncrementCounter
 	xdef	DecrementCounter
@@ -13,6 +14,14 @@ RenderCounter:
 	move.w	#20,d1
 	jsr	DrawText8
 	rts
+
+RenderCounterAtY:
+	;; d0.w x position
+	;; d1.w	y position
+	;; a1.l	text
+	lea	panel,a0
+	jsr	DrawText8
+	rts	
 
 RenderNumber4:
 	;; d0.l	number

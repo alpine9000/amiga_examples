@@ -11,21 +11,21 @@
 	xdef ScrollSprites
 	xdef RenderPlayerScore
 	xdef PreRenderColumnsRemaining
-	xdef deadSprite 	; used in items
 	xdef UpdatePlayerFallingAnimation
 	xdef InstallPlayerColorPalette
 	xdef SelectNextPlayerSprite
 	xdef SpriteEnableAuto
 
+	xdef deadSprite 	; used in items	
 	xdef spriteLagX
 	xdef spriteY
 	xdef spriteX
+	xdef spriteCurrentPathwayTile
 	xdef playerXColumn
-	xdef playerXColumnLastSafe
-	
+	xdef playerXColumnLastSafe	
 	xdef playerLevelPausePixels
 	xdef playerLevelMissPixels
-	xdef spriteCurrentPathwayTile
+
 	
 PLAYER_INSTALL_COLOR_PALETTE	equ 0
 PLAYER_SPRITE_DATA		equ 4

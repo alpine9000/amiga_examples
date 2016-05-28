@@ -215,3 +215,23 @@ ResetScore: macro
 CompareScore: macro
 	 cmp.l	#\1,__score
 	 endm
+
+RenderSkippedFramesCounter: macro
+	if 	SKIPPED_FRAMES_DISPLAY=1
+	move.l	verticalBlankCount,d0
+	move.l	frameCount,d1	
+	cmp.l	d1,d0
+	beq	.noSkippedFrames
+	addq	#1,d0
+	cmp.l	d1,d0
+	beq	.noSkippedFrames
+	move.l	frameCount,verticalBlankCount
+	lea	skippedFramesCounterText,a0
+	jsr	IncrementCounter
+	lea	skippedFramesCounterText,a1	
+	move.w	#SCREEN_WIDTH-(4*8),d0
+	move.w	#0,d1
+	jsr	RenderCounterAtY
+.noSkippedFrames:
+	endif
+endm

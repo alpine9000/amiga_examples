@@ -10,6 +10,11 @@
 	
 PICKUP_OFFSET 		equ	(SCREEN_WIDTH_BYTES*PANEL_BIT_DEPTH*17)+(272/8)
 PICKUP_NUM_FLASHES	equ	6
+PICKUP_DEBOUNCE_FRAMES	equ     50
+
+PICKUP_SAFE_TILE1	equ	$f02
+PICKUP_SAFE_TILE2	equ	$1682
+
 
 ResetPickupItem:	macro
 	move.w	#0,pickup\1FlashCounter
@@ -18,13 +23,15 @@ ResetPickupItem:	macro
 	bsr	Show\1Pickup
 .\@skip:
 	endm
-	
+
+
 ResetPickups:
 	move.l	#0,lastPickupFrameCount
 	ResetPickupItem	Arrow
 	ResetPickupItem	Clock
 	ResetPickupItem	Eye	
 	rts
+
 
 InitialisePickups:
 	move.w	#0,hasEyePickup
@@ -38,13 +45,12 @@ InitialisePickups:
 	bsr	HideClockPickup
 	rts
 	
-	
+
 UsePickup:
 	move.l	frameCount,d0
 	sub.l	lastPickupFrameCount,d0
-	cmp.l	#50,d0
+	cmp.l	#PICKUP_DEBOUNCE_FRAMES,d0
 	blt	.done
-
 	move.l	frameCount,lastPickupFrameCount
 	cmp.w	#0,hasEyePickup
 	bne	.useEye
@@ -72,9 +78,9 @@ UsePickup:
 	cmp.w	#0,a0
 	beq	.done
 	move.w	(a0),d0
-	cmp.w	#$f02,d0	; dont active on safe columns
+	cmp.w	#PICKUP_SAFE_TILE1,d0	; dont active on safe columns
 	beq	.done
-	cmp.w	#$1682,d0	; dont active on safe zones
+	cmp.w	#PICKUP_SAFE_TILE2,d0	; dont active on safe zones
 	beq	.done	
 	PlaySound Whoosh
 	move.w	#0,hasArrowPickup
@@ -83,7 +89,7 @@ UsePickup:
 	bra	.done
 .done:
 	rts
-	
+
 
 FlashItem:	macro
 	move.w	pickup\1FlashCounter,d0
@@ -109,7 +115,8 @@ FlashItem:	macro
 	sub.w	#1,pickup\1FlashCounter
 .\@skip:
 	endm
-	
+
+
 FlashPickup:
 	cmp.w	#0,flashCount
 	bgt	.skip
@@ -135,35 +142,42 @@ PickupItem: macro
 .\@done:
 	endm
 
+
 PickupClock:
 	PickupItem Clock,FreezeScrolling
 	rts
 
+
 PickupEye:
 	PickupItem Eye,RevealPathway
 	rts
-	
+
+
 PickupArrow:	
 	PickupItem Arrow,SpriteEnableAuto
 	rts
-	
+
+
 ShowEyePickup:
 	move.w	#0,d0
 	move.w	#0,d1
 	bsr	BlitPickup
 	rts
 
+
 HideEyePickup:
 	move.w	#0,d0
 	move.w	#1,d1
 	bsr	BlitPickup
 	rts
-	
+
+
 ShowClockPickup:
 	move.w	#1,d0
 	move.w	#0,d1
 	bsr	BlitPickup
 	rts
+
 
 HideClockPickup:
 	move.w	#1,d0
@@ -171,11 +185,13 @@ HideClockPickup:
 	bsr	BlitPickup
 	rts
 
+
 ShowArrowPickup:
 	move.w	#2,d0
 	move.w	#0,d1
 	bsr	BlitPickup
 	rts
+
 
 HideArrowPickup:
 	move.w	#2,d0
@@ -210,6 +226,7 @@ BlitPickup:
 	move.w 	#(14*PANEL_BIT_DEPTH)<<6|(1),BLTSIZE(a6)
 	rts
 
+
 hasClockPickup:
 	dc.w	0
 hasEyePickup:
@@ -222,16 +239,10 @@ pickupEyeFlashCounter:
 	dc.w	0
 pickupClockFlashCounter:
 	dc.w	0	
-	
 lastPickupFrameCount:
 	dc.l	0
-
 flashCount:
 	dc.w	0
 
-revealMessageText:
-	dc.b	"SHOW ME THE BOARD!"
-	dc.b	0
-	align 4
 pickups:
 	incbin "out/pickups.bin"

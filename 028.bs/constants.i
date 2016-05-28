@@ -1,4 +1,4 @@
-
+SKIPPED_FRAMES_DISPLAY			equ 1
 MPANEL_COPPER_WAIT			equ $9ad1 ; controls the vertical position of the message panel
 
 PLAYER_MOVE_UP				equ 1
