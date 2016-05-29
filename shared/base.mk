@@ -138,6 +138,7 @@ out/main.bin: out/main.o $(OBJS)
 out/shrunk.bin: $(SHRINKLER_EXE) out/main.bin
 	$(SHRINKLEREXE) -d out/main.bin out/shrunk.bin
 
+.PHONE: clean
 clean:
 	rm -rf out bin *~
 

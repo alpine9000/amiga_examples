@@ -78,7 +78,7 @@ ReShowMenu:
 .wait:
 	jsr	WaitVerticalBlank
 	jsr	_ProcessJoystick
-	rts
+
 
 
 RenderMenu:
@@ -120,6 +120,12 @@ RenderMenu:
 	add.w	#16,d1			
 	move.w	#(320/2)-(6*8)+4,d0	
 	jsr	DrawMaskedText85
+	if TRACKLOADER=0
+	lea	quit,a1
+	add.w	#16,d1			
+	move.w	#(320/2)-(6*8),d0	
+	jsr	DrawMaskedText85
+	endif
 	rts
 	
 MenuUp:
@@ -139,7 +145,11 @@ MenuUp:
 	rts
 
 MenuDown:
-	cmp.l	#creditsTopColor,selectedPtr
+	if TRACKLOADER=0
+	cmp.l	#quitTopColor,selectedPtr
+	else
+	cmp.l	#creditsTopColor,selectedPtr	
+	endif
 	beq	.done
 	PlaySound Jump		
 	move.l	selectedPtr,a0
@@ -198,7 +208,13 @@ ButtonPressed:
 	beq	.creditsButton		
 	cmp.l	#tutorialTopColor,selectedPtr
 	beq	.tutorialButton
+	if TRACKLOADER=0
+	cmp.l	#quitTopColor,selectedPtr
+	beq	.quitButton
+	endif
 	bra	.done
+.quitButton:
+	jmp	QuitGame
 .difficultyButton:
 	bsr	ToggleDifficulty
 	bra	.done
@@ -212,10 +228,10 @@ ButtonPressed:
 .done:
 	bra	_ProcessJoystick	
 .playButton:
-	rts
+	jmp	StartGame
 .tutorialButton:
 	move.l	#tutorialLevelInstallers,nextLevelInstaller	
-	rts
+	jmp	StartGame	
 
 WaitForButtonRelease:
 .joystickPressed:
@@ -295,17 +311,17 @@ music:
 credits:
 	dc.b	"  CREDITS   "
 	dc.b	0
-	align	4
-
-
-	align	2	
 musicOn:
 	dc.b	"MUSIC - ON  "
 	dc.b	0	
 musicOff:
 	dc.b	"MUSIC - OFF "
+	dc.b	0
+	if TRACKLOADER=0
+quit:
+	dc.b	"    QUIT    "
 	dc.b	0	
-
+	endif
 	align 4
 splashCopperList:
 splashCopperListBplPtr:
@@ -328,6 +344,7 @@ splashCopperListBplPtr:
 playTopColor:	
 	dc.w	MENU_SELECTED_TOP_COLOR
 	dc.w	PLAY_COPPER_WORD+(($1000/4)*3),$fffe
+	dc.w	PLAY_COPPER_WORD+(($1000/4)*3),$fffe	
 	dc.w	COLOR31
 playBottomColor:	
 	dc.w	MENU_SELECTED_BOTTOM_COLOR
@@ -337,6 +354,7 @@ playBottomColor:
 tutorialTopColor:	
 	dc.w	MENU_TEXT_COLOR
 	dc.w	PLAY_COPPER_WORD+$1000+(($1000/4)*3),$fffe
+	dc.w	PLAY_COPPER_WORD+$1000+(($1000/4)*3),$fffe	
 	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
 
 	dc.w	PLAY_COPPER_WORD+$2000,$fffe
@@ -344,6 +362,7 @@ tutorialTopColor:
 levelTopColor:	
 	dc.w	MENU_TEXT_COLOR
 	dc.w	PLAY_COPPER_WORD+$2000+(($1000/4)*3),$fffe
+	dc.w	PLAY_COPPER_WORD+$2000+(($1000/4)*3),$fffe	
 	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
 
 	dc.w	PLAY_COPPER_WORD+$3000,$fffe
@@ -351,16 +370,27 @@ levelTopColor:
 musicTopColor:
 	dc.w	MENU_TEXT_COLOR
 	dc.w	PLAY_COPPER_WORD+$3000+(($1000/4)*3),$fffe
+	dc.w	PLAY_COPPER_WORD+$3000+(($1000/4)*3),$fffe	
 	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
-
+	
 	dc.w	PLAY_COPPER_WORD+$4000,$fffe
 	dc.w	COLOR31
 creditsTopColor:
 	dc.w	MENU_TEXT_COLOR
 	dc.w	PLAY_COPPER_WORD+$4000+(($1000/4)*3),$fffe
+	dc.w	PLAY_COPPER_WORD+$4000+(($1000/4)*3),$fffe	
 	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR		
-	
-	dc.l	$fffffffe		
+
+	dc.w	PLAY_COPPER_WORD+$5000,$fffe
+	dc.w	COLOR31
+	if TRACKLOADER=0
+quitTopColor:
+	dc.w	MENU_TEXT_COLOR
+	dc.w	$ffdf,$fffe
+	dc.w	$06df,$fffe
+	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
+	endif
+	dc.l	$fffffffe			
 
 selectedPtr:
 	dc.l	playTopColor

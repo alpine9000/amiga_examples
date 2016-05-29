@@ -1,0 +1,2176 @@
+           How to write demos that work (Version 5) - 18/3/93
+           ===================================================
+
+               (or the Amiga Demo Coders Reference Manual)
+
+                Edited by Comrade J/SAE (ex demo maniac)
+
+                 Co-Editor post vacant (apply by email)
+
+
+* Please note this is a REPLACEMENT to text files howtocode1.txt
+through howtocode4.txt. Sysops, please remove these earlier files
+as they contain many mistakes. Thanks in advance...*
+
+Thanks to:  Vic Ricker, Grue, Timo Rossi, Jesse Michael, John Derek Muir,
+Boerge Noest, Christopher Klaus, Doz/Shining, Andrew Patterson, Walter
+Dao, Chris Green, Magnus Timmerby, Patrik Lundquist, Raymond Penners,
+the otherwise anonymous u920659@daimi.aau.dk, Matthew Arnold, TGR/Anthrox,
+Tero Lehtonen, Carl-Henrik Sk}rstedt (that's how it's spelt via
+7-bit ASCII!!), Arno Hollosi, Irmen de Jong and Jonas Matton
+for their comments and contributions.
+
+Thanks also to CS who didn't want a credit but I'd like to say
+thank you anyway...
+
+Introduction
+============
+
+This file has grown somewhat from the file uploaded over
+Christmas 1992. I've been very busy over the last two months,
+so sorry that I haven't been able to update this sooner.
+It started as an angry protest after several new demos I downloaded
+refused to work on my 3000, and has ended up as a sort of general
+how-to-code type article, with particular emphasis on the Amiga 1200.
+
+Now, as many of you may know, Commodore have not released
+hardware information on the AGA chipset, indeed they have said they
+will not (as the registers will change in the future). Demo coders
+may not be too concerned about what is coming in a year or two,
+but IF YOU ARE WRITING COMMERCIAL SOFTWARE you must be.
+
+Chris Green, from Commodore US, asked me to mention the following:
+
+"I'd like it if you acknowledged early in your text that it IS possible
+to do quite exciting demos without poking any hardware registers, and
+that this can be as interesting as direct hardware access.
+amiga.physik.unizh.ch has two AGA demos with source code by me, AABoing
+and TMapdemo. These probably seem pretty lame by normal demo standards
+as I didn't have time to do any nifty artwork or sound, and each only does
+one thing. but they do show the POTENTIAL for OS friendly demos."
+
+I have seen these demos and they are very neat. Currently you
+cannot do serious copper tricks with the OS (or can you Chris? I'd
+love to see some examples if you can...), for example smooth
+gradiated background copperlists or all that fun messing with
+bitplane pointers and modulos. But for a lot of things the
+Kickstart 3.0 graphics.library is capable of lots. If you are
+in desperate need for some hardware trick that the OS can't handle,
+let Chris know about it, you never know what might make it into the
+next OS version!
+
+Chris mentions QBlit and QBSBlit, interrupt driven blitter access.
+These are things that will make games in particular far easier
+to write under the OS now.
+
+Chris also says "Note that if I did a 256 color lores screen using this
+document, it would run fifty times slower than one created using the OS,
+as you haven't figured out enhanced fetch modes yet. A Hires 256 color
+screen wouldn't even work."
+
+There are some new additions to the AGA chapter that discuss some of
+this problem, but if you want maximum performance from an AGA system,
+use the OS.
+
+Remember that on the A1200 chipram has wait-states, while the
+32-bit ROM doesn't. So use the ROM routines, some of them run
+faster than anything you could possibly write (on a A1200 with
+just 2Mb ram).
+
+The only drawback is again documentation. To learn how to code
+V39 OS programs you need the V39 includes and autodocs, which
+I'm not allowed to include here a) because I've signed an NDA,
+and b) because they're massive...
+
+Perhaps, in a later release, I'll give some highlites of V39
+programming... Get Chris Green's example code, it's a good
+place to start.
+
+Register as a developer with your local Commodore office to get
+the autodocs and includes, it's relatively inexpensive (£85 per
+year in the UK)
+
+---
+
+Most demos I've seen use similar startup code to that I was using back
+in 1988. Hey guys, wake up! The Amiga has changed quite a bit since
+then.
+
+So. Here are some tips on what to do and what not to do:
+
+
+1. RTFM.
+========
+
+Read the f'ing manuals. All of them. Borrow them off friends or from
+your local public library if you have to.
+
+Read the "General Amiga Development Guidelines" in the dark grey (2.04)
+Hardware Reference Manual and follow them TO THE LETTER.
+If it says "Leave this bit cleared" then don't set it!
+
+Don't use self-modifying code. A common bit of code I see is:
+
+... in the setup code
+
+        move.l  $6c.w,old                ; Store Level 3 interrupt.
+                                         ; Naughty... Naughty.
+
+..  at the end of the interrupt
+
+        movem.l (sp)+,a0-a6/d0-d7
+        dc.w    $4ef9               ; jmp instruction
+old     dc.l    0                   ; self modifying!!!!
+
+DONT DO THIS!
+
+68020 and above processors with cache enabled often barf at this
+piece of code (the cache still contains the JMP 0 instruction
+which isn't then altered).
+
+Interrupts should be set up with the AddIntServer(), SetIntVector()
+or AddIntHandler() functions. Read the chapter on Interrupts in
+the Amiga Rom Kernal Manual: Libraries
+
+
+
+2. Proper Copper startup.
+=========================
+
+(Please look at the startup example code at the end of this file).
+
+IF you are going to use the copper then this is how you should set it
+up. The current workbench view and copper address are stored, and
+then the copper enabled. On exit the workbench view is restored.
+
+This guarantees(*) your demo will run on an AGA (Amiga 1200) machine,
+even if set into some weird screen mode before running your code.
+
+Otherwise under AGA, the hardware registers can be in some strange states
+before your code runs, beware!
+
+The LoadView(NULL) forces the display to a standard, empty position,
+flushing the rubbish out of the hardware registers: Note. There is
+a bug in the V39 OS on Amiga 1200/4000 and the sprite resolution is
+*not* reset, you will have to do this manually if you use sprites
+(See below...)
+
+Two WaitTOF() calls are needed after the LoadView to wait for both the
+long and short frame copperlists of interlaced displays to finish.
+
+See the bottom of this file for a full, tested, example startup.asm
+code, that you can freely use for your own productions.
+
+It has been suggested to me that instead of using the GfxBase gb_ActiView
+I should instead use the Intuition ib_ViewLord view. This will work
+just as well, but there has been debate as to whether in the future
+with retargetable graphics (RTG) this will work in the same way. As the
+GfxBase is at a lower level than Intuition, I prefer to access it this
+way (but thank's for the suggestion Boerge anyway!). Using gb_ActiView
+code should run from non-Workbench environments (for example, being
+called from within Amos) too...
+
+
+* - Nothing is ever guaranteed where Commodore are involved. They
+may move the hardware registers into chipram next week :-)
+
+
+3. Your code won't run from an icon.
+====================================
+
+You stick an icon for your new demo (not everyone uses the CLI!) and
+it either crashes or doesn't give back all the RAM it uses. Why?
+
+Icon startup needs specific code to reply to the workbench message.
+With the excellent Hisoft Devpac assember, all you need to do is add
+the line
+
+    include "misc/easystart.i"
+
+and it magically works!
+
+For those without Devpac, here is the relevent code:
+
+---------------------------------------------------------
+
+* Include this at the front of your program
+* after any other includes
+* note that this needs exec/exec_lib.i
+
+	IFND	EXEC_EXEC_I
+	include	"exec/exec.i"
+	ENDC
+	IFND	LIBRARIES_DOSEXTENS_I
+	include	"libraries/dosextens.i
+	ENDC
+
+
+	movem.l	d0/a0,-(sp)		save initial values
+	clr.l	returnMsg
+
+	sub.l	a1,a1
+	move.l    4.w,a6
+	jsr	_LVOFindTask(a6)		find us
+	move.l	d0,a4
+
+	tst.l	pr_CLI(a4)
+	beq.s	fromWorkbench
+
+* we were called from the CLI
+	movem.l	(sp)+,d0/a0		restore regs
+	bra	end_startup		and run the user prog
+
+* we were called from the Workbench
+fromWorkbench
+	lea	pr_MsgPort(a4),a0
+	move.l    4.w,a6
+	jsr	_LVOWaitPort(A6)	wait for a message
+	lea	pr_MsgPort(a4),a0
+	jsr	_LVOGetMsg(A6)		then get it
+	move.l	d0,returnMsg		save it for later reply
+
+* do some other stuff here RSN like the command line etc
+	nop
+
+	movem.l	(sp)+,d0/a0		restore
+end_startup
+	bsr.s	_main			call our program
+
+* returns to here with exit code in d0
+	move.l	d0,-(sp)		save it
+
+	tst.l	returnMsg
+	beq.s	exitToDOS		if I was a CLI
+
+	move.l	4.w,a6
+        jsr	_LVOForbid(a6)
+
+	move.l	returnMsg(pc),a1
+	jsr	_LVOReplyMsg(a6)
+
+exitToDOS
+	move.l	(sp)+,d0		exit code
+	rts
+
+* startup code variable
+returnMsg	dc.l	0
+
+* the program starts here
+	even
+_main
+
+---------------------------------------------------------
+
+
+
+
+4. How do I tell if I'm running on an Amiga 1200/4000?
+======================================================
+
+Do *NOT* check library revision numbers, V39 OS can and does
+run on standard & ECS chipset machines (This Amiga 3000
+is currently running V39).
+
+This code is a much better check for AGA than in the last
+issue!!!!!
+
+
+GFXB_AA_ALICE equ 2
+gb_ChipRevBits0 equ $ec
+
+; Call with a6 containing GfxBase from opened graphics.library
+
+	btst	#GFXB_AA_ALICE,gb_ChipRevBits0(a6)
+	bne.s	is_aa
+
+Chris Green pointed this out to me. He says quite rightly that the
+$dff07c register bits mentioned last time may very well change
+if the chip design is changed, even for new production models of the
+AA chipset. Thanks!
+
+This will not work unless the V39 SetPatch command has been
+executed, so forget about Trackloader demos (and I wish you would!
+Some of us want to put your demos on our hard disk). Remember you
+can use Fast File System and Directory Caching System floppy disks
+on the A1200.
+
+The code in the last issue also had major problems when being
+run on non ECS machines (without Super Denise or Lisa), as the
+register was undefined under the original (A) chipset, and
+would return garbage, sometimes triggering a false AGA-present
+response.
+
+
+5. Use Relocatable Code
+=======================
+
+If you write demos that run from a fixed address you should be shot.
+NEVER EVER DO THIS. It's stupid and completely unnecessary.
+Now with so many versions of the OS, different processors, memory
+configurations and third party peripherals it's impossible to
+say any particular area of ram will be free to just take and
+use.
+
+It's not as though allocating ram legally is dificult. If you
+can't handle it then perhaps you should give up coding and
+take up graphics or something :-)
+
+If you require bitplanes to be on a 64Kb boundary then try the
+following (in pseudo-code because I'm still too lazy to write it
+in asm for you):
+
+        for c=65536 to (top of chip ram) step 65536
+
+        if AllocAbs(c,NUMBER_OF_BYTES_YOU_WANT) == TRUE then goto ok:
+
+	next c:
+
+        print "sorry. No free ram. Close down something and retry demo!"
+        stop
+
+ok:	Run_Outrageous_demo with mem at c
+
+Keep your code in multiple sections. Several small sections are
+better than one large section, they will more easily fit in and run
+on a system with fragmented memory. Lots of calls across sections
+are slower than with a single section, so keep all your relevent
+code together. Keep code in a public memory section:
+
+        section mycode,code
+
+Keep graphics, copperlists and similar in a chip ram section:
+
+        section mydata,data_c
+
+Never use code_f,data_f or bss_f as these will fail on a chipram
+only machine.
+
+And one final thing, I think many demo coders have realised this
+now, but $C00000 memory does not exist on any production machines
+now, so stop using it!!!
+
+
+
+
+6. Don't Crunch demos!
+======================
+
+Don't ever use Tetrapack or Bytekiller based packers. They are crap.
+Many more demos fall over due to being packed with crap packers than
+anything else. If you are spreading your demo by electronic means
+(which most people do now, the days of the SAE Demodisks are long
+gone!) then assemble your code, and use LHARC to archive it, you
+will get better compression with LHARC than with most runtime
+packers.
+
+If you *have* to pack your demos, then use Powerpacker 4+, Turbo
+Imploder or Titanics Cruncher, which I've had no problems with myself,
+although I have heard of problems with some of these on 68040 machines.
+If it will decrunch on a 68040 with caches enabled it will probably
+work on everything.
+
+(found in the documentation to IMPLODER 4.0)
+
+>** 68040 Cache Coherency **
+>
+>With the advent of the 68040 processor, programs that diddle with code which is
+>subsequently executed will be prone to some problems. I don't mean the usual
+>self-modifying code causing the code cached in the data cache to no longer
+>be as the algorithm expects. This is something the Imploder never had a
+>problem with, indeed the Imploder has always worked fine with anything
+>upto and including an 68030.
+>
+>The reason the 68040 is different is that it has a "copyback" mode. In this
+>mode (which WILL be used by people because it increases speed dramatically)
+>writes get cached and aren't guaranteed to be written out to main memory
+>immediately. Thus 4 subsequent byte writes will require only one longword
+>main memory write access. Now you might have heard that the 68040 does
+>bus-snooping. The odd thing is that it doesn't snoop the internal cache
+>buses!
+>
+>Thus if you stuff some code into memory and try to execute it, chances are
+>some of it will still be in the data cache. The code cache won't know about
+>this and won't be notified when it caches from main memory those locations
+>which do not yet contain code still to be written out from the data caches.
+>This problem is amplified by the absolutely huge size of the caches.
+>
+>So programs that move code, like the explosion algorithms, need to do a
+>cache flush after being done. As of version 4.0, the appended decompression
+>algorithms as well as the explode.library flush the cache, but only onder OS
+>2.0. The reason for this is that only OS 2.0 has calls for cache-flushing.
+>
+>This is yet another reason not to distribute imploded programs; they might
+>just cross the path of a proud '40 owner still running under 1.3.
+>
+>It will be interesting to see how many other applications will run into
+>trouble once the '40 comes into common use among Amiga owners. The problem
+>explained above is something that could not have been easily anticipated
+>by developers. It is known that the startup code shipped with certain
+>compilers does copy bits of code, so it might very well be a large problem.
+
+
+Look at some new EXEC-functions to solve this problem:
+
+  CacheClearU() and CacheControl()
+
+Both functions are available with Kickstart 2.0 and above.
+
+I strongly disadvise trying to 'protect' code by encrypting
+parts of it, it's very easy for your code to fail on >68000 if you
+do. What's the point anyway? Lamers will still use Action Replay
+to get at your code.
+
+I never learnt anything by disassembling anyones demo. It's far
+more dificult to try and understand someone elses (uncommented)
+code than to write your own code from scratch.
+
+
+7. Don't use the K-Seka assembler!
+==================================
+
+It's dead and buried. Get a life, get a real assembler. Hisoft Devpac
+is probably the best all-round assembler, although I use ArgAsm
+which is astonishingly fast. The same goes for hacked versions of
+Seka.
+
+Is it any coincidence that almost every piece of really bad
+code I see is written with Seka? No, I don't think so :-)
+
+When buying an assembler check the following:
+
+1. That it handles standard CBM style include files without
+alteration.
+
+2. That it allows multiple sections
+
+3. That it can create both executable and linkable code
+
+4. 68020+ support is a good idea.
+
+Devpac 3.0 is probably the best all-round assembler at the moment.
+People on a tighter budget could do worse than look at the
+public domain A68K (It's much better than Seka!). I'd suggest
+using Cygnus Ed as your Text Editor.
+
+8. Don't use the hardware unless you have to!
+=============================================
+
+This one is aimed particularly at utility authors. I've seen some
+*awfully* written utilities, for example (although I don't want
+to single them out as there are plenty of others) the Kefrens
+IFF converter.
+
+There is NO REASON why this has to have it's own copperlist. A standard
+OS-friendly version opening it's own screen works perfectly (I
+still use the original SCA IFF-Converter), and multitasks properly.
+
+If you want to write good utilities, learn C.
+
+
+9. Beware bogus input falling through to Workbench
+==================================================
+
+If you keep multitasking enabled and run your own copperlist remember
+that any input (mouse clicks, key presses, etc) fall through to the
+workbench. The correct way to get around this is to add an input
+handler to the IDCMP food chain (see - you *do* have to read the
+other manuals!) at a high priority to grab all input events before
+workbench/cli can get to them. You can then use this for your
+keyboard handler too (no more $bfexxx peeking, PLEASE!!!)
+
+Look at the sourcecode for Protracker for an excellent example of
+how to do the job properly. Well done Lars!
+
+
+
+10. Have fun!
+=============
+
+Too many people out there (particularly the American OS-Lamic
+Fundamentalists) try to tell us that you should never program at a hardware
+level. If you're programming for fun, ignore them! But try and put
+a little thought into how your code will work on other machines,
+nothing annoys people more than downloading 400Kb of demo and then
+finding it blows up on their machines. I'm not naming any names, but
+there are quite a few groups who I have no intention of downloading
+their demos again because I know it's a waste of download. With
+the launch of the Amiga 1200 you cannot just write for 1.3 Amiga
+500's any more.
+
+I'd like to apologise to all Americans for blaming OS-Fundamentalism
+on them. I've since heard from *two* American hardware hackers.
+
+:-)
+
+I guess I ought to point out that 90% of my programs are now
+fully OS legal, although I am writing an AGA hardware-hacking
+demo for the 1200 now... Demo and Source available soon....
+As soon as I have finished that I am writing a fully OS AGA demo,
+because I HAVE SEEN THE LIGHT! SATAN MADE ME USE THAT HARDWARE
+MANUAL. I WILL NEVER POKE A REGISTER AGAIN, or something like
+that... As usual full demo *and* source will be uploaded.
+If anyone has any ideas of what I should do (and I'd also
+appreciate a nice short tracker module...) you know where
+to send them...
+
+
+
+11. Don't Publish Code you haven't checked!
+===========================================
+
+Thanks to Timo Rossi for spotting the stupid bug in my copper
+setup routine (using LOFList instead of copinit). Funnily enough
+my own setup routine uses the correct copinit code:
+
+Please ignore the original file (howtocode[1|2|3|4].txt) and use this
+instead.
+
+12. Copper End
+==============
+
+I've remembered where this double copper end comes from:
+
+The ArgAsm assembler has copper macros (CMOVE, CWAIT and CEND)
+built in, and the CEND macro deliberately leaves two copper
+END instructions, the manual states this is important
+for compatibility reasons..
+
+Will whoever pinched my ArgAsm manual please return it? I bet
+it was you Alex..
+
+
+13. Using a 68010 processor
+===========================
+
+The 68010 is a direct replacement for the 68000 chip, it can
+be fitted to the Amiga 500,500+,1500 and 2000 without any
+other alterations (I have been told it will not fit an A600).
+
+The main benefit of the 68010 over the 68000 is the loop cache mode.
+Common 3 word loops like:
+
+	   moveq  #50,d0
+.lp        move.b (a0)+,(a1)+  ; one word
+           dbra   d0,.lp       ; two words
+
+are recognised as loops and speed up dramatically on 68010.
+
+
+14. Using the blitter.
+======================
+
+If you are using the blitter in your code and you are leaving the
+system intact (as you should) always use the graphics.library
+functions OwnBlitter() and DisownBlitter() to take control
+of the blitter. Remember to free it for system use, many system
+functions (including floppy disk data decoding) use the blitter.
+
+OwnBlitter() does not trash any registers. I guess DisownBlitter()
+doesn't either, although Chris may well correct me on this.
+
+Another big mistake I've seen is with blitter/processor timing.
+
+Assuming that a particular routine will be slow enough that a blitter
+wait is not needed is silly. Always check for blitter finished, and
+wait if you need to.
+
+Don't assume the blitter will always run at the same speed too. Think
+about how your code would run if the processor or blitter were running
+at 100 times the current speed. As long as you keep this in mind,
+you'll be in a better frame of mind for writing compatible code.
+
+Another big source of blitter problems is using the blitter in interrupts.
+
+Most demos do all processing in the interrupt, with only a
+
+.wt	   btst	   #6,$bfe001		; is left mouse button clicked?
+	   bne.s   .wt
+
+loop outside of the interrupt. However, some demos do stuff outside the
+interrupt too. Warning. If you use blitter in both your interrupt
+and your main code, (or for that matter if you use the blitter via the
+copper and also in your main code), you may have big problems....
+
+Take this for example:
+
+	lea	   $dff000,a5
+	move.l	GfxBase,a6
+	jsr	   _LVOWaitBlit(a6)
+	move.l	#-1,BLTAFWM(a5)		; set FWM and LWM in one go
+	move.l	#source,BLTAPT(a5)
+	move.l	#dest,BLTDPT(a5)
+	move.w	#%100111110000,BLTCON0(a5)
+	move.w	#0,BLTCON1(a5)
+	move.w	#64*height+width/2,BLTSIZE(a5)	; trigger blitter
+
+There is *nothing* stopping an interrupt, or copper, triggering a
+blitter operation between the WaitBlit call and
+your final BLTSIZE blitter trigger. This can lead to total system blowup.
+
+Code that may, by luck, work on standard speed machines may die horribly
+on faster processors due to timing differences causing this type of
+problem to occurr.
+
+The safest way to avoid this is to keep all your blitter calls together,
+use the copper exclusively, or write a blitter-interrupt routine to
+do your blits for you.
+
+Always use the graphics.library WaitBlit() routine for your
+end of blitter code. It does not change any registers, takes into
+account any revision of blitter chip and any unusual circumstances,
+and on an Amiga 1200 will execute faster (because in 32-bit ROM)
+than from chipram.
+
+
+
+Another thing concerning blitter:
+
+Instead of calculating your LF-bytes all the time you can do this
+instead
+
+A	EQU	%11110000
+B	EQU	%11001100
+C	EQU	%10101010
+
+So when you need an lf-byte you can just type:
+
+	move.w	#(A!B)&C,d0
+
+
+
+
+15 NTSC
+=======
+
+As an European myself, I'm naturally biased agains the inferior video
+system, but even though the US & Canada have a relatively minor Amiga
+community compared with Europe (Sorry, it's true :-) we should still
+help them out, even though they've never done a PAL Video Toaster for
+us (sob!).
+
+You have two options.
+
+Firstly, you could write your code only to use the first 200 display
+lines, and leave a black border at the bottom. This annoys PAL owners,
+who rightly expect things to have a full display. It took long enough
+for European games writers to work out that PAL displays were better.
+
+You could write code that automatically checked which system it is
+running on and ran the correct code accordingly:
+
+(How to check: Note, this is probably not the officialy supported method,
+but so many weird things happen with new monitors on AGA machines that
+I prefer this method, it's simpler, and works under any Kickstart)
+
+	move.l	4.w,a6          ; execbase
+	cmp.b	#50,PowerSupplyFrequency(a6)    ; 531(a6)
+	beq.s	.pal
+
+        jmp	I'm NTSC (or more accurately, I'm running from 60Hz power)
+.pal	jmp	I'm PAL  (or I'm running from 50hz power).
+
+
+If people have already switched modes to PAL, or if they are running
+some weird software like the ICD Flicker Free Video Prefs thingy, then
+this completely ignores them, but that serves them right for trying
+to be clever :-)
+
+Probably better would be to check VBlankFrequency(a6) [530(a6)]
+as well, if both are 60Hz then it's definately a NTSC machine. If
+one or more are 50Hz, then it's probably a better idea to run in PAL.
+VBlankFrequency can give all sorts of weird things on an AGA
+system (DblPal runs at 48Hz, for example).
+
+Chris Green suggests checking GfxBase->DisplayFlags for PAL
+rather than what I do above.
+
+Well, If Commodore had fixed the bug in Kickstart 1.3 that
+was reported to them while Kickstart 1.2 was in beta (that a
+PAL machine, especially with a Genlock, often fails to report
+that it is PAL) then I'd use it. They did fix it in 2.0 though
+(at last!) along with the "Oh I've got $200000 RAM. I guess that
+means the user wants *two* mouse pointers in the PAL area" bug.. :-)
+
+So, for V1.2/1.3 do the PowerSupplyFrequency() check, on 2.04 or
+higher use GfxBase->DisplayFlags check as Chris suggests...
+
+Under Kickstart 2.04 or greater, the Display Database can be accessed.
+Any program can enquire of the database what type of displays
+are available, so for example "I want a 50hz 15Khz PAL screen. Can
+I display it on this Amiga?" (Unfortunately it doesn't take
+an ASCII string like that, but it's not much more dificult). Of
+course many users will have the default monitor installed (PAL or
+NTSC) and not realise that they can have extra modes by dragging
+the monitor icon into their Monitors drawer, and of course
+this doesn't work on Kickstart 1.3 machines.
+
+Now, if you want to force a machine into the other display system
+you need some magic pokes: Here you go (beware other bits in
+$dff1dc can do nasty things. One bit can reverese the polarity
+on the video sync, not to healthy for some monitors I've heard...)
+
+To turn a NTSC system into PAL (50Hz)
+
+	move.w	#32,$dff1dc		; Magically PAL
+
+To turn a PAL system into NTSC (60Hz)
+
+	move.w	#0,$dff1dc		; Magically NTSC
+
+Remember: Not all displays can handle both display systems!
+Commdore 1084/1084S, Philips 8833/8852 and multisync monitors
+will, and very few US TV's will handle PAL signals.
+
+It might be polite for PAL demos to ask NTSC users if they
+wish to switch to PAL (by the magic poke) or quit.
+
+16 Programming AGA hardware
+===========================
+
+**** WARNING ****
+
+AGA Registers are temporary. They will change. Do not rely
+on this documentation. No programs written with this information
+can be officially endorsed or supported by Commodore. If this
+bothers you then stop reading now.
+
+I've rewritten this again, because of big mistakes, things
+that weren't really necessary, and because no-one realy understood
+the original. Remember that for most things the OS provides a much
+better and easier way to access new screen modes, and the OS
+will be compatible with future chipsets, these registers will
+change!
+
+
+Bitplanes:
+Set 0 to 7 bitplanes as before in $dff100.
+Set 8 bitplanes by setting bit 4 of $dff100, bits 12 to 15 should be zero.
+(ooops. Big mistake last time!)
+
+Colour Registers:
+
+There are now 256 colour registers, all accessed through the original
+32 registers
+
+AGA works with 8 differents palettes of 32 colors each, re-using
+colour registers from $0180 to $01BE.
+
+You can choose the palette you want to access via the bits 13 to 15 of
+register $0106
+
+
+bit 15 | bit 14 | bit 13 | Selected palette
+-------+--------+--------+------------------------------
+   0   |    0   |    0   | Palette 0 (color 0 to 31)
+   0   |    0   |    1   | Palette 1 (color 32 to 63)
+   0   |    1   |    0   | Palette 2 (color 64 to 95)
+   0   |    1   |    1   | Palette 3 (color 96 to 125)
+   1   |    0   |    0   | Palette 4 (color 128 to 159)
+   1   |    0   |    1   | Palette 5 (color 160 to 191)
+   1   |    1   |    0   | Palette 6 (color 192 to 223)
+   1   |    1   |    1   | Palette 7 (color 224 to 255)
+
+To move a 24-bit colour value into a colour register requires
+two writes to the register:
+
+First clear bit 9 of $dff106
+Move high nibbles of each colour component to colour registers
+
+Then set bit 9 of $dff106
+Move low nibbles of each colour components to colour registers
+
+For example, to change colour zero to the colour $123456
+
+   dc.l $01060000
+   dc.l $01800135
+   dc.l $01060200
+   dc.l $01800246
+
+Note: As soon as you start messing with $dff106 forget all your
+fancy multi-colours-per-line plasma tricks. The colour only
+gets updated at the end of the scanline. Bummer dudes...
+
+
+Sprites:
+To  change  the  resolution  of the sprite, just use bit 7 and 6 of
+register $0106
+
+bit 7 | bit 6 | Resolution
+------+-------+-----------
+  0   |   0   | Lowres    	(140ns)
+  1   |   0   | Hires		(70ns)
+  0   |   1   | Lowres    	(140ns)
+  1   |   1   | SuperHires	(35ns)
+--------------------------
+
+(Now.. 70ns sprites may not be available unless the Interlace bit in
+BPLCON0 is set. Don't ask me why....
+There appears to be much more to this than just these two bits.
+It seems to depend on a lot of different things...)
+
+For 32-bit and 64-bit wide sprites use bit 3 and 2 of register $01FC
+Sprite format (in particular the control words) vary for each width.
+
+bit 3 | bit 2 | Wide        | Control Words
+------+-------+-------------+----------------------------------
+  0   |   0   | 16 pixels   | 2 words (normal)
+  1   |   0   | 32 pixels   | 2 longwords
+  0   |   1   | 32 pixels   | 2 longwords
+  1   |   1   | 64 pixels   | 2 double long words (4 longwords)
+---------------------------------------------------------------
+Wider sprites are not available under all conditions.
+
+It  is possible to choose the color palette of the sprite.
+This is done with bits 7 and 4 of register $010C.
+
+bit 7 | bit 6 | bit 5 | bit 4 | Starting color of the sprite's palette
+------+-------+-------+-------+------------------------------------------
+  0   |   0   |   0   |   0   | $0180/palette 0 (coulor 0)
+  0   |   0   |   0   |   1   | $01A0/palette 0 (color 15)
+  0   |   0   |   1   |   0   | $0180/palette 1 (color 31)
+  0   |   0   |   1   |   1   | $01A0/palette 1 (color 47)
+  0   |   1   |   0   |   0   | $0180/palette 2 (color 63)
+  0   |   1   |   0   |   1   | $01A0/palette 2 (color 79)
+  0   |   1   |   1   |   0   | $0180/palette 3 (color 95)
+  0   |   1   |   1   |   1   | $01A0/palette 3 (color 111)
+  1   |   0   |   0   |   0   | $0180/palette 4 (color 127)
+  1   |   0   |   0   |   1   | $01A0/palette 4 (color 143)
+  1   |   0   |   1   |   0   | $0180/palette 5 (color 159)
+  1   |   0   |   1   |   1   | $01A0/palette 5 (color 175)
+  1   |   1   |   0   |   0   | $0180/palette 6 (color 191)
+  1   |   1   |   0   |   1   | $01A0/palette 6 (color 207)
+  1   |   1   |   1   |   0   | $0180/palette 7 (color 223)
+  1   |   1   |   1   |   1   | $01A0/palette 7 (color 239)
+-------------------------------------------------------------------------
+
+Bitplanes, sprites and copperlists should be 64-bit aligned
+under AGA. Bitplanes should also only be multiples of 64-bits
+wide, so if you want an extra area on the side of your screen for
+smooth blitter scrolling it must be *8 bytes* wide, not two as normal.
+
+For example:
+
+      CNOP  0,8
+sprite   incbin "myspritedata"
+
+      CNOP  0,8
+bitplane incbin "mybitplane"
+
+and so on.
+
+This also raises another problem. You can no longer use
+AllocMem() to allocate bitplane/sprite memory directly.
+
+Either use AllocMem(sizeofplanes+8) and calculate how many
+bytes you have to skip at the front to give 64-bit alignment
+(remember this assumes either you allocate each bitplane
+individually or make sure the bitplane size is also an
+exact multiple of 64-bits), or you can use the new V39
+function AllocBitMap().
+
+
+17. Keyboard Timings
+====================
+
+If you have to read the keyboard by hardware, be very careful
+with your timings. Not only do different processor speeds affect
+the keyboard timings (for example, in the game F-15 II Strike Eagle
+on an Amiga 3000 the key repeat delay is ridiculously short, you
+ttyyppee lliikkee tthhiiss aallll tthhee ttiimmee. You use
+up an awful lot of Sidewinders very quickly!), but there are differences
+between different makes of keyboard, some Amiga 2000's came with
+Cherry keyboards, these have small function keys the same
+size as normal alphanumeric keys - these keyboards have different
+timings to the normal Mitsumi keyboards.
+
+Use an input handler to read the keyboard. The Commodore guys
+have spent ages writing code to handle all the different possible
+hardware combinations around, why waste time reinventing the wheel?
+
+18. How to break out of never-ending loops
+==========================================
+
+Another great tip for Boerge here:
+
+>This is a simple tip I have. I needed to be able to break out of my
+>code if I had neverending loops. I also needed to call my exit code when I did
+>this. Therefore I could not just exit from the keyboard interrupt which I have
+>taken over(along with the rest of the machine). My solution wa to enter
+>supervisor mode before I start my program, and if I set the stack back then
+>I can do an RTE in the interrupt and just return from the Supervisor() call.
+>This is snap'ed from my code:
+>
+>	lea     .SupervisorCode,a5
+>	move.l  sp,a4           ;
+>	move.l  (sp),a3         ;
+>	EXEC    Supervisor
+>	bra     ReturnWithOS
+>
+>.SupervisorCode
+>	move.l  sp,crashstack   ; remember SSP
+>	move.l  USP,a7          ; swap USP and SSP
+>	move.l  a3,-(sp)        ; push return address on stack
+>
+>that last was needed because it was a subroutine that RTSes (boy did I have
+>porblems working out my crashes before I fixed that)
+>Then I have my exit code:
+>
+>ReturnWithOS
+>	tst.l   crashstack
+>	beq     .nocrash
+>	move.l  crashstack,sp
+>	clr.l   crashstack
+>	RTE                     ; return from supervisor mode
+>.nocrash
+>
+>my exit code goes on after this.
+>
+>This made it possible to escape from an interrupt without having to care
+>for what the exception frames look like.
+
+I haven't tried this because my code never crashes. ;-)
+
+
+19. Version numbers!
+====================
+
+Put version numbers in your code. This allows the CLI version command
+to determine easily the version of both your source and executable
+files. Some directory utilities allow version number checking too (so
+you can't accidentally copy a newer version of your source over
+an older one, for example). Of course, if you pack your files the
+version numbers get hidden. Leaving version numbers unpacked
+was going to be added to PowerPacker, but I don't know if this is
+done yet.
+
+A version number string is in the format
+
+$VER: howtocode5.txt 5.0 (18.03.92)
+^          ^          ^Version number (date is optional)
+|          |
+|          | File Name
+|
+| Identifier
+
+The Version command searches for $VER and prints the string it finds
+following it.
+
+For example, adding the line to the begining of your source file
+
+; $VER: MyFunDemo.s 4.0 (01.01.93)
+
+and somewhere in your code
+
+	dc.b	"$VER: MyFunDemo 4.0 (01.01.93)",0
+
+means if you do VERSION MyFunDemo.s you will get:
+
+MyFunDemo.s 4.0 (01.01.93)
+
+and if you assemble and do Version MyFunDemo, you'll get
+
+MyFunDemo 4.0 (01.01.93)
+
+Try doing version howtocode5.txt and see what you get :-)
+
+This can be very useful for those stupid demo compilations
+where everything gets renamed to 1, 2, 3, etc...
+
+Just do version 1 to get the full filename (and real date)
+
+Does this work on Kickstart 1.3? I can't remember, I ditched
+my 1.3 Kickstart 2 years ago :-)
+
+
+20. CDTV
+========
+
+I've been asked if there is any special advice on how to program
+demos to work on CDTV, and if hardware access to the CDTV (for
+playing CD Audio, etc) is possible.
+
+The CDTV is essentially a 1Mb chip ram Amiga with a CD-ROM drive.
+The major difference (apart from lack of fast ram or $c00000 ram)
+is that the CDTV roms can take up anything from 100-200Kb of ram.
+
+Many demos fail on CDTV through lack of memory.
+
+You can hack your CDTV to switch on/off these roms (put a switch
+on JP15), when switched off the CDTV has a full 1Mb of memory and
+more software works, but you can still play audio CD's in the CD
+drive..
+
+I have no information on how to program the CDTV at the hardware
+level. Currently the only supported way to access the CDTV
+special functions is by the CDTV.DEVICE, a standard ROM device
+that can be OpenDevice()d and sent IORequests. I don't think
+I'm allowed to give out the documentation for this, sorry :-(
+
+21. Copper Wait Commands
+========================
+
+The Hardware Reference manual states a copper wait for the start
+of line xx is done with:
+
+$xx01,$fffe
+
+However (as many of you have found out), this actually triggers
+just before the end of the previous line (around 4 or 5 low-res
+pixels in from the maximum overscan border).
+
+For most operations this is not a problem (and indeed gives a little
+extra time to initialise stuff for the next line), but if you are
+changing the background colour ($dff180), then there is a noticable
+'step' at the end of the scanline.
+
+The correct way to do a copper wait to avoid this problem is
+
+$xx07,$fffe.
+
+This just misses the previous scanline, so the background colour is
+changed exactly at the start of the scanline, not before.
+
+
+
+22. Screen Modulos (thanks Magnus for this one...)
+==================================================
+
+Don't assume bitplane modulos (BPL0MOD and BPL1MOD) will be
+set to zero. If you require zero modulos set them, at the start
+of your copperlist is as good a place as any.
+
+Under V39 OS the workbench is interleaved by default, so the
+modulo can be huge...
+
+Indeed, do not assume that *any* hardware register is set
+to a particular value.
+
+
+
+23. Open Graphics Library! (Thanks Magnus, CS, and others..)
+============================================================
+
+I've never seen this in use before, but Magnus spotted
+it. It's got to be one of the worst pieces of code I've
+ever seen! Don't ever do this!
+
+	move.l	4.w,a0          ; get execbase
+	move.l	(a0),a0         ; wandering down the library list...
+	move.l	(a0),a0 	; right. I think this is graphics.library
+
+	; now goes ahead and uses a0 as gfxbase...
+
+Oh yes, graphics.library is always going to be second down the chain from
+Execbase?
+
+If you want to access gfxbase (or any other library base) OPEN the
+library. Do not wander down the library chain, either by guesswork or
+by manually checking for "graphics.library" in the library base name.
+OpenLibrary() will do this for you.
+
+Here is the only official way to open a library.
+
+	MOVEA.L	4,a6
+	LEA.L	gfxname(PC),a1
+	MOVE.L	#39,d0			; version required (here V39)
+	JSR	_LVOOpenLibrary(a6)	; resolved by linking with amiga.lib
+					; or by include "exec/exec_lib.i"
+	TST.L	d0
+	BEQ.S	OpenFailed
+	; use the base value in d0 as the a6 for calling graphics functions
+	; remember d0/d1/a0/a1 are scratch registers for system calls
+
+gfxname	DC.B	'graphics.library',0
+
+Don't use OldOpenLibrary! Always open libraries with a version, at least V33.
+V33 is equal to Kickstart 1.2. And DON'T forget to check the result returned
+in d0 (and nothing else).
+
+
+24. Protracker Replay code bug
+==============================
+
+I've just got the Protracker 2.3 update, and the replay code (both
+the VBlank and CIA code) still has the same bug from 1.0!
+
+At the front of the file is an equate
+
+>DMAWait = 300 ; Set this as low as possible without losing low notes.
+
+And then it goes on to use 300 as a hard coded value, never refering
+to DMAWait!
+
+Now, until I can get some free time to write a reliable scanline-wait
+routine to replace their DBRA loops (does anyone want to write a better
+Protracker player? Free fame & publicity :-), I suggest you change
+the references to 300 in the code (except in the data tables!) to
+DMAWait, and you make the DMAWait value *MUCH* higher.
+
+I use 1024 on this Amiga 3000 without any apparent problem, but
+perhaps it's safer to use a value around 2000. Has anyone tried
+Protracker on a 68040 machine, if so, what DMAWait value in Prefs
+is needed to make all modules sound ok?
+
+Or, does anyone have a system friendly version of the ProRunner
+replay? The one I have is awful, it hits the CIA timer hardware
+directly so nothing can use the CIA's once it quits.
+
+25. Devpac optimise mode produces crap code?
+============================================
+
+If you're using Devpac and have found that the OPT o+ flag produces
+crap code, then you need to add the option o3-. I can't remember
+what this option does, my Devpac 3 manual is at the office.
+
+26. Argasm produces crap code, whatever happens
+===============================================
+
+First, Argasm (unlike Devpac) from the Command Line or if called from
+Arexx using Cygnus Ed (my prefered system) defaults to writing linkable
+code, so you need to add
+
+        opt	l-		(disable linkable code)
+
+If you find that your Argasm executables fail then check you haven't
+got any BSR's across sections! Argasm seems to allow this, but of
+course the code doesn't work. Jez San from Argonaut software who
+publish ArgAsm says it's not a bug, but a feature of the linker...
+
+Yeah right Jez...
+
+But Argasm is *fast*, and it produces non-working code
+*faster* than any other assembler :-)
+
+I still use it though, but Devpac comes in handy for checking
+code every now and then. Argonaut have abandoned ArgAsm so
+the last version (1.09d) is the last. There will be no more...
+
+
+27. Help! I'm starting to code in assembler. Where do I begin?
+==============================================================
+
+If you are just starting to learn programming, and you want
+a good place to begin learning assembler, buy Amos!. It's
+very easy to write assembler code, load it into amos and test it.
+
+For example, take this routine:
+
+;simplemaths.s
+
+        add.l	d0,d1		; add contents of d0 to d1
+        rts
+
+Assemble this with Devpac and what do you get? Not a lot.
+
+Now, load AMOS and type this:
+
+Pload "ram:simplemaths",1  ' load executable file into bank 1
+Input "Enter a number ";n1
+Input "Enter another number ";n2
+dreg(0) = n1               ' Store n1 in 68000 register d0
+dreg(1) = n2               ' Store n2 in 68000 register d1
+call(1)                    ' Run your machinecode routine
+Print n1;" plus ";n2;" equals ";dreg(1)    ' returns result in d1
+
+You can start playing with 68000 instructions this way, seeing how
+they work, without having to 'jump in the deep end' writing
+routines to set up displays, copperlists, windows or writing to
+the console.
+
+You can also pass your machine code the address of AMOS's
+bitplanes (by Phybase(0) to Phybase(n) where n is number of
+bitplanes - 1), so you can write your own vector/bob code
+and test it easily before writing your own front end code.
+
+Once you have got the hang of 68000, you can drop Amos.
+
+
+Another good way is to write some code in C, and use the inline
+debugging options with SAS C, and OMD to examine what your C
+compiler actually generates. To do this with SAS V6.x do the
+following
+
+SC debug=full myprog.c
+
+OMD >ram:omdoutput myprog.o myprog.c
+
+You will get each line of C code interleaved with the assembler
+that it generates. Very handy!
+
+It's also amazing how good the code generated by SAS C 6.2 really
+is.
+
+28 How can I tell what processor I am running on?
+=================================================
+
+Look inside your case. Find the large rectangular (or Square) chip,
+read the label :-)
+
+Or...
+
+	move.l  4.w,a6
+	move.w  AttnFlags(a6),d0	; get processor flags
+
+d0.w is then a bit array which contains the following bits
+
+Bit	Meaning if set
+
+0  68010 processor fitted (or 68020/30/40)
+1  68020 processor fitted (or 68030/40)
+2  68030 processor fitted (or 68040)   [V37+]
+3  68040 processor fitted              [V37+]
+4  68881 FPU fitted       (or 68882)
+5  68882 FPU fitted                    [V37+]
+6  68040 FPU fitted                    [V37+]
+
+
+The 68040 FPU bit is set when a working 68040 FPU
+is in the system.  If this bit is set and both the
+68881 and 68882 bits are not set, then the 68040
+math emulation code has not been loaded and only 68040
+FPU instructions are available.  This bit is valid *ONLY*
+if the 68040 bit is set.
+
+Don't forget to check which ROM version you're running.
+
+DO NOT assume that the system has a >68000 if the word is non-zero!
+68881 chips are available on add-on boards without any faster processor.
+
+And don't assume that a 68000 processor means a 7Mhz 68000. It may well
+be a 14Mhz processor.
+
+So, you can use this to determine whether specific processor functions
+are available (more on 68020 commands in a later issue), but *NOT*
+to determine values for timing loops. Who knows, Motorola may
+release a 100Mhz 68020 next year  :-)
+
+Does anyone know a system-friendly way to check for MMU?
+
+
+29. All addresses are 32 bit
+============================
+
+"Oh look" says clever programmer. "If I access $dcdff180 I can access
+the colour0 hardware register, but it confuses people hacking my
+code!".
+
+Oh no you can't. On a machine with a 32-bit address bus (any
+accelerated Amiga) this doesn't work. And all us hackers know this
+trick now anyway :-)
+
+Always pad out 24-bit addresses (eg $123456) with ZEROs in the high
+byte ($00123456). Do not use the upper byte for data, for storing
+your IQ, for scrolly messages or for anything else.
+
+Similarly, on non ECS machines the bottom 512k of memory was paged
+four times on the address bus, eg:
+
+	move.l #$12345678,$0
+
+	move.l	$80000,d0	; d0 = $12345678
+	move.l	$100000,d1	; d1 = $12345678
+	move.l	$180000,d2	; d2 = $12345678
+
+This does not work on ECS and upwards!!!! You will get meaningless
+results if you try this, so PLEASE do not do it!
+
+
+30. Action Replay Cartridges
+============================
+
+These things are great fun, even more so if you get into the
+'sysop mode' (Allows disassembly of ram areas not previously
+allowed by Action Replay, including non-autoconfig ram and
+the cartridge rom!)
+
+To get into sysop mode on Action Replay 1 type:
+
+LORD OLAF
+
+To get into sysop mode on Action Replay 2 type:
+
+MAY
+THE
+FORCE
+BE
+WITH
+YOU
+
+To get into sysop mode on Action Replay 3 type the same as
+Action Replay 2. After this you get a message
+"Try a new one".
+Then type in
+
+NEW
+
+and sysop powers are granted!
+
+
+31. Avoiding Forbid() and Permit()
+==================================
+
+I've tried it, this works, it's wonderful.
+
+Instead of using Forbid() and Permit() to prevent the OS stealing
+time from your code, you could put your demo or game at a high
+task priority.
+
+The following code at the beginning will do this:
+
+
+        move.l  4.w,a6
+        sub.l   a1,a1            ; Zero - Find current task
+        jsr     _LVOFindTask(a6)
+
+        move.l  d0,a1
+        moveq   #127,d0		 ; task priority to very high...
+        jsr     _LVOSetTaskPri(a6)
+
+Now, only essential system activity will dare to steal time
+from your code. This means you can now carry on using dos.library
+to load files from hard drives, CD-ROM, etc, while your code
+is running.
+
+Try using this instead of Forbid() and Permit(), and insert a new
+floppy disk while your code is running. Wow... The system
+recognises the disk change....  But remember to add your
+input handler!!!
+
+Of course this is purely up to you. You may prefer to Forbid() when
+your code is running (it makes it easier to write).
+
+Several people have suggested to me that I needed to do a Forbid()
+*before* the LoadView(NULL);WaitTOF();WaitTOF(); code, in case something
+else has run and opened a display (disrupting copper registers) in
+the meantime.
+
+There is no point doing this because WaitTOF() disables the Forbid()
+state anyway... Ok..  you could write a busy-loop to check for VBlank,
+but it's much better to specifically check if a view has opened,
+check if gb_ActiView is not zero. If it's zero, it's ok to carry on,
+otherwise LoadView(NULL);WaitTOF();WaitTOF() again, and so on...
+
+Now... I haven't actually checked this, I haven't had time, but
+it should work! :-)   (I'll live to regret this, I know...)
+
+32. 68020 Optimization (Thanks Chris)
+=====================================
+
+A1200 speed issues:
+
+The A1200 has a fairly large number of wait-states when accessing
+chip-ram. ROM is zero wait-states. Due to the slow RAM speed, it may be
+better to use calculations for some things that you might have used tables
+for on the A500.
+
+Add-on RAM will probably be faster than chip-ram, so it is worth
+segmenting your game so that parts of it can go into fast-ram if available.
+
+For good performance, it is critical that you code your important loops
+to execute entirely from the on-chip 256-byte cache. A straight line loop
+258 bytes long will execute far slower than a 254 byte one.
+
+The '020 is a 32 bit chip. Longword accesses will be twice as fast when
+they are aligned on a long-word boundary. Aligning the entry points of
+routines on 32 bit boundaries can help, also. You should also make sure
+that the stack is always long-word aligned.
+
+Write-accesses to chip-ram incur wait-states. However, other processor
+instructions can execute while results are being written to memory:
+
+	move.l	d0,(a0)+	; store x coordinate
+	move.l	d1,(a0)+	; store y coordinate
+	add.l	d2,d0		; x+=deltax
+	add.l	d3,d1		; y+=deltay
+
+	will be slower than:
+
+	move.l	d0,(a0)+	; store x coordinate
+	add.l	d2,d0		; x+=deltax
+	move.l	d1,(a0)+	; store y coordinate
+	add.l	d3,d1		; y+=deltay
+
+The 68020 adds a number of enhancements to the 68000 architecture,
+including new addressing modes and instructions. Some of these are
+unconditional speedups, while others only sometimes help:
+
+	Adressing modes:
+
+o   Scaled Indexing. The 68000 addressing mode (disp,An,Dn) can have
+    a scale factor of 2,4,or 8 applied to the data register on the 68020.
+    This is totally free in terms of instruction length and execution time.
+    An example is:
+
+        68000                   68020
+        -----                   -----
+        add.w   d0,d0           move.w  (0,a1,d0.w*2),d1
+        move.w  (0,a1,d0.w),d1
+
+o   16 bit offsets on An+Rn modes. The 68000 only supported 8 bit
+    displacements when using the sum of an address register and another
+    register as a memory address. The 68020 supports 16 bit displacements.
+    This costs one extra cycle when the instruction is not in cache, but is
+    free if the instruction is in cache. 32 bit displacements can also be
+    used, but they cost 4 additional clock cycles.
+
+o   Data registers can be used as addresses. (d0) is 3 cycles slower than
+    (a0), and it only takes 2 cycles to move a data register to an address
+    register, but this can help in situations where there is not a free
+    address register.
+
+o   Memory indirect addressing. These instructions can help in some
+    circumstances when there are not any free register to load a pointer
+    into. Otherwise, they lose.
+
+    New instructions:
+
+o   Extended precision divide an multiply instructions. The 68020 can
+    perform 32x32->32, 32x32->64 multiplication and 32/32 and 64/32
+    division. These are significantly faster than the multi-precision
+    operations which are required on the 68000.
+
+o   EXTB. Sign extend byte to longword. Faster than the equivalent
+    EXT.W EXT.L sequence on the 68000.
+
+o   Compare immediate and TST work in program-counter relative mode
+    on the 68020.
+
+o   Bit field instructions. BFINS inserts a bitfield, and is faster
+    than 2 MOVEs plus and AND and an OR. This instruction can be used
+    nicely in fill routines or text plotting. BFEXTU/BFEXTS can extract
+    and optionally sign-extend a bitfield on an arbitrary boundary.
+    BFFFO can find the highest order bit set in a field. BFSET, BFCHG,
+    and BFCLR can set, complement, or clear up to 32 bits at arbitrary
+    boundaries.
+
+
+o   On the 020, all shift instructions execute in the same amount of time,
+    regardless of how many bits are shifted. Note that ASL and ASR are
+    slower than LSL and LSR. The break-even point on ADD Dn,Dn versus LSL
+    is at two shifts.
+
+o   Many tradeoffs on the 020 are different than the 68000.
+
+o   The 020 has PACK an UNPACK which can be useful.
+
+
+
+
+
+33. Sprites
+===========
+Some people doesn't initialize the sprites they don't want to
+use correctly. (This reminds me of Soundtracker.)
+A common error is unwanted sprites pointing at address $0.
+If the longword at address $0 isn't zero you'll get some funny looking
+sprites at unpredictable places.
+
+The right way of getting rid of sprites is to point them to an address
+you for sure know is #$00000000 (0.l), and with AGA you may need to
+point to FOUR long words of 0 on a 64-bit boundary
+
+           CNOP 0,8
+pointhere: dc.l	0,0,0,0
+
+The second problem is people turning off the sprite DMA at the wrong time.
+Vertical stripes on the screen are not always beautiful. Wrong time means
+that you turn off the DMA when it is "drawing" a sprite.
+It is very easy to avoid this.
+Just turn off the DMA when the raster is in the vertical blank area.
+
+Currently V39 Kickstart has a bug where sprite resolution and width
+are not always reset when you run your own code. To reset this
+you must do the following (but only if you detect AGA chipset)
+
+	move.w	#0,$dff1fc
+	move.w	#0,$dff106
+
+Remember this will also zero the other bits in these registers,
+so do this before any of your other setup!
+
+
+34. Trackloaders
+================
+Use CIA timers! DON'T use processor timing. If you use processor timing you
+will MESS UP the diskdrives in accelerated Amigas.
+
+Use AddICRVector to allocate your timers, don't hit $bfxxxx
+addresses!!!
+
+On second thoughts. DON'T use trackloaders! Use Dos...
+
+
+
+35. Debug with Enforcer
+=======================
+
+Commodore have written a number of utilities that are *excellent*
+for debugging. They are great for trapping errors in code, such
+as illegal memory access and using memory not previously allocated.
+
+The down side is they need to things:
+
+a) A Memory Management Unit (at least for Enforcer). This rules
+out any 68000 machine, and (unfortunately) the Amiga 1200 and the
+Amiga 4000/EC030. If you are seriously into programming insist on
+a FULL 68030/40 chip, accept no substitute. Amiga 2000 owners
+on a tight budget may want to look at the Commodore A2620 card
+(14Mhz 68020 with 68851 MMU fitted) which will work and is now
+very cheap.
+
+b) A serial terminal. This is really essential anyway, any
+serious programmer will have a terminal (I have an old Amiga 500
+running NCOMM for this task) to output debug information with dprintf()
+from their code. This is the only sensible way to display debug info
+while messing with copperlists and hardware displays.
+
+Enforcer, Mungwall and other utilities are available on Fred Fish
+Disks, amiga.physik and wuarchive, and probably on an issue of the
+excellent "The Source" coders magazine from Epsilon.
+
+36. More Accurate Vector Maths
+==============================
+
+A little (little) math hint for vector calculations:
+
+When doing a muls with a value and then downshifting the value, use
+and 'addx' to get roundoff error instead of truncated error, for
+example:
+	moveq	#0,d7
+DoMtxMul
+	.
+	.
+	muls	(a0),d0		;Do a muls with a sin value *256
+	asr.l	#8,d0
+	addx.w	d7,d0		;trunc > roundoff
+	.
+	.
+
+When you do a 'asr' the last outshifted bit goes to the x-flag.
+if you use an addx with source=0 => dest=dest+'x-flag'.
+This halves the error, and makes complicated vector objects
+less 'hacky'... Just an Idea ... And it don't take too many
+cycles either...
+
+Hope it helps.
+/Carl-Henrik Sk}rstedt (Asterix - Movement)
+
+
+
+
+37. 68000 Optimization
+======================
+
+ASSEMBLY CODE OPTIMIZATION (READ: "HOW AS FAST AND SMALL AS POSSIBLE?").
+Written by Irmen de Jong, march '93. (E-mail: ijdjong@cs.vu.nl)
+
+Some notes added by CJ
+
+-----------------------------------------------------------------------------
+Original	Possible optimization	Examples/notes
+-----------------------------------------------------------------------------
+STANDARD WELL-KNOWN OPTIMIZATIONS
+RULE: use Quick-type/Short branch! Use INLINE subroutines if they are small!
+-----------------------------------------------------------------------------
+
+BRA/BSR	xx	BRA.s/BSR.s xx		if xx is close to PC
+
+MOVE.X #0	CLR.X/MOVEQ/SUBA.X	move.l #0,count -> clr.l count
+					move.l #0,d0    -> moveq #0,d0
+					move.l #0,a0    -> sub.l a0,a0
+
+CLR.L Dx	MOVEQ #0,Dx		-
+
+CMP #0		TST			-
+
+MOVE.L #nn,dx	MOVEQ #nn,dx		possible if -128<=nn<=127
+
+ADD.X #nn	ADDQ.X #nn		possible if 1<=nn<=8
+SUB.X #nn	SUBQ.X #nn		same...
+
+JMP/JSR xx	BRA/BSR	xx		possible if xx is close to PC
+					* and in same section!*
+					(what's the use of JMP/JSR nn(PC)?)
+
+JSR xx;RTS	JMP xx			save a RTS
+BSR xx;RTS	BRA xx			same...
+					(assuming routine doesn't rely
+					on anything in the stack)
+
+LSL/ASL #1/2,xx	ADD xx,xx [ADD xx,xx]	lsl #2,d0 -> 2 times add d0,d0
+
+MULU #yy,xx where yy is a power of 2, 2..256
+		LSL/ASL #1-8,xx		mulu #2,d0 -> asl #1,d0 -> add d0,d0
+					BEWARE: STATUS FLAGS ARE "WRONG"
+
+DIVU #yy,xx where yy is a power of 2, 2..256
+		LSR/ASR #.. SWAP	divu #16,d0 -> lsr #4,d0
+					BEWARE: STATUS FLAGS ARE "WRONG",
+					AND HIGHWORD IS NOT THE REMAINDER.
+
+ADDRESS-RELATED OPTIMIZATIONS
+RULE: use short adressing/quick adds!
+----------------------------------------------------------------------------
+
+MOVEA.L #nn	MOVEA.W #nn		Movea is "sign-extending" thus
+					possible if 0<=nn<=$7fff
+
+ADDA.X #nn	LEA nn(			adda.l #800,a0 -> lea 800(a0),a0
+					possible if -$8000<=nn<=$7fff
+
+LEA nn(		ADDQ.W #nn		lea 6(a0),a0 -> addq.w #6,a0
+					possible if 1<=nn<=8
+
+$0000nnnn.l	$nnnn.w			move.l	4,a6 -> move.l 4.w,a6
+					possible if 0<=nnnn<=$7fff
+					(nnnn is SIGN EXTENDED to LONG!)
+
+MOVE.L #xx,Ay	LEA xx,Ay		try xx(PC) with the LEA
+
+MOVE.L Ax,Ay;
+ADD #nnnn,Ay	LEA nnnn(Ax),Ay		copy&add in one
+
+OFFSET-RELATED OPTIMIZATIONS
+RULE: use PC-relative addressing or basereg addressing!
+      put your code&data in ONE segment if possible!
+----------------------------------------------------------------------------
+MOVE.X nnnn	MOVE.X nnnn(pc)		lea copper,a0 -> lea copper(pc),a0..
+LEA nnnn	LEA nnnn(pc)		...possible if nnnn is close to PC
+
+(Ax,Dx.l)	(Ax,Dx.w)		possible if 0<=Dx<=$7fff
+
+If PC-relative doesn't work, use Ax as a pointer to your data block.
+Use indirect addressing to get to your data: move.l Data1-Base(Ax),Dx etc.
+
+TRICKY OPTIMIZATIONS
+----------------------------------------------------------------------------
+BSET #xx,yy	ORI.W	#2^xx,yy	0<=xx<=15
+BCLR #xx,yy	ANDI.W	#~(2^xx),yy	"
+BCHG #xx,yy	EORI.W	#2^xx,yy	"
+BTST #xx,yy	ANDI.W	#2^xx,yy	"
+					Best improvement if yy=a data reg.
+					BEWARE: STATUS FLAGS ARE "WRONG".
+
+SILLY OPTIMIZATIONS (FOR OPTIMIZING COMPILER OUTPUTS ETC)
+RULE: make the routines in assembly yourself!
+----------------------------------------------------------------------------
+MOVEM (one reg.) MOVE			movem.l	d0,-(sp) -> move d0,-(sp)
+
+MOVE xx,-(sp)	PEA xx			possible if xx=(Ax) or constant.
+
+0(Ax)		(Ax)			-
+
+MULU/MULS #0	CLR.L			moveq #0,Dx with data-registers.
+
+MULU #1,xx	SWAP CLR SWAP		high word is cleared with mulu #1
+MULS #1,xx	SWAP CLR SWAP EXT.L	see MULU, and sign exteded.
+					BEWARE: STATUS FLAGS ARE "WRONG"
+
+LOOP OPTIMIZATION.
+----------------------------------------------------------------------------
+Example: imagine you want to eor 4096 bytes beginning at (a0).
+Solution one:
+
+	move	#4096-1,d7
+..1	eori.b	d0,(a0)+
+	dbra	d7,.1
+
+Consider the loop from above. 4096 times a eor.b and a dbra takes time.
+What do you think about this:
+
+	move	#4096/4-1,d7
+..1	eor.l	d0,(a0)+
+	dbra	d7,.1
+
+Eors 4096 bytes too! But only needs 1024 eor.l/dbras.
+Yeah, I hear you smart guys cry: what about 1024 eor.l without any loop?!
+Right, that IS the fastest solution, but is VERY memory consuming (2 Kb).
+Instead, join a loop and a few eor.l:
+
+	move	#4096/4/4-1,d7
+..1	eor.l	d0,(a0)+
+	eor.l	d0,(a0)+
+	eor.l	d0,(a0)+
+	eor.l	d0,(a0)+
+	dbra	d7,.1
+
+This is faster than the loop before. I think about 8 or 16 eor.l's is just
+fine, depending on the size of the mem to be handled (and the wanted
+speed!). Also, mind the cache on 68020+ processors, the loop code must be
+small enough to fit in it for highest speeds.
+Try to do as much as possible within one loop (but considering the text
+above) instead of a few loops after each other.
+
+MEMORY CLEARING/FILLING.
+----------------------------------------------------------------------------
+A common problem is how to clear or fill some mem in a short time.
+If it is CHIP-MEMORY, use the blitter (only D-channel, see below). In this
+case you can still do other things with yer 680x0 while blittie-boy is busy
+erasing. If it is FAST-MEMORY, you can use the method from above, with
+clr.l instead of eor.l, but there is a much faster way:
+
+	move.l	sp,TempSp
+	lea	MemEnd,sp
+	moveq	#0,d0
+	...for all 7 data regs...
+	moveq	#0,d7
+	move.l	d0,a0
+	...for 6 address regs...
+	move.l	d0,a6
+
+After this, ONE instruction can clear 60 bytes of memory (15*4):
+
+	movem.l	d0-d7/a0-a6,-(sp)	;wham!
+
+Now, repeat this instruction as often as required to erase the memory.
+(memsize/60 times). You may need an additional movem.l to erase the last
+few bytes. Get sp(=a7) back at the end with (guess..):
+
+	move.l	TempSp,sp
+
+If you are low on mem, put a few movem.l in a loop. But, now you need a
+loop-counter register, so you'll only clear 56 bytes in one movem.l.
+In the case of CHIP memory, you can use both the blitter and the processor
+simultaneously to clear much CHIP mem in a VERY short time...
+It takes some experimentation to find the best sizes to clear with the
+blitter and with the processor.
+
+BUT, ALWAYS USE A WAITBLIT AFTER CLEARING SIMULTANEOUSLY, even if you know
+that the blitter is finished before your processor is (mind 680x0's)
+
+BLITTER SPEEDS. (from the Hardware Reference Manual)
+----------------------------------------------------------------------------
+Some general notes about blitter speeds. These numbers are for an OCS/ECS
+blitter only, in 16-bit chip ram (who knows the AGA blitter speed???)
+
+		      n * H * W
+	time taken = -----------
+			7.09 		(7.15 for NTSC)
+
+time is in microseconds. H=blitheight,W=blitwidth(#words),n=cycles
+
+n=4+....depends on # DMA-channels used
+
+	A: +0 (this one is free!)
+	B: +2
+	C or D: +0		In line-mode, every pixel takes 8 cycles.
+	C and D: +2
+
+So, use A,D,A&D for the fastest operation.
+Use A&C for 2-source operations (e.g. collision check or so).
+
+
+NOTES (FURTHER NOTES MAY BE ADDED IN FUTURE...)
+----------------------------------------------------------------------------
+- 68020+ processors are particularly fast at using longwords. Byte access
+  is some sort of brake on the memory access. Use at least words.
+
+- 68010 has a loop-cache, it caches 3 word loops like
+	loop	move.l	(a0)+,(a1)+
+		dbra	d7,loop
+
+- When optimizing BIG programs (for instance, compiler outputs...) first
+  try to find the time-critical parts (inner loops, often called procs etc.)
+  In most cases 10% of the code is responsible for 90% of the execution time.
+  I see people using OldOpenLibrary() because it needs one less register
+  set up.. I mean, what's the point? Are people really going to notice if
+  your demo takes two clock cycles less before starting? :-)
+
+- Often it is better not to set BLTPRI in DMACON (#10 in $dff09a) as this
+  can keep your processor from calculating things while the blitter is busy.
+
+- Use as much registers as possible! I.e. store values in registers rather
+  than in memory, this gives one hell of a performance boost.
+  (NOTE: just this is the power of RISC machines. Very much register access
+  instead of memory access. Fill these 16 registers!)
+
+- Related to the last one: unlike many compilers, DONT put your parameters
+  on stack before calling a sub! Instead, put them in well defined registers!
+
+- In case you have enough memory, try to remove as many MULU/S and DIVU/S
+  as possible by pre-calculating a multiplication or division table, and
+  reading values from it, rather than each time MULU #10 or so.
+   * Beware on A1200 though, read Chris's section on 68020 optimization.
+
+
+38. How do I make a RESET
+=========================
+
+Here is the official routine supported by Commodore:
+                             ^^^^^^^^^^^^^^^^^^^^^^
+
+
+  INCLUDE "exec/types.i"
+  INCLUDE "exec/libraries.i"
+
+  csect text
+  xdef  _ColdReboot
+  xref  _LVOSupervisor
+
+EXECBASE        equ 4
+ROMEND          equ $01000000
+SIZE_OFFSET     equ -$14
+
+KICK_V36        equ 36
+V36_ColdReboot  equ -726
+
+
+_ColdReboot:
+      move.l EXECBASE,a6
+      cmp.w  #KICK_V36,LIB_VERSION(a6)   ;which Version of Exec ?
+      blt.s  .old_kick                   ;old one -> goto old_kick
+
+      jmp    V36_ColdReboot(a6)          ;else use Exec-Function
+
+.old_kick:
+      lea    .Reset_Code(pc),a5
+      jsr    _LVOSupervisor(a6)          ;get Supervisor-status
+      ;never reaching this point
+
+    cnop 0,4                             ;very important
+.Reset_Code:
+      lea    ROMEND,a0                   ;Calc Entrypoint
+      sub.l  SIZE_OFFSET(a0),a0
+      move.l 4(a0),a0
+      subq.l #2,a0
+      reset                              ;Reset peripherie
+      jmp    (a0)                        ;done
+                     ; <reset> and <jmp> in the same LONGWORD !!!!
+END
+
+
+39. System-Privates:
+====================
+
+  If anywhere in the manuals, includes or autodocs it says that
+  this or that is  PRIVATE or RESERVED or INTERNAL (or something
+  similar) then
+
+    * don't read this entry
+    * never ever WRITE something to it
+    * if it's a function, then DON'T use it
+    * don't check it for anything
+
+  Private system points can be changed without reason, or without
+  writing it into any documentation !
+
+  (Thanks Arno!)
+
+ And to add to that, if a system structure member has a routine that
+allows you to alter it (for example, SetAPen() alters the Pen
+value in the RastPort. It is currently possible to alter the pen
+by poking the structure) then USE IT! Do not Poke system structures
+unless there is no other way to alter the value.
+
+40. Good Books
+==============
+
+I've been asked to suggest some good books:
+
+Hardware Reference Manual
+-------------------------
+Essential for demo and game coders.
+
+Rom Kernal Manual: Libraries
+----------------------------
+Essential for *ALL* Amiga Programmers
+
+Rom Kernal Manual: Devices
+--------------------------
+Essential if you plan to do any work with Device IO (input.device,
+timer.device, trackdisk.device, etc...)
+
+Rom Kernal Manual: Includes & Autodocs
+--------------------------------------
+These are available on disk instead, which is a lot cheaper!
+Essential reference work,
+
+All these books are available to developers on the CATS CD 2 as
+AmigaGuide files.. $50 from CATS US.
+
+Amiga User Interface & Style Guide
+----------------------------------
+Probably the most boring book I've ever read :-) Useful if you
+intend to write applications, but even then some of the rules have
+changed for V39 since this book was printed.
+
+AmigaDOS manual 3rd Edition (Bantam)
+------------------------------------
+Truly awful book, unfortunately the ONLY official dos.library
+reference. Why it can't be integrated into the RKM's I don't know...
+If you need to program dos.library and want info on AmigaDos file
+and hunk formats, this is the book.
+
+Mapping the Amiga (Compute)
+---------------------------
+One of my favourite books. This is an easy-to-read reference
+to all system (1.3) functions and structures. Much easier to
+use than the Includes & Autodocs. I wish there was a V39 update
+to this!
+
+Amiga System Programmers Guide (Abacus)
+---------------------------------------
+Quite handy, it covers a lot of the Hardware Reference manual,
+Rom Kernal Manuals and more in one book, but I'd suggest you
+buy the official books instead.
+
+Advanced Amiga System Programmers Guide (Abacus)
+------------------------------------------------
+Slightly more interesting than the first one, covers mainly
+OS level programming, but again nothing really new.
+
+Amiga Disk Drives Inside and Out (Abacus)
+-----------------------------------------
+AVOID THIS BOOK! It has some of the worst code and coding practices
+I have ever seen in it. Half of the code will only work under
+Kickstart 1.2, the other half doesn't work at all!!!!
+
+680x0 Programming by Example (Howard Sams & Company)
+----------------------------------------------------
+Excellent book on 68000 programming. Covers 68000/020/030
+instructions, optimization. Aimed at the advanced 68000 user,
+some really neat stuff in this book. The only 68000 book I've
+bought, except the Motorola manual.
+
+The Discworld Series (Terry Pratchett)
+--------------------------------------
+Nothing to do with Amigas, but excellent books. If you need
+a break from programming, read one of these!
+
+
+
+
+
+Copper Startup Code
+===================
+
+I've seperated this out now, cut out this file and keep it safe
+(you may need a grown up to help you with this :-)
+
+8<-------8<-------8<-------8<-------8<-------8<-------8<-------8<-------
+
+*
+* Startup.asm  - A working tested version of startup from Howtocode5.txt
+*
+* This code sets up one of two copperlists (one for PAL and one for NTSC)
+* machines. It shows something to celebrate 3(?) years since the Berlin
+* wall came down :-) Press left mouse button to return to normality.
+* Tested on Amiga 3000 (ECS/V39 Kickstart) and Amiga 1200 (AGA/V39)
+* Read Howtocode5.txt for information on this source!
+*
+* Note: You will have to do something about sprites. Each sprite
+* pointer should point at a valid sprite, or for AGA *FOUR* long
+* words on a 64-bit boundary,
+* ie:
+*		CNOP 0,8
+* blanksprite:  dc.l 0,0,0,0
+*
+* Also, for AGA, sprites need to be fixed (see section on Sprites)
+*
+* $VER: startup.asm V5.0gti (18.3.92)
+* Valid on day of purchase only. No re-admission. No rain-checks.
+*
+
+	opt	l-,o+             	; auto link, optimise on
+
+; 	opt	o3-			; add this for Devpac Assembler
+
+	section	mycode,code		; need not be in chipram
+
+	incdir	"include:"
+	include	"exec/types.i"
+	include	"exec/funcdef.i"	; keep code simple and
+	include	"exec/exec_lib.i"	; easy to read - use
+	include	"graphics/gfxbase.i"	; the includes!
+	include	"graphics/graphics_lib.i"
+
+	include "misc/easystart.i"	; Allows startup from
+					; icon
+
+
+StartCopper:
+
+
+	move.l	4.w,a6
+	sub.l   a1,a1          ; Zero - Find current task
+	jsr	_LVOFindTask(a6)
+
+	move.l	d0,a1
+	moveq	#127,d0  	; task priority to very high...
+	jsr	_LVOSetTaskPri(a6)
+
+	move.l	4.w,a6		; get ExecBase
+	lea	gfxname,a1	; graphics name
+	moveq	#0,d0		; any version
+	jsr	_LVOOpenLibrary(a6)
+	tst.l	d0
+	beq	End		; failed to open? Then quit
+	move.l	d0,gfxbase
+	move.l	d0,a6
+	move.l	gb_ActiView(a6),wbview
+				; store current view address
+                            	; gb_ActiView = 34
+
+.loop	sub.l	a0,a0		; clear a0
+	jsr 	_LVOLoadView(a6) 	; Flush View to nothing
+	jsr	_LVOWaitTOF(a6) 	; Wait once
+	jsr	_LVOWaitTOF(a6) 	; Wait again.
+
+;	now check nothing has run in the meantime!
+;
+;  Please note, I haven't actually checked this bit!! :-)
+;  Can someone prove if it does or does not work????
+;
+        cmp.l	#0,gb_ActiView(a6)      ; Any other view appeared?
+	bne.s	.loop			; If so wipe it.
+
+	cmp.b	#50,VBlankFrequency(a6) ; Am I *running* PAL?
+	bne.s	.ntsc
+
+	move.l	#mycopper,$dff080 	; bang it straight in.
+	bra.s	.lp
+
+.ntsc	move.l	#mycopperntsc,$dff080
+
+
+.lp	btst	#6,$bfe001              ; ok.. I'll do an input
+	bne.s	.lp                     ; handler next time.
+
+
+CloseDown:
+	move.l	wbview,a1
+	move.l	gfxbase,a6
+	jsr	_LVOLoadView(a6) ; Fix view
+
+	move.l	gb_copinit(a6),$dff080	 ; Kick it into life
+                                    	 ; copinit = 38
+	move.l	a6,a1
+	move.l	4.w,a6
+	jsr	_LVOCloseLibrary(a6) ; EVERYONE FORGETS THIS!!!!
+
+End:	rts                              ; back to workbench/clc
+
+	section mydata,data_c	         ;  keep data & code seperate!
+
+mycopper	dc.w	$100,$0200	; otherwise no display!
+        	dc.w	$180,$00
+        	dc.w	$8107,$fffe    	; wait for $8107,$fffe
+		dc.w	$180,$f00      	; background red
+		dc.w	$d607,$fffe	; wait for $d607,$fffe
+		dc.w	$180,$ff0      	; background yellow
+        	dc.w	$ffff,$fffe
+        	dc.w	$ffff,$fffe
+
+mycopperntsc
+		dc.w	$100,$0200	; otherwise no display!
+        	dc.w	$180,$00
+        	dc.w	$6e07,$fffe    	; wait for $6e07,$fffe
+        	dc.w	$180,$f00      	; background red
+		dc.w	$b007,$fffe	; wait for $b007,$fffe
+		dc.w	$180,$ff0      	; background yellow
+        	dc.w	$ffff,$fffe
+		dc.w	$ffff,$fffe
+
+wbview  	dc.l	0
+gfxbase 	dc.l	0
+gfxname 	dc.b	"graphics.library",0
+
+
+Thanks to everyone who has replied. Any more questions, queries,
+or "CJ, you got it wrong again!" type mail to the email
+address below....
+
+What I want:
+===========
+If anyone wants to spend some time writing something on these
+(especially from a demo coders perspective) I'd be very grateful.
+I would write some of them myself if I had more time...
+
+
+o    68881/2 Programming
+
+o    How to Read C code (for Assember programmers reading OS manuals)
+
+o    Introduction to programming vector graphics
+
+o    How to set up an input handler
+
+o    Reading the new Motorola syntax code
+
+
+And anything else you want to write about. Please feel free to write
+additions/replacements for anything already here...
+
+
+
+And of course, if anyone spots a *really* bad bit of code or
+programming practice, let me know and I'll warn people about
+it here... (Don't send my old code though :-)
+
+And a final comment: For those of you who wrote about
+Amazing Tunes II (a demo I wrote 2 years back) wanting to
+know how to get it to run on a 1Mb chipram machine... Sorry.
+It doesn't. It probaby breaks *every* rule in this docfile.
+I speak from experience. I used to be that evil programmer :-)
+Disassemble the bootblock to see some nightmare code... You can
+probably patch it if you're clever. It was meant to support
+1Mb chipram but it never worked..  If you have 1.5Mb of ram
+(be it chip, fast or a mixture) it should work though...
+
+I had to totally rewrite it recently for The Demo Collection CDROM
+
+(which is totally amazing, costs £19.95 and contains 600Mb
+of demos, animations, 1000 Modules and much more - It's available
+from Almathera on (UK) 081 683 6418)
+
+It now plays 1000 modules (instead of 20), is much more system
+friendly and works on a (less than) 1Mb chipram CDTV.
+
+And you never know, if enough people ask I may do an AGA version,
+possibly on an Intuition screen... That would be nice!
+
+--------------------------------------------------------------------
+
+This text is Copyright (C) 1993 Share and Enjoy, but may be freely
+distributed in any electronic form. The copyright of contributions
+quoted from other authors remains with the original author. If you would
+like to contribute to this file, email me at the address below...
+
+The startup code in this article is freeware and may be used by
+anyone for any purpose.
+
+All trademarks and registered names (Workbench, Kickstart, etc)
+acknowledged.
+
+All opinions expressed in this article are my own, and in no way
+reflect those of anyone else. Please note that many of the
+programming practices described in this text are ONLY applicable
+for demo coding, and should not be used for Games and other
+programming.
+
+I didn't write this for fun, I wrote it for you to use! Hopefully
+this will grow into a big file that demo coders can use.
+
+If you want to make a contribution please email it to me:
+I prefer plain ASCII set to no more than 75 column width, and
+no tabs if possible (although I can fix text sent to me..)
+
+If you strongly disagree with anything I write, or you want to send me
+some source or demos to test on Amiga 1200/4000 etc, or you have
+questions about Amiga programming, or suggestions for future articles,
+or just want to chat about the best way to optimise automatic copperlist
+generation code (*), then contact me via email at:
+
+Please send mail to comradej@althera.demon.co.uk.
+
+I CAN NOW REPLY TO MAIL!!! At last, thanks to AmigaElm and some ARexx
+I can reply to mail! If you sent me a message and haven't got a reply,
+it's because I lost the message, please mail me again! Sorry about
+the delays before!
+
+I seem to have lost usenet news now, so I haven't read anything from
+alt.sys.amiga.demos since early January.
+
+* - This is a NIGHTMARE. I really feel sorry for the guys who wrote
+MrgCop(). I will never swear at MrgCop() or RethinkDisplay() again :-)
+

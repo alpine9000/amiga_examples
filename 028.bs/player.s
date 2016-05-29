@@ -307,7 +307,7 @@ CheckPlayerMiss:
 	move.w	playerMissPixels,d1
 	cmp.w	spriteL,d1	
 	beq	.check
-	rts
+	jmp 	PostCheckPlayerMiss
 
 .check:
 	cmp.w	#1,pathwayMissPending
@@ -414,7 +414,7 @@ CheckPlayerMiss:
 .dontClearPathway:
 
 	jsr	DetectItemCollisions		
-	rts
+	jmp	PostCheckPlayerMiss
 
 
 GetNextAutoMove:
