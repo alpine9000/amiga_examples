@@ -297,16 +297,25 @@ out/main.o: $(IMAGEDATA) \
 	out/panelFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw out/yay.raw
 
 
-bin/main.exe:  $(ALL_OBJS) 
+bin/BlockySkies:  $(ALL_OBJS) 
 	vlink	-hunkattr DATA=2 -hunkattr CODE=2 -hunkattr .text=2 -hunkattr .code=2 -hunkattr .data=2	-hunkattr .noload=2 -hunkattr .bss=2 $(ALL_OBJS) -o $@
 	cp $@ ~/A1200
 	cp $@ ~/A4000
+	ls -lh bin/BlockySkies
+	-mkdir BlockySkies
+	cp assets/BlockySkiesDrawer.info BlockySkies.info
+	cp bin/BlockySkies BlockySkies
+	cp assets/BlockySkies.info BlockySkies
+	lha -c bin/BlockySkies.lha BlockySkies BlockySkies.info
+	-@rm BlockySkies.info
+	-@rm -rf BlockySkies
+	ls -lh bin/BlockySkies.lha
 
 .PHONY:	wipe
 wipe:	clean
 	mkdir bin
 	mkdir out
-	make TRACKLOADER=0 bin/main.exe
+	make TRACKLOADER=0 bin/BlockySkies
 
 .PHONY:	wb
-wb: wipe bin/main.exe
+wb: wipe bin/BlockySkies

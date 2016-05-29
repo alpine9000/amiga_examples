@@ -382,8 +382,8 @@ creditsTopColor:
 	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR		
 
 	dc.w	PLAY_COPPER_WORD+$5000,$fffe
-	dc.w	COLOR31
 	if TRACKLOADER=0
+	dc.w	COLOR31	
 quitTopColor:
 	dc.w	MENU_TEXT_COLOR
 	dc.w	$ffdf,$fffe
