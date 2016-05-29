@@ -309,7 +309,9 @@ bin/BlockySkies:  $(ALL_OBJS)
 	lha -c bin/BlockySkies.lha BlockySkies BlockySkies.info
 	-@rm BlockySkies.info
 	-@rm -rf BlockySkies
-	ls -lh bin/BlockySkies.lha
+	rm -f bin/BlockySkiesInstall.adf && ../tools/external/amitools/xdftool.py bin/BlockySkiesInstall.adf format "BlockySkies" + write assets/BlockySkies.info + write bin/BlockySkies
+	ls -lh bin/BlockySkies*
+
 
 .PHONY:	wipe
 wipe:	clean
