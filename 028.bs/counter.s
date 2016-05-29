@@ -6,6 +6,7 @@
 	xdef    RenderNumber5
 	xdef    RenderNumber4
 	xdef    RenderNumber2	
+	xdef	ToAscii
 	
 RenderCounter:
 	;; d0.w x position
@@ -145,6 +146,6 @@ ToAscii:
 	rts
 
 staticBuffer:
-	dc.b	"00000"
+	dc.b	"000000000"
 	dc.b	0
 

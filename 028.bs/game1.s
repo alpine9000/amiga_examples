@@ -331,11 +331,12 @@ InitialiseNewGame:
 
 
 GameOver:
+	jsr	RegisterHighScore
 	sub.l	#4,nextLevelInstaller
 	lea	gameOverMessage,a1
 	jsr	Message
 	jsr	WaitForJoystick
-	bra	MainMenu
+	jmp	ShowHighScore
 	
 TutorialOver:
 	move.l	#levelInstallers,nextLevelInstaller

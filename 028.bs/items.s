@@ -15,7 +15,8 @@
 	xdef VerticalScrollBees
 	xdef DetectBeeCollisions
 	xdef RenderScore
-
+	xdef RegisterHighScore
+	
 	include "bees.i"
 
 
@@ -484,6 +485,10 @@ beeDownMovingDown:
 nextSpriteSlot:
 	dc.w	0
 
+RegisterHighScore:
+	move.l	__score,d0
+	jsr	AddHighScore
+	rts
 
 __score:
 	dc.l	0
