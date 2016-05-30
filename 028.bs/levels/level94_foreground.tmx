@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="8" tilewidth="16" tileheight="16" nextobjectid="1">
+<map version="1.0" orientation="orthogonal" renderorder="left-down" width="22" height="8" tilewidth="16" tileheight="16" nextobjectid="1">
  <tileset firstgid="1" name="foreground" tilewidth="16" tileheight="16" tilecount="320" columns="20">
   <image source="../assets/assets.png" width="320" height="256"/>
  </tileset>
  <tileset firstgid="321" name="items" tilewidth="16" tileheight="16" tilecount="320" columns="20">
   <image source="../assets/items.png" trans="000000" width="320" height="256"/>
  </tileset>
- <layer name="foreground" width="100" height="8">
+ <layer name="foreground" width="22" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjZ2BgsGLEjtlpIDeK8WM7YNgxAbEYFppcOctB4K+hirWA4bcbR9hq4QhvQnKj8UE+piR/VI7mD6pjQnlg+Wj+oCserT8GFya3jhjNH7TB0njaprSQG8X4MQAt/aRm
+   eJxjZ2BgsGLEjtkpkLMDYiYgFsNCkytnCTRbC0jvxqFGC4c+QnIgcylxbyUB9+Jz0/IBcC+h8CUnDAm5VxpPeqFEDgCZchSW
   </data>
  </layer>
- <layer name="pathway" width="100" height="8">
+ <layer name="pathway" width="22" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUEAK6jAwM3wfaEaMABdxlwIyTk1AxZNqYkc4OG8EAFCeg8NZlRBWTZ0TQMPAYiD8C8XkGiHp0faOA/gAUJ5KjcTAKRsEooAMAAJUwDuA=
+   eJxjYBiaQJeRgeE7jcy+y4Bp9kmoGDJtzEie2SB9uoyoYvKMCBoGHgPxRyA+zwBRj66PEgAyW5JKZg0kAAC+8g7g
   </data>
  </layer>
- <layer name="items" width="100" height="8">
+ <layer name="items" width="22" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFQwHEMOKWc8QjNwooB6DwBWFvHOHsPBr+dAWw9E5MugepccGiLnY0zmgC0OMkgBFTHqYmAC0efUfjhCqAUL7wICJO3EbjYkCB/2j4j4IRAADc/AcM
+   eJxjYKAviGHELeeIRw5dHQh741DvTKQ5uOwnxh0gNS5Y1MUS0ItudgAjpjxMTQCae3yxqMUHPIgw243MsEIH/lQyh1QAAKPaBww=
   </data>
  </layer>
 </map>

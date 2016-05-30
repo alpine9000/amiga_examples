@@ -20,6 +20,7 @@ InstallLevel\1:
 	move.w	#\a,d0
 	move.l	#level\1ForegroundMapEnd,endForegroundMapPtr
 	move.l	#level\1ItemsMapEnd,itemsMapEndPtr
+	move.l	#level\1ItemsMap-level\1ForegroundMap,itemsMapOffset
 	jsr	StartMusic
 	rts
 
