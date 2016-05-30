@@ -397,6 +397,8 @@ CheckPlayerMiss:
 	bra	.dontClearPathway
 .clearPathway:
 	move.w	#2,pathwayClearPending
+	move.l	a2,pathwayLastSafeTileAddress
+	move.l	a3,foregroundLastSafeTileAddress	
 	move.l  playerXColumn,playerXColumnLastSafe
 
 

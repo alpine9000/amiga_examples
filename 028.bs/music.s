@@ -2,7 +2,9 @@
 	
 	xdef 	StartMusic
 
-
+p61Inited:
+	dc.w	0
+	
 StartMusic:
 .wait: 				; In case there is currently  fade in progress
 	jsr	WaitVerticalBlank
@@ -28,9 +30,15 @@ StartMusic:
 
 	move.w	d0,currentModule
 	movem.l	d0-a6,-(sp)
-	move.w	d0,-(sp)
+	cmp.w	#0,p61Inited
+	beq	.skipEnd
+	movem.l	d0-a6,-(sp)
+	IntsOff
 	jsr	P61_End
-	move.w	(sp)+,d0	
+	IntsOn	
+	movem.l	(sp)+,d0-a6	
+	move.w	#0,p61Inited	
+.skipEnd:
 	lea	module,a0
 	lea	modules,a1
 	lsl.w	#3,d0
@@ -44,6 +52,7 @@ StartMusic:
         moveq   #0,d0
 	move.w	#64,P61_Master
 	jsr     P61_Init
+	move.w	#1,p61Inited
 	movem.l	(sp)+,d0-a6
 .skip:
 	rts

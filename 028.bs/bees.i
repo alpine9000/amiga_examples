@@ -113,6 +113,7 @@ DetectDownBeeCollisions:
 	ble	.skip
 
 	bsr	DeleteItemSprite
+	add.l	#3*4,a7 ; dirty hack - unwind the call stack
 	jmp	BigBang
 .skip:
 	rts
@@ -159,6 +160,7 @@ DetectUpBeeCollisions:
 	ble	.skip
 
 	bsr	DeleteItemSprite
+	add.l	#3*4,a7 ; dirty hack - unwind the call stack
 	jmp	BigBang
 .skip:
 	rts		

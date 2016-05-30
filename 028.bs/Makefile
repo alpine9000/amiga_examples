@@ -22,7 +22,6 @@ IMAGES=foreground.png \
 	panel.png \
 	pickups.png \
 	mpanel.png \
-	mpanelOrig.png \
 	sprite_pig-0.png \
 	sprite_pig-1.png \
 	sprite_pig-2.png \
@@ -126,10 +125,6 @@ out/countdown.bin: assets/countdown.png
 
 out/mpanel.bin: assets/mpanel.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/mpanel --use-palette=assets/mpanel.pal
-
-out/mpanelOrig.bin: out/mpanelOrig.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 16 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output-grey-palette --output out/mpanelOrig --use-palette=assets/mpanel.pal
-
 
 out/sprite_pig-%.bin: out/sprite_pig-%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig-$* --palette-offset 16 --use-palette=assets/pig.pal
@@ -301,6 +296,8 @@ bin/BlockySkies:  $(ALL_OBJS)
 	vlink	-hunkattr DATA=2 -hunkattr CODE=2 -hunkattr .text=2 -hunkattr .code=2 -hunkattr .data=2	-hunkattr .noload=2 -hunkattr .bss=2 $(ALL_OBJS) -o $@
 	cp $@ ~/A1200
 	cp $@ ~/A4000
+	cp assets/BlockySkies.info ~/A1200
+	cp assets/BlockySkies.info ~/A4000
 	ls -lh bin/BlockySkies
 	-mkdir BlockySkies
 	cp assets/BlockySkiesDrawer.info BlockySkies.info

@@ -22,7 +22,7 @@ ShowHighScore:
 	lea 	CUSTOM,a6
 
 	jsr	ReloadSplashScreen	
-	bsr	HighlighScore
+	bsr	HighlightScore
 	
 	lea	splash,a0
 	add.l	#(150*40*5)+((320-96)/16),a0
@@ -144,7 +144,7 @@ AddHighScore:
 .skip:
 	rts
 
-HighlighScore:
+HighlightScore:
 	lea	firstTopColor,a0
 	lea	highScores,a1
 	move.l	__score,d0

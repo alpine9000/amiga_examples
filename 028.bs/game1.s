@@ -11,6 +11,7 @@
 	
 	xdef	pathwayRenderPending
 	xdef	pathwayPlayerTileAddress
+	xdef	pathwayLastSafeTileAddress
 	xdef	pathwayFadeCount	
 	xdef	pathwayClearPending
 	xdef	pathwayMapPtr
@@ -20,6 +21,7 @@
 	xdef	foregroundScrollX
 	xdef	foregroundBitplanes1	
 	xdef	foregroundPlayerTileAddress	
+	xdef	foregroundLastSafeTileAddress
 	xdef	foregroundMapPtr
 	xdef	foregroundTilemap
 	xdef 	foregroundScrollPixels
@@ -163,7 +165,7 @@ SetupBoardLoop:
 	jsr 	SwitchBuffers
 	move.l	foregroundScrollX,d0
 	move.w	#1,moving
-	bsr 	Update
+	bsr	Update
 
 	jsr	RenderNextForegroundFrame
 	jsr	PrepareItemSpriteData			
@@ -263,6 +265,13 @@ PostCheckPlayerMiss:
 	bra	GameLoop
 
 QuitGame:
+	jsr	WaitVerticalBlank	
+	jsr	PlayNextSound
+	IntsOff
+	jsr	WaitVerticalBlank		
+	movem.l	d0-a6,-(sp)
+	jsr	P61_End
+	movem.l	(sp)+,d0-a6
 	rts
 
 Update:	
@@ -331,20 +340,23 @@ InitialiseNewGame:
 
 
 GameOver:
-	jsr	RegisterHighScore
 	sub.l	#4,nextLevelInstaller
 	lea	gameOverMessage,a1
 	jsr	Message
 	jsr	WaitForJoystick
+	jsr	RestorePanel
+	jsr	RegisterHighScore
 	jmp	ShowHighScore
 	
 TutorialOver:
+	jsr	RestorePanel
 	add.l	#8,sp		; dirty hack - unwind the call stack
 	move.l	#levelInstallers,nextLevelInstaller
 	move.l	#"0001",levelCounter
 	lea	tutorialOverMessage,a1	
 	jsr	Message
 	jsr	WaitForJoystick
+	jsr	RestorePanel
 	bra	MainMenu
 
 InstallNextLevel:
@@ -370,11 +382,9 @@ LevelComplete:
 	jsr 	SelectNextPlayerSprite
 	move.l	levelCompleteMessage,a1
 	jsr	Message		
-	
 	bsr	InstallNextLevel
-	
 	jsr	WaitForJoystick
-	
+	jsr	RestorePanel	
 	jsr	ResetItems
 	bra	Reset
 
@@ -872,7 +882,7 @@ BlitCountdown:
 	;; palette
 	Level	91,"STAY ON THE PATHWAYS!",100,2*2,12,10,"WELL DONE!",A,21,0
 	Level	92,"COLLECT COINS!",100,2*2,12,10,"NEXT COLLECT AN ARROW...",A,21,0
-	Level	93,"PRESS FIRE TO ACTIVATEE THE ARROW",100,2*2,12,10,"WHOOHOO",A,21,0
+	Level	93,"PRESS FIRE TO ACTIVATE THE ARROW",100,2*2,12,10,"WHOOHOO",A,21,0
 	Level	94,"WATCH OUT FOR BEES!",100,2*2,12,10,"LOL - BEES",A,21,0
 	Level	95,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"CLOCKS WILL STOP THE BOARD MOVING",A,21,0
 	Level	96,"PRESS FIRE TO ACTIVATE THE CLOCK",200,2*2,12,10,"EYES WILL UNHIDE THE BOARD",A,21,0
@@ -1019,13 +1029,13 @@ nextLevelInstaller:
 
 tutorialLevelInstallers:
 	dc.l	InstallLevel91
+endTutorialLevelInstaller:		
 	dc.l	InstallLevel92
 	dc.l	InstallLevel93
 	dc.l	InstallLevel94
 	dc.l	InstallLevel95	
 	dc.l	InstallLevel96
 	dc.l	InstallLevel97
-endTutorialLevelInstaller:	
 	dc.l	0	
 panelFade:
 	include "out/panelFade.s"
@@ -1084,6 +1094,10 @@ pathwayRenderPending:
 	dc.w	0
 pathwayPlayerTileAddress:
 	dc.l	0
+pathwayLastSafeTileAddress:
+	dc.l	0
+foregroundLastSafeTileAddress:
+	dc.l	0	
 pathwayClearPending:
 	dc.w	0	
 foregroundScrollX:

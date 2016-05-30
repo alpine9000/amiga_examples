@@ -4,8 +4,8 @@
 	xdef	ClearPathway
 	
 RenderPathway:
-	move.l	pathwayPlayerTileAddress,d5
-	andi.w	#$fff0,d5       ; point the address to the last tile of the previous column
+	move.l	pathwayLastSafeTileAddress,d5
+	;; 	add.l	#2,d5
 	move.l	d5,a4
 	moveq	#0,d5
 
@@ -31,7 +31,7 @@ RenderPathway:
 	beq	.dontBlit
 	
 	lea 	foregroundTilemap,a1	
-	add.w	d0,a1 	; source tile	
+	adda.w	d0,a1 	; source tile	
 
 	move.l	a3,a0	; move.l foregroundOffscreen,a0 
 	adda.w	d3,a0
@@ -67,8 +67,7 @@ RenderPathway:
 
 ClearPathway:
 	sub.w	#1,pathwayClearPending
-	move.l	foregroundPlayerTileAddress,d7
-	andi.w	#$fff0,d7	 ; address of the last tile in the previous column
+	move.l	foregroundLastSafeTileAddress,d7
 	moveq	#0,d5		 ; x index
 	lea 	foregroundTilemap,a3
 

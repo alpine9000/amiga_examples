@@ -6,6 +6,7 @@ InstallLevel\1:
 	move.l	#level\1PathwayMap,startPathwayMapPtr
 	move.l	#level\1ForegroundMap,foregroundMapPtr
 	move.l	#level\1PathwayMap,pathwayMapPtr	
+	move.l	#level\1PathwayMap+8,pathwayLastSafeTileAddress
 	move.l	#palette\8_playAreaPalette,playAreaPalette
 	move.l	#palette\8_playareaFade,playareaFade
 	move.l	#palette\8_flagsFade,flagsFade
@@ -33,7 +34,7 @@ level\1ForegroundMapEnd:
 	dc.w	$FFFF
 	dc.w	$FFFF
 	dc.w	$FFFF
-	dc.w	$FFFF		
+	dc.w	$FFFF
 level\1PathwayMap:
 	include "out/level\1_pathway-map.s"
 level\1ItemsMap:

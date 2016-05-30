@@ -1,3 +1,10 @@
+IntsOff:	macro
+	move	#$7fff,INTENA(a6) 	; disable all interrupts
+	endm
+IntsOn:		macro
+	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)			
+	endm
+	
 PlaySound:	macro
 	if	SFX=1
 	jsr	Play\1Sound	
