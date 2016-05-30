@@ -888,7 +888,7 @@ BlitCountdown:
 	Level	96,"PRESS FIRE TO ACTIVATE THE CLOCK",200,2*2,12,10,"EYES WILL UNHIDE THE BOARD",A,21,0
 	Level	97,"PRESS FIRE TO ACTIVATE THE EYE",100,2*2,12,10,"LEVEL 7",A,21,0
 	
-	Level	1,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 1 COMPLETE!",B,98,2
+	Level	1,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 1 COMPLETE!",B,99,2
 	Level	2,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 2",B,98,2
 
 	Level	3,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 3 COMPLETE!",C,98,2
@@ -932,7 +932,7 @@ panel:
 countdownImages:
 	incbin "out/countdown.bin"	
 itemsMapOffset:
-	dc.l	level1ItemsMap-level1ForegroundMap
+	dc.l	0
 itemsMapEndPtr:
 	dc.l	0
 foregroundScrollPixels:
@@ -1029,13 +1029,13 @@ nextLevelInstaller:
 
 tutorialLevelInstallers:
 	dc.l	InstallLevel91
-endTutorialLevelInstaller:		
 	dc.l	InstallLevel92
 	dc.l	InstallLevel93
 	dc.l	InstallLevel94
 	dc.l	InstallLevel95	
 	dc.l	InstallLevel96
 	dc.l	InstallLevel97
+endTutorialLevelInstaller:	
 	dc.l	0	
 panelFade:
 	include "out/panelFade.s"

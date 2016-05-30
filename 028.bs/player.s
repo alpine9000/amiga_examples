@@ -592,8 +592,15 @@ UpdatePlayerScore:
 RenderPlayerScore:
 	jsr	RenderScore
 	move.l	playerXColumn,d0
+	cmp.l	#100,playerXColumn
+	bge	.3
 	move.w	#PANEL_COLUMNS_REMAINING_X+(8*3),d1
 	jsr	RenderNumber2
+	bra	.done
+.3:
+	move.w	#PANEL_COLUMNS_REMAINING_X+(8*2),d1
+	jsr	RenderNumber3
+.done:
 	rts
 
 PreRenderColumnsRemaining:
