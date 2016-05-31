@@ -26,3 +26,6 @@ background
 # ???
 # main cloud
 # cloud hilight
+# balloon outline
+# balloon main
+# balloon ropes

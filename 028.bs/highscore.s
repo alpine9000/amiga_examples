@@ -155,15 +155,17 @@ HighlightScore:
 	beq	.match
 	move.w 	#MENU_TEXT_COLOR,(a0)
 	move.w	#MENU_TEXT_BOTTOM_COLOR,MENU_BOTTOM_OFFSET(a0)
-	add.l	#4,a1
-	add.l	#MENU_OFFSET,a0
-	bra	.loop
+	bra	.notMatch
 .match:
 	move.w  #MENU_SELECTED_TOP_COLOR,(a0)
 	move.w  #MENU_SELECTED_BOTTOM_COLOR,MENU_BOTTOM_OFFSET(a0)
+.notMatch:
+	add.l	#MENU_OFFSET,a0	
+	add.l	#4,a1	
+	bra	.loop	
 .done:
 	rts
-	
+
 highScore:
 	dc.b	" HI SCORES  "
 	dc.b	0

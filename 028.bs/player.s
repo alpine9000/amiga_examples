@@ -172,6 +172,11 @@ ProcessJoystick:
 	;; 812
 	;; 7 3
 	;; 654
+	btst.b	#0,joystick
+	beq	.joystickNotPressed1
+	jsr	UsePickup
+.joystickNotPressed1:
+	
 	jsr	ReadJoystick
 	cmp.w	#0,spriteR
 	bne	.skip
@@ -181,23 +186,32 @@ ProcessJoystick:
 	bne	.skip
 	cmp.w	#0,spriteL
 	bne	.skip	
-
+	
 	cmp.w	#0,spriteAutoMoveEnabled
+	if 1
 	beq	.autoMoveDisabled
-
 	;; Set fast as default, will be overridden to correct speed
 	move.w	#PLAYER_FAST_PAUSE_PIXELS,playerPausePixels
 	move.w	#PLAYER_FAST_CHECK_MISS_PIXELS,playerMissPixels
-		
+	else
+	beq	.autoMoveDisabled2
+	move.w	#PLAYER_FAST_PAUSE_PIXELS,playerPausePixels
+	move.w	#PLAYER_FAST_CHECK_MISS_PIXELS,playerMissPixels
+.autoMoveDisabled2:	
+	endif
+
+
 	bsr	GetNextAutoMove
 	cmp.w	#1,d0
-	beq	.skip
+	beq	.skip	
 
 .autoMoveDisabled:
+	if 0
 	btst.b	#0,joystick
 	beq	.joystickNotPressed	
 	jsr	UsePickup
 .joystickNotPressed:
+	endif
 	
 	cmp.b	#3,joystickpos
  	bne	.notRight

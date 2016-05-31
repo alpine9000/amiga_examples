@@ -344,13 +344,16 @@ GameOver:
 	cmp.l	#tutorialLevelInstallers,nextLevelInstaller
 	blt	.notTutorial
 	move.l	#levelInstallers,nextLevelInstaller
-	move.l	#"0001",levelCounter	
+	move.l	#"0001",levelCounter
+	bra	.dontRegisterHighScore
 .notTutorial:
+	jsr	RegisterHighScore
+.dontRegisterHighScore:
 	lea	gameOverMessage,a1
 	jsr	Message
 	jsr	WaitForJoystick
 	jsr	RestorePanel
-	jsr	RegisterHighScore
+
 	jmp	ShowHighScore
 	
 TutorialOver:
@@ -891,7 +894,7 @@ BlitCountdown:
 	Level	91,"STAY ON THE PATHWAYS!",100,2*2,12,10,"WELL DONE!",A,21,0,1
 	Level	92,"COLLECT COINS!",100,2*2,12,10,"NEXT COLLECT AN ARROW...",A,21,0,1
 	Level	93,"PRESS FIRE TO ACTIVATE THE ARROW",100,2*2,12,10,"WHOOHOO",A,21,0,1
-	Level	94,"WATCH OUT FOR BEES!",100,2*2,12,10,"LOL - BEES",A,21,0,1
+	Level	94,"WATCH OUT FOR BEES!",100,2*2,12,10,"LOL - BEES :-)",A,21,0,1
 	Level	95,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"CLOCKS WILL STOP THE BOARD MOVING",A,21,0,1
 	Level	96,"PRESS FIRE TO ACTIVATE THE CLOCK",200,2*2,12,10,"EYES WILL UNHIDE THE BOARD",A,21,0,1
 	Level	97,"PRESS FIRE TO ACTIVATE THE EYE",100,2*2,12,10,"LEVEL 7",A,21,0,1
@@ -900,11 +903,14 @@ BlitCountdown:
 	Level	2,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 2",B,98,2,0
 	Level	3,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 3 COMPLETE!",C,98,2,0
 	Level	4,"LETS GO?",25,4*2,8,6,"LEVEL 4 COMPLETE",C,98,2,0
-	Level	5,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 5 COMPLETE!",A,98,1,0
+	Level	5,"KABOOM?!",75,4*2,8,6,"PHEW!!! LEVEL 5 COMPLETE!",D,99,1,0
+	Level	6,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 6 COMPLETE!",A,98,1,0
+
 
 	Palette	A
 	Palette	B
-	Palette	C	
+	Palette	C
+	Palette	D	
 
 levelData:
 	ds.b	(level2End-level2Start)+1024
@@ -1032,6 +1038,7 @@ levelInstallers:
 	dc.l	InstallLevel3
 	dc.l	InstallLevel4
 	dc.l	InstallLevel5
+	dc.l	InstallLevel6	
 	dc.l	0
 nextLevelInstaller:
 	dc.l	levelInstallers	
@@ -1125,23 +1132,5 @@ freezeCountdownCounter:
 startUserstack:
 	ds.b	$1000		; size of stack
 userstack:
-	endif
-
-	if 0
-	LevelData	91,"STAY ON THE PATHWAYS!",100,2*2,12,10,"WELL DONE!",A,21,0
-	LevelData	92,"COLLECT COINS!",100,2*2,12,10,"NEXT COLLECT AN ARROW...",A,21,0
-	LevelData	93,"PRESS FIRE TO ACTIVATE THE ARROW",100,2*2,12,10,"WHOOHOO",A,21,0
-	LevelData	94,"WATCH OUT FOR BEES!",100,2*2,12,10,"LOL - BEES",A,21,0
-	LevelData	95,"REMEMBER THE PATHWAYS BEFORE THEY FADE!",75,2*2,12,10,"CLOCKS WILL STOP THE BOARD MOVING",A,21,0
-	LevelData	96,"PRESS FIRE TO ACTIVATE THE CLOCK",200,2*2,12,10,"EYES WILL UNHIDE THE BOARD",A,21,0
-	LevelData	97,"PRESS FIRE TO ACTIVATE THE EYE",100,2*2,12,10,"LEVEL 7",A,21,0
-	
-	LevelData	1,"LET'S TRY A LONGER LEVEL!",75,2*2,12,10,"PHEW!, LEVEL 1 COMPLETE!",B,99,2
-	LevelData	2,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 2",B,98,2
-
-	LevelData	3,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 3 COMPLETE!",C,98,2
-	LevelData	4,"LETS GO?",25,4*2,8,6,"LEVEL 4 COMPLETE",C,98,2
-
-	LevelData	5,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 5 COMPLETE!",A,98,1
 	endif
 	end

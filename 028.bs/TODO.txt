@@ -1,0 +1,2 @@
+(1) Check second pass path rendering
+(2) sprite per level

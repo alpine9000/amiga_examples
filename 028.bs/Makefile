@@ -5,6 +5,7 @@ BACKGROUND_GREY_COLOR=777
 paletteA_BACKGROUND_COLOR_LONG=000 153 238 255
 paletteB_BACKGROUND_COLOR_LONG=000 000 102 187
 paletteC_BACKGROUND_COLOR_LONG=210 002 053 255
+paletteD_BACKGROUND_COLOR_LONG=134 134 134 255
 
 MAX_P61_SIZE=$(shell ls -Sl assets/P61.* | awk '{print $$5}' | head -1)
 
@@ -284,11 +285,13 @@ out/main.o: $(IMAGEDATA) \
 	out/level3_foreground-map.s\
 	out/level4_foreground-map.s\
 	out/level5_foreground-map.s\
+	out/level6_foreground-map.s\
 	out/background-map.s  Makefile link.script.x\
 	out/menu-palette.s\
 	out/paletteA_playarea_fade.s out/paletteA_flags_fade.s out/paletteA_foreground-palette-table.s out/paletteA_tileFade.s\
 	out/paletteB_playarea_fade.s out/paletteB_flags_fade.s out/paletteB_foreground-palette-table.s out/paletteB_tileFade.s\
 	out/paletteC_playarea_fade.s out/paletteC_flags_fade.s out/paletteC_foreground-palette-table.s out/paletteC_tileFade.s\
+	out/paletteD_playarea_fade.s out/paletteD_flags_fade.s out/paletteD_foreground-palette-table.s out/paletteD_tileFade.s\
 	out/panelFade.s out/jump.raw out/falling.raw out/chaching.raw out/whoosh.raw out/yay.raw
 
 
