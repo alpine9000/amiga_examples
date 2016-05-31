@@ -18,22 +18,9 @@ MENU_BOTTOM_OFFSET		equ (playBottomColor-playTopColor)
 	
 ShowMenu:
 	lea 	CUSTOM,a6
-
-	jsr	ReloadSplashScreen	
-
-	lea	splash,a0
-	add.l	#(150*40*5)+((320-96)/16),a0
-
-	WaitBlitter	
-	move.w #(BC0F_SRCA|BC0F_DEST|$f0),BLTCON0(A6)
-	move.w #0,BLTCON1(a6) 
-	move.l #$ffffffff,BLTAFWM(a6) 		;no masking of first/last word
-	move.w #(320-96)/8,BLTAMOD(a6)		;A modulo
-	move.w #0,BLTDMOD(a6)			;D modulo	
-	move.l a0,BLTAPTH(a6)			;source graphic top left corner
-	move.l backgroundOffscreen,BLTDPTH(a6)	;destination top left corner
-	move.w #((64*5)<<6)|(96/16),BLTSIZE(a6)	
-
+	jsr	ReloadSplashScreen
+	jsr	RestoreSplashMenuSection
+	
 ReShowMenu:	
 	jsr	WaitVerticalBlank	
 	;; set up default palette
@@ -79,12 +66,13 @@ ReShowMenu:
 	jsr	WaitVerticalBlank
 	jsr	_ProcessJoystick
 
-
-
 RenderMenu:
+	;;  small restore
+
 	move.l	backgroundOffscreen,a0
+	add.l	#((64)*(96/16)*5),a0	
 	lea	splash,a2
-	add.l	#(150*40*5)+((320-96)/16),a2
+	add.l	#((134+32)*40*5)+((320-96)/16),a2
 
 	WaitBlitter	
 	move.w #(BC0F_SRCA|BC0F_DEST|$f0),BLTCON0(A6)
@@ -94,8 +82,8 @@ RenderMenu:
 	move.w #(320-96)/8,BLTDMOD(a6)	;D modulo	
 	move.l a0,BLTAPTH(a6)		;source graphic top left corner
 	move.l a2,BLTDPTH(a6)		;destination top left corner
-	move.w 	#((64*5)<<6)|(96/16),BLTSIZE(a6)	
-
+	move.w 	#((32*5)<<6)|(96/16),BLTSIZE(a6)	
+	
 	lea	menu,a1
 	lea	splash,a0
 	move.w	#(320/2)-(6*8)+4,d0

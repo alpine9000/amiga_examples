@@ -26,6 +26,7 @@
 	xdef playerLevelMissPixels
 
 	xdef pigPlayerSpriteConfig
+	xdef carPlayerSpriteConfig	
 	xdef robotPlayerSpriteConfig
 	xdef tankPlayerSpriteConfig
 	xdef playerSpriteConfig
@@ -298,6 +299,10 @@ InstallPlayerColorPalette:
 InstallPigColorPalette:	
 	include "out/sprite_pig-0-palette.s"
 	rts
+
+InstallCarColorPalette:	
+	include "out/sprite_car-0-palette.s"
+	rts	
 
 InstallRobotColorPalette:	
 	include "out/sprite_robot-0-palette.s"
@@ -619,6 +624,11 @@ pigPlayerSpriteConfig:
 	dc.l	InstallPigColorPalette
 	dc.l	spritePig
 	dc.l	spriteFalling1
+
+carPlayerSpriteConfig:
+	dc.l	InstallCarColorPalette
+	dc.l	spriteCar
+	dc.l	spriteFallingCar1	
 
 robotPlayerSpriteConfig:
 	dc.l	InstallRobotColorPalette

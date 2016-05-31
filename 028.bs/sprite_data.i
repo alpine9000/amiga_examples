@@ -124,6 +124,48 @@ spriteTankRightJump:
 	dc.w	0,0
 	incbin	"out/sprite_tank-2.bin" ; 7, right jump
 	dc.l	0
+
+spriteCar:
+spriteCarUp:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_car-1.bin" ; 0, up
+	dc.l	0
+spriteCarUpJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_car-0.bin" ; 1, up jump
+	dc.l	0		
+spriteCarDown:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_car-5.bin" ; 2, down
+	dc.l	0
+spriteCarDownJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_car-4.bin" ; 3, down jump
+	dc.l	0		
+spriteCarLeft:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_car-7.bin" ; 4, left
+	dc.l	0
+spriteCarLeftJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_car-6.bin" ; 5, left jump
+	dc.l	0		
+spriteCarRight:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_car-3.bin" ; 6, right
+	dc.l	0
+spriteCarRightJump:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_car-2.bin" ; 7, right jump
+	dc.l	0
 	
 spriteFalling0:
 	dc.w	0,0
@@ -203,4 +245,31 @@ spriteFallingTank4:
 	dc.w	0,0
 	dc.w	0,0
 	incbin	"out/sprite_fallingTank-4.bin" 
+	dc.l	0
+
+
+spriteFallingCar0:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingCar-0.bin" 
+	dc.l	0
+spriteFallingCar1:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingCar-1.bin" 
+	dc.l	0
+spriteFallingCar2:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingCar-2.bin" 
+	dc.l	0
+spriteFallingCar3:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingCar-3.bin" 
+	dc.l	0
+spriteFallingCar4:
+	dc.w	0,0
+	dc.w	0,0
+	incbin	"out/sprite_fallingCar-4.bin" 
 	dc.l	0

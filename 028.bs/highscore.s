@@ -8,37 +8,23 @@ SPLASH_SCREEN_WIDTH_BYTES	equ 40
 
 PLAY_COPPER_WORD		equ $aad1
 
-MENU_TITLE_TOP_COLOR		equ $be0 ;$e71
-MENU_TITLE_BOTTOM_COLOR		equ $9d4 ;$fe7	
-MENU_SELECTED_TOP_COLOR		equ $f30
-MENU_SELECTED_BOTTOM_COLOR	equ $d10
+MENU_TITLE_TOP_COLOR		equ $7ef
+MENU_TITLE_BOTTOM_COLOR		equ $5cd	
+MENU_SELECTED_TOP_COLOR		equ $4d2
+MENU_SELECTED_BOTTOM_COLOR	equ $3e1
 MENU_TEXT_COLOR			equ $7ef
-MENU_TEXT_BOTTOM_COLOR		equ $5cd	
+MENU_TEXT_BOTTOM_COLOR		equ $5cd
+MENU_FIRE_TOP_COLOR		equ $be0 ;$e71
+MENU_FIRE_BOTTOM_COLOR		equ $9d4 ;$fe7		
 
 MENU_BOTTOM_OFFSET		equ (firstBottomColor-firstTopColor)
 MENU_OFFSET			equ (secondTopColor-firstTopColor)
 	
 ShowHighScore:
 	lea 	CUSTOM,a6
-
 	jsr	ReloadSplashScreen	
 	bsr	HighlightScore
 	
-	lea	splash,a0
-	add.l	#(150*40*5)+((320-96)/16),a0
-
-	WaitBlitter	
-	move.w #(BC0F_SRCA|BC0F_DEST|$f0),BLTCON0(A6)
-	move.w #0,BLTCON1(a6) 
-	move.l #$ffffffff,BLTAFWM(a6) 		;no masking of first/last word
-	move.w #(320-96)/8,BLTAMOD(a6)		;A modulo
-	move.w #0,BLTDMOD(a6)			;D modulo	
-	move.l a0,BLTAPTH(a6)			;source graphic top left corner
-	move.l backgroundOffscreen,BLTDPTH(a6)	;destination top left corner
-	move.w #((64*5)<<6)|(96/16),BLTSIZE(a6)	
-
-ReShowMenu:
-	move.w	#1,splashInvalid
 	jsr	WaitVerticalBlank	
 	;; set up default palette
 	include "out/menu-palette.s"
@@ -77,34 +63,17 @@ ReShowMenu:
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
 
 	bsr	RenderHighScore
-	
 	jsr	WaitForJoystick
 	jmp	ShowMenu
 
 
 RenderHighScore:
-	move.l	backgroundOffscreen,a0
-	lea	splash,a2
-	add.l	#(150*40*5)+((320-96)/16),a2
-
-	WaitBlitter	
-	move.w #(BC0F_SRCA|BC0F_DEST|$f0),BLTCON0(A6)
-	move.w #0,BLTCON1(a6) 
-	move.l #$ffffffff,BLTAFWM(a6) 	;no masking of first/last word
-	move.w #0,BLTAMOD(a6)		;A modulo
-	move.w #(320-96)/8,BLTDMOD(a6)	;D modulo	
-	move.l a0,BLTAPTH(a6)		;source graphic top left corner
-	move.l a2,BLTDPTH(a6)		;destination top left corner
-	move.w 	#((64*5)<<6)|(96/16),BLTSIZE(a6)	
-
 	lea	highScore,a1
 	lea	splash,a0
 	move.w	#(320/2)-(6*8)+4,d0
 	move.w	#150-16,d1
 	jsr	DrawMaskedText85
-
 	lea	highScores,a2
-
 .loop:
 	move.w	#9,d2
 	move.l	(a2)+,d0
@@ -116,6 +85,11 @@ RenderHighScore:
 	jsr	DrawMaskedText85
 	cmp.l	#endHighScores,a2
 	bne	.loop
+	lea	splash,a0	
+	lea	pressFire,a1
+	move.l	#(320/2)-(6*8),d0	
+	add.w	#16,d1
+	jsr	DrawMaskedText85	
 	rts
 
 AddHighScore:
@@ -127,7 +101,6 @@ AddHighScore:
 	cmp.l	#highScores,a0
 	blt	.next
 	bra	.loop1
-
 .next:
 	move.l	#endHighScores-4,a0
 .loop:
@@ -169,6 +142,10 @@ HighlightScore:
 highScore:
 	dc.b	" HI SCORES  "
 	dc.b	0
+
+pressFire:
+	dc.b	" PRESS FIRE "
+	dc.b	0	
 
 	align 4
 highScores:
@@ -237,6 +214,12 @@ secondTopColor:
 	dc.w	MENU_TEXT_COLOR
 	dc.w	$ffdf,$fffe
 	dc.w	$06df,$fffe
-	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
+	dc.w	COLOR31,MENU_FIRE_BOTTOM_COLOR
+	dc.w	$9df,$fffe
+	dc.w	COLOR31
+	dc.w	MENU_FIRE_TOP_COLOR
+	dc.w	$16df,$fffe
+	dc.w	COLOR31,MENU_FIRE_BOTTOM_COLOR	
+
 	dc.l	$fffffffe
 	

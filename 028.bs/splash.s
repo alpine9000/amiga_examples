@@ -2,12 +2,29 @@
 
 	xdef	ShowSplash
 	xdef	ReloadSplashScreen
+	xdef	RestoreSplashMenuSection
 	xdef	splash
 	xdef	splashInvalid
 	
 SPLASH_COLOR_DEPTH		equ 5
 SPLASH_SCREEN_WIDTH_BYTES	equ 40
 
+RestoreSplashMenuSection:
+	move.l	backgroundOffscreen,a0
+	lea	splash,a2
+	add.l	#(134*40*5)+((320-96)/16),a2
+
+	WaitBlitter	
+	move.w #(BC0F_SRCA|BC0F_DEST|$f0),BLTCON0(A6)
+	move.w #0,BLTCON1(a6) 
+	move.l #$ffffffff,BLTAFWM(a6) 	;no masking of first/last word
+	move.w #0,BLTAMOD(a6)		;A modulo
+	move.w #(320-96)/8,BLTDMOD(a6)	;D modulo	
+	move.l a0,BLTAPTH(a6)		;source graphic top left corner
+	move.l a2,BLTDPTH(a6)		;destination top left corner
+	move.w 	#((112*5)<<6)|(96/16),BLTSIZE(a6)
+	rts
+	
 ReloadSplashScreen:
 	cmp.w	#0,splashInvalid
 	beq	.skip
@@ -16,6 +33,20 @@ ReloadSplashScreen:
 	move.l	#splash,a0
 	move.l	#diskSplash,a1	
 	jsr	LoadDiskData
+
+	lea	splash,a0
+	add.l	#(134*40*5)+((320-96)/16),a0
+
+	WaitBlitter	
+	move.w #(BC0F_SRCA|BC0F_DEST|$f0),BLTCON0(A6)
+	move.w #0,BLTCON1(a6) 
+	move.l #$ffffffff,BLTAFWM(a6) 		;no masking of first/last word
+	move.w #(320-96)/8,BLTAMOD(a6)		;A modulo
+	move.w #0,BLTDMOD(a6)			;D modulo	
+	move.l a0,BLTAPTH(a6)			;source graphic top left corner
+	move.l backgroundOffscreen,BLTDPTH(a6)	;destination top left corner
+	move.w #((112*5)<<6)|(96/16),BLTSIZE(a6)
+	
 .skip:
 	rts
 	
