@@ -47,14 +47,14 @@ IMAGES=foreground.png \
 	sprite_tank-5.png \
 	sprite_tank-6.png \
 	sprite_tank-7.png \
-	sprite_car-0.png \
-	sprite_car-1.png \
-	sprite_car-2.png \
-	sprite_car-3.png \
-	sprite_car-4.png \
-	sprite_car-5.png \
-	sprite_car-6.png \
-	sprite_car-7.png \
+	sprite_cow-0.png \
+	sprite_cow-1.png \
+	sprite_cow-2.png \
+	sprite_cow-3.png \
+	sprite_cow-4.png \
+	sprite_cow-5.png \
+	sprite_cow-6.png \
+	sprite_cow-7.png \
 	sprite_coin-0.png \
 	sprite_coin-1.png \
 	sprite_coin-2.png \
@@ -68,11 +68,11 @@ IMAGES=foreground.png \
 	sprite_fallingPig-2.png \
 	sprite_fallingPig-3.png \
 	sprite_fallingPig-4.png \
-	sprite_fallingCar-0.png \
-	sprite_fallingCar-1.png \
-	sprite_fallingCar-2.png \
-	sprite_fallingCar-3.png \
-	sprite_fallingCar-4.png \
+	sprite_fallingCow-0.png \
+	sprite_fallingCow-1.png \
+	sprite_fallingCow-2.png \
+	sprite_fallingCow-3.png \
+	sprite_fallingCow-4.png \
 	sprite_fallingRobot-0.png \
 	sprite_fallingRobot-1.png \
 	sprite_fallingRobot-2.png \
@@ -143,8 +143,8 @@ out/mpanel.bin: assets/mpanel.png
 out/sprite_pig-%.bin: out/sprite_pig-%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_pig-$* --palette-offset 16 --use-palette=assets/pig.pal
 
-out/sprite_car-%.bin: out/sprite_car-%.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_car-$* --palette-offset 16 --use-palette=assets/car.pal
+out/sprite_cow-%.bin: out/sprite_cow-%.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_cow-$* --palette-offset 16 --use-palette=assets/cow.pal
 
 out/sprite_robot-%.bin: out/sprite_robot-%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_robot-$* --palette-offset 16 --use-palette=assets/robot.pal
@@ -156,8 +156,8 @@ out/sprite_tank-%.bin: out/sprite_tank-%.png
 out/sprite_fallingPig-%.bin: out/sprite_fallingPig-%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_fallingPig-$* --palette-offset 16 --use-palette=assets/pig.pal
 
-out/sprite_fallingCar-%.bin: out/sprite_fallingCar-%.png
-	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_fallingCar-$* --palette-offset 16 --use-palette=assets/car.pal
+out/sprite_fallingCow-%.bin: out/sprite_fallingCow-%.png
+	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_fallingCow-$* --palette-offset 16 --use-palette=assets/cow.pal
 
 out/sprite_fallingRobot-%.bin: out/sprite_fallingRobot-%.png
 	$(IMAGECON) --input $< $(IMAGECON_ARGS) --colors 4 --output-bitplanes  --output-palette --full-color-palette-file --output-palette-asm --output-palette --output-png --output-copperlist --output out/sprite_fallingRobot-$* --palette-offset 16 --use-palette=assets/robot.pal
@@ -186,8 +186,8 @@ out/sprite_pig%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_pig --width=16 --height=16 --rows=1 --cols=8 --dx=16 --dy=16 --x=192 --y=112
 
 .SECONDARY:
-out/sprite_car%.png: assets/assets.png
-	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_car --width=16 --height=16 --rows=1 --cols=8 --dx=16 --dy=16 --x=192 --y=0
+out/sprite_cow%.png: assets/assets.png
+	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_cow --width=16 --height=16 --rows=1 --cols=8 --dx=16 --dy=16 --x=192 --y=48
 
 out/mpanelOrig.png: assets/mpanel.png
 	../tools/croppa/out/croppa --input=assets/mpanel.png --output=out/mpanelOrig.png --width=320 --height=16 --rows=1 --cols=1 --dx=0 --dy=0 --x=0 --y=8
@@ -205,8 +205,8 @@ out/sprite_fallingPig%.png: assets/assets.png
 	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_fallingPig --width=16 --height=16 --rows=1 --cols=5 --dx=16 --dy=16 --x=192 --y=128
 
 .SECONDARY:
-out/sprite_fallingCar%.png: assets/assets.png
-	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_fallingCar --width=16 --height=16 --rows=1 --cols=5 --dx=16 --dy=16 --x=192 --y=32
+out/sprite_fallingCow%.png: assets/assets.png
+	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_fallingCow --width=16 --height=16 --rows=1 --cols=5 --dx=16 --dy=16 --x=192 --y=64
 
 .SECONDARY:
 out/sprite_fallingRobot%.png: assets/assets.png
@@ -226,11 +226,11 @@ out/sprite_bee%.png: assets/assets.png
 
 .SECONDARY:
 out/sprite_eye%.png: assets/assets.png
-	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_eye-0.png --width=16 --height=15 --rows=1 --cols=1 --dx=16 --dy=16 --x=192 --y=64
+	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_eye-0.png --width=16 --height=15 --rows=1 --cols=1 --dx=16 --dy=16 --x=224 --y=96
 
 .SECONDARY:
 out/sprite_clock%.png: assets/assets.png
-	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_clock-0.png --width=16 --height=15 --rows=1 --cols=1 --dx=16 --dy=16 --x=192 --y=80
+	../tools/croppa/out/croppa --input=assets/assets.png --output=out/sprite_clock-0.png --width=16 --height=15 --rows=1 --cols=1 --dx=16 --dy=16 --x=240 --y=96
 
 .SECONDARY:
 out/sprite_arrow%.png: assets/assets.png
