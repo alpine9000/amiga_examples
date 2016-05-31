@@ -1,12 +1,8 @@
 Level:	macro
 InstallLevel\1:
+	movem.l	d0/a0-a1,-(sp)
 	move.l	#level\1StartMessage,startMessage
 	move.l	#level\1CompleteMessage,levelCompleteMessage
-	move.l	#level\1ForegroundMap,startForegroundMapPtr
-	move.l	#level\1PathwayMap,startPathwayMapPtr
-	move.l	#level\1ForegroundMap,foregroundMapPtr
-	move.l	#level\1PathwayMap,pathwayMapPtr	
-	move.l	#level\1PathwayMap+8,pathwayLastSafeTileAddress
 	move.l	#palette\8_playAreaPalette,playAreaPalette
 	move.l	#palette\8_playareaFade,playareaFade
 	move.l	#palette\8_flagsFade,flagsFade
@@ -17,14 +13,52 @@ InstallLevel\1:
 	move.w	#\6,playerLevelMissPixels
 	move.l	#\9,playerXColumnLastSafe
 	move.l	#\9,playerXColumn
-	move.w	#\a,d0
+
+	if \b=0
+	lea	levelData,a0
+	lea	level\1Start,a1
+	move.l	#level\1End-level\1Start,d0
+	jsr	LoadDiskData	
+	move.l	#levelData+(level\1ForegroundMap-level\1Start),startForegroundMapPtr
+	move.l	#levelData+(level\1PathwayMap-level\1Start),startPathwayMapPtr
+	move.l	#levelData+(level\1ForegroundMap-level\1Start),foregroundMapPtr
+	move.l	#levelData+(level\1PathwayMap-level\1Start),pathwayMapPtr	
+	move.l	#levelData+(level\1PathwayMap-level\1Start)+8,pathwayLastSafeTileAddress
+	move.l	#levelData+(level\1ForegroundMapEnd-level\1Start),endForegroundMapPtr
+	move.l	#levelData+(level\1ItemsMapEnd-level\1Start),itemsMapEndPtr
+	move.l	#level\1ItemsMap-level\1ForegroundMap,itemsMapOffset
+	else
+	move.l	#level\1ForegroundMap,startForegroundMapPtr
+	move.l	#level\1PathwayMap,startPathwayMapPtr
+	move.l	#level\1ForegroundMap,foregroundMapPtr
+	move.l	#level\1PathwayMap,pathwayMapPtr	
+	move.l	#level\1PathwayMap+8,pathwayLastSafeTileAddress
 	move.l	#level\1ForegroundMapEnd,endForegroundMapPtr
 	move.l	#level\1ItemsMapEnd,itemsMapEndPtr
 	move.l	#level\1ItemsMap-level\1ForegroundMap,itemsMapOffset
+	endif
+	move.w	#\a,d0
 	jsr	StartMusic
+	movem.l	(sp)+,d0/a0-a1
 	rts
 
 	align 4
+level\1StartMessage:
+	dc.b	\2
+	dc.b	0
+	align 	4
+
+level\1CompleteMessage:
+	dc.b	\7
+	dc.b	0
+	align 4
+
+
+	if \b=0
+	section	.noload
+	cnop	0,512
+	endif
+level\1Start:
 level\1ForegroundMap:
 	include "out/level\1_foreground-map.s"
 level\1ForegroundMapEnd:
@@ -41,18 +75,11 @@ level\1PathwayMap:
 level\1ItemsMap:
 	include "out/level\1_items-indexes.s"
 level\1ItemsMapEnd:
-
-level\1StartMessage:
-	dc.b	\2
-	dc.b	0
-	align 	4
-
-level\1CompleteMessage:
-	dc.b	\7
-	dc.b	0
-	align 	4
-
-
+	cnop 0,512
+level\1End:
+	if \b=0
+	section	CODE
+	endif
 	endm
 
 
