@@ -1,6 +1,7 @@
 Level:	macro
 InstallLevel\1:
 	movem.l	d0/a0-a1,-(sp)
+	move.l	#\cPlayerSpriteConfig,playerSpriteConfig
 	move.l	#level\1StartMessage,startMessage
 	move.l	#level\1CompleteMessage,levelCompleteMessage
 	move.l	#palette\8_playAreaPalette,playAreaPalette
@@ -14,6 +15,8 @@ InstallLevel\1:
 	move.l	#\9,playerXColumnLastSafe
 	move.l	#\9,playerXColumn
 
+	jsr     InstallPlayerColorPalette
+	
 	if \b=0
 	lea	levelData,a0
 	lea	level\1Start,a1

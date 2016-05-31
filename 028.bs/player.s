@@ -13,7 +13,6 @@
 	xdef PreRenderColumnsRemaining
 	xdef UpdatePlayerFallingAnimation
 	xdef InstallPlayerColorPalette
-	xdef SelectNextPlayerSprite
 	xdef SpriteEnableAuto
 
 	xdef deadSprite 	; used in items	
@@ -26,6 +25,10 @@
 	xdef playerLevelPausePixels
 	xdef playerLevelMissPixels
 
+	xdef pigPlayerSpriteConfig
+	xdef robotPlayerSpriteConfig
+	xdef tankPlayerSpriteConfig
+	xdef playerSpriteConfig
 	
 PLAYER_INSTALL_COLOR_PALETTE	equ 0
 PLAYER_SPRITE_DATA		equ 4
@@ -589,18 +592,6 @@ CheckDirection:
 	rts
 
 	
-SelectNextPlayerSprite:
-	cmp.l	#tankPlayerSpriteConfig,playerSpriteConfig
-	beq	.s1
-	add.l	#3*4,playerSpriteConfig
-	bra	.done
-.s1:
-	move.l	#pigPlayerSpriteConfig,playerSpriteConfig
-.done:
-	bsr	InstallPlayerColorPalette	
-	rts
-
-
 UpdatePlayerScore:
 	AddToScore 10
 RenderPlayerScore:
