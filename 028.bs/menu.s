@@ -21,7 +21,7 @@ ShowMenu:
 	jsr	ReloadSplashScreen
 	jsr	RestoreSplashMenuSection
 	jsr	ResetSound
-	
+	move.l	#0,frameCount
 ReShowMenu:	
 	jsr	WaitVerticalBlank	
 	;; set up default palette
