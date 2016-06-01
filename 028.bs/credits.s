@@ -94,7 +94,7 @@ Credits:
 RenderText:
 	lea	credits,a1
 
-	move.w	#48,d0
+	move.w	#40,d0
 	move.w	#20,d1	
 .loop:
 	cmp.b	#0,(a1)
@@ -111,7 +111,7 @@ RenderText:
 
 
 credits:
-	dc.b	"          BLOCKY SKIES"
+	dc.b	"           BLOCKY SKIES"
 	dc.b	0
 	dc.b	" "
 	dc.b	0	
