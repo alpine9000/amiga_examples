@@ -22,9 +22,7 @@ RenderPathway:
 	move.l	pathwayMapPtr,a2
 	bsr	GetMapTile
 	cmp.l	a4,a2		; search for the start column
-	ble	.next	
-	cmp.l	pathwayPlayerTileAddress,a2
-	beq	.next
+	ble	.nextX
 	
 	move.w	(a2),d0
 	cmp.w	#0,d0
@@ -47,14 +45,17 @@ RenderPathway:
 	bsr	BlitTileLoop
 	bra	.next
 .dontBlit:
+	cmp.l	pathwayPlayerTileAddress,a2
+	ble	.next
 	add.w	#1,d7
 	cmp.w	#7,d7
 	beq	.skip
 .next:
 	dbra	d6,.loopY
-	add.w	#1,d5
-	cmp.w	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-0,d5 ; don't render pathways off the play area
-	beq	.pathwayNotComplete
+.nextX:
+	cmp.w	#(FOREGROUND_PLAYAREA_WIDTH_WORDS/2)-2,d5 ; don't render pathways off the play area
+	bge	.pathwayNotComplete
+	add.w	#1,d5	
 	bra	.loopX
 .skip:
 	sub.w	#1,pathwayRenderPending	
