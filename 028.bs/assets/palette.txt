@@ -17,8 +17,8 @@ flags
 # safe tile #1
 # safe tile #2
 # flag color #3
-# normal tile #2 (not used ?)
-# pathway (not used ?)
+# normal tile #2
+# pathway 
 
 background
 ----------
