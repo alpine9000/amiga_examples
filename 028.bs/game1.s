@@ -126,6 +126,7 @@ Reset:
 	jsr	PreRenderColumnsRemaining
 	jsr	RenderPlayerScore
 	jsr	ResetPickups
+	jsr	ResetSound
 	
 	move.l  startForegroundMapPtr,foregroundMapPtr
 	move.l  startPathwayMapPtr,pathwayMapPtr
@@ -264,6 +265,7 @@ PostCheckPlayerMiss:
 
 	bra	GameLoop
 
+	if TRACKLOADER=0
 QuitGame:
 	jsr	WaitVerticalBlank	
 	jsr	PlayNextSound
@@ -273,6 +275,7 @@ QuitGame:
 	jsr	P61_End
 	movem.l	(sp)+,d0-a6
 	jmp	LongJump
+	endif
 
 Update:	
 	jsr	UpdatePlayer

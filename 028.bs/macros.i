@@ -19,7 +19,7 @@ KillSound:	macro
         move.w  #1,AUD3PER(a6)	
 	move.w  #2,AUD3LEN(a6) ; set the empty sound for the next sample to be played
 	move.l	#emptySound,AUD3LCH(a6)	
-	WaitScanLines 1
+	WaitScanLines 3
 	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
 .\@skip:
 	endif
@@ -198,7 +198,7 @@ AddToScore: macro
 	 cmp.l	__nextPlayerBonus,d0
 	 blt	.\@skip
 	 movem.l d0-a6,-(sp)
-	 PlaySound Yay
+	 PlaySound Bonus
 	 lea	livesCounterText,a0
 	 jsr	IncrementCounter
 	 lea	livesCounterShortText,a1

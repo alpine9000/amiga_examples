@@ -1,7 +1,12 @@
 	include "includes.i"
 
 	xdef	PlayNextSound
+	xdef	ResetSound	
 	xdef	fadeMusic
+	
+ResetSound:
+	move.l	#0,blackoutFrame
+	rts
 	
 PlayNextSound:
 	cmp.w	#0,fadeMusic
@@ -30,8 +35,13 @@ PlayNextSound:
 	xdef    PlayChachingSound
 	xdef    PlayWhooshSound
 	xdef    PlayYaySound
+	xdef	PlayBonusSound
 	
 PlayJumpSound:
+	move.l	d0,-(sp)
+	move.l	blackoutFrame,d0
+	cmp.l	frameCount,d0
+	bgt	.skip	
 	move.w	#0,dontKillSound	
 	lea     jump(pc),a1
         move.l  a1,AUD3LCH(a6)
@@ -39,9 +49,15 @@ PlayJumpSound:
         move.w  #64,AUD3VOL(a6)
 	move.w  #(endJump-jump)/2,AUD3LEN(a6) ;Set length in words
 	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
+.skip:
+	move.l	(sp)+,d0
 	rts
 
 PlayWhooshSound:
+	move.l	d0,-(sp)
+	move.l	blackoutFrame,d0
+	cmp.l	frameCount,d0
+	bgt	.skip	
 	KillSound
 	move.w	#0,dontKillSound	
 	lea     whoosh,a1
@@ -50,6 +66,8 @@ PlayWhooshSound:
         move.w  #64,AUD3VOL(a6)
 	move.w  #(endWhoosh-whoosh)/2,AUD3LEN(a6) ;Set length in words
 	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
+.skip:
+	move.l	(sp)+,d0	
 	rts	
 
 
@@ -65,6 +83,10 @@ PlayFallingSound:
 	rts
 
 PlayChachingSound:
+	move.l	d0,-(sp)
+	move.l	blackoutFrame,d0
+	cmp.l	frameCount,d0
+	bgt	.skip
 	KillSound
 	move.w	#0,dontKillSound
 	lea     chaching,a1
@@ -73,6 +95,8 @@ PlayChachingSound:
         move.w  #64,AUD3VOL(a6) 
 	move.w  #(endChaching-chaching)/2,AUD3LEN(a6) ;Set length in words
 	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
+.skip:
+	move.l	(sp)+,d0
 	rts
 
 PlayYaySound:
@@ -85,6 +109,22 @@ PlayYaySound:
 	move.w  #(endYay-yay)/2,AUD3LEN(a6) ;Set length in words
 	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
 	rts
+
+PlayBonusSound:
+	KillSound
+	move.l	d0,-(sp)
+	move.l	frameCount,d0
+	add.l	#41,d0
+	move.l	d0,blackoutFrame
+	move.l	(sp)+,d0
+	move.w	#0,dontKillSound
+	lea     yay,a1
+        move.l  a1,AUD3LCH(a6)
+        move.w  #423,AUD3PER(a6)
+        move.w  #64,AUD3VOL(a6) 
+	move.w  #(endYay-yay)/2,AUD3LEN(a6) ;Set length in words
+	move.w	#(DMAF_AUD3|DMAF_SETCLR),DMACON(a6)
+	rts	
 
 	align	4
 jump:
@@ -108,6 +148,8 @@ yay:
 endYay:
 
 	align	2
+blackoutFrame:
+	dc.l	0
 emptySound:
 	dc.l	0
 dontKillSound:

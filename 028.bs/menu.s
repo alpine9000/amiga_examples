@@ -20,6 +20,7 @@ ShowMenu:
 	lea 	CUSTOM,a6
 	jsr	ReloadSplashScreen
 	jsr	RestoreSplashMenuSection
+	jsr	ResetSound
 	
 ReShowMenu:	
 	jsr	WaitVerticalBlank	
@@ -201,8 +202,10 @@ ButtonPressed:
 	beq	.quitButton
 	endif
 	bra	.done
+	if TRACKLOADER=0
 .quitButton:
 	jmp	QuitGame
+	endif
 .difficultyButton:
 	bsr	ToggleDifficulty
 	bra	.done
