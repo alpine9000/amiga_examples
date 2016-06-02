@@ -20,10 +20,10 @@ VerticalScrollDownBee:
 	cmp.w	#1,beeDownMovingDown
 	bne	.up
 .down:	
-	add.w	#1,d0
+	add.w	beeDownSpeed,d0
 	bra	.c1
 .up:
-	sub.w	#1,d0
+	sub.w	beeDownSpeed,d0
 .c1:
 	move.w	d0,ITEM_Y_OFFSET(a1)
 	cmp.w	#(ITEM_SPRITE_VSTART+(16*5))<<ITEM_Y_OFFSET_SHIFT_CONVERT,d4
@@ -52,10 +52,10 @@ VerticalScrollUpBee:
 	cmp.w	#1,beeUpMovingDown
 	bne	.up
 .down:	
-	add.w	#1,d0
+	add.w	beeUpSpeed,d0
 	bra	.c1
 .up:
-	sub.w	#1,d0
+	sub.w	beeUpSpeed,d0
 .c1:
 	move.w	d0,ITEM_Y_OFFSET(a1)
 	cmp.w	#(ITEM_SPRITE_VSTART)<<ITEM_Y_OFFSET_SHIFT_CONVERT,d4

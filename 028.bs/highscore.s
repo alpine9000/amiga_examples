@@ -175,51 +175,63 @@ splashCopperListBplPtr:
 
 	dc.w	PLAY_COPPER_WORD,$fffe
 	dc.w	COLOR31
-
 	dc.w	MENU_FIRE_TOP_COLOR
 	dc.w	PLAY_COPPER_WORD+(($1000/4)*3),$fffe
-	dc.w	PLAY_COPPER_WORD+(($1000/4)*3),$fffe	
 	dc.w	COLOR31
 	dc.w	MENU_FIRE_BOTTOM_COLOR
 	dc.w	PLAY_COPPER_WORD+$1000,$fffe
+
 	dc.w	COLOR31
-firstTopColor:	
 	dc.w	MENU_TEXT_COLOR
-	dc.w	PLAY_COPPER_WORD+$1000+(($1000/4)*3),$fffe
 	dc.w	PLAY_COPPER_WORD+$1000+(($1000/4)*3),$fffe	
 	dc.w	COLOR31
-firstBottomColor:	
 	dc.w	MENU_TEXT_BOTTOM_COLOR
+
 	dc.w	PLAY_COPPER_WORD+$2000,$fffe
 	dc.w	COLOR31	
-secondTopColor:	
+firstTopColor:
 	dc.w	MENU_TEXT_COLOR
 	dc.w	PLAY_COPPER_WORD+$2000+(($1000/4)*3),$fffe
 	dc.w	PLAY_COPPER_WORD+$2000+(($1000/4)*3),$fffe	
-	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
+	dc.w	COLOR31
+firstBottomColor:	
+	dc.w	MENU_TEXT_BOTTOM_COLOR
 	dc.w	PLAY_COPPER_WORD+$3000,$fffe
 	dc.w	COLOR31
+secondTopColor:	
 	dc.w	MENU_TEXT_COLOR
 	dc.w	PLAY_COPPER_WORD+$3000+(($1000/4)*3),$fffe
 	dc.w	PLAY_COPPER_WORD+$3000+(($1000/4)*3),$fffe	
-	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
+	dc.w	COLOR31
+secondBottomColor:
+	dc.w	MENU_TEXT_BOTTOM_COLOR
 	dc.w	PLAY_COPPER_WORD+$4000,$fffe
 	dc.w	COLOR31
+thirdTopColor:	
 	dc.w	MENU_TEXT_COLOR
 	dc.w	PLAY_COPPER_WORD+$4000+(($1000/4)*3),$fffe
 	dc.w	PLAY_COPPER_WORD+$4000+(($1000/4)*3),$fffe	
-	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR		
+	dc.w	COLOR31
+thirdBottomColor:
+	dc.w	MENU_TEXT_BOTTOM_COLOR		
 	dc.w	PLAY_COPPER_WORD+$5000,$fffe
 	dc.w	COLOR31
+fourthTopColor:	
 	dc.w	MENU_TEXT_COLOR
 	dc.w	$ffdf,$fffe
 	dc.w	$06df,$fffe
-	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
+	dc.w	COLOR31
+fourthBottomColor:
+	dc.w	MENU_TEXT_BOTTOM_COLOR
 	dc.w	$9df,$fffe
 	dc.w	COLOR31
+fifthTopColor:	
 	dc.w	MENU_TEXT_COLOR
 	dc.w	$16df,$fffe
-	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR	
+	dc.w	$16df,$fffe	
+	dc.w	COLOR31
+fifthBottoMColor:	
+	dc.w	MENU_TEXT_BOTTOM_COLOR	
 
 	dc.l	$fffffffe
 	

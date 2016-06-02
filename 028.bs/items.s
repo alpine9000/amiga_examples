@@ -2,6 +2,8 @@
 
 	xdef __score
 	xdef __nextPlayerBonus
+	xdef beeUpSpeed
+	xdef beeDownSpeed	
 	
 	xdef SetupItemSpriteData
 	xdef ScrollItemSprites
@@ -495,7 +497,8 @@ __score:
 
 __nextPlayerBonus:
 	dc.l	0
-
+beeUpSpeed:
+	dc.w	0
+beeDownSpeed:
+	dc.w	0	
 	align	4
-
-

@@ -403,12 +403,13 @@ CheckPlayerMiss:
 	move.w	(a2),d0
 	move.w	d0,spriteCurrentPathwayTile
 	bsr	CheckDirection
+
+	;; a3 now points at the tile under the sprite
+	move.l	a3,foregroundPlayerTileAddress
 	
 	cmp.w	#$78e,d0
 	bge	.noBigBang
 
-	;; a3 now points at the tile under the sprite
-	move.l	a3,foregroundPlayerTileAddress
 	move.w	(a3),d0	
 	
 	cmp.w	#FOREGROUND_TILE_EMPTY,d0	; empty tile
@@ -502,7 +503,7 @@ GetNextAutoMove:
 .leftBottom:
 	cmp.w	#PLAYER_MOVE_RIGHT,spriteLastMove
 	beq	.goDown
-	bra	.goLeft	
+	bra	.goLeft
 .topRight:
 	cmp.w	#PLAYER_MOVE_DOWN,spriteLastMove
 	beq	.goRight

@@ -1,6 +1,8 @@
 Level:	macro
 InstallLevel\1:
 	movem.l	d0/a0-a1,-(sp)
+	move.w	#\d,beeUpSpeed
+	move.w	#\e,beeDownSpeed
 	move.l	#\cPlayerSpriteConfig,playerSpriteConfig
 	move.l	#level\1StartMessage,startMessage
 	move.l	#level\1CompleteMessage,levelCompleteMessage
