@@ -247,7 +247,7 @@ GameLoop:
 PostCheckPlayerMiss:	
 	bsr	RenderNextForegroundFrame
 	jsr 	RenderNextBackgroundFrame
-	
+
 	cmp.w	#0,pathwayClearPending
 	beq	.dontClearPathway
 	jsr	ClearPathway
@@ -905,7 +905,7 @@ BlitCountdown:
 	Level	1,"WELCOME TO BLOCKY SKIES!",75,2*2,12,10,"PHEW!, LEVEL 1 COMPLETE!",A,99,0,1,pig
 	Level	2,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 2",B,98,2,0,robot
 	Level	3,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 3 COMPLETE!",C,98,2,0,pig
-	Level	4,"MOOOOOOOO!",200,4*2,8,6,"LEVEL 4 COMPLETE",E,99,2,0,cow
+	Level	4,"MOO!",75,4*2,8,6,"ALRIGHT! LEVEL 4 COMPLETE!!",E,99,2,0,cow
 	Level	5,"KABOOM?!",200,4*2,8,6,"PHEW!!! LEVEL 5 COMPLETE!",D,99,1,0,tank
 	Level	6,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 6 COMPLETE!",A,98,1,0,cow
 

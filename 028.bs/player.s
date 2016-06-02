@@ -173,9 +173,6 @@ UpdatePlayer:
 
 
 ProcessJoystick:
-	;; 812
-	;; 7 3
-	;; 654
 	btst.b	#0,joystick
 	beq	.joystickNotPressed1
 	jsr	UsePickup
@@ -210,29 +207,55 @@ ProcessJoystick:
 	beq	.skip	
 
 .autoMoveDisabled:
+
+
+DiagonalJoystick:	macro
+	cmp.b	#\1,joystickpos
+	bne	.\@1
+	cmp.b	#\2,lastJoystickPos
+	bne	.\@2
+	move.b	#\3,joystickpos
+	bra	.process	
+.\@2:
+	move.b	#\2,joystickpos
+	bra	.process
+.\@1:
+	endm
+	
+	;; 812
+	;; 7 3
+	;; 654
+
 	if 0
-	btst.b	#0,joystick
-	beq	.joystickNotPressed	
-	jsr	UsePickup
-.joystickNotPressed:
+	DiagonalJoystick 2,1,3
+	DiagonalJoystick 8,1,7
+	DiagonalJoystick 4,3,5
+	DiagonalJoystick 6,5,7		
+
+	move.b	joystickpos,lastJoystickPos	
 	endif
 	
+.process:
 	cmp.b	#3,joystickpos
  	bne	.notRight
 	PlayerMoveRight
+	bra	.skip	
 .notRight:
 	cmp.b	#1,joystickpos
  	bne	.notUp
 	PlayerMoveUp
+	bra	.skip	
 .notUp:
 	cmp.b	#5,joystickpos
  	bne	.notDown
 	PlayerMoveDown
+	bra	.skip	
 .notDown:
 	cmp.b	#7,joystickpos
  	bne	.notLeft
 	PlayerMoveLeft
-.notLeft:	
+	bra	.skip
+.notLeft:
 .skip:
 	rts
 
@@ -645,6 +668,10 @@ playerSpriteConfig:
 	
 	include "sprite_data.i"
 
+	if 0
+lastJoystickPos:
+	dc.w	0
+	endif
 spritePlayerFallingAnimation:
 	dc.w	0
 currentSpriteOffset:

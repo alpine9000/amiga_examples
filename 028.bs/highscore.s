@@ -68,10 +68,15 @@ ShowHighScore:
 
 
 RenderHighScore:
-	lea	highScore,a1
-	lea	splash,a0
-	move.w	#(320/2)-(6*8)+4,d0
+	lea	splash,a0	
+	lea	pressFire,a1
+	move.l	#(320/2)-(6*8),d0	
 	move.w	#150-16,d1
+	jsr	DrawMaskedText85	
+	lea	splash,a0
+	lea	highScore,a1
+	move.w	#(320/2)-(6*8)+4,d0
+	add.w	#16,d1
 	jsr	DrawMaskedText85
 	lea	highScores,a2
 .loop:
@@ -85,11 +90,6 @@ RenderHighScore:
 	jsr	DrawMaskedText85
 	cmp.l	#endHighScores,a2
 	bne	.loop
-	lea	splash,a0	
-	lea	pressFire,a1
-	move.l	#(320/2)-(6*8),d0	
-	add.w	#16,d1
-	jsr	DrawMaskedText85	
 	rts
 
 AddHighScore:
@@ -176,11 +176,11 @@ splashCopperListBplPtr:
 	dc.w	PLAY_COPPER_WORD,$fffe
 	dc.w	COLOR31
 
-	dc.w	MENU_TITLE_TOP_COLOR
+	dc.w	MENU_FIRE_TOP_COLOR
 	dc.w	PLAY_COPPER_WORD+(($1000/4)*3),$fffe
 	dc.w	PLAY_COPPER_WORD+(($1000/4)*3),$fffe	
 	dc.w	COLOR31
-	dc.w	MENU_TITLE_BOTTOM_COLOR
+	dc.w	MENU_FIRE_BOTTOM_COLOR
 	dc.w	PLAY_COPPER_WORD+$1000,$fffe
 	dc.w	COLOR31
 firstTopColor:	
@@ -214,12 +214,12 @@ secondTopColor:
 	dc.w	MENU_TEXT_COLOR
 	dc.w	$ffdf,$fffe
 	dc.w	$06df,$fffe
-	dc.w	COLOR31,MENU_FIRE_BOTTOM_COLOR
+	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
 	dc.w	$9df,$fffe
 	dc.w	COLOR31
-	dc.w	MENU_FIRE_TOP_COLOR
+	dc.w	MENU_TEXT_COLOR
 	dc.w	$16df,$fffe
-	dc.w	COLOR31,MENU_FIRE_BOTTOM_COLOR	
+	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR	
 
 	dc.l	$fffffffe
 	
