@@ -90,6 +90,9 @@ RenderHighScore:
 	jsr	DrawMaskedText85
 	cmp.l	#endHighScores,a2
 	bne	.loop
+
+	RenderVersion
+	
 	rts
 
 AddHighScore:
@@ -233,5 +236,10 @@ fifthTopColor:
 fifthBottoMColor:	
 	dc.w	MENU_TEXT_BOTTOM_COLOR	
 
+	dc.w	$22df,$fffe
+	dc.w	COLOR31,$bbb
+	dc.w	$26df,$fffe
+	dc.w	COLOR31,$999
+	
 	dc.l	$fffffffe
 	

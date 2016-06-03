@@ -5,6 +5,7 @@
 	xdef	RestoreSplashMenuSection
 	xdef	splash
 	xdef	splashInvalid
+	xdef 	versionText
 	
 SPLASH_COLOR_DEPTH		equ 5
 SPLASH_SCREEN_WIDTH_BYTES	equ 40
@@ -46,7 +47,7 @@ ReloadSplashScreen:
 	move.l a0,BLTAPTH(a6)			;source graphic top left corner
 	move.l backgroundOffscreen,BLTDPTH(a6)	;destination top left corner
 	move.w #((112*5)<<6)|(96/16),BLTSIZE(a6)
-	
+
 .skip:
 	rts
 	
@@ -94,6 +95,8 @@ ShowSplash:
 	move.w	#(DMAF_BLITTER|DMAF_SETCLR!DMAF_COPPER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)		
 	move.w	#(INTF_SETCLR|INTF_VERTB|INTF_INTEN),INTENA(a6)	
 
+	RenderVersion
+	
 .wait:
 	jsr	WaitVerticalBlank
 	jsr	WaitForJoystick
@@ -114,10 +117,20 @@ splashCopperListBplPtr:
 	dc.w	BPL5PTH,0
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
-	dc.l	$fffffffe		
+	dc.w	$ffdf,$fffe
+	dc.w	$22df,$fffe
+	dc.w	COLOR31,$ddd
+	dc.w	$26df,$fffe
+	dc.w	COLOR31,$ccc
+	dc.l	$fffffffe
 
 splashInvalid:
 	dc.w	1
+	align 4
+versionText:
+	dc.b	"TEST VERSION 1"
+	dc.b	0
+	align 4
 	
 	section	.bss
 splash:

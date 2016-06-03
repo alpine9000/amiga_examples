@@ -242,3 +242,13 @@ RenderSkippedFramesCounter: macro
 .noSkippedFrames:
 	endif
 endm
+
+RenderVersion: macro
+	movem.l	d0-a6,-(sp)
+	lea	versionText,a1
+	lea	splash,a0
+	move.w	#(320)-(15*8)+4,d0
+	move.w	#256-10,d1
+	jsr	DrawMaskedText85
+	movem.l	(sp)+,d0-a6
+endm

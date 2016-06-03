@@ -81,7 +81,7 @@ Entry2:
 	jsr	StartMusic
 	jsr	ShowSplash
 MainMenu:
-	jmp	ShowMenu
+a	jmp	ShowMenu
 StartGame:
 	jsr 	BlueFill
 	jsr	InitialiseBackground
@@ -904,12 +904,14 @@ BlitCountdown:
 	Level	96,"PRESS FIRE TO ACTIVATE THE CLOCK",200,2*2,12,10,"EYES WILL UNHIDE THE BOARD",A,21,0,1,pig,1,1
 	Level	97,"PRESS FIRE TO ACTIVATE THE EYE",100,2*2,12,10,"YOU DID IT!",A,21,0,1,pig,1,1
 
-	Level	1,"WELCOME TO BLOCKY SKIES!",75,2*2,12,10,"PHEW!, LEVEL 1 COMPLETE!",A,99,0,1,pig,1,1
+	Level	1,"WELCOME TO BLOCKY SKIES!",70,2*2,12,10,"PHEW!, LEVEL 1 COMPLETE!",A,99,0,1,pig,1,1
 	Level	2,"HAVING FUN YET?",70,2*2,12,10,"LEVEL 2",B,98,2,0,robot,1,1
+	if TEST_VERSION=0
 	Level	3,"GIDDY UP!",50,4*2,8,6,"GETTING FASTER!, LEVEL 3 COMPLETE!",C,98,2,0,pig,1,1
 	Level	4,"MOO!",75,4*2,8,6,"ALRIGHT! LEVEL 4 COMPLETE!!",E,99,2,0,cow,2,3
 	Level	5,"KABOOM?!",75,4*2,8,6,"PHEW!!! LEVEL 5 COMPLETE!",D,99,1,0,tank,1,1
 	Level	6,"WHAT? WHAT?!",50,4*2,8,6,"NICE! LEVEL 6 COMPLETE!",A,98,1,0,cow,2,2
+	endif
 
 
 	Palette	A
@@ -1040,11 +1042,13 @@ panelGreyPalette:
 	include "out/panel-grey-table.s"
 levelInstallers:
 	dc.l	InstallLevel1
+	if TEST_VERSION=0
 	dc.l	InstallLevel2
 	dc.l	InstallLevel3
 	dc.l	InstallLevel4
 	dc.l	InstallLevel5
-	dc.l	InstallLevel6	
+	dc.l	InstallLevel6
+	endif
 	dc.l	0
 nextLevelInstaller:
 	dc.l	levelInstallers	

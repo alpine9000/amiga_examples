@@ -84,6 +84,8 @@ RenderMenu:
 	move.l a0,BLTAPTH(a6)		;source graphic top left corner
 	move.l a2,BLTDPTH(a6)		;destination top left corner
 	move.w 	#((32*5)<<6)|(96/16),BLTSIZE(a6)	
+
+	RenderVersion
 	
 	lea	menu,a1
 	lea	splash,a0
@@ -380,7 +382,16 @@ quitTopColor:
 	dc.w	$ffdf,$fffe
 	dc.w	$06df,$fffe
 	dc.w	COLOR31,MENU_TEXT_BOTTOM_COLOR
+	else
+	dc.w	$ffdf,$fffe
+	dc.w	$06df,$fffe	
 	endif
+
+	dc.w	$22df,$fffe
+	dc.w	COLOR31,$bbb
+	dc.w	$26df,$fffe
+	dc.w	COLOR31,$999
+	
 	dc.l	$fffffffe			
 
 selectedPtr:
