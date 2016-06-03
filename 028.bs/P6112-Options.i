@@ -4,7 +4,7 @@ P61mode	=2	;Try other modes ONLY IF there are no Fxx commands >= 20.
 
 ;;    ---  options common to all P61modes  ---
 
-songAusecode equ $8159
+songAusecode equ $49D59
 songBusecode equ $800D40D
 songCusecode equ $9559		
 usecode=songAusecode|songBusecode|songCusecode

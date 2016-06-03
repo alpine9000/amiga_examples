@@ -330,8 +330,8 @@ splashCopperListBplPtr:
 	dc.w	BPL5PTH,0
 	dc.w	BPL6PTL,0
 	dc.w	BPL6PTH,0
-
-
+	dc.w 	$18c,$820
+	
 	dc.w	PLAY_COPPER_WORD,$fffe
 	dc.w	COLOR31
 playTopColor:	
