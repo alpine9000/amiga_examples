@@ -1,7 +1,9 @@
 	include "includes.i"
 
 	xdef	StartGame
+	if	TRACKLOADER=0
 	xdef	QuitGame
+	endif
 	xdef    LevelComplete
 	xdef    BigBang
 	xdef	InstallTilePalette
@@ -1066,7 +1068,27 @@ endTutorialLevelInstaller:
 panelFade:
 	include "out/panelFade.s"
 
-
+copyright:
+	dc.b	"Copyright (c) 2016, Enable Software Pty Ltd. All rights reserved. "
+	dc.b	"Redistribution and use in source and binary forms, with or without "
+	dc.b	"modification, are permitted provided that the following conditions are met: "
+	dc.b	"Redistributions of source code must retain the above copyright notice, this "
+	dc.b    "list of conditions and the following disclaimer. "
+	dc.b	"Redistributions in binary form must reproduce the above copyright notice, "
+	dc.b	"this list of conditions and the following disclaimer in the documentation "
+	dc.b	"and/or other materials provided with the distribution. "
+	dc.b	"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND "
+	dc.b	"ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED "
+	dc.b	"WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE "
+	dc.b	"DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR "
+	dc.b	"ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES "
+	dc.b	"(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES ;"
+	dc.b	"LOSS OF USE, DATA, OR PROFITS ; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND "
+	dc.b	"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT "
+	dc.b	"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS "
+	dc.b	"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+	dc.b	0
+	align 4
 	section .bss	
 foregroundBitplanes1:
 	ds.b	IMAGESIZE*2
