@@ -49,6 +49,9 @@ Credits:
 	move.l	#0,d2
 	jsr	FillColor
 
+	jsr	WaitVerticalBlank
+	jsr	PlayNextSound
+	
 	bsr	RenderText
 	
 	jsr	WaitVerticalBlank
@@ -79,8 +82,7 @@ Credits:
 	move.w	#0,BPLCON1(a6)	
 
 	move.w	#0,COLOR00(a6)
-	move.w	#$F00,COLOR06(a6)		
-	
+
 	;; install copper list, then enable dma
 	lea	copperList(pc),a0
 	move.l	a0,COP1LC(a6)	
@@ -107,6 +109,11 @@ RenderText:
 	add.w	#10,d1
 	bra	.loop	
 .done:
+	move.w	#20,d0
+	move.w	#221,d1
+	lea	moreInfo,a1
+	lea	foregroundBitplanes1,a0
+	jsr	DrawWSMaskedText8	
 	rts
 
 
@@ -125,8 +132,8 @@ credits:
 	dc.b	0
 	dc.b	"     LEVELS   CHIPMUNK & ALPINE9000"
 	dc.b	0	
-	dc.b	" "
-	dc.b	0	
+	dc.b	" "	
+	dc.b	0		
 	dc.b	"             THANKS"
 	dc.b	0
 	dc.b	" "
@@ -140,7 +147,24 @@ credits:
 	dc.b	"     FS-UAE   Frode Solheim"
 	dc.b	0
 	dc.b	" VASM/VLINK   PHX & Volker"
+	dc.b	0
+	dc.b	"        SFX   Muska666,Mike Koenig"
+	dc.b	0
+	dc.b	"              CGEffex,timtube"
+	dc.b	0
+	dc.b	" "
+	dc.b	0
+	dc.b	"            MORE INFO"
+	dc.b	0
+	dc.b	" "
+	dc.b	0
+	dc.b	0
+	align 	4
+moreInfo:
+	dc.b	"http://alpine9000.github.io/blockyskies"
+	dc.b	0
 	align	4
+	
 copperList:
 copperListBplPtr:
 	dc.w	BPL1PTL,0
