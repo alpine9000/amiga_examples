@@ -103,4 +103,4 @@ Some of the code I have included in this repository is copyright by various auth
 
 Some of the tools use GPL licensed libraries which would mean they could only be distributed under the conditions of the respective version of the GPL.
 
-All code without a copyright notice is probably in the public domain.
+All code without a copyright notice is licensed as per the terms in [LICENSE.txt](LICENSE.txt).
