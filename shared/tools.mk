@@ -1,5 +1,5 @@
 WARN_ERROR=-Werror
-HOST_WARNINGS=$(WARN_ERROR) -pedantic-errors -Wfatal-errors -Wall  -Wextra -Wno-unused-parameter -Wshadow -limagequant
+HOST_WARNINGS=$(WARN_ERROR) -pedantic-errors -Wfatal-errors -Wall  -Wextra -Wno-unused-parameter -Wshadow -limagequant -Wno-unused-command-line-argument -Wno-ignored-attributes
 HOST_CFLAGS=$(HOST_WARNINGS) -O3 $(EXTRA_CFLAGS)
 
 $(PROGRAM): out bin $(OBJS) 

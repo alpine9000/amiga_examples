@@ -16,11 +16,10 @@ out/copper-new.s: $(GIF_FILE) out/copper_fun_generate convert.sh
 	./convert.sh > out/copper-new.s
 
 out/copper_fun_generate: copper_fun_generate.c Makefile
-	gcc $(HOST_CFLAGS) `GraphicsMagick-config --cppflags` copper_fun_generate.c  -o out/copper_fun_generate $(LIBS)
+	gcc -Wno-ignored-attributes $(HOST_CFLAGS) `GraphicsMagick-config --cppflags` copper_fun_generate.c  -o out/copper_fun_generate $(LIBS)
 
 video: GIF_FILE:=assets/video.gif
 video: all
 
 vgo: RUN_SCRIPT:=$(A600_RUN_SCRIPT)
 vgo: video go
-

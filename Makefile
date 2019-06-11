@@ -4,6 +4,8 @@ SUBDIRS=tools/makeadf \
 	tools/croppa\
 	tools/external/shrinkler\
 	tools/external/doynamite68k\
+	tools/mapgen\
+	tools/fade\
 	000.trackdisk\
 	001.simple_image\
 	002.sprite_display\
@@ -25,14 +27,14 @@ SUBDIRS=tools/makeadf \
 	018.vert_scroll\
 	019.hori_scroll\
 	020.shrinkler\
-	021.calling_c\
 	022.photons_bootloader\
 	023.slideshow\
 	024.simple_text\
 	025.scroll_text\
 	026.tile_hscroll\
 	027.parallax\
-	028.bs
+	#028.bs
+	#021.calling_c\
 
 .PHONY: subdirs $(SUBDIRS)
 

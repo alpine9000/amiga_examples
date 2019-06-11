@@ -1,6 +1,7 @@
+	include "funcdef.i"
 	include "../include/registers.i"
 	include "exec/io.i"
-	include "lvo/exec_lib.i"
+	include "exec/exec_lib.i"
 	include "devices/trackdisk.i"
 
 

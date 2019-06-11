@@ -11,10 +11,10 @@ typedef struct {
   unsigned short lo;
   unsigned short pad2;
   unsigned short hi;
-} copper_layout_t
+} copper_layout_t;
 
 
-void 
+void
 PokeBitplanePointers(unsigned short* copper, unsigned char* bitplanes, unsigned short interlace, unsigned short numBitplanes, unsigned short screenWidthBytes)
 {
   char i;
@@ -29,5 +29,5 @@ PokeBitplanePointers(unsigned short* copper, unsigned char* bitplanes, unsigned 
     ptr->hi = extract.words.hi;
     bitplanes += screenWidthBytes;
     ptr++;
-  } 
+  }
 }

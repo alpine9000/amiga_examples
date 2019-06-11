@@ -1,6 +1,6 @@
 HOST_WARNINGS=-pedantic-errors -Wfatal-errors -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow
 HOST_CFLAGS=$(HOST_WARNINGS)
-
+SDK_INCLUDE=-I/usr/local/amiga/vgcc/ndk/include/
 MAKEADFDIR=../tools/makeadf/
 MAKEADF=$(MAKEADFDIR)/out/makeadf
 IMAGECONDIR=../tools/imagecon
@@ -16,7 +16,7 @@ A600_RUN_SCRIPT=~/Google\ Drive/Amiga/amiga600.sh
 A1200T_RUN_SCRIPT=~/Google\ Drive/Amiga/amiga1200t.sh
 
 #VASM_ARGS=-phxass -Fhunk -quiet -spaces
-VASM_ARGS=-Fhunk -quiet -esc 
+VASM_ARGS=-Fhunk -quiet -esc
 
 ifndef FLOPPY
 FLOPPY=bin/$(EXAMPLE_NAME).adf
@@ -110,18 +110,18 @@ out/bootblock.bin: out/bootblock.o
 	vlink -brawbin1 $< -o $@
 
 out/bootblock.o: $(BOOTBLOCK_ASM) $(PROGRAM_BIN)
-	vasmm68k_mot $(VASM_ARGS) $(VASM_EXTRA_BOOTBLOCK_ARGS) -DUSERSTACK_ADDRESS="\$$$(USERSTACK_ADDRESS)" -DBASE_ADDRESS="\$$$(BASE_ADDRESS)"  $< -o $@ -I/usr/local/amiga/os-include
+	vasmm68k_mot $(VASM_ARGS) $(VASM_EXTRA_BOOTBLOCK_ARGS) -DUSERSTACK_ADDRESS="\$$$(USERSTACK_ADDRESS)" -DBASE_ADDRESS="\$$$(BASE_ADDRESS)"  $< -o $@ $(SDK_INCLUDE) -I../include
 
 out/main.o: $(MODULE) $(EXTRA)
-	vasmm68k_mot $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ -I/usr/local/amiga/os-include
-	@vasmm68k_mot -depend=make $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ -I/usr/local/amiga/os-include > $*.d
+	vasmm68k_mot $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ $(SDK_INCLUDE)
+	@vasmm68k_mot -depend=make $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ $(SDK_INCLUDE) > $*.d
 
 out/%.o: %.s
-	vasmm68k_mot $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ -I/usr/local/amiga/os-include
-	@vasmm68k_mot -depend=make $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ -I/usr/local/amiga/os-include > out/$*.d
+	vasmm68k_mot $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ $(SDK_INCLUDE)
+	@vasmm68k_mot -depend=make $(VASM_ARGS) $(VASM_EXTRA_ARGS) $< -o $@ $(SDK_INCLUDE) > out/$*.d
 
 out/%.o: %.c
-	vc -O3 -c $< -o $@
+	m68k-amigaosvasm-gcc -O3 -c $< -o $@
 	-@vc -O3 -S $< -o out/$*.s > /dev/null 2> /dev/null
 	-@vc -O0 -S $< -o out/$*-noopt.s > /dev/null 2> /dev/null
 
