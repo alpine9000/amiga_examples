@@ -1,8 +1,4 @@
-	include "funcdef.i"
 	include "../include/registers.i"
-	include "exec/io.i"
-	include "exec/exec_lib.i"
-	include "devices/trackdisk.i"
 
 
 bootblock:
@@ -23,15 +19,15 @@ BootEntry:
 	
 	;; Load the progam from the floppy using trackdisk.device
 
-	move.l  #mainEnd-mainStart,IO_LENGTH(a1)
-	move.l  a5,IO_DATA(a1)
-	move.l  #mainStart-bootblock,IO_OFFSET(a1)	
-	jsr     _LVODoIO(a6)
+	move.l  #mainEnd-mainStart,36(a1) ;IO_LENGTH(a1) 
+	move.l  a5,40(a1)		  ;IO_DATA(a1)
+	move.l  #mainStart-bootblock,44(a1) ;IO_OFFSET(a1)	
+	jsr     -456(a6)		    ;_LVODoIO(a6)
 
 	;; Turn off drive motor
-	move.l  #0,IO_LENGTH(a1)
-	move.w  #TD_MOTOR,IO_COMMAND(a1)
-	jsr     _LVODoIO(a6)
+	move.l  #0,36(a1) 	;IO_LENGTH(a1)
+	move.w  #9,28(a1)       ;#TD_MOTOR,IO_COMMAND(a1)
+	jsr      -456(a6)        ;_LVODoIO(a6)
 
 	if SHRINKLER==0
 	jmp     (a5)			; -> main.s entry point
